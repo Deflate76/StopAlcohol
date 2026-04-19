@@ -2,8 +2,22 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>금주 서바이벌 리포트</title>
+    
+    <meta name="description" content="1,000명의 도전자와 함께하는 금주 서바이벌 레이스" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="금주서바이벌" />
+    
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1"></script>
     
@@ -45,7 +59,6 @@
             color: var(--text-dark);
         }
 
-        /* --- 시작 화면 (Setup Area) --- */
         #setupArea {
             padding: 20px 0;
             display: flex;
@@ -78,12 +91,6 @@
             font-family: inherit;
         }
 
-        #dateTimeInput:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.15);
-        }
-
         .start-btn {
             width: 100%;
             max-width: 320px;
@@ -101,7 +108,6 @@
 
         .start-btn:active { transform: scale(0.97); }
 
-        /* --- 리포트 화면 요소 --- */
         .timer-display { margin: 15px 0; padding: 25px 20px; background: #fff5f5; border-radius: 20px; border: 1px solid #ffe3e3; }
         .time-unit { display: block; font-size: 3rem; font-weight: 800; color: var(--danger-color); line-height: 1.2; }
         #subTime { font-size: 1.2rem; font-weight: 600; color: #555; margin-top: 5px; }
@@ -124,7 +130,9 @@
         .progress-bg { background: #eee; height: 10px; border-radius: 5px; overflow: hidden; width: 80px; }
         .progress-fill { background: var(--primary-color); height: 100%; width: 0%; transition: width 0.5s ease; }
 
-        /* --- 모달 --- */
+        /* 하단 세팅일 표시 스타일 */
+        .setting-date-info { margin-top: 30px; font-size: 0.85rem; color: #718096; background: #edf2f7; padding: 10px; border-radius: 10px; }
+
         .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; backdrop-filter: blur(4px); }
         .modal-content { background: white; padding: 30px 25px; border-radius: 24px; width: 88%; max-width: 400px; text-align: left; position: relative; box-sizing: border-box; }
         .close-modal { position: absolute; right: 20px; top: 15px; font-size: 28px; cursor: pointer; color: #cbd5e0; }
@@ -133,9 +141,7 @@
         input[type="range"] { width: 100%; margin: 15px 0; accent-color: var(--danger-color); }
         select, textarea { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; margin-top: 8px; box-sizing: border-box; font-size: 1rem; font-family: inherit; }
         
-        .reset-btn { background-color: transparent; color: #a0aec0; margin-top: 30px; border: none; text-decoration: underline; cursor: pointer; font-size: 0.85rem; width: 100%; padding: 10px; }
-
-        /* 유틸리티 */
+        .reset-btn { background-color: transparent; color: #a0aec0; margin-top: 10px; border: none; text-decoration: underline; cursor: pointer; font-size: 0.85rem; width: 100%; padding: 10px; }
         .highlight { color: var(--primary-color); font-weight: 700; }
     </style>
 </head>
@@ -188,6 +194,10 @@
             <div id="changeList"></div>
         </div>
         
+        <div class="setting-date-info">
+            도전 세팅 일시: <span id="displaySettingDate">-</span>
+        </div>
+        
         <button class="reset-btn" onclick="resetDate()">데이터 초기화 및 재설정</button>
     </div>
 </div>
@@ -198,7 +208,6 @@
         <h3 style="margin-top:0">고비 기록하기</h3>
         <label>갈망 강도 (<span id="rangeVal" style="color:var(--danger-color)">5</span> / 10)</label>
         <input type="range" id="cravingRange" min="1" max="10" value="5" oninput="document.getElementById('rangeVal').innerText = this.value">
-
         <label>무엇이 당신을 유혹하나요?</label>
         <select id="cravingReason" onchange="toggleEtc(this.value)">
             <option value="스트레스">업무 및 일상 스트레스</option>
@@ -209,7 +218,6 @@
             <option value="기타">기타 (직접 입력)</option>
         </select>
         <textarea id="etcReason" style="display:none; margin-top:12px;" placeholder="구체적인 사유를 적어주세요"></textarea>
-        
         <button class="start-btn" style="margin-top:25px; width:100%;" onclick="submitCraving()">이 고비 기록하고 참기</button>
     </div>
 </div>
@@ -219,7 +227,6 @@
         <span class="close-modal" onclick="closeModal('statsModal')">&times;</span>
         <h3 style="margin-top:0">나의 고비 극복 리포트</h3>
         <div style="height: 250px;"><canvas id="cravingHistoryChart"></canvas></div>
-        <p style="font-size: 0.8rem; color:#718096; margin-top:15px; text-align:center;">기록이 쌓일수록 나의 취약 시간을 파악할 수 있습니다.</p>
     </div>
 </div>
 
@@ -241,12 +248,9 @@
     window.onload = function() {
         renderChangeCards();
         document.getElementById('cravingCount').innerText = cravingData.length;
-        
-        // 날짜 입력창 기본값 설정 (현재 시간)
         const now = new Date();
         now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
         document.getElementById('dateTimeInput').value = now.toISOString().slice(0, 16);
-
         const saved = localStorage.getItem('quitDrinkingDateTime');
         if (saved) startApp(saved);
     };
@@ -267,11 +271,11 @@
         localStorage.setItem('cravingHistory', JSON.stringify(cravingData));
         document.getElementById('cravingCount').innerText = cravingData.length;
         closeModal('cravingModal');
-        alert("고비를 잘 넘기셨습니다! 물 한 잔 마시며 기분 전환을 해보세요.");
+        alert("고비를 잘 넘기셨습니다!");
     }
 
     function openStats() {
-        if (cravingData.length === 0) return alert("기록된 고비가 아직 없습니다.");
+        if (cravingData.length === 0) return alert("기록된 고비가 없습니다.");
         openModal('statsModal');
         setTimeout(() => {
             const ctx = document.getElementById('cravingHistoryChart').getContext('2d');
@@ -281,14 +285,9 @@
                 type: 'bar',
                 data: {
                     labels: lastData.map(d => d.date),
-                    datasets: [{ label: '갈망 강도', data: lastData.map(d => d.strength), backgroundColor: '#e74c3c', borderRadius: 6 }]
+                    datasets: [{ label: '갈망 강도', data: lastData.map(d => d.strength), backgroundColor: '#e74c3c' }]
                 },
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false, 
-                    scales: { y: { beginAtZero: true, max: 10, ticks: { stepSize: 2 } } },
-                    plugins: { legend: { display: false } }
-                }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
             });
         }, 150);
     }
@@ -297,10 +296,10 @@
         document.getElementById('changeList').innerHTML = stages.map((s, i) => `
             <div class="change-card" id="card${i}">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <span style="font-weight:700; font-size:0.95rem; color:var(--text-dark);">${s.t}</span>
+                    <span style="font-weight:700; font-size:0.95rem;">${s.t}</span>
                     <div class="progress-bg"><div class="progress-fill" id="fill${i}"></div></div>
                 </div>
-                <p style="font-size:0.85rem; color:#666; margin-top:6px; line-height:1.4;">${s.desc}</p>
+                <p style="font-size:0.85rem; color:#666; margin-top:6px;">${s.desc}</p>
             </div>
         `).join('');
     }
@@ -316,6 +315,10 @@
         document.getElementById('setupArea').style.display = 'none';
         document.getElementById('displayArea').style.display = 'block';
         
+        // 하단 세팅 정보 표시
+        const startDateObj = new Date(startISO);
+        document.getElementById('displaySettingDate').innerText = startDateObj.toLocaleString('ko-KR');
+
         const allPoints = [];
         for (let i = 0; i <= 365; i++) {
             allPoints.push({x: i, y: Math.round(1000 * Math.exp(-0.04 * i))});
@@ -324,14 +327,23 @@
         const ctx = document.getElementById('survivalChart').getContext('2d');
         mainChart = new Chart(ctx, {
             type: 'line',
-            data: { datasets: [{ data: allPoints, borderColor: '#3498db', pointRadius: 0, fill: true, backgroundColor: 'rgba(52,152,219,0.1)', tension: 0.3 }] },
+            data: { datasets: [{ data: allPoints, borderColor: '#3498db', pointRadius: 0, fill: false, tension: 0.3 }] },
             options: { 
                 responsive: true, maintainAspectRatio: false,
                 scales: { 
-                    x: { type: 'linear', min: 0, max: 100, title: {display: true, text: '경과일수', font: {size: 10}} }, 
-                    y: { beginAtZero: true, max: 1000, title: {display: true, text: '생존자 수', font: {size: 10}} } 
+                    x: { type: 'linear', min: 0, max: 100 }, 
+                    y: { beginAtZero: true, max: 1000 } 
                 },
-                plugins: { legend: {display: false}, annotation: { annotations: { line1: { type: 'line', xMin: 0, xMax: 0, borderColor: 'red', borderWidth: 2, label: { display: true, content: '현재', position: 'end', backgroundColor: 'red', font: {size: 10} } } } } }
+                plugins: { 
+                    legend: {display: false}, 
+                    annotation: { 
+                        annotations: { 
+                            line1: { type: 'line', xMin: 0, xMax: 0, borderColor: 'red', borderWidth: 2, label: { display: true, content: '현재', position: 'end', backgroundColor: 'red' }, z: 10 },
+                            box1: { type: 'box', xMin: 0, xMax: 0, backgroundColor: 'rgba(200, 200, 200, 0.2)', borderWidth: 0 }, // 탈락자 영역
+                            box2: { type: 'box', xMin: 0, xMax: 100, backgroundColor: 'rgba(52, 152, 219, 0.1)', borderWidth: 0 } // 생존자 영역
+                        } 
+                    } 
+                }
             }
         });
 
@@ -349,8 +361,11 @@
             document.getElementById('survivors').innerText = survivors.toLocaleString();
             document.getElementById('myRank').innerText = survivors.toLocaleString();
 
+            // 그래프 영역 업데이트
             mainChart.options.plugins.annotation.annotations.line1.xMin = days;
             mainChart.options.plugins.annotation.annotations.line1.xMax = days;
+            mainChart.options.plugins.annotation.annotations.box1.xMax = days;
+            mainChart.options.plugins.annotation.annotations.box2.xMin = days;
             mainChart.update('none');
 
             stages.forEach((s, i) => {
@@ -362,14 +377,11 @@
     }
 
     function resetDate() {
-        if (confirm("모든 금주 기록과 갈망 데이터가 삭제됩니다. 정말 초기화하시겠습니까?")) {
+        if (confirm("정말 초기화하시겠습니까?")) {
             localStorage.clear();
             location.reload();
         }
     }
 </script>
-
-
-    
 </body>
 </html>
