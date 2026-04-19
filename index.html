@@ -16,15 +16,46 @@
             --bg-color: #f0f2f5;
         }
         body { font-family: 'Pretendard', -apple-system, sans-serif; text-align: center; padding: 15px; background-color: var(--bg-color); color: #333; line-height: 1.6; }
-        .container { max-width: 550px; margin: 0 auto; background: white; padding: 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .container { max-width: 550px; margin: 0 auto; background: white; padding: 30px 20px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); box-sizing: border-box; }
         
         h1 { font-size: 1.6rem; white-space: nowrap; word-break: keep-all; margin-bottom: 20px; letter-spacing: -0.5px; }
 
+        /* 초기 설정 영역 스타일 수정 */
+        #setupArea { padding: 10px 0; }
+        #setupArea p { margin-bottom: 20px; color: #666; font-size: 0.95rem; }
+        #dateTimeInput { 
+            width: 100%; 
+            padding: 15px; 
+            font-size: 1.1rem; 
+            border: 2px solid #edf2f7; 
+            border-radius: 12px; 
+            margin-bottom: 15px; 
+            box-sizing: border-box; 
+            font-family: inherit;
+            color: #2d3748;
+            background-color: #f8fafc;
+        }
+
+        /* 메인 버튼 스타일 */
+        .main-btn { 
+            width: 100%; 
+            padding: 16px; 
+            font-size: 1.1rem; 
+            font-weight: bold; 
+            background-color: var(--primary-color); 
+            color: white; 
+            border: none; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            transition: background 0.2s;
+        }
+        .main-btn:active { background-color: #2980b9; }
+
+        /* 타이머 & 랭킹 */
         .timer-display { margin: 15px 0; padding: 20px; background: #fff5f5; border-radius: 15px; border: 1px solid #ffe3e3; }
         .time-unit { display: block; font-size: 2.8rem; font-weight: 800; color: var(--danger-color); }
         #subTime { font-size: 1.1rem; font-weight: 600; color: #555; }
 
-        /* 랭킹 섹션 개선 */
         .rank-info { background: #e3f2fd; padding: 18px 15px; border-radius: 18px; margin: 15px 0; border: 1px solid #bbdefb; display: flex; flex-direction: column; gap: 8px; }
         .rank-item { display: flex; justify-content: center; align-items: baseline; gap: 4px; }
         .rank-label { font-size: 0.95rem; color: #555; }
@@ -54,8 +85,7 @@
         .progress-bg { background: #eee; height: 8px; border-radius: 4px; overflow: hidden; width: 70px; }
         .progress-fill { background: var(--primary-color); height: 100%; width: 0%; transition: width 0.5s ease; }
         
-        .main-btn { width: 100%; padding: 15px; font-size: 16px; font-weight: bold; background-color: var(--primary-color); color: white; border: none; border-radius: 10px; cursor: pointer; }
-        .reset-btn { background-color: transparent; color: #bdc3c7; margin-top: 20px; border: none; text-decoration: underline; cursor: pointer; font-size: 0.8rem; }
+        .reset-btn { background-color: transparent; color: #bdc3c7; margin-top: 20px; border: none; text-decoration: underline; cursor: pointer; font-size: 0.8rem; width: 100%; }
     </style>
 </head>
 <body>
@@ -64,9 +94,9 @@
     <h1>🚫 금주 서바이벌 리포트</h1>
     
     <div id="setupArea">
-        <p>시작 일시를 입력하고 생존을 시작하세요.</p>
+        <p>1,000명의 도전자와 함께하는 금주 레이스!<br>마지막 술을 드신 일시를 선택해 주세요.</p>
         <input type="datetime-local" id="dateTimeInput">
-        <button class="main-btn" onclick="saveDate()">도전 시작</button>
+        <button class="main-btn" onclick="saveDate()">도전 시작하기</button>
     </div>
 
     <div id="displayArea" style="display: none;">
@@ -104,7 +134,7 @@
             <div id="changeList"></div>
         </div>
         
-        <button class="reset-btn" onclick="resetDate()">기록 재설정</button>
+        <button class="reset-btn" onclick="resetDate()">데이터 초기화 (기록 재설정)</button>
     </div>
 </div>
 
@@ -125,7 +155,7 @@
             <option value="기타">기타 (직접 입력)</option>
         </select>
         <textarea id="etcReason" style="display:none; margin-top:10px;" placeholder="사유를 간단히 적어주세요"></textarea>
-        <button class="main-btn" style="margin-top:20px; background-color: var(--warning-color);" onclick="submitCraving()">이 고비 기록하기</button>
+        <button class="main-btn" style="margin-top:20px; background-color: var(--warning-color);" onclick="submitCraving()">이 고비 이겨내기</button>
     </div>
 </div>
 
@@ -157,6 +187,11 @@
         document.getElementById('cravingCount').innerText = cravingData.length;
         const saved = localStorage.getItem('quitDrinkingDateTime');
         if (saved) startApp(saved);
+        
+        // 오늘 날짜 기본값 설정 (편의성)
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        document.getElementById('dateTimeInput').value = now.toISOString().slice(0, 16);
     };
 
     function openModal(id) { document.getElementById(id).style.display = 'flex'; }
@@ -175,10 +210,11 @@
         localStorage.setItem('cravingHistory', JSON.stringify(cravingData));
         document.getElementById('cravingCount').innerText = cravingData.length;
         closeModal('cravingModal');
+        alert("고비를 무사히 넘겼습니다! 멋져요!");
     }
 
     function openStats() {
-        if (cravingData.length === 0) return alert("아직 기록된 데이터가 없습니다.");
+        if (cravingData.length === 0) return alert("아직 기록된 고비가 없습니다.");
         openModal('statsModal');
         setTimeout(() => {
             const ctx = document.getElementById('cravingHistoryChart').getContext('2d');
@@ -188,7 +224,7 @@
                 type: 'bar',
                 data: {
                     labels: lastData.map(d => d.date),
-                    datasets: [{ label: '갈망 강도', data: lastData.map(d => d.strength), backgroundColor: '#e74c3c' }]
+                    datasets: [{ label: '갈망 강도', data: lastData.map(d => d.strength), backgroundColor: '#e74c3c', borderRadius: 5 }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 10 } } }
             });
@@ -235,6 +271,8 @@
         timerInterval = setInterval(() => {
             const days = (new Date() - new Date(startISO)) / 86400000;
             const diff = new Date() - new Date(startISO);
+            if (diff < 0) return;
+
             document.getElementById('mainDays').innerText = Math.floor(days) + "일";
             document.getElementById('subTime').innerText = `${Math.floor((diff/3600000)%24)}시간 ${Math.floor((diff/60000)%60)}분 ${Math.floor((diff/1000)%60)}초`;
             
@@ -255,7 +293,7 @@
     }
 
     function resetDate() {
-        if (confirm("모든 기록을 초기화하시겠습니까?")) {
+        if (confirm("모든 기록을 초기화하시겠습니까? 갈망 통계도 함께 삭제됩니다.")) {
             localStorage.clear();
             location.reload();
         }
