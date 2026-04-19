@@ -14,78 +14,129 @@
             --success-color: #2ecc71;
             --warning-color: #f39c12;
             --bg-color: #f0f2f5;
+            --text-dark: #2d3748;
         }
-        body { font-family: 'Pretendard', -apple-system, sans-serif; text-align: center; padding: 15px; background-color: var(--bg-color); color: #333; line-height: 1.6; }
-        .container { max-width: 550px; margin: 0 auto; background: white; padding: 30px 20px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); box-sizing: border-box; }
         
-        h1 { font-size: 1.6rem; white-space: nowrap; word-break: keep-all; margin-bottom: 20px; letter-spacing: -0.5px; }
-
-        /* 초기 설정 영역 스타일 수정 */
-        #setupArea { padding: 10px 0; }
-        #setupArea p { margin-bottom: 20px; color: #666; font-size: 0.95rem; }
-        #dateTimeInput { 
-            width: 100%; 
+        body { 
+            font-family: 'Pretendard', -apple-system, sans-serif; 
+            text-align: center; 
             padding: 15px; 
-            font-size: 1.1rem; 
-            border: 2px solid #edf2f7; 
-            border-radius: 12px; 
-            margin-bottom: 15px; 
+            background-color: var(--bg-color); 
+            color: #333; 
+            line-height: 1.6; 
+        }
+
+        .container { 
+            max-width: 550px; 
+            margin: 0 auto; 
+            background: white; 
+            padding: 30px 20px; 
+            border-radius: 24px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
             box-sizing: border-box; 
+        }
+        
+        h1 { 
+            font-size: 1.6rem; 
+            white-space: nowrap; 
+            word-break: keep-all; 
+            margin-bottom: 25px; 
+            letter-spacing: -0.5px; 
+            color: var(--text-dark);
+        }
+
+        /* --- 시작 화면 (Setup Area) --- */
+        #setupArea {
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #setupArea p {
+            font-size: 1rem;
+            color: #4a5568;
+            margin-bottom: 25px;
+            word-break: keep-all;
+        }
+
+        #dateTimeInput {
+            width: 100%;
+            max-width: 320px;
+            padding: 16px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            background-color: #ffffff;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-align: center;
             font-family: inherit;
-            color: #2d3748;
-            background-color: #f8fafc;
         }
 
-        /* 메인 버튼 스타일 */
-        .main-btn { 
-            width: 100%; 
-            padding: 16px; 
-            font-size: 1.1rem; 
-            font-weight: bold; 
-            background-color: var(--primary-color); 
-            color: white; 
-            border: none; 
-            border-radius: 12px; 
-            cursor: pointer; 
-            transition: background 0.2s;
+        #dateTimeInput:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.15);
         }
-        .main-btn:active { background-color: #2980b9; }
 
-        /* 타이머 & 랭킹 */
-        .timer-display { margin: 15px 0; padding: 20px; background: #fff5f5; border-radius: 15px; border: 1px solid #ffe3e3; }
-        .time-unit { display: block; font-size: 2.8rem; font-weight: 800; color: var(--danger-color); }
-        #subTime { font-size: 1.1rem; font-weight: 600; color: #555; }
+        .start-btn {
+            width: 100%;
+            max-width: 320px;
+            padding: 18px;
+            font-size: 1.2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3);
+            transition: transform 0.2s;
+        }
 
-        .rank-info { background: #e3f2fd; padding: 18px 15px; border-radius: 18px; margin: 15px 0; border: 1px solid #bbdefb; display: flex; flex-direction: column; gap: 8px; }
-        .rank-item { display: flex; justify-content: center; align-items: baseline; gap: 4px; }
+        .start-btn:active { transform: scale(0.97); }
+
+        /* --- 리포트 화면 요소 --- */
+        .timer-display { margin: 15px 0; padding: 25px 20px; background: #fff5f5; border-radius: 20px; border: 1px solid #ffe3e3; }
+        .time-unit { display: block; font-size: 3rem; font-weight: 800; color: var(--danger-color); line-height: 1.2; }
+        #subTime { font-size: 1.2rem; font-weight: 600; color: #555; margin-top: 5px; }
+
+        .rank-info { background: #e3f2fd; padding: 20px 15px; border-radius: 20px; margin: 15px 0; border: 1px solid #bbdefb; display: flex; flex-direction: column; gap: 10px; }
+        .rank-item { display: flex; justify-content: center; align-items: baseline; gap: 6px; }
         .rank-label { font-size: 0.95rem; color: #555; }
-        .rank-number { font-size: 1.4rem; font-weight: 800; color: #1976d2; }
-        .rank-total { font-size: 0.85rem; color: #777; }
-        
-        /* 갈망 섹션 */
-        .craving-section { margin-top: 25px; padding: 20px; background: #fff9f0; border-radius: 18px; border: 1px dashed var(--warning-color); }
-        .craving-btn { background-color: var(--warning-color); color: white; border: none; padding: 14px; border-radius: 12px; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 10px; font-size: 1rem; }
-        .stat-btn { background-color: #fff; color: var(--warning-color); border: 2px solid var(--warning-color); padding: 10px; border-radius: 10px; font-size: 0.9rem; cursor: pointer; width: 100%; font-weight: bold; }
+        .rank-number { font-size: 1.5rem; font-weight: 800; color: #1976d2; }
+        .rank-total { font-size: 0.9rem; color: #777; }
 
-        /* 모달 스타일 */
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
-        .modal-content { background: white; padding: 25px; border-radius: 20px; width: 85%; max-width: 400px; text-align: left; position: relative; }
-        .close-modal { position: absolute; right: 20px; top: 15px; font-size: 24px; cursor: pointer; color: #999; }
-        
-        label { display: block; margin-top: 15px; font-weight: bold; font-size: 0.9rem; }
-        input[type="range"] { width: 100%; margin: 10px 0; }
-        select, textarea { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ddd; margin-top: 5px; box-sizing: border-box; font-size: 1rem; }
-        
-        .chart-container { position: relative; height: 240px; width: 100%; margin-top: 20px; }
-        
-        /* 로드맵 */
-        .change-section { margin-top: 30px; text-align: left; border-top: 2px solid #eee; padding-top: 20px; }
-        .change-card { background: #fff; border: 1px solid #e1e4e8; border-radius: 12px; padding: 12px 15px; margin-bottom: 10px; }
-        .change-card.active { border-color: var(--success-color); background-color: #fafffa; }
-        .progress-bg { background: #eee; height: 8px; border-radius: 4px; overflow: hidden; width: 70px; }
+        .craving-section { margin-top: 25px; padding: 20px; background: #fff9f0; border-radius: 20px; border: 1px dashed var(--warning-color); }
+        .craving-btn { background-color: var(--warning-color); color: white; border: none; padding: 15px; border-radius: 14px; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 12px; font-size: 1rem; }
+        .stat-btn { background-color: #fff; color: var(--warning-color); border: 2px solid var(--warning-color); padding: 10px; border-radius: 12px; font-size: 0.9rem; cursor: pointer; width: 100%; font-weight: bold; }
+
+        .chart-container { position: relative; height: 250px; width: 100%; margin: 25px 0; }
+
+        .change-section { margin-top: 30px; text-align: left; border-top: 2px solid #eee; padding-top: 25px; }
+        .change-card { background: #fff; border: 1px solid #e1e4e8; border-radius: 14px; padding: 15px; margin-bottom: 12px; transition: 0.3s; }
+        .change-card.active { border-color: var(--success-color); background-color: #fafffa; box-shadow: 0 4px 12px rgba(46, 204, 113, 0.1); }
+        .progress-bg { background: #eee; height: 10px; border-radius: 5px; overflow: hidden; width: 80px; }
         .progress-fill { background: var(--primary-color); height: 100%; width: 0%; transition: width 0.5s ease; }
+
+        /* --- 모달 --- */
+        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+        .modal-content { background: white; padding: 30px 25px; border-radius: 24px; width: 88%; max-width: 400px; text-align: left; position: relative; box-sizing: border-box; }
+        .close-modal { position: absolute; right: 20px; top: 15px; font-size: 28px; cursor: pointer; color: #cbd5e0; }
         
-        .reset-btn { background-color: transparent; color: #bdc3c7; margin-top: 20px; border: none; text-decoration: underline; cursor: pointer; font-size: 0.8rem; width: 100%; }
+        label { display: block; margin-top: 18px; font-weight: 700; font-size: 0.9rem; color: #4a5568; }
+        input[type="range"] { width: 100%; margin: 15px 0; accent-color: var(--danger-color); }
+        select, textarea { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; margin-top: 8px; box-sizing: border-box; font-size: 1rem; font-family: inherit; }
+        
+        .reset-btn { background-color: transparent; color: #a0aec0; margin-top: 30px; border: none; text-decoration: underline; cursor: pointer; font-size: 0.85rem; width: 100%; padding: 10px; }
+
+        /* 유틸리티 */
+        .highlight { color: var(--primary-color); font-weight: 700; }
     </style>
 </head>
 <body>
@@ -94,9 +145,12 @@
     <h1>🚫 금주 서바이벌 리포트</h1>
     
     <div id="setupArea">
-        <p>1,000명의 도전자와 함께하는 금주 레이스!<br>마지막 술을 드신 일시를 선택해 주세요.</p>
+        <p>
+            <span class="highlight">1,000명의 도전자</span>와 함께하는 레이스!<br>
+            마지막으로 술을 드신 일시를 선택해 주세요.
+        </p>
         <input type="datetime-local" id="dateTimeInput">
-        <button class="main-btn" onclick="saveDate()">도전 시작하기</button>
+        <button class="start-btn" onclick="saveDate()">도전 시작하기</button>
     </div>
 
     <div id="displayArea" style="display: none;">
@@ -112,7 +166,7 @@
                 <span class="rank-number" id="survivors">1,000</span>
                 <span class="rank-label">명 생존</span>
             </div>
-            <div style="height: 1px; background: rgba(25, 118, 210, 0.1); width: 60%; margin: 0 auto;"></div>
+            <div style="height: 1px; background: rgba(25, 118, 210, 0.1); width: 50%; margin: 0 auto;"></div>
             <div class="rank-item">
                 <span class="rank-label">나의 현재 순위 :</span>
                 <span class="rank-number" id="myRank">1</span>
@@ -130,40 +184,42 @@
         </div>
 
         <div class="change-section">
-            <h3 style="text-align: center; margin-bottom: 15px;">🧬 신체 회복 로드맵</h3>
+            <h3 style="text-align: center; margin-bottom: 20px;">🧬 신체 회복 로드맵</h3>
             <div id="changeList"></div>
         </div>
         
-        <button class="reset-btn" onclick="resetDate()">데이터 초기화 (기록 재설정)</button>
+        <button class="reset-btn" onclick="resetDate()">데이터 초기화 및 재설정</button>
     </div>
 </div>
 
 <div id="cravingModal" class="modal">
     <div class="modal-content">
         <span class="close-modal" onclick="closeModal('cravingModal')">&times;</span>
-        <h3>고비 기록하기</h3>
+        <h3 style="margin-top:0">고비 기록하기</h3>
         <label>갈망 강도 (<span id="rangeVal" style="color:var(--danger-color)">5</span> / 10)</label>
         <input type="range" id="cravingRange" min="1" max="10" value="5" oninput="document.getElementById('rangeVal').innerText = this.value">
 
-        <label>갈망 원인</label>
+        <label>무엇이 당신을 유혹하나요?</label>
         <select id="cravingReason" onchange="toggleEtc(this.value)">
-            <option value="스트레스">업무/일상 스트레스</option>
+            <option value="스트레스">업무 및 일상 스트레스</option>
             <option value="회식/모임">회식 또는 사교 모임</option>
             <option value="우울/공허">우울하거나 외로운 기분</option>
             <option value="습관/지루함">그냥 습관적으로(지루함)</option>
             <option value="보상심리">고생한 나에 대한 보상</option>
             <option value="기타">기타 (직접 입력)</option>
         </select>
-        <textarea id="etcReason" style="display:none; margin-top:10px;" placeholder="사유를 간단히 적어주세요"></textarea>
-        <button class="main-btn" style="margin-top:20px; background-color: var(--warning-color);" onclick="submitCraving()">이 고비 이겨내기</button>
+        <textarea id="etcReason" style="display:none; margin-top:12px;" placeholder="구체적인 사유를 적어주세요"></textarea>
+        
+        <button class="start-btn" style="margin-top:25px; width:100%;" onclick="submitCraving()">이 고비 기록하고 참기</button>
     </div>
 </div>
 
 <div id="statsModal" class="modal">
-    <div class="modal-content" style="max-width: 500px;">
+    <div class="modal-content" style="max-width: 450px;">
         <span class="close-modal" onclick="closeModal('statsModal')">&times;</span>
-        <h3>나의 고비 극복 리포트</h3>
+        <h3 style="margin-top:0">나의 고비 극복 리포트</h3>
         <div style="height: 250px;"><canvas id="cravingHistoryChart"></canvas></div>
+        <p style="font-size: 0.8rem; color:#718096; margin-top:15px; text-align:center;">기록이 쌓일수록 나의 취약 시간을 파악할 수 있습니다.</p>
     </div>
 </div>
 
@@ -174,24 +230,25 @@
     let cravingData = JSON.parse(localStorage.getItem('cravingHistory') || '[]');
 
     const stages = [
-        { d: 1, t: "1일: 알코올 해독", desc: "혈당 안정 및 독소 배출 시작" },
-        { d: 7, t: "1주: 수면 개선", desc: "깊은 수면(REM) 비중 증가" },
-        { d: 14, t: "2주: 위장 회복", desc: "소화 능력 및 역류 증상 완화" },
-        { d: 30, t: "1개월: 간 기능 회복", desc: "간 지방 수치 감소 및 피부 개선" },
-        { d: 90, t: "3개월: 면역력 강화", desc: "전반적인 면역 시스템 견고화" },
-        { d: 365, t: "1년: 질병 위험 급감", desc: "암 발생 위험 현저히 감소" }
+        { d: 1, t: "1일: 알코올 해독", desc: "혈당 안정 및 몸속 독소 배출 시작" },
+        { d: 7, t: "1주: 수면 개선", desc: "깊은 수면(REM) 비중 증가로 개운함" },
+        { d: 14, t: "2주: 위장 회복", desc: "소화 능력 개선 및 역류 증상 완화" },
+        { d: 30, t: "1개월: 간 기능 회복", desc: "간 지방 수치 감소 및 안색 개선" },
+        { d: 90, t: "3개월: 면역력 강화", desc: "전반적인 혈액 및 면역 체계 강화" },
+        { d: 365, t: "1년: 질병 위험 급감", desc: "암 및 심혈관 질환 위험 현저히 감소" }
     ];
 
     window.onload = function() {
         renderChangeCards();
         document.getElementById('cravingCount').innerText = cravingData.length;
-        const saved = localStorage.getItem('quitDrinkingDateTime');
-        if (saved) startApp(saved);
         
-        // 오늘 날짜 기본값 설정 (편의성)
+        // 날짜 입력창 기본값 설정 (현재 시간)
         const now = new Date();
         now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
         document.getElementById('dateTimeInput').value = now.toISOString().slice(0, 16);
+
+        const saved = localStorage.getItem('quitDrinkingDateTime');
+        if (saved) startApp(saved);
     };
 
     function openModal(id) { document.getElementById(id).style.display = 'flex'; }
@@ -210,11 +267,11 @@
         localStorage.setItem('cravingHistory', JSON.stringify(cravingData));
         document.getElementById('cravingCount').innerText = cravingData.length;
         closeModal('cravingModal');
-        alert("고비를 무사히 넘겼습니다! 멋져요!");
+        alert("고비를 잘 넘기셨습니다! 물 한 잔 마시며 기분 전환을 해보세요.");
     }
 
     function openStats() {
-        if (cravingData.length === 0) return alert("아직 기록된 고비가 없습니다.");
+        if (cravingData.length === 0) return alert("기록된 고비가 아직 없습니다.");
         openModal('statsModal');
         setTimeout(() => {
             const ctx = document.getElementById('cravingHistoryChart').getContext('2d');
@@ -224,28 +281,33 @@
                 type: 'bar',
                 data: {
                     labels: lastData.map(d => d.date),
-                    datasets: [{ label: '갈망 강도', data: lastData.map(d => d.strength), backgroundColor: '#e74c3c', borderRadius: 5 }]
+                    datasets: [{ label: '갈망 강도', data: lastData.map(d => d.strength), backgroundColor: '#e74c3c', borderRadius: 6 }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 10 } } }
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    scales: { y: { beginAtZero: true, max: 10, ticks: { stepSize: 2 } } },
+                    plugins: { legend: { display: false } }
+                }
             });
-        }, 100);
+        }, 150);
     }
 
     function renderChangeCards() {
         document.getElementById('changeList').innerHTML = stages.map((s, i) => `
             <div class="change-card" id="card${i}">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <span style="font-weight:bold; font-size:0.9rem;">${s.t}</span>
+                    <span style="font-weight:700; font-size:0.95rem; color:var(--text-dark);">${s.t}</span>
                     <div class="progress-bg"><div class="progress-fill" id="fill${i}"></div></div>
                 </div>
-                <p style="font-size:0.8rem; color:#666; margin-top:4px;">${s.desc}</p>
+                <p style="font-size:0.85rem; color:#666; margin-top:6px; line-height:1.4;">${s.desc}</p>
             </div>
         `).join('');
     }
 
     function saveDate() {
         const input = document.getElementById('dateTimeInput').value;
-        if (!input) return alert("날짜를 선택하세요.");
+        if (!input) return alert("일시를 선택해 주세요.");
         localStorage.setItem('quitDrinkingDateTime', input);
         startApp(input);
     }
@@ -255,24 +317,31 @@
         document.getElementById('displayArea').style.display = 'block';
         
         const allPoints = [];
-        for (let i = 0; i <= 365; i++) allPoints.push({x: i, y: Math.round(1000 * Math.exp(-0.04 * i))});
+        for (let i = 0; i <= 365; i++) {
+            allPoints.push({x: i, y: Math.round(1000 * Math.exp(-0.04 * i))});
+        }
 
         const ctx = document.getElementById('survivalChart').getContext('2d');
         mainChart = new Chart(ctx, {
             type: 'line',
-            data: { datasets: [{ data: allPoints, borderColor: '#3498db', pointRadius: 0, fill: true, backgroundColor: 'rgba(52,152,219,0.1)' }] },
+            data: { datasets: [{ data: allPoints, borderColor: '#3498db', pointRadius: 0, fill: true, backgroundColor: 'rgba(52,152,219,0.1)', tension: 0.3 }] },
             options: { 
                 responsive: true, maintainAspectRatio: false,
-                scales: { x: { type: 'linear', min: 0, max: 100 }, y: { beginAtZero: true, max: 1000 } },
-                plugins: { legend: {display: false}, annotation: { annotations: { line1: { type: 'line', xMin: 0, xMax: 0, borderColor: 'red', borderWidth: 2 } } } }
+                scales: { 
+                    x: { type: 'linear', min: 0, max: 100, title: {display: true, text: '경과일수', font: {size: 10}} }, 
+                    y: { beginAtZero: true, max: 1000, title: {display: true, text: '생존자 수', font: {size: 10}} } 
+                },
+                plugins: { legend: {display: false}, annotation: { annotations: { line1: { type: 'line', xMin: 0, xMax: 0, borderColor: 'red', borderWidth: 2, label: { display: true, content: '현재', position: 'end', backgroundColor: 'red', font: {size: 10} } } } } }
             }
         });
 
         timerInterval = setInterval(() => {
-            const days = (new Date() - new Date(startISO)) / 86400000;
-            const diff = new Date() - new Date(startISO);
+            const start = new Date(startISO);
+            const now = new Date();
+            const diff = now - start;
             if (diff < 0) return;
 
+            const days = diff / 86400000;
             document.getElementById('mainDays').innerText = Math.floor(days) + "일";
             document.getElementById('subTime').innerText = `${Math.floor((diff/3600000)%24)}시간 ${Math.floor((diff/60000)%60)}분 ${Math.floor((diff/1000)%60)}초`;
             
@@ -293,7 +362,7 @@
     }
 
     function resetDate() {
-        if (confirm("모든 기록을 초기화하시겠습니까? 갈망 통계도 함께 삭제됩니다.")) {
+        if (confirm("모든 금주 기록과 갈망 데이터가 삭제됩니다. 정말 초기화하시겠습니까?")) {
             localStorage.clear();
             location.reload();
         }
