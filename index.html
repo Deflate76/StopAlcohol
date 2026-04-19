@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>금주 서바이벌 & 신체 변화 로드맵</title>
+    <title>금주 서바이벌 리포트</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1"></script>
     
@@ -18,41 +18,44 @@
         body { font-family: 'Pretendard', -apple-system, sans-serif; text-align: center; padding: 15px; background-color: var(--bg-color); color: #333; line-height: 1.6; }
         .container { max-width: 550px; margin: 0 auto; background: white; padding: 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         
-        h1 { font-size: 1.6rem; white-space: nowrap; word-break: keep-all; margin-bottom: 20px; }
+        h1 { font-size: 1.6rem; white-space: nowrap; word-break: keep-all; margin-bottom: 20px; letter-spacing: -0.5px; }
 
-        /* 타이머 & 랭킹 */
         .timer-display { margin: 15px 0; padding: 20px; background: #fff5f5; border-radius: 15px; border: 1px solid #ffe3e3; }
         .time-unit { display: block; font-size: 2.8rem; font-weight: 800; color: var(--danger-color); }
-        .rank-info { background: #e3f2fd; padding: 15px; border-radius: 15px; margin: 15px 0; border: 1px solid #bbdefb; }
-        .rank-number { font-size: 1.5rem; font-weight: bold; color: #1976d2; }
+        #subTime { font-size: 1.1rem; font-weight: 600; color: #555; }
+
+        /* 랭킹 섹션 개선 */
+        .rank-info { background: #e3f2fd; padding: 18px 15px; border-radius: 18px; margin: 15px 0; border: 1px solid #bbdefb; display: flex; flex-direction: column; gap: 8px; }
+        .rank-item { display: flex; justify-content: center; align-items: baseline; gap: 4px; }
+        .rank-label { font-size: 0.95rem; color: #555; }
+        .rank-number { font-size: 1.4rem; font-weight: 800; color: #1976d2; }
+        .rank-total { font-size: 0.85rem; color: #777; }
         
         /* 갈망 섹션 */
         .craving-section { margin-top: 25px; padding: 20px; background: #fff9f0; border-radius: 18px; border: 1px dashed var(--warning-color); }
-        .craving-btn { background-color: var(--warning-color); color: white; border: none; padding: 14px; border-radius: 12px; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 10px; }
-        .stat-btn { background-color: #fff; color: var(--warning-color); border: 2px solid var(--warning-color); padding: 8px; border-radius: 10px; font-size: 0.9rem; cursor: pointer; width: 100%; font-weight: bold; }
+        .craving-btn { background-color: var(--warning-color); color: white; border: none; padding: 14px; border-radius: 12px; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 10px; font-size: 1rem; }
+        .stat-btn { background-color: #fff; color: var(--warning-color); border: 2px solid var(--warning-color); padding: 10px; border-radius: 10px; font-size: 0.9rem; cursor: pointer; width: 100%; font-weight: bold; }
 
         /* 모달 스타일 */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
-        .modal-content { background: white; padding: 25px; border-radius: 20px; width: 90%; max-width: 400px; text-align: left; position: relative; }
+        .modal-content { background: white; padding: 25px; border-radius: 20px; width: 85%; max-width: 400px; text-align: left; position: relative; }
         .close-modal { position: absolute; right: 20px; top: 15px; font-size: 24px; cursor: pointer; color: #999; }
         
-        /* 폼 요소 */
         label { display: block; margin-top: 15px; font-weight: bold; font-size: 0.9rem; }
         input[type="range"] { width: 100%; margin: 10px 0; }
-        select, textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; margin-top: 5px; box-sizing: border-box; }
+        select, textarea { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ddd; margin-top: 5px; box-sizing: border-box; font-size: 1rem; }
         
-        .chart-container { position: relative; height: 260px; width: 100%; margin-top: 20px; }
+        .chart-container { position: relative; height: 240px; width: 100%; margin-top: 20px; }
         
         /* 로드맵 */
         .change-section { margin-top: 30px; text-align: left; border-top: 2px solid #eee; padding-top: 20px; }
         .change-card { background: #fff; border: 1px solid #e1e4e8; border-radius: 12px; padding: 12px 15px; margin-bottom: 10px; }
         .change-card.active { border-color: var(--success-color); background-color: #fafffa; }
-        .change-card.doing { border-color: var(--primary-color); background-color: #f0f7ff; }
         .progress-bg { background: #eee; height: 8px; border-radius: 4px; overflow: hidden; width: 70px; }
         .progress-fill { background: var(--primary-color); height: 100%; width: 0%; transition: width 0.5s ease; }
         
         .main-btn { width: 100%; padding: 15px; font-size: 16px; font-weight: bold; background-color: var(--primary-color); color: white; border: none; border-radius: 10px; cursor: pointer; }
-        .reset-btn { background-color: transparent; color: #bdc3c7; margin-top: 20px; border: none; text-decoration: underline; cursor: pointer; }
+        .reset-btn { background-color: transparent; color: #bdc3c7; margin-top: 20px; border: none; text-decoration: underline; cursor: pointer; font-size: 0.8rem; }
     </style>
 </head>
 <body>
@@ -61,6 +64,7 @@
     <h1>🚫 금주 서바이벌 리포트</h1>
     
     <div id="setupArea">
+        <p>시작 일시를 입력하고 생존을 시작하세요.</p>
         <input type="datetime-local" id="dateTimeInput">
         <button class="main-btn" onclick="saveDate()">도전 시작</button>
     </div>
@@ -72,12 +76,23 @@
         </div>
 
         <div class="rank-info">
-            <div>현재 생존자: <span class="rank-number" id="survivors">1,000</span>명 / 내 순위: <span class="rank-number" id="myRank">1</span>위</div>
+            <div class="rank-item">
+                <span class="rank-label">현재</span>
+                <span class="rank-total">1,000명 중</span>
+                <span class="rank-number" id="survivors">1,000</span>
+                <span class="rank-label">명 생존</span>
+            </div>
+            <div style="height: 1px; background: rgba(25, 118, 210, 0.1); width: 60%; margin: 0 auto;"></div>
+            <div class="rank-item">
+                <span class="rank-label">나의 현재 순위 :</span>
+                <span class="rank-number" id="myRank">1</span>
+                <span class="rank-label">위</span>
+            </div>
         </div>
 
         <div class="craving-section">
             <button class="craving-btn" onclick="openModal('cravingModal')">🔥 지금 고비가 왔어요!</button>
-            <button class="stat-btn" onclick="openStats()">📈 총 <span id="cravingCount">0</span>번의 고비를 넘겼습니다 (기록보기)</button>
+            <button class="stat-btn" onclick="openStats()">📈 총 <span id="cravingCount">0</span>번의 고비를 넘겼습니다</button>
         </div>
 
         <div class="chart-container">
@@ -85,7 +100,7 @@
         </div>
 
         <div class="change-section">
-            <h3 style="text-align: center;">🧬 신체 회복 로드맵</h3>
+            <h3 style="text-align: center; margin-bottom: 15px;">🧬 신체 회복 로드맵</h3>
             <div id="changeList"></div>
         </div>
         
@@ -96,10 +111,9 @@
 <div id="cravingModal" class="modal">
     <div class="modal-content">
         <span class="close-modal" onclick="closeModal('cravingModal')">&times;</span>
-        <h3>지금 기분이 어떠신가요?</h3>
-        <label>갈망 강도 (1: 참을만함 ~ 10: 폭발직전)</label>
+        <h3>고비 기록하기</h3>
+        <label>갈망 강도 (<span id="rangeVal" style="color:var(--danger-color)">5</span> / 10)</label>
         <input type="range" id="cravingRange" min="1" max="10" value="5" oninput="document.getElementById('rangeVal').innerText = this.value">
-        <div style="text-align: center; font-weight: bold; color: var(--danger-color);"><span id="rangeVal">5</span> / 10</div>
 
         <label>갈망 원인</label>
         <select id="cravingReason" onchange="toggleEtc(this.value)">
@@ -111,19 +125,15 @@
             <option value="기타">기타 (직접 입력)</option>
         </select>
         <textarea id="etcReason" style="display:none; margin-top:10px;" placeholder="사유를 간단히 적어주세요"></textarea>
-
-        <button class="main-btn" style="margin-top:20px; background-color: var(--warning-color);" onclick="submitCraving()">기록하고 이겨내기</button>
+        <button class="main-btn" style="margin-top:20px; background-color: var(--warning-color);" onclick="submitCraving()">이 고비 기록하기</button>
     </div>
 </div>
 
 <div id="statsModal" class="modal">
     <div class="modal-content" style="max-width: 500px;">
         <span class="close-modal" onclick="closeModal('statsModal')">&times;</span>
-        <h3>나의 고비 극복 타임라인</h3>
-        <div style="height: 300px;">
-            <canvas id="cravingHistoryChart"></canvas>
-        </div>
-        <p style="font-size: 0.8rem; color: #666; margin-top: 10px;">* 최근 10개의 기록이 표시됩니다.</p>
+        <h3>나의 고비 극복 리포트</h3>
+        <div style="height: 250px;"><canvas id="cravingHistoryChart"></canvas></div>
     </div>
 </div>
 
@@ -134,17 +144,17 @@
     let cravingData = JSON.parse(localStorage.getItem('cravingHistory') || '[]');
 
     const stages = [
-        { d: 1, t: "1일: 알코올 해독", desc: "혈당 수치가 안정화되고 독소 배출이 시작됩니다." },
-        { d: 7, t: "1주: 수면의 질 향상", desc: "REM 수면 비중이 늘어나 개운함을 느낍니다." },
-        { d: 14, t: "2주: 위장 회복", desc: "역류성 식도염 증상이 완화되고 소화가 잘 됩니다." },
-        { d: 30, t: "1개월: 간 기능 부활", desc: "간 지방 수치가 감소하며 피부 안색이 맑아집니다." },
-        { d: 90, t: "3개월: 면역력 강화", desc: "혈액세포가 교체되며 면역 시스템이 견고해집니다." },
-        { d: 365, t: "1년: 암 위험 급감", desc: "각종 암 발생 위험이 일반인 수준으로 낮아집니다." }
+        { d: 1, t: "1일: 알코올 해독", desc: "혈당 안정 및 독소 배출 시작" },
+        { d: 7, t: "1주: 수면 개선", desc: "깊은 수면(REM) 비중 증가" },
+        { d: 14, t: "2주: 위장 회복", desc: "소화 능력 및 역류 증상 완화" },
+        { d: 30, t: "1개월: 간 기능 회복", desc: "간 지방 수치 감소 및 피부 개선" },
+        { d: 90, t: "3개월: 면역력 강화", desc: "전반적인 면역 시스템 견고화" },
+        { d: 365, t: "1년: 질병 위험 급감", desc: "암 발생 위험 현저히 감소" }
     ];
 
     window.onload = function() {
         renderChangeCards();
-        updateCravingUI();
+        document.getElementById('cravingCount').innerText = cravingData.length;
         const saved = localStorage.getItem('quitDrinkingDateTime');
         if (saved) startApp(saved);
     };
@@ -153,76 +163,53 @@
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
     function toggleEtc(val) { document.getElementById('etcReason').style.display = (val === '기타') ? 'block' : 'none'; }
 
-    function updateCravingUI() {
-        document.getElementById('cravingCount').innerText = cravingData.length;
-    }
-
     function submitCraving() {
         const strength = document.getElementById('cravingRange').value;
         const reason = document.getElementById('cravingReason').value;
-        const etc = document.getElementById('etcReason').value;
-        
         const entry = {
-            date: new Date().toLocaleString('ko-KR', {month:'short', day:'numeric', hour:'numeric', minute:'numeric'}),
+            date: new Date().toLocaleString('ko-KR', {month:'short', day:'numeric', hour:'numeric'}),
             strength: parseInt(strength),
-            reason: reason === '기타' ? etc : reason
+            reason: reason === '기타' ? document.getElementById('etcReason').value : reason
         };
-
         cravingData.push(entry);
         localStorage.setItem('cravingHistory', JSON.stringify(cravingData));
-        updateCravingUI();
+        document.getElementById('cravingCount').innerText = cravingData.length;
         closeModal('cravingModal');
-        alert("기록되었습니다. 이 고비만 넘기면 몸은 더 건강해질 거예요!");
     }
 
     function openStats() {
-        if (cravingData.length === 0) return alert("아직 기록된 고비가 없습니다.");
+        if (cravingData.length === 0) return alert("아직 기록된 데이터가 없습니다.");
         openModal('statsModal');
-        
         setTimeout(() => {
             const ctx = document.getElementById('cravingHistoryChart').getContext('2d');
-            const lastData = cravingData.slice(-10); // 최근 10개만
-
+            const lastData = cravingData.slice(-10);
             if (statsChart) statsChart.destroy();
             statsChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: lastData.map(d => d.date),
-                    datasets: [{
-                        label: '갈망 강도',
-                        data: lastData.map(d => d.strength),
-                        backgroundColor: 'rgba(231, 76, 60, 0.6)',
-                        borderColor: 'rgb(231, 76, 60)',
-                        borderWidth: 1,
-                        borderRadius: 5
-                    }]
+                    datasets: [{ label: '갈망 강도', data: lastData.map(d => d.strength), backgroundColor: '#e74c3c' }]
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: { y: { beginAtZero: true, max: 10 } }
-                }
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 10 } } }
             });
         }, 100);
     }
 
-    /* 기존 금주 앱 로직 */
     function renderChangeCards() {
-        const list = document.getElementById('changeList');
-        list.innerHTML = stages.map((s, i) => `
+        document.getElementById('changeList').innerHTML = stages.map((s, i) => `
             <div class="change-card" id="card${i}">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <span style="font-weight:bold; font-size:0.9rem;">${s.t}</span>
                     <div class="progress-bg"><div class="progress-fill" id="fill${i}"></div></div>
                 </div>
-                <p style="font-size:0.8rem; color:#666; margin:5px 0 0 0;">${s.desc}</p>
+                <p style="font-size:0.8rem; color:#666; margin-top:4px;">${s.desc}</p>
             </div>
         `).join('');
     }
 
     function saveDate() {
         const input = document.getElementById('dateTimeInput').value;
-        if (!input) return alert("날짜를 선택해주세요.");
+        if (!input) return alert("날짜를 선택하세요.");
         localStorage.setItem('quitDrinkingDateTime', input);
         startApp(input);
     }
@@ -237,21 +224,21 @@
         const ctx = document.getElementById('survivalChart').getContext('2d');
         mainChart = new Chart(ctx, {
             type: 'line',
-            data: { datasets: [{ label: '유지자', data: allPoints, borderColor: '#3498db', pointRadius: 0, fill: true, backgroundColor: 'rgba(52,152,219,0.1)' }] },
+            data: { datasets: [{ data: allPoints, borderColor: '#3498db', pointRadius: 0, fill: true, backgroundColor: 'rgba(52,152,219,0.1)' }] },
             options: { 
                 responsive: true, maintainAspectRatio: false,
-                scales: { x: { type: 'linear', min: 0, max: 100 }, y: { beginAtZero: true } },
-                plugins: { annotation: { annotations: { line1: { type: 'line', xMin: 0, xMax: 0, borderColor: 'red', borderWidth: 2 } } }, legend: {display: false} }
+                scales: { x: { type: 'linear', min: 0, max: 100 }, y: { beginAtZero: true, max: 1000 } },
+                plugins: { legend: {display: false}, annotation: { annotations: { line1: { type: 'line', xMin: 0, xMax: 0, borderColor: 'red', borderWidth: 2 } } } }
             }
         });
 
         timerInterval = setInterval(() => {
+            const days = (new Date() - new Date(startISO)) / 86400000;
             const diff = new Date() - new Date(startISO);
-            const days = diff / (24 * 60 * 60 * 1000);
             document.getElementById('mainDays').innerText = Math.floor(days) + "일";
             document.getElementById('subTime').innerText = `${Math.floor((diff/3600000)%24)}시간 ${Math.floor((diff/60000)%60)}분 ${Math.floor((diff/1000)%60)}초`;
             
-            const survivors = Math.max(1, Math.round(1000 * Math.exp(-0.04 * Math.floor(days))));
+            const survivors = Math.max(1, Math.round(1000 * Math.exp(-0.04 * days)));
             document.getElementById('survivors').innerText = survivors.toLocaleString();
             document.getElementById('myRank').innerText = survivors.toLocaleString();
 
@@ -261,20 +248,18 @@
 
             stages.forEach((s, i) => {
                 const perc = Math.min((days / s.d) * 100, 100);
-                const fill = document.getElementById(`fill${i}`);
-                fill.style.width = perc + '%';
+                document.getElementById(`fill${i}`).style.width = perc + '%';
                 if(perc >= 100) document.getElementById(`card${i}`).classList.add('active');
             });
         }, 1000);
     }
 
     function resetDate() {
-        if (confirm("모든 데이터(금주 기록 및 갈망 통계)를 초기화할까요?")) {
+        if (confirm("모든 기록을 초기화하시겠습니까?")) {
             localStorage.clear();
             location.reload();
         }
     }
 </script>
-
 </body>
 </html>
