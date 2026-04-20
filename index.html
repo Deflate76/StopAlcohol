@@ -19,9 +19,9 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1">
-   <script src="recovery.js"></script>
-</script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1"></script>
+    
+    <script src="recovery.js"></script>
     
     <style>
         :root {
@@ -114,6 +114,11 @@
         .time-unit { display: block; font-size: 3rem; font-weight: 800; color: var(--danger-color); line-height: 1.2; }
         #subTime { font-size: 1.2rem; font-weight: 600; color: #555; margin-top: 5px; }
 
+        .sub-progress-container { width: 100%; max-width: 300px; margin: 12px auto 0; }
+        .sub-progress-bg { background: #ffe3e3; height: 10px; border-radius: 5px; overflow: hidden; position: relative; }
+        .sub-progress-fill { background: var(--danger-color); height: 100%; width: 0%; transition: width 1s linear; }
+        .sub-percent-text { font-size: 0.8rem; color: #e74c3c; font-weight: 700; margin-top: 4px; display: block; }
+
         .rank-info { background: #e3f2fd; padding: 20px 15px; border-radius: 20px; margin: 15px 0; border: 1px solid #bbdefb; display: flex; flex-direction: column; gap: 10px; }
         .rank-item { display: flex; justify-content: center; align-items: baseline; gap: 6px; }
         .rank-label { font-size: 0.95rem; color: #555; }
@@ -124,7 +129,6 @@
         .craving-btn { background-color: var(--warning-color); color: white; border: none; padding: 15px; border-radius: 14px; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 12px; font-size: 1rem; }
         .stat-btn { background-color: #fff; color: var(--warning-color); border: 2px solid var(--warning-color); padding: 10px; border-radius: 12px; font-size: 0.9rem; cursor: pointer; width: 100%; font-weight: bold; }
 
-        /* 범례 스타일 */
         .chart-legend { display: flex; justify-content: center; gap: 15px; margin-top: 20px; margin-bottom: 5px; }
         .legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.8rem; color: #666; font-weight: 600; }
         .legend-color { width: 12px; height: 12px; border-radius: 3px; }
@@ -133,9 +137,14 @@
 
         .change-section { margin-top: 30px; text-align: left; border-top: 2px solid #eee; padding-top: 25px; }
         .change-card { background: #fff; border: 1px solid #e1e4e8; border-radius: 14px; padding: 15px; margin-bottom: 12px; transition: 0.3s; }
+        
+        .progress-bg { background: #eee; height: 16px; border-radius: 8px; overflow: hidden; width: 100px; position: relative; display: flex; align-items: center; justify-content: center; }
+        .progress-fill { background: linear-gradient(90deg, #f39c12, #e67e22); height: 100%; width: 0%; transition: width 0.5s ease; position: absolute; left: 0; }
+        .progress-text { position: absolute; font-size: 10px; font-weight: 800; color: #444; z-index: 2; }
+        
         .change-card.active { border-color: var(--success-color); background-color: #fafffa; box-shadow: 0 4px 12px rgba(46, 204, 113, 0.1); }
-        .progress-bg { background: #eee; height: 10px; border-radius: 5px; overflow: hidden; width: 80px; }
-        .progress-fill { background: var(--primary-color); height: 100%; width: 0%; transition: width 0.5s ease; }
+        .change-card.active .progress-fill { background: linear-gradient(90deg, #2ecc71, #27ae60); }
+        .change-card.active .progress-text { color: #fff; }
 
         .setting-date-info { margin-top: 30px; font-size: 0.85rem; color: #718096; background: #edf2f7; padding: 10px; border-radius: 10px; }
 
@@ -169,6 +178,12 @@
         <div class="timer-display">
             <span id="mainDays" class="time-unit">0일</span>
             <div id="subTime">0시간 0분 0초</div>
+            <div class="sub-progress-container">
+                <div class="sub-progress-bg">
+                    <div class="sub-progress-fill" id="subFill"></div>
+                </div>
+                <span class="sub-percent-text" id="subPercent">오늘의 목표: 0.0% 달성</span>
+            </div>
         </div>
 
         <div class="rank-info">
@@ -247,15 +262,6 @@
     let statsChart = null;
     let cravingData = JSON.parse(localStorage.getItem('cravingHistory') || '[]');
 
-    const stages = [
-        { d: 1, t: "1일: 알코올 해독", desc: "혈당 안정 및 몸속 독소 배출 시작" },
-        { d: 7, t: "1주: 수면 개선", desc: "깊은 수면(REM) 비중 증가로 개운함" },
-        { d: 14, t: "2주: 위장 회복", desc: "소화 능력 개선 및 역류 증상 완화" },
-        { d: 30, t: "1개월: 간 기능 회복", desc: "간 지방 수치 감소 및 안색 개선" },
-        { d: 90, t: "3개월: 면역력 강화", desc: "전반적인 혈액 및 면역 체계 강화" },
-        { d: 365, t: "1년: 질병 위험 급감", desc: "암 및 심혈관 질환 위험 현저히 감소" }
-    ];
-
     window.onload = function() {
         renderChangeCards();
         document.getElementById('cravingCount').innerText = cravingData.length;
@@ -308,7 +314,10 @@
             <div class="change-card" id="card${i}">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <span style="font-weight:700; font-size:0.95rem;">${s.t}</span>
-                    <div class="progress-bg"><div class="progress-fill" id="fill${i}"></div></div>
+                    <div class="progress-bg">
+                        <span class="progress-text" id="text${i}">0%</span>
+                        <div class="progress-fill" id="fill${i}"></div>
+                    </div>
                 </div>
                 <p style="font-size:0.85rem; color:#666; margin-top:6px;">${s.desc}</p>
             </div>
@@ -335,7 +344,6 @@
 
         const ctx = document.getElementById('survivalChart').getContext('2d');
         
-        // 초기 차트 생성 (데이터셋 2개 분리)
         mainChart = new Chart(ctx, {
             type: 'line',
             data: {
@@ -393,41 +401,49 @@
 
             const days = diff / 86400000;
             document.getElementById('mainDays').innerText = Math.floor(days) + "일";
-            document.getElementById('subTime').innerText = `${Math.floor((diff/3600000)%24)}시간 ${Math.floor((diff/60000)%60)}분 ${Math.floor((diff/1000)%60)}초`;
             
+            const hours = Math.floor((diff/3600000)%24);
+            const minutes = Math.floor((diff/60000)%60);
+            const seconds = Math.floor((diff/1000)%60);
+            document.getElementById('subTime').innerText = `${hours}시간 ${minutes}분 ${seconds}초`;
+            
+            const dailyProgress = ((hours * 3600 + minutes * 60 + seconds) / 86400) * 100;
+            document.getElementById('subFill').style.width = dailyProgress + '%';
+            document.getElementById('subPercent').innerText = `오늘의 목표: ${dailyProgress.toFixed(1)}% 달성`;
+
             const survivors = Math.max(1, calculateSurvival(days));
             document.getElementById('survivors').innerText = survivors.toLocaleString();
             document.getElementById('myRank').innerText = survivors.toLocaleString();
 
-            // 그래프 데이터 분리 업데이트
             const pastPoints = [];
             const futurePoints = [];
             
-            // 0일부터 현재일(days)까지 포인트 (Red 영역)
             for (let i = 0; i <= days; i += 1) {
                 pastPoints.push({ x: i, y: calculateSurvival(i) });
             }
-            pastPoints.push({ x: days, y: calculateSurvival(days) }); // 현재 시점 정확히 추가
+            pastPoints.push({ x: days, y: calculateSurvival(days) });
 
-            // 현재일(days)부터 100일까지 포인트 (Green 영역)
-            futurePoints.push({ x: days, y: calculateSurvival(days) }); // 현재 시점 연결
+            futurePoints.push({ x: days, y: calculateSurvival(days) });
             for (let i = Math.ceil(days); i <= 100; i += 1) {
                 futurePoints.push({ x: i, y: calculateSurvival(i) });
             }
 
             mainChart.data.datasets[0].data = pastPoints;
             mainChart.data.datasets[1].data = futurePoints;
-
-            // 현재선 위치 업데이트
             mainChart.options.plugins.annotation.annotations.line1.xMin = days;
             mainChart.options.plugins.annotation.annotations.line1.xMax = days;
-            
             mainChart.update('none');
 
             stages.forEach((s, i) => {
                 const perc = Math.min((days / s.d) * 100, 100);
                 document.getElementById(`fill${i}`).style.width = perc + '%';
-                if(perc >= 100) document.getElementById(`card${i}`).classList.add('active');
+                document.getElementById(`text${i}`).innerText = Math.floor(perc) + '%';
+                
+                if(perc >= 100) {
+                    document.getElementById(`card${i}`).classList.add('active');
+                } else {
+                    document.getElementById(`card${i}`).classList.remove('active');
+                }
             });
         }, 1000);
     }
