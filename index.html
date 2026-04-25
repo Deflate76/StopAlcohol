@@ -78,7 +78,6 @@
         .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; backdrop-filter: blur(4px); }
         .modal-content { background: white; padding: 30px 25px; border-radius: 24px; width: 88%; max-width: 400px; max-height: 90vh; overflow-y: auto; text-align: left; position: relative; box-sizing: border-box; }
         
-        /* ★ 추가: 모달 우측 상단 닫기 버튼 스타일 */
         .close-btn-top { position: absolute; top: 25px; right: 25px; font-size: 1.8rem; color: #cbd5e0; background: none; border: none; cursor: pointer; line-height: 1; transition: color 0.2s ease; padding: 0; }
         .close-btn-top:hover { color: var(--danger-color); }
 
@@ -222,7 +221,7 @@
         <input type="range" id="hungerRange" min="1" max="10" value="5" oninput="document.getElementById('hungerVal').innerText = this.value" style="width:100%; margin:10px 0;">
 
         <button class="start-btn" style="margin-top:25px; width:100%;" onclick="submitCraving()">이 고비 기록하고 참기</button>
-        </div>
+    </div>
 </div>
 
 <div id="statsModal" class="modal">
@@ -231,7 +230,7 @@
         
         <h3 style="margin-top:0; padding-right: 20px;">나의 고비 극복 리포트</h3>
         <div style="height: 350px; margin-top: 20px;"><canvas id="cravingHistoryChart"></canvas></div>
-        </div>
+    </div>
 </div>
 
 <script type="module">
@@ -670,6 +669,7 @@
         mainChart.update('none');
     }
 
+    /* ★ 혼합 그래프(Mixed Chart) 적용으로 갈망 강도 강조 ★ */
     window.openStats = function() {
         if (cravingData.length === 0) return alert("기록된 고비가 없습니다.");
         openModal('statsModal');
@@ -679,15 +679,26 @@
             const lastData = cravingData.slice(-10);
             
             statsChart = new Chart(ctx, {
-                type: 'bar',
+                type: 'bar', // 기본 틀은 Bar 형태로 둡니다.
                 data: { 
                     labels: lastData.map(d => d.date), 
                     datasets: [
-                        { label: '갈망 강도', data: lastData.map(d => d.strength), backgroundColor: '#e74c3c' },
-                        { label: '육체 피로', data: lastData.map(d => d.fatigue || 0), backgroundColor: '#3498db' },
-                        { label: '정신 스트레스', data: lastData.map(d => d.stress || 0), backgroundColor: '#f39c12' },
-                        { label: '수면 부족', data: lastData.map(d => d.sleep || 0), backgroundColor: '#9b59b6' },
-                        { label: '배고픔', data: lastData.map(d => d.hunger || 0), backgroundColor: '#2ecc71' }
+                        { 
+                            type: 'line', // 갈망 강도만 꺾은선으로 변경
+                            label: '🔥 갈망 강도', 
+                            data: lastData.map(d => d.strength), 
+                            borderColor: '#e74c3c', 
+                            backgroundColor: '#e74c3c',
+                            borderWidth: 3,
+                            pointRadius: 5,
+                            tension: 0.3,
+                            order: 0 // 화면상 가장 앞으로 나오게 배치
+                        },
+                        // 나머지 지표들은 배경 역할을 하도록 투명도(0.5)를 낮춘 막대그래프를 사용합니다.
+                        { label: '육체 피로', data: lastData.map(d => d.fatigue || 0), backgroundColor: 'rgba(52, 152, 219, 0.5)', order: 1 },
+                        { label: '정신 스트레스', data: lastData.map(d => d.stress || 0), backgroundColor: 'rgba(243, 156, 18, 0.5)', order: 1 },
+                        { label: '수면 부족', data: lastData.map(d => d.sleep || 0), backgroundColor: 'rgba(155, 89, 182, 0.5)', order: 1 },
+                        { label: '배고픔', data: lastData.map(d => d.hunger || 0), backgroundColor: 'rgba(46, 204, 113, 0.5)', order: 1 }
                     ] 
                 },
                 options: { 
