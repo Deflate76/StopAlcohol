@@ -1,14 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 
-    <!--
-// Copyright (c) 2026 Kim Jung-hoon (김정훈). All rights reserved.
-// This project and its source code are the intellectual property of the author.
-// Unauthorized copying, distribution, or modification is strictly prohibited.
--->
-
-    
-<head>
+    <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>금주 서바이벌 리포트</title>
@@ -32,6 +25,7 @@
             --danger-color: #e74c3c;
             --success-color: #2ecc71;
             --warning-color: #f39c12;
+            --purple-color: #9b59b6;
             --bg-color: #f0f2f5;
             --text-dark: #2d3748;
         }
@@ -82,7 +76,7 @@
 
         /* 모달 등 */
         .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; backdrop-filter: blur(4px); }
-        .modal-content { background: white; padding: 30px 25px; border-radius: 24px; width: 88%; max-width: 400px; text-align: left; position: relative; box-sizing: border-box; }
+        .modal-content { background: white; padding: 30px 25px; border-radius: 24px; width: 88%; max-width: 400px; max-height: 90vh; overflow-y: auto; text-align: left; position: relative; box-sizing: border-box; }
         .reset-btn { background-color: transparent; color: #a0aec0; margin-top: 10px; border: none; text-decoration: underline; cursor: pointer; font-size: 0.85rem; width: 100%; }
         .highlight { color: var(--primary-color); font-weight: 700; }
         textarea, select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; margin-top: 10px; font-family: inherit; }
@@ -106,7 +100,7 @@
         .comment-input { flex: 1; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.85rem; background: #f8f9fa; }
         .comment-btn { background: var(--text-dark); color: white; border: none; padding: 8px 14px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; cursor: pointer; }
 
-        /* ★ 추가: 푸터 스타일 */
+        /* 푸터 스타일 */
         footer { margin-top: 30px; padding: 15px 0; text-align: center; font-size: 0.75rem; color: #9ca3af; border-top: 1px solid #e2e8f0; width: 100%; max-width: 550px; align-self: center; }
     </style>
 </head>
@@ -193,8 +187,11 @@
 <div id="cravingModal" class="modal">
     <div class="modal-content">
         <h3 style="margin-top:0">고비 기록하기</h3>
+        
         <label style="font-weight:700; font-size:0.9rem;">갈망 강도 (<span id="rangeVal" style="color:var(--danger-color)">5</span>/10)</label>
-        <input type="range" id="cravingRange" min="1" max="10" value="5" oninput="document.getElementById('rangeVal').innerText = this.value" style="width:100%; margin:15px 0;">
+        <input type="range" id="cravingRange" min="1" max="10" value="5" oninput="document.getElementById('rangeVal').innerText = this.value" style="width:100%; margin:10px 0;">
+        
+        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:15px;">갈망의 원인</label>
         <select id="cravingReason" onchange="toggleEtc(this.value)">
             <option value="스트레스">업무 및 일상 스트레스</option>
             <option value="회식/모임">회식 또는 사교 모임</option>
@@ -204,15 +201,28 @@
             <option value="기타">기타 (직접 입력)</option>
         </select>
         <textarea id="etcReason" style="display:none;" placeholder="구체적인 사유를 적어주세요"></textarea>
+
+        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:20px;">육체피로 정도 (<span id="fatigueVal" style="color:var(--primary-color)">5</span>/10)</label>
+        <input type="range" id="fatigueRange" min="1" max="10" value="5" oninput="document.getElementById('fatigueVal').innerText = this.value" style="width:100%; margin:10px 0;">
+
+        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:10px;">정신적 스트레스 정도 (<span id="stressVal" style="color:var(--warning-color)">5</span>/10)</label>
+        <input type="range" id="stressRange" min="1" max="10" value="5" oninput="document.getElementById('stressVal').innerText = this.value" style="width:100%; margin:10px 0;">
+
+        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:10px;">수면 상태 (<span id="sleepVal" style="color:var(--purple-color)">5</span>/10) <br><span style="font-size:0.75rem; color:#999; font-weight:normal;">1: 충분함 ~ 10: 최고로 부족함</span></label>
+        <input type="range" id="sleepRange" min="1" max="10" value="5" oninput="document.getElementById('sleepVal').innerText = this.value" style="width:100%; margin:10px 0;">
+
+        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:10px;">배고픔 정도 (<span id="hungerVal" style="color:var(--success-color)">5</span>/10) <br><span style="font-size:0.75rem; color:#999; font-weight:normal;">1: 충분함 ~ 10: 너무 배고픔</span></label>
+        <input type="range" id="hungerRange" min="1" max="10" value="5" oninput="document.getElementById('hungerVal').innerText = this.value" style="width:100%; margin:10px 0;">
+
         <button class="start-btn" style="margin-top:25px; width:100%;" onclick="submitCraving()">이 고비 기록하고 참기</button>
         <button onclick="closeModal('cravingModal')" style="width:100%; border:none; background:none; margin-top:15px; color:#999; cursor:pointer;">닫기</button>
     </div>
 </div>
 
 <div id="statsModal" class="modal">
-    <div class="modal-content" style="max-width: 450px;">
+    <div class="modal-content" style="max-width: 500px;">
         <h3 style="margin-top:0">나의 고비 극복 리포트</h3>
-        <div style="height: 250px;"><canvas id="cravingHistoryChart"></canvas></div>
+        <div style="height: 350px;"><canvas id="cravingHistoryChart"></canvas></div>
         <button onclick="closeModal('statsModal')" style="width:100%; border:none; background:none; margin-top:20px; color:#999; cursor:pointer;">닫기</button>
     </div>
 </div>
@@ -542,24 +552,37 @@
         } catch (e) { alert("연동 에러: " + e.code); }
     };
 
+    /* 데이터베이스 저장 및 모달 관련 수정 시작 */
     window.submitCraving = async function() {
         if (!userId) return;
+        
         const strength = document.getElementById('cravingRange').value;
         const reason = document.getElementById('cravingReason').value;
+        const fatigue = document.getElementById('fatigueRange').value;
+        const stress = document.getElementById('stressRange').value;
+        const sleep = document.getElementById('sleepRange').value;
+        const hunger = document.getElementById('hungerRange').value;
+
         const entry = {
             date: new Date().toLocaleString('ko-KR', {month:'short', day:'numeric', hour:'numeric'}),
             strength: parseInt(strength),
             reason: reason === '기타' ? document.getElementById('etcReason').value : reason,
+            fatigue: parseInt(fatigue),
+            stress: parseInt(stress),
+            sleep: parseInt(sleep),
+            hunger: parseInt(hunger),
             timestamp: new Date().getTime()
         };
+
         try {
             await updateDoc(doc(db, "users", userId), { cravingHistory: arrayUnion(entry) });
             cravingData.push(entry);
             document.getElementById('cravingCount').innerText = cravingData.length;
             closeModal('cravingModal');
             alert("고비를 잘 넘기셨습니다!");
-        } catch (e) { alert("저장 실패"); }
+        } catch (e) { alert("저장 실패: " + e.message); }
     };
+    /* 수정 끝 */
 
     function renderChangeCards(tabName) {
         let activeStages = physicalStages;
@@ -642,6 +665,7 @@
         mainChart.update('none');
     }
 
+    /* 그래프(Bar Chart) 여러 데이터 표시 업데이트 시작 */
     window.openStats = function() {
         if (cravingData.length === 0) return alert("기록된 고비가 없습니다.");
         openModal('statsModal');
@@ -649,13 +673,33 @@
             const ctx = document.getElementById('cravingHistoryChart').getContext('2d');
             if (statsChart) statsChart.destroy();
             const lastData = cravingData.slice(-10);
+            
             statsChart = new Chart(ctx, {
                 type: 'bar',
-                data: { labels: lastData.map(d => d.date), datasets: [{ label: '갈망 강도', data: lastData.map(d => d.strength), backgroundColor: '#e74c3c' }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                data: { 
+                    labels: lastData.map(d => d.date), 
+                    datasets: [
+                        { label: '갈망 강도', data: lastData.map(d => d.strength), backgroundColor: '#e74c3c' },
+                        { label: '육체 피로', data: lastData.map(d => d.fatigue || 0), backgroundColor: '#3498db' },
+                        { label: '정신 스트레스', data: lastData.map(d => d.stress || 0), backgroundColor: '#f39c12' },
+                        { label: '수면 부족', data: lastData.map(d => d.sleep || 0), backgroundColor: '#9b59b6' },
+                        { label: '배고픔', data: lastData.map(d => d.hunger || 0), backgroundColor: '#2ecc71' }
+                    ] 
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    scales: {
+                        y: { beginAtZero: true, max: 10 }
+                    },
+                    plugins: { 
+                        legend: { display: true, position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } 
+                    } 
+                }
             });
         }, 200);
     };
+    /* 업데이트 끝 */
 
     window.resetDate = async function() {
         if (confirm("서버의 모든 기록이 초기화됩니다. 계속할까요?")) {
