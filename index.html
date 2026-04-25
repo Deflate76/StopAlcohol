@@ -33,30 +33,41 @@
         body { font-family: 'Pretendard', -apple-system, sans-serif; text-align: center; padding: 15px; background-color: var(--bg-color); color: #333; line-height: 1.6; }
         .container { max-width: 550px; margin: 0 auto; background: white; padding: 30px 20px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); box-sizing: border-box; }
         h1 { font-size: 1.6rem; white-space: nowrap; word-break: keep-all; margin-bottom: 25px; letter-spacing: -0.5px; color: var(--text-dark); }
+        
         #setupArea { padding: 20px 0; display: flex; flex-direction: column; align-items: center; }
         #dateTimeInput { width: 100%; max-width: 320px; padding: 16px; font-size: 1.05rem; font-weight: 600; color: var(--text-dark); border: 2px solid #e2e8f0; border-radius: 16px; margin-bottom: 20px; text-align: center; font-family: inherit; }
+        
         .start-btn { width: 100%; max-width: 320px; padding: 18px; font-size: 1.2rem; font-weight: 800; background: linear-gradient(135deg, #3498db, #2980b9); color: white; border: none; border-radius: 16px; cursor: pointer; box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3); transition: transform 0.2s; }
         .start-btn:active { transform: scale(0.97); }
+        
         .timer-display { margin: 15px 0; padding: 25px 20px; background: #fff5f5; border-radius: 20px; border: 1px solid #ffe3e3; }
         .time-unit { display: block; font-size: 3rem; font-weight: 800; color: var(--danger-color); line-height: 1.2; }
         #subTime { font-size: 1.2rem; font-weight: 600; color: #555; margin-top: 5px; }
+        
         .sub-progress-container { width: 100%; max-width: 300px; margin: 12px auto 0; }
         .sub-progress-bg { background: #ffe3e3; height: 10px; border-radius: 5px; overflow: hidden; position: relative; }
         .sub-progress-fill { background: var(--danger-color); height: 100%; width: 0%; transition: width 1s linear; }
         .sub-percent-text { font-size: 0.8rem; color: #e74c3c; font-weight: 700; margin-top: 4px; display: block; }
+        
         .rank-info { background: #e3f2fd; padding: 20px 15px; border-radius: 20px; margin: 15px 0; border: 1px solid #bbdefb; display: flex; flex-direction: column; gap: 10px; }
         .rank-item { display: flex; justify-content: center; align-items: baseline; gap: 6px; }
         .rank-number { font-size: 1.5rem; font-weight: 800; color: #1976d2; }
+        
         .craving-section { margin-top: 25px; padding: 20px; background: #fff9f0; border-radius: 20px; border: 1px dashed var(--warning-color); }
         .craving-btn { background-color: var(--warning-color); color: white; border: none; padding: 15px; border-radius: 14px; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 12px; font-size: 1rem; }
         .stat-btn { background-color: #fff; color: var(--warning-color); border: 2px solid var(--warning-color); padding: 10px; border-radius: 12px; font-size: 0.9rem; cursor: pointer; width: 100%; font-weight: bold; }
+        
         .chart-container { position: relative; height: 250px; width: 100%; margin: 10px 0 25px 0; }
-        .change-card { background: #fff; border: 1px solid #e1e4e8; border-radius: 14px; padding: 15px; margin-bottom: 12px; text-align: left; }
+        
+        /* 로드맵 카드 스타일 */
+        .change-card { background: #fff; border: 1px solid #e1e4e8; border-radius: 14px; padding: 15px; margin-bottom: 12px; text-align: left; transition: all 0.3s ease; }
         .progress-bg { background: #eee; height: 16px; border-radius: 8px; overflow: hidden; width: 100px; position: relative; display: flex; align-items: center; justify-content: center; }
         .progress-fill { background: linear-gradient(90deg, #f39c12, #e67e22); height: 100%; width: 0%; transition: width 0.5s ease; position: absolute; left: 0; }
         .progress-text { position: absolute; font-size: 10px; font-weight: 800; color: #444; z-index: 2; }
-        .change-card.active { border-color: var(--success-color); background-color: #fafffa; }
+        .change-card.active { border-color: var(--success-color); background-color: #fafffa; box-shadow: 0 4px 12px rgba(46, 204, 113, 0.1); }
         .change-card.active .progress-fill { background: linear-gradient(90deg, #2ecc71, #27ae60); }
+        .change-card.active .progress-text { color: #fff; }
+
         .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; backdrop-filter: blur(4px); }
         .modal-content { background: white; padding: 30px 25px; border-radius: 24px; width: 88%; max-width: 400px; text-align: left; position: relative; box-sizing: border-box; }
         .reset-btn { background-color: transparent; color: #a0aec0; margin-top: 10px; border: none; text-decoration: underline; cursor: pointer; font-size: 0.85rem; width: 100%; }
@@ -137,9 +148,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
     import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-analytics.js";
 
-    // 제공해주신 Firebase 설정 정보 적용
     const firebaseConfig = {
         apiKey: "AIzaSyBWDwueP3a0atxCqFIgqd96sgXc0EqYbEY",
         authDomain: "alcoholaway.firebaseapp.com",
@@ -152,29 +161,23 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const analytics = getAnalytics(app);
 
-    // 사용자 기기 식별을 위한 ID (익명)
-    let userId = localStorage.getItem('sober_user_id');
-    if (!userId) {
-        userId = 'user_' + Math.random().toString(36).substr(2, 9);
-        localStorage.setItem('sober_user_id', userId);
-    }
+    let userId = localStorage.getItem('sober_user_id') || ('user_' + Math.random().toString(36).substr(2, 9));
+    localStorage.setItem('sober_user_id', userId);
 
     let mainChart = null;
     let statsChart = null;
     let cravingData = [];
     let timerInterval = null;
 
-    // 초기 로드
     window.onload = async function() {
+        // 1. 카드 먼저 생성
         renderChangeCards();
         
         const now = new Date();
         now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
         document.getElementById('dateTimeInput').value = now.toISOString().slice(0, 16);
 
-        // Firestore 데이터 로드
         try {
             const userDoc = await getDoc(doc(db, "users", userId));
             if (userDoc.exists()) {
@@ -185,10 +188,9 @@
                     startApp(data.quitDate);
                 }
             }
-        } catch (e) { console.error("Data Load Error:", e); }
+        } catch (e) { console.error(e); }
     };
 
-    // 앱 구동 시작
     window.startApp = function(startISO) {
         document.getElementById('setupArea').style.display = 'none';
         document.getElementById('displayArea').style.display = 'block';
@@ -220,37 +222,20 @@
             document.getElementById('myRank').innerText = survivors.toLocaleString();
 
             updateChart(days);
+            // 로드맵 실시간 업데이트 호출
             updateRoadmap(days);
         }, 1000);
     };
 
-// 시작일 저장
     window.saveDate = async function() {
         const input = document.getElementById('dateTimeInput').value;
         if (!input) return alert("일시를 선택해 주세요.");
-        
         try {
-            await setDoc(doc(db, "users", userId), {
-                quitDate: input,
-                createdAt: new Date()
-            }, { merge: true });
+            await setDoc(doc(db, "users", userId), { quitDate: input, createdAt: new Date() }, { merge: true });
             startApp(input);
-        } catch (e) {
-            // 콘솔에는 전체 에러 객체를 출력 (개발자용)
-            console.error("Firebase 저장 오류 세부사항:", e);
-            
-            // 사용자에게는 에러 코드와 메시지를 함께 표시
-            // e.code: 'permission-denied', 'unavailable' 등
-            // e.message: 구체적인 에러 내용
-            alert(`연동 오류가 발생했습니다.\n\n오류 코드: ${e.code}\n메시지: ${e.message}`);
-            
-            if (e.code === 'permission-denied') {
-                console.warn("팁: Firebase Console의 Firestore Rules 탭에서 읽기/쓰기 권한이 허용되어 있는지 확인하세요.");
-            }
-        }
+        } catch (e) { alert("오류 코드: " + e.code); }
     };
 
-    // 고비 기록 저장
     window.submitCraving = async function() {
         const strength = document.getElementById('cravingRange').value;
         const reason = document.getElementById('cravingReason').value;
@@ -260,58 +245,36 @@
             reason: reason === '기타' ? document.getElementById('etcReason').value : reason,
             timestamp: new Date().getTime()
         };
-
         try {
-            const userRef = doc(db, "users", userId);
-            await updateDoc(userRef, {
-                cravingHistory: arrayUnion(entry)
-            });
+            await updateDoc(doc(db, "users", userId), { cravingHistory: arrayUnion(entry) });
             cravingData.push(entry);
             document.getElementById('cravingCount').innerText = cravingData.length;
             closeModal('cravingModal');
-            alert("고비를 멋지게 넘기셨습니다!");
-        } catch (e) { alert("기록 중 오류가 발생했습니다."); }
+            alert("기록 완료!");
+        } catch (e) { alert("기록 실패"); }
     };
 
-    // 차트 초기화
-    function initSurvivalChart() {
-        const ctx = document.getElementById('survivalChart').getContext('2d');
-        mainChart = new Chart(ctx, {
-            type: 'line',
-            data: { datasets: [
-                { label: '탈락 영역', data: [], borderColor: '#e74c3c', backgroundColor: 'rgba(231, 76, 60, 0.4)', fill: true, pointRadius: 0, tension: 0.3 },
-                { label: '생존 영역', data: [], borderColor: '#2ecc71', backgroundColor: 'rgba(46, 204, 113, 0.4)', fill: true, pointRadius: 0, tension: 0.3 }
-            ]},
-            options: { 
-                responsive: true, maintainAspectRatio: false, 
-                scales: { 
-                    x: { type: 'linear', min: 0, max: 100, title: { display:true, text:'경과일수', font:{size:10} } }, 
-                    y: { beginAtZero: true, max: 1000, title: { display:true, text:'생존자수', font:{size:10} } } 
-                },
-                plugins: { 
-                    legend: { display: false }, 
-                    annotation: { annotations: { 
-                        line1: { type: 'line', xMin: 0, xMax: 0, borderColor: 'black', borderWidth: 2, label: { display: true, content: '현재', position: 'end', backgroundColor: 'black' } } 
-                    }}
-                }
-            }
-        });
+    // 로드맵 카드 생성 함수
+    function renderChangeCards() {
+        if (!window.stages) {
+            console.error("recovery.js의 stages 데이터를 찾을 수 없습니다.");
+            return;
+        }
+        document.getElementById('changeList').innerHTML = stages.map((s, i) => `
+            <div class="change-card" id="card${i}">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-weight:700; font-size:0.95rem;">${s.t}</span>
+                    <div class="progress-bg">
+                        <span class="progress-text" id="text${i}">0%</span>
+                        <div class="progress-fill" id="fill${i}"></div>
+                    </div>
+                </div>
+                <p style="font-size:0.85rem; color:#666; margin-top:6px;">${s.desc}</p>
+            </div>
+        `).join('');
     }
 
-    function updateChart(days) {
-        if (!mainChart) return;
-        const past = []; const future = [];
-        for (let i = 0; i <= days; i++) past.push({x: i, y: 1000 * Math.exp(-0.04 * i)});
-        past.push({x: days, y: 1000 * Math.exp(-0.04 * days)});
-        for (let i = Math.ceil(days); i <= 100; i++) future.push({x: i, y: 1000 * Math.exp(-0.04 * i)});
-        
-        mainChart.data.datasets[0].data = past;
-        mainChart.data.datasets[1].data = future;
-        mainChart.options.plugins.annotation.annotations.line1.xMin = days;
-        mainChart.options.plugins.annotation.annotations.line1.xMax = days;
-        mainChart.update('none');
-    }
-
+    // 로드맵 퍼센트 업데이트 함수
     function updateRoadmap(days) {
         if (!window.stages) return;
         stages.forEach((s, i) => {
@@ -321,54 +284,63 @@
             const card = document.getElementById(`card${i}`);
             if (fill) fill.style.width = perc + '%';
             if (text) text.innerText = Math.floor(perc) + '%';
-            if (card) perc >= 100 ? card.classList.add('active') : card.classList.remove('active');
+            if (card) {
+                if (perc >= 100) card.classList.add('active');
+                else card.classList.remove('active');
+            }
         });
     }
 
+    // 차트 초기화 (기존 로직)
+    function initSurvivalChart() {
+        const ctx = document.getElementById('survivalChart').getContext('2d');
+        mainChart = new Chart(ctx, {
+            type: 'line',
+            data: { datasets: [
+                { label: '탈락 영역', data: [], borderColor: '#e74c3c', backgroundColor: 'rgba(231, 76, 60, 0.4)', fill: true, pointRadius: 0, tension: 0.3 },
+                { label: '생존 영역', data: [], borderColor: '#2ecc71', backgroundColor: 'rgba(46, 204, 113, 0.4)', fill: true, pointRadius: 0, tension: 0.3 }
+            ]},
+            options: { responsive: true, maintainAspectRatio: false, scales: { x: { type: 'linear', min: 0, max: 100 }, y: { beginAtZero: true, max: 1000 } }, plugins: { legend: { display: false }, annotation: { annotations: { line1: { type: 'line', xMin: 0, xMax: 0, borderColor: 'black', borderWidth: 2, label: { display: true, content: '현재', position: 'end' } } } } } }
+        });
+    }
+
+    function updateChart(days) {
+        if (!mainChart) return;
+        const past = []; const future = [];
+        for (let i = 0; i <= days; i++) past.push({x: i, y: 1000 * Math.exp(-0.04 * i)});
+        past.push({x: days, y: 1000 * Math.exp(-0.04 * days)});
+        for (let i = Math.ceil(days); i <= 100; i++) future.push({x: i, y: 1000 * Math.exp(-0.04 * i)});
+        mainChart.data.datasets[0].data = past;
+        mainChart.data.datasets[1].data = future;
+        mainChart.options.plugins.annotation.annotations.line1.xMin = days;
+        mainChart.options.plugins.annotation.annotations.line1.xMax = days;
+        mainChart.update('none');
+    }
+
+    // 통계 및 UI 제어 (기존 로직)
     window.openStats = function() {
-        if (cravingData.length === 0) return alert("기록된 고비가 없습니다.");
+        if (cravingData.length === 0) return alert("기록 없음");
         openModal('statsModal');
         setTimeout(() => {
             const ctx = document.getElementById('cravingHistoryChart').getContext('2d');
             if (statsChart) statsChart.destroy();
-            const lastData = cravingData.slice(-10);
             statsChart = new Chart(ctx, {
                 type: 'bar',
-                data: {
-                    labels: lastData.map(d => d.date),
-                    datasets: [{ label: '갈망 강도', data: lastData.map(d => d.strength), backgroundColor: '#e74c3c' }]
-                },
+                data: { labels: cravingData.slice(-10).map(d => d.date), datasets: [{ data: cravingData.slice(-10).map(d => d.strength), backgroundColor: '#e74c3c' }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
             });
         }, 200);
     };
 
     window.resetDate = async function() {
-        if (confirm("서버의 모든 기록이 초기화되며 처음부터 다시 시작합니다. 계속할까요?")) {
-            try {
-                await deleteDoc(doc(db, "users", userId));
-                location.reload();
-            } catch (e) { alert("초기화 중 오류가 발생했습니다."); }
+        if (confirm("초기화하시겠습니까?")) {
+            try { await deleteDoc(doc(db, "users", userId)); location.reload(); } catch (e) { alert("실패"); }
         }
     };
 
-    // UI 제어 함수
     window.openModal = (id) => document.getElementById(id).style.display = 'flex';
     window.closeModal = (id) => document.getElementById(id).style.display = 'none';
     window.toggleEtc = (val) => document.getElementById('etcReason').style.display = (val === '기타') ? 'block' : 'none';
-    
-    function renderChangeCards() {
-        if (!window.stages) return;
-        document.getElementById('changeList').innerHTML = stages.map((s, i) => `
-            <div class="change-card" id="card${i}">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <span style="font-weight:700; font-size:0.95rem;">${s.t}</span>
-                    <div class="progress-bg"><span class="progress-text" id="text${i}">0%</span><div class="progress-fill" id="fill${i}"></div></div>
-                </div>
-                <p style="font-size:0.85rem; color:#666; margin-top:6px;">${s.desc}</p>
-            </div>
-        `).join('');
-    }
 </script>
 </body>
 </html>
