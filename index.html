@@ -300,13 +300,13 @@
         }
     });
 
-    // ★ 추가: 구글 로그인 처리 함수
-    window.loginWithGoogle = async function() {
+window.loginWithGoogle = async function() {
         try {
             await signInWithPopup(auth, googleProvider);
         } catch (error) {
-            console.error("로그인 에러:", error);
-            alert("로그인 중 문제가 발생했습니다.");
+            console.error("로그인 에러 전체:", error);
+            // 사용자에게 정확한 에러 코드와 메시지를 띄워줍니다.
+            alert(`로그인 실패!\n에러 코드: ${error.code}\n에러 메시지: ${error.message}`);
         }
     };
 
