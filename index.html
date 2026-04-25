@@ -85,6 +85,41 @@
         .highlight { color: var(--primary-color); font-weight: 700; }
         textarea, select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; margin-top: 10px; font-family: inherit; }
 
+        /* ★ 추가: 동적 색상 변경 커스텀 프로그레스 바 스타일 */
+        .dynamic-range {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            /* JS에서 설정한 CSS 변수(var)를 읽어와 배경 그라데이션에 적용 */
+            background: linear-gradient(to right, var(--range-color, #f39c12) 0%, var(--range-color, #f39c12) var(--range-percent, 50%), #e2e8f0 var(--range-percent, 50%), #e2e8f0 100%);
+            outline: none;
+            margin: 15px 0;
+            transition: background 0.1s ease;
+        }
+        .dynamic-range::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #fff;
+            border: 3px solid var(--range-color, #f39c12);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            cursor: pointer;
+            transition: border-color 0.1s ease;
+        }
+        .dynamic-range::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #fff;
+            border: 3px solid var(--range-color, #f39c12);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            cursor: pointer;
+            transition: border-color 0.1s ease;
+        }
+
         /* 커뮤니티 게시판 상세 스타일 */
         .post-card { background: #fff; padding: 16px; border-radius: 14px; border-left: 4px solid var(--warning-color); box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 12px; }
         .post-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 0.85rem; }
@@ -194,8 +229,8 @@
         
         <h3 style="margin-top:0; padding-right: 20px;">고비 기록하기</h3>
         
-        <label style="font-weight:700; font-size:0.9rem;">갈망 강도 (<span id="rangeVal" style="color:var(--danger-color)">5</span>/10)</label>
-        <input type="range" id="cravingRange" min="1" max="10" value="5" oninput="document.getElementById('rangeVal').innerText = this.value" style="width:100%; margin:10px 0;">
+        <label style="font-weight:700; font-size:0.9rem;">갈망 강도 (<span id="rangeVal" style="font-weight: 800;">5</span>/10)</label>
+        <input type="range" id="cravingRange" min="1" max="10" value="5" class="dynamic-range" oninput="updateRangeStyle(this, 'rangeVal')">
         
         <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:15px;">갈망의 원인</label>
         <select id="cravingReason" onchange="toggleEtc(this.value)">
@@ -208,17 +243,17 @@
         </select>
         <textarea id="etcReason" style="display:none;" placeholder="구체적인 사유를 적어주세요"></textarea>
 
-        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:20px;">육체피로 정도 (<span id="fatigueVal" style="color:var(--primary-color)">5</span>/10)</label>
-        <input type="range" id="fatigueRange" min="1" max="10" value="5" oninput="document.getElementById('fatigueVal').innerText = this.value" style="width:100%; margin:10px 0;">
+        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:25px;">육체피로 정도 (<span id="fatigueVal" style="font-weight: 800;">5</span>/10)</label>
+        <input type="range" id="fatigueRange" min="1" max="10" value="5" class="dynamic-range" oninput="updateRangeStyle(this, 'fatigueVal')">
 
-        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:10px;">정신적 스트레스 정도 (<span id="stressVal" style="color:var(--warning-color)">5</span>/10)</label>
-        <input type="range" id="stressRange" min="1" max="10" value="5" oninput="document.getElementById('stressVal').innerText = this.value" style="width:100%; margin:10px 0;">
+        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:15px;">정신적 스트레스 정도 (<span id="stressVal" style="font-weight: 800;">5</span>/10)</label>
+        <input type="range" id="stressRange" min="1" max="10" value="5" class="dynamic-range" oninput="updateRangeStyle(this, 'stressVal')">
 
-        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:10px;">수면 상태 (<span id="sleepVal" style="color:var(--purple-color)">5</span>/10) <br><span style="font-size:0.75rem; color:#999; font-weight:normal;">1: 충분함 ~ 10: 최고로 부족함</span></label>
-        <input type="range" id="sleepRange" min="1" max="10" value="5" oninput="document.getElementById('sleepVal').innerText = this.value" style="width:100%; margin:10px 0;">
+        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:15px;">수면 상태 (<span id="sleepVal" style="font-weight: 800;">5</span>/10) <br><span style="font-size:0.75rem; color:#999; font-weight:normal;">1: 충분함 ~ 10: 최고로 부족함</span></label>
+        <input type="range" id="sleepRange" min="1" max="10" value="5" class="dynamic-range" oninput="updateRangeStyle(this, 'sleepVal')">
 
-        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:10px;">배고픔 정도 (<span id="hungerVal" style="color:var(--success-color)">5</span>/10) <br><span style="font-size:0.75rem; color:#999; font-weight:normal;">1: 충분함 ~ 10: 너무 배고픔</span></label>
-        <input type="range" id="hungerRange" min="1" max="10" value="5" oninput="document.getElementById('hungerVal').innerText = this.value" style="width:100%; margin:10px 0;">
+        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:15px;">배고픔 정도 (<span id="hungerVal" style="font-weight: 800;">5</span>/10) <br><span style="font-size:0.75rem; color:#999; font-weight:normal;">1: 충분함 ~ 10: 너무 배고픔</span></label>
+        <input type="range" id="hungerRange" min="1" max="10" value="5" class="dynamic-range" oninput="updateRangeStyle(this, 'hungerVal')">
 
         <button class="start-btn" style="margin-top:25px; width:100%;" onclick="submitCraving()">이 고비 기록하고 참기</button>
     </div>
@@ -669,7 +704,6 @@
         mainChart.update('none');
     }
 
-    /* ★ 혼합 그래프(Mixed Chart) 적용으로 갈망 강도 강조 ★ */
     window.openStats = function() {
         if (cravingData.length === 0) return alert("기록된 고비가 없습니다.");
         openModal('statsModal');
@@ -679,12 +713,12 @@
             const lastData = cravingData.slice(-10);
             
             statsChart = new Chart(ctx, {
-                type: 'bar', // 기본 틀은 Bar 형태로 둡니다.
+                type: 'bar',
                 data: { 
                     labels: lastData.map(d => d.date), 
                     datasets: [
                         { 
-                            type: 'line', // 갈망 강도만 꺾은선으로 변경
+                            type: 'line',
                             label: '🔥 갈망 강도', 
                             data: lastData.map(d => d.strength), 
                             borderColor: '#e74c3c', 
@@ -692,9 +726,8 @@
                             borderWidth: 3,
                             pointRadius: 5,
                             tension: 0.3,
-                            order: 0 // 화면상 가장 앞으로 나오게 배치
+                            order: 0 
                         },
-                        // 나머지 지표들은 배경 역할을 하도록 투명도(0.5)를 낮춘 막대그래프를 사용합니다.
                         { label: '육체 피로', data: lastData.map(d => d.fatigue || 0), backgroundColor: 'rgba(52, 152, 219, 0.5)', order: 1 },
                         { label: '정신 스트레스', data: lastData.map(d => d.stress || 0), backgroundColor: 'rgba(243, 156, 18, 0.5)', order: 1 },
                         { label: '수면 부족', data: lastData.map(d => d.sleep || 0), backgroundColor: 'rgba(155, 89, 182, 0.5)', order: 1 },
@@ -727,7 +760,43 @@
         }
     };
 
-    window.openModal = (id) => document.getElementById(id).style.display = 'flex';
+    /* ★ JS 함수 추가: 슬라이더 값을 기반으로 실시간 색상(그라데이션 및 텍스트)을 계산합니다. */
+    window.updateRangeStyle = function(el, textId) {
+        const val = parseInt(el.value);
+        const min = parseInt(el.min) || 1;
+        const max = parseInt(el.max) || 10;
+        const percent = ((val - min) / (max - min)) * 100;
+        
+        // Hue 값 계산: 좌측 1(녹색=120)부터 우측 10(적색=0)까지 부드럽게 변환
+        const hue = 120 - ((val - min) / (max - min)) * 120;
+        const color = `hsl(${hue}, 85%, 45%)`; 
+        
+        // CSS 변수 업데이트 (track 채워짐 효과 및 thumb 테두리 색상)
+        el.style.setProperty('--range-color', color);
+        el.style.setProperty('--range-percent', `${percent}%`);
+        
+        // 숫자 텍스트 업데이트
+        if (textId) {
+            const textEl = document.getElementById(textId);
+            if (textEl) {
+                textEl.innerText = val;
+                textEl.style.color = color;
+            }
+        }
+    };
+
+    window.openModal = (id) => {
+        document.getElementById(id).style.display = 'flex';
+        // 모달이 열릴 때 초기 값들에 대해서도 색상을 렌더링합니다.
+        if (id === 'cravingModal') {
+            updateRangeStyle(document.getElementById('cravingRange'), 'rangeVal');
+            updateRangeStyle(document.getElementById('fatigueRange'), 'fatigueVal');
+            updateRangeStyle(document.getElementById('stressRange'), 'stressVal');
+            updateRangeStyle(document.getElementById('sleepRange'), 'sleepVal');
+            updateRangeStyle(document.getElementById('hungerRange'), 'hungerVal');
+        }
+    };
+    
     window.closeModal = (id) => document.getElementById(id).style.display = 'none';
     window.toggleEtc = (val) => document.getElementById('etcReason').style.display = (val === '기타') ? 'block' : 'none';
 
