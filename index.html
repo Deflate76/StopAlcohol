@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="ko">
-
-    <!--
+<!--
 // Copyright (c) 2026 Kim Jung-hoon (김정훈). All rights reserved.
 // This project and its source code are the intellectual property of the author.
 // Unauthorized copying, distribution, or modification is strictly prohibited.
 -->
+
     
 <head>
     <meta charset="UTF-8">
@@ -39,43 +39,39 @@
         .container { max-width: 550px; margin: 0 auto; background: white; padding: 30px 20px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); box-sizing: border-box; }
         h1 { font-size: 1.6rem; white-space: nowrap; word-break: keep-all; margin-bottom: 25px; letter-spacing: -0.5px; color: var(--text-dark); }
         
-        /* 로그인 영역 스타일 */
+        /* 로그인 & 세팅 */
         #loginArea { padding: 40px 0; display: none; flex-direction: column; align-items: center; gap: 20px; }
         .google-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; max-width: 300px; padding: 15px; border-radius: 12px; border: 1px solid #ddd; background: white; font-weight: 700; font-size: 1rem; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: 0.2s; }
         .google-btn:active { transform: scale(0.98); background: #f8f9fa; }
-
         #setupArea { padding: 20px 0; display: none; flex-direction: column; align-items: center; }
         #dateTimeInput { width: 100%; max-width: 320px; padding: 16px; font-size: 1.05rem; font-weight: 600; color: var(--text-dark); border: 2px solid #e2e8f0; border-radius: 16px; margin-bottom: 20px; text-align: center; font-family: inherit; }
-        
         .start-btn { width: 100%; max-width: 320px; padding: 18px; font-size: 1.2rem; font-weight: 800; background: linear-gradient(135deg, #3498db, #2980b9); color: white; border: none; border-radius: 16px; cursor: pointer; box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3); transition: transform 0.2s; }
         .start-btn:active { transform: scale(0.97); }
-        
         .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 0.9rem; color: #666; }
         .logout-btn { background: #f1f3f5; border: none; padding: 6px 12px; border-radius: 8px; font-weight: 600; cursor: pointer; color: #495057; }
 
+        /* 타이머 & 차트 */
         .timer-display { margin: 15px 0; padding: 25px 20px; background: #fff5f5; border-radius: 20px; border: 1px solid #ffe3e3; }
         .time-unit { display: block; font-size: 3rem; font-weight: 800; color: var(--danger-color); line-height: 1.2; }
         #subTime { font-size: 1.2rem; font-weight: 600; color: #555; margin-top: 5px; }
-        
         .sub-progress-container { width: 100%; max-width: 300px; margin: 12px auto 0; }
         .sub-progress-bg { background: #ffe3e3; height: 10px; border-radius: 5px; overflow: hidden; position: relative; }
         .sub-progress-fill { background: var(--danger-color); height: 100%; width: 0%; transition: width 1s linear; }
         .sub-percent-text { font-size: 0.8rem; color: #e74c3c; font-weight: 700; margin-top: 4px; display: block; }
-        
         .rank-info { background: #e3f2fd; padding: 20px 15px; border-radius: 20px; margin: 15px 0; border: 1px solid #bbdefb; display: flex; flex-direction: column; gap: 10px; }
         .rank-item { display: flex; justify-content: center; align-items: baseline; gap: 6px; }
         .rank-number { font-size: 1.5rem; font-weight: 800; color: #1976d2; }
-        
         .craving-section { margin-top: 25px; padding: 20px; background: #fff9f0; border-radius: 20px; border: 1px dashed var(--warning-color); }
         .craving-btn { background-color: var(--warning-color); color: white; border: none; padding: 15px; border-radius: 14px; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 12px; font-size: 1rem; }
         .stat-btn { background-color: #fff; color: var(--warning-color); border: 2px solid var(--warning-color); padding: 10px; border-radius: 12px; font-size: 0.9rem; cursor: pointer; width: 100%; font-weight: bold; }
-        
         .chart-container { position: relative; height: 300px; width: 100%; margin: 10px 0 25px 0; }
         
+        /* ★ 수정: 탭 버튼 (두 줄 대응을 위해 padding과 line-height 조절) */
         .tab-container { display: flex; justify-content: space-around; margin-top: 30px; border-bottom: 2px solid #e2e8f0; margin-bottom: 20px; }
-        .tab-btn { padding: 12px 10px; border: none; background: none; font-size: 0.9rem; font-weight: 700; color: #718096; cursor: pointer; transition: all 0.3s; border-bottom: 3px solid transparent; margin-bottom: -2px; }
+        .tab-btn { padding: 8px 5px; border: none; background: none; font-size: 0.95rem; font-weight: 700; color: #718096; cursor: pointer; transition: all 0.3s; border-bottom: 3px solid transparent; margin-bottom: -2px; line-height: 1.3; }
         .tab-btn.active { color: var(--primary-color); border-bottom-color: var(--primary-color); }
 
+        /* 신체 변화 리스트 */
         .change-card { background: #fff; border: 1px solid #e1e4e8; border-radius: 14px; padding: 15px; margin-bottom: 12px; text-align: left; transition: all 0.3s ease; }
         .progress-bg { background: #eee; height: 16px; border-radius: 8px; overflow: hidden; width: 100px; position: relative; display: flex; align-items: center; justify-content: center; }
         .progress-fill { background: linear-gradient(90deg, #f39c12, #e67e22); height: 100%; width: 0%; transition: width 0.5s ease; position: absolute; left: 0; }
@@ -84,18 +80,31 @@
         .change-card.active .progress-fill { background: linear-gradient(90deg, #2ecc71, #27ae60); }
         .change-card.active .progress-text { color: #fff; }
 
+        /* 모달 등 */
         .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; backdrop-filter: blur(4px); }
         .modal-content { background: white; padding: 30px 25px; border-radius: 24px; width: 88%; max-width: 400px; text-align: left; position: relative; box-sizing: border-box; }
         .reset-btn { background-color: transparent; color: #a0aec0; margin-top: 10px; border: none; text-decoration: underline; cursor: pointer; font-size: 0.85rem; width: 100%; }
         .highlight { color: var(--primary-color); font-weight: 700; }
         textarea, select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; margin-top: 10px; font-family: inherit; }
 
-        /* ★ 추가: 커뮤니티 게시판 전용 스타일 */
-        .post-card { background: #fff; padding: 16px; border-radius: 14px; border-left: 4px solid var(--warning-color); box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        /* ★ 커뮤니티 게시판 상세 스타일 (D+Day, 수정/삭제, 댓글) */
+        .post-card { background: #fff; padding: 16px; border-radius: 14px; border-left: 4px solid var(--warning-color); box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 12px; }
         .post-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 0.85rem; }
         .post-author { font-weight: 700; color: #2d3748; }
-        .post-date { color: #a0aec0; }
+        .post-date { color: #a0aec0; font-size: 0.75rem; }
         .post-body { font-size: 0.95rem; color: #4a5568; line-height: 1.5; word-break: break-all; }
+        
+        .day-badge { background: #e3f2fd; color: #1976d2; padding: 3px 6px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; margin-left: 6px; vertical-align: middle; }
+        .post-actions { display: flex; gap: 12px; margin-top: 12px; font-size: 0.8rem; justify-content: flex-end; }
+        .action-btn { background: none; border: none; color: #a0aec0; cursor: pointer; padding: 0; font-weight: 600; transition: color 0.2s; }
+        .action-btn:hover { color: var(--primary-color); }
+        
+        .comment-section { margin-top: 15px; padding-top: 12px; border-top: 1px dashed #e2e8f0; }
+        .comment-item { font-size: 0.85rem; padding: 6px 0; border-bottom: 1px solid #f8f9fa; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+        .comment-item:last-child { border-bottom: none; }
+        .comment-input-area { display: flex; gap: 8px; margin-top: 10px; }
+        .comment-input { flex: 1; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.85rem; background: #f8f9fa; }
+        .comment-btn { background: var(--text-dark); color: white; border: none; padding: 8px 14px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -104,9 +113,7 @@
     <h1>🚫 금주 서바이벌 리포트</h1>
 
     <div id="loginArea">
-        <p style="color: #666; font-size: 0.95rem; word-break: keep-all;">
-            나만의 금주 기록을 안전하게 저장하고<br>여러 기기에서 확인하기 위해 로그인해 주세요.
-        </p>
+        <p style="color: #666; font-size: 0.95rem; word-break: keep-all;">나만의 금주 기록을 안전하게 저장하고<br>여러 기기에서 확인하기 위해 로그인해 주세요.</p>
         <button class="google-btn" onclick="loginWithGoogle()">
             <svg width="18" height="18" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
             Google 계정으로 로그인
@@ -153,10 +160,10 @@
         </div>
 
         <div class="tab-container">
-            <button class="tab-btn active" onclick="switchTab(this, 'physical')">신체 회복</button>
-            <button class="tab-btn" onclick="switchTab(this, 'liver')">간 기능</button>
-            <button class="tab-btn" onclick="switchTab(this, 'brain')">뇌 기능</button>
-            <button class="tab-btn" style="color: var(--warning-color);" onclick="switchTab(this, 'community')">📡 생존자 통신</button>
+            <button class="tab-btn active" onclick="switchTab(this, 'physical')">신체<br>회복</button>
+            <button class="tab-btn" onclick="switchTab(this, 'liver')">간<br>기능</button>
+            <button class="tab-btn" onclick="switchTab(this, 'brain')">뇌<br>기능</button>
+            <button class="tab-btn" style="color: var(--warning-color);" onclick="switchTab(this, 'community')">생존자<br>통신</button>
         </div>
 
         <div class="change-section" id="changeSection">
@@ -166,11 +173,9 @@
         <div class="community-section" id="communitySection" style="display: none; text-align: left;">
             <div style="background: #fff; padding: 15px; border-radius: 14px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
                 <textarea id="postContent" placeholder="오늘 하루, 어떤 고비가 있었나요? 생존자들과 나누어 보세요." rows="3" style="width: 100%; border: 1px solid #ddd; border-radius: 10px; padding: 12px; resize: none; margin-bottom: 10px; box-sizing: border-box; font-family: inherit;"></textarea>
-                <button onclick="submitPost()" style="width: 100%; background: var(--text-dark); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">통신 발송</button>
+                <button onclick="submitPost()" style="width: 100%; background: var(--warning-color); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">통신 발송</button>
             </div>
-            
-            <div id="postList" style="display: flex; flex-direction: column; gap: 12px;">
-                </div>
+            <div id="postList" style="display: flex; flex-direction: column; gap: 0px;"></div>
         </div>
         
         <div style="font-size: 0.8rem; color: #999; margin-top: 20px;">도전 세팅 일시: <span id="displaySettingDate">-</span></div>
@@ -207,53 +212,13 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
-    // ★ 추가: 게시판 운영을 위해 collection, addDoc, query, orderBy, limit, onSnapshot 임포트
     import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, deleteDoc, collection, addDoc, query, orderBy, limit, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
 
-    const stages = [
-        { d: 1, t: "1일: 알코올 완전 배출", desc: "혈중 알코올이 0이 되며, 몸이 본격적인 해독 스위치를 켭니다." },
-        { d: 2, t: "2일: 숙취 및 갈증 해소", desc: "체내 수분 밸런스가 정상화되고 극심한 피로감과 두통이 사라집니다." },
-        { d: 3, t: "3일: 금단 증상 완화", desc: "초기 불안감과 손떨림이 잦아들며, 신체가 알코올 없는 상태에 적응하기 시작합니다." },
-        { d: 5, t: "5일: 피부 톤 및 탄력 개선", desc: "탈수 증상이 회복되어 푸석했던 피부가 맑아지고 생기가 돕니다." },
-        { d: 7, t: "1주: 깊은 수면(REM) 회복", desc: "수면의 질이 극적으로 향상되어 아침에 일어날 때 진짜 '개운함'을 느낍니다." },
-        { d: 10, t: "10일: 브레인 포그 걷힘", desc: "머릿속 안개가 걷힌 듯 인지 능력이 맑아지고 집중력이 상승합니다." },
-        { d: 14, t: "2주: 위장 및 소화력 회복", desc: "위점막이 재생되어 속쓰림, 역류성 식도염, 더부룩함이 크게 개선됩니다." },
-        { d: 21, t: "3주: 혈압 및 심박수 안정화", desc: "고혈압 수치가 제자리를 찾기 시작하며 심혈관계의 부담이 확 줄어듭니다." },
-        { d: 30, t: "1개월: 간 지방 수치 대폭 감소", desc: "지방간이 최대 15~20% 감소하며, 간 수치 정상화로 피로회복력이 급증합니다." },
-        { d: 60, t: "2개월: 강력한 면역력 형성", desc: "백혈구 기능이 완전히 회복되어 감기 등 외부 바이러스에 대한 저항력이 강해집니다." },
-        { d: 90, t: "3개월: 도파민 시스템 정상화", desc: "술 없이도 일상에서 자연스러운 행복과 스트레스 해소를 온전히 느낄 수 있게 됩니다." },
-        { d: 180, t: "6개월: 눈에 띄는 체형 변화", desc: "불필요한 '빈 칼로리' 섭취가 사라져 뱃살이 줄어들고 얼굴선이 뚜렷해집니다." },
-        { d: 365, t: "1년: 중증 질환 위험 급감", desc: "간경화, 유방암, 구강암 등 알코올 관련 치명적 질환의 위험이 비약적으로 떨어집니다." },
-        { d: 730, t: "2년: 뇌세포 용적 회복", desc: "알코올로 인해 위축되었던 뇌의 회백질이 건강한 비음주자 수준으로 재생됩니다." },
-        { d: 1825, t: "5년: 소화기계 완벽한 리셋", desc: "식도암, 위암 등의 발생 확률이 금주 전의 절반 수준으로 대폭 낮아집니다." },
-        { d: 3650, t: "10년: 완전한 리셋 및 자유", desc: "신체의 거의 모든 지표가 평생 술을 마시지 않은 사람과 유사한 수준으로 건강해집니다." }
-    ];
-
-    const liverStages = [
-        { d: 1, t: "1일: 해독 공장 가동", desc: "간이 알코올 분해 업무를 끝내고, 쌓여있던 독소를 처리하는 본래 업무에 집중합니다." },
-        { d: 7, t: "1주: 염증 수치 하락", desc: "알코올로 인한 간의 미세한 염증들이 가라앉으며 혈액 검사상 간 수치가 하락하기 시작합니다." },
-        { d: 14, t: "2주: 지방 대사 재개", desc: "알코올 대신 지방을 연소하기 시작하여 간에 끼어있던 기름기가 빠져나가기 시작합니다." },
-        { d: 30, t: "1개월: 지방간 20% 감소", desc: "지방간 수치가 급격히 떨어지며, 간의 크기가 정상으로 돌아오고 혈색이 좋아집니다." },
-        { d: 90, t: "3개월: 단백질 합성 최적화", desc: "알부민 등 필수 단백질 합성이 원활해져 만성 피로가 사라지고 근육 성장이 효율적으로 변합니다." },
-        { d: 180, t: "6개월: 간 섬유화 억제", desc: "딱딱하게 굳으려던 간 조직의 손상이 멈추고, 건강한 간 세포가 그 자리를 대체합니다." },
-        { d: 365, t: "1년: 해독 능력 극대화", desc: "간의 정화 능력이 정점에 도달하여 약물 대사나 독소 배출 속도가 비약적으로 빨라집니다." },
-        { d: 1825, t: "5년: 간암 발생률 급감", desc: "간세포의 변이 가능성이 차단되어, 간암 및 간경변 위험이 일반인 수준에 근접합니다." },
-        { d: 3650, t: "10년: 완벽한 재생 완료", desc: "오랜 기간 손상받았던 간 조직이 완전히 새것처럼 리모델링되어 최상의 상태를 유지합니다." }
-    ];
-
-    const brainStages = [
-        { d: 1, t: "1일: 신경 과민기", desc: "알코올의 억제 효과가 사라지며 뇌가 과하게 흥분하지만, 독성 배출을 시작합니다." },
-        { d: 3, t: "3일: 금단 불안 정점", desc: "가장 힘든 고비입니다. 뇌가 술 없이 신호를 보내는 법을 다시 배우기 시작합니다." },
-        { d: 7, t: "1주: 수면 사이클 복구", desc: "알코올 없이 렘(REM) 수면에 진입하여 뇌의 노폐물(글림파틱 시스템)이 청소됩니다." },
-        { d: 14, t: "2주: 감정 조절 시작", desc: "충동을 조절하는 전두엽 기능이 살아나며 이유 없는 짜증과 감정 기복이 줄어듭니다." },
-        { d: 30, t: "1개월: 인지 능력 반등", desc: "기억력, 작업 속도, 의사결정 능력이 눈에 띄게 개선되며 업무 효율이 올라갑니다." },
-        { d: 90, t: "3개월: 도파민 수용체 재생", desc: "술이 주는 강한 자극 없이도 일상의 소소한 즐거움에서 행복감을 느끼기 시작합니다." },
-        { d: 180, t: "6개월: 신경 가소성 강화", desc: "알코올 갈망을 담당하는 뇌 회로가 약화되고, 새로운 건강한 습관이 뇌에 각인됩니다." },
-        { d: 365, t: "1년: 회백질 용적 증가", desc: "알코올로 수축되었던 뇌 부피가 물리적으로 회복되며 지능적 유연성을 되찾습니다." },
-        { d: 730, t: "2년: 신경계 완전 정상화", desc: "뇌의 화학적 균형이 비음주자와 거의 동일한 상태로 완벽하게 리셋됩니다." }
-    ];
-
+    // (기존 stages 데이터 유지)
+    const stages = [ { d: 1, t: "1일: 알코올 완전 배출", desc: "혈중 알코올이 0이 되며, 몸이 본격적인 해독 스위치를 켭니다." }, { d: 2, t: "2일: 숙취 및 갈증 해소", desc: "체내 수분 밸런스가 정상화되고 극심한 피로감과 두통이 사라집니다." }, { d: 3, t: "3일: 금단 증상 완화", desc: "초기 불안감과 손떨림이 잦아들며, 신체가 알코올 없는 상태에 적응하기 시작합니다." }, { d: 5, t: "5일: 피부 톤 및 탄력 개선", desc: "탈수 증상이 회복되어 푸석했던 피부가 맑아지고 생기가 돕니다." }, { d: 7, t: "1주: 깊은 수면(REM) 회복", desc: "수면의 질이 극적으로 향상되어 아침에 일어날 때 진짜 '개운함'을 느낍니다." }, { d: 10, t: "10일: 브레인 포그 걷힘", desc: "머릿속 안개가 걷힌 듯 인지 능력이 맑아지고 집중력이 상승합니다." }, { d: 14, t: "2주: 위장 및 소화력 회복", desc: "위점막이 재생되어 속쓰림, 역류성 식도염, 더부룩함이 크게 개선됩니다." }, { d: 21, t: "3주: 혈압 및 심박수 안정화", desc: "고혈압 수치가 제자리를 찾기 시작하며 심혈관계의 부담이 확 줄어듭니다." }, { d: 30, t: "1개월: 간 지방 수치 대폭 감소", desc: "지방간이 최대 15~20% 감소하며, 간 수치 정상화로 피로회복력이 급증합니다." }, { d: 60, t: "2개월: 강력한 면역력 형성", desc: "백혈구 기능이 완전히 회복되어 감기 등 외부 바이러스에 대한 저항력이 강해집니다." }, { d: 90, t: "3개월: 도파민 시스템 정상화", desc: "술 없이도 일상에서 자연스러운 행복과 스트레스 해소를 온전히 느낄 수 있게 됩니다." }, { d: 180, t: "6개월: 눈에 띄는 체형 변화", desc: "불필요한 '빈 칼로리' 섭취가 사라져 뱃살이 줄어들고 얼굴선이 뚜렷해집니다." }, { d: 365, t: "1년: 중증 질환 위험 급감", desc: "간경화, 유방암, 구강암 등 알코올 관련 치명적 질환의 위험이 비약적으로 떨어집니다." }, { d: 730, t: "2년: 뇌세포 용적 회복", desc: "알코올로 인해 위축되었던 뇌의 회백질이 건강한 비음주자 수준으로 재생됩니다." }, { d: 1825, t: "5년: 소화기계 완벽한 리셋", desc: "식도암, 위암 등의 발생 확률이 금주 전의 절반 수준으로 대폭 낮아집니다." }, { d: 3650, t: "10년: 완전한 리셋 및 자유", desc: "신체의 거의 모든 지표가 평생 술을 마시지 않은 사람과 유사한 수준으로 건강해집니다." } ];
+    const liverStages = [ { d: 1, t: "1일: 해독 공장 가동", desc: "간이 알코올 분해 업무를 끝내고, 쌓여있던 독소를 처리하는 본래 업무에 집중합니다." }, { d: 7, t: "1주: 염증 수치 하락", desc: "알코올로 인한 간의 미세한 염증들이 가라앉으며 혈액 검사상 간 수치가 하락하기 시작합니다." }, { d: 14, t: "2주: 지방 대사 재개", desc: "알코올 대신 지방을 연소하기 시작하여 간에 끼어있던 기름기가 빠져나가기 시작합니다." }, { d: 30, t: "1개월: 지방간 20% 감소", desc: "지방간 수치가 급격히 떨어지며, 간의 크기가 정상으로 돌아오고 혈색이 좋아집니다." }, { d: 90, t: "3개월: 단백질 합성 최적화", desc: "알부민 등 필수 단백질 합성이 원활해져 만성 피로가 사라지고 근육 성장이 효율적으로 변합니다." }, { d: 180, t: "6개월: 간 섬유화 억제", desc: "딱딱하게 굳으려던 간 조직의 손상이 멈추고, 건강한 간 세포가 그 자리를 대체합니다." }, { d: 365, t: "1년: 해독 능력 극대화", desc: "간의 정화 능력이 정점에 도달하여 약물 대사나 독소 배출 속도가 비약적으로 빨라집니다." }, { d: 1825, t: "5년: 간암 발생률 급감", desc: "간세포의 변이 가능성이 차단되어, 간암 및 간경변 위험이 일반인 수준에 근접합니다." }, { d: 3650, t: "10년: 완벽한 재생 완료", desc: "오랜 기간 손상받았던 간 조직이 완전히 새것처럼 리모델링되어 최상의 상태를 유지합니다." } ];
+    const brainStages = [ { d: 1, t: "1일: 신경 과민기", desc: "알코올의 억제 효과가 사라지며 뇌가 과하게 흥분하지만, 독성 배출을 시작합니다." }, { d: 3, t: "3일: 금단 불안 정점", desc: "가장 힘든 고비입니다. 뇌가 술 없이 신호를 보내는 법을 다시 배우기 시작합니다." }, { d: 7, t: "1주: 수면 사이클 복구", desc: "알코올 없이 렘(REM) 수면에 진입하여 뇌의 노폐물(글림파틱 시스템)이 청소됩니다." }, { d: 14, t: "2주: 감정 조절 시작", desc: "충동을 조절하는 전두엽 기능이 살아나며 이유 없는 짜증과 감정 기복이 줄어듭니다." }, { d: 30, t: "1개월: 인지 능력 반등", desc: "기억력, 작업 속도, 의사결정 능력이 눈에 띄게 개선되며 업무 효율이 올라갑니다." }, { d: 90, t: "3개월: 도파민 수용체 재생", desc: "술이 주는 강한 자극 없이도 일상의 소소한 즐거움에서 행복감을 느끼기 시작합니다." }, { d: 180, t: "6개월: 신경 가소성 강화", desc: "알코올 갈망을 담당하는 뇌 회로가 약화되고, 새로운 건강한 습관이 뇌에 각인됩니다." }, { d: 365, t: "1년: 회백질 용적 증가", desc: "알코올로 수축되었던 뇌 부피가 물리적으로 회복되며 지능적 유연성을 되찾습니다." }, { d: 730, t: "2년: 신경계 완전 정상화", desc: "뇌의 화학적 균형이 비음주자와 거의 동일한 상태로 완벽하게 리셋됩니다." } ];
     const physicalStages = typeof stages !== 'undefined' ? stages : [];
 
     const firebaseConfig = {
@@ -272,13 +237,12 @@
     const googleProvider = new GoogleAuthProvider();
 
     let userId = null; 
+    let userQuitDate = null; // ★ 추가: 내 금주 시작일을 전역으로 저장 (게시판 D+Day 계산용)
     let mainChart = null;
     let statsChart = null;
     let cravingData = [];
     let timerInterval = null;
     let currentTabName = 'physical';
-    
-    // ★ 추가: 실시간 리스너 해제용 변수
     let unsubscribePosts = null; 
 
     window.onload = function() {
@@ -292,7 +256,6 @@
         if (user) {
             userId = user.uid;
             document.getElementById('loginArea').style.display = 'none';
-            
             document.querySelectorAll('.user-display-name').forEach(el => {
                 el.innerText = `${user.displayName || '도전자'}님 환영합니다!`;
             });
@@ -300,17 +263,17 @@
             try {
                 const userDoc = await getDoc(doc(db, "users", userId));
                 if (userDoc.exists() && userDoc.data().quitDate) {
+                    userQuitDate = userDoc.data().quitDate; // 내 날짜 셋팅
                     cravingData = userDoc.data().cravingHistory || [];
                     document.getElementById('cravingCount').innerText = cravingData.length;
-                    startApp(userDoc.data().quitDate);
+                    startApp(userQuitDate);
                 } else {
                     document.getElementById('setupArea').style.display = 'flex';
                 }
-            } catch (e) { 
-                console.error("데이터 로드 에러:", e); 
-            }
+            } catch (e) { console.error("데이터 로드 에러:", e); }
         } else {
             userId = null;
+            userQuitDate = null;
             if (timerInterval) clearInterval(timerInterval);
             document.getElementById('loginArea').style.display = 'flex';
             document.getElementById('setupArea').style.display = 'none';
@@ -319,24 +282,17 @@
     });
 
     window.loginWithGoogle = async function() {
-        try {
-            await signInWithPopup(auth, googleProvider);
-        } catch (error) {
-            console.error("로그인 에러 전체:", error);
-            alert(`로그인 실패!\n에러 코드: ${error.code}\n에러 메시지: ${error.message}`);
-        }
+        try { await signInWithPopup(auth, googleProvider); } 
+        catch (error) { alert(`로그인 실패!\n에러 메시지: ${error.message}`); }
     };
 
     window.logout = async function() {
         try {
             await signOut(auth);
             localStorage.removeItem('quitDrinkingDateTime_server');
-        } catch (error) {
-            alert("로그아웃 실패");
-        }
+        } catch (error) { alert("로그아웃 실패"); }
     };
 
-    // ★ 수정: 커뮤니티 탭 전환 로직 포함
     window.switchTab = function(btn, tabName) {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
@@ -348,12 +304,12 @@
         if (tabName === 'community') {
             changeSection.style.display = 'none';
             communitySection.style.display = 'block';
-            loadPosts(); // 게시글 로드
+            loadPosts(); 
         } else {
             changeSection.style.display = 'block';
             communitySection.style.display = 'none';
             renderChangeCards(tabName);
-            if (unsubscribePosts) unsubscribePosts(); // 다른 탭 이동 시 리스너 해제
+            if (unsubscribePosts) unsubscribePosts(); 
         }
         
         const savedDate = localStorage.getItem('quitDrinkingDateTime_server') || null;
@@ -363,7 +319,15 @@
         }
     };
 
-    // ★ 추가: 통신(게시글) 쓰기 함수
+    // ★ 유틸 함수: ISO 날짜를 받아서 D+N 계산
+    function calcDday(quitISO) {
+        if(!quitISO) return "?";
+        const diff = new Date() - new Date(quitISO);
+        if(diff < 0) return "0";
+        return Math.floor(diff / 86400000) + 1; // 1일차부터
+    }
+
+    // ★ 통신 발송 시 D+Day 기록 포함
     window.submitPost = async function() {
         if (!userId) return alert("로그인이 필요합니다.");
         const content = document.getElementById('postContent').value.trim();
@@ -373,17 +337,16 @@
             await addDoc(collection(db, "posts"), {
                 uid: userId,
                 author: auth.currentUser.displayName || "익명의 생존자",
+                authorQuitDate: userQuitDate || null, // 글쓴이의 금주 시작일 저장
                 content: content,
-                createdAt: new Date().getTime()
+                createdAt: new Date().getTime(),
+                comments: [] // 댓글 배열 초기화
             });
             document.getElementById('postContent').value = '';
-        } catch (error) {
-            console.error("게시물 작성 실패:", error);
-            alert("작성에 실패했습니다.");
-        }
+        } catch (error) { alert("작성에 실패했습니다."); }
     };
 
-    // ★ 추가: 실시간 게시글 불러오기 함수
+    // ★ 게시글 리얼타임 로드 (수정, 삭제, 댓글 UI 반영)
     window.loadPosts = function() {
         const q = query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(50));
         
@@ -397,20 +360,64 @@
             }
 
             snapshot.forEach((docSnap) => {
+                const id = docSnap.id;
                 const data = docSnap.data();
                 const dateStr = new Date(data.createdAt).toLocaleString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
                 
+                // D+Day 뱃지
+                const authorDays = calcDday(data.authorQuitDate);
+                const dayBadge = `<span class="day-badge">D+${authorDays}</span>`;
+
                 const isMe = data.uid === userId;
                 const authorText = isMe ? `${data.author} <span style="color:var(--primary-color);">(나)</span>` : data.author;
                 const borderStyle = isMe ? 'border-left: 4px solid var(--primary-color);' : '';
 
+                // 본인 글인 경우 나타나는 수정/삭제 버튼
+                const encodedContent = encodeURIComponent(data.content); // 안전한 파라미터 전달용
+                const actionHTML = isMe ? `
+                    <div class="post-actions">
+                        <button class="action-btn" onclick="editPost('${id}', '${encodedContent}')">수정</button>
+                        <button class="action-btn" style="color:var(--danger-color);" onclick="deletePost('${id}')">삭제</button>
+                    </div>
+                ` : '';
+
+                // 댓글 렌더링
+                let commentsHTML = '';
+                if(data.comments && data.comments.length > 0) {
+                    commentsHTML = data.comments.map((c, cIdx) => {
+                        const cDay = calcDday(c.authorQuitDate);
+                        const isCMe = c.uid === userId;
+                        const delBtn = isCMe ? `<button class="action-btn" style="font-size:0.75rem; color:var(--danger-color); margin-left:8px;" onclick="deleteComment('${id}', ${cIdx})">지우기</button>` : '';
+                        
+                        return `
+                            <div class="comment-item">
+                                <strong style="color:#2d3748">${c.author}</strong>
+                                <span class="day-badge" style="font-size:0.65rem; padding:1px 4px;">D+${cDay}</span>
+                                <span style="margin-left:5px; color:#4a5568;">${c.text}</span>
+                                ${delBtn}
+                            </div>
+                        `;
+                    }).join('');
+                }
+
                 const postHTML = `
                     <div class="post-card" style="${borderStyle}">
                         <div class="post-header">
-                            <span class="post-author">${authorText}</span>
+                            <div><span class="post-author">${authorText}</span>${dayBadge}</div>
                             <span class="post-date">${dateStr}</span>
                         </div>
-                        <div class="post-body">${data.content.replace(/\n/g, '<br>')}</div>
+                        <div class="post-body">
+                            ${data.content.replace(/\n/g, '<br>')}
+                            ${data.editedAt ? '<span style="font-size:0.75rem; color:#a0aec0;"> (수정됨)</span>' : ''}
+                        </div>
+                        ${actionHTML}
+                        <div class="comment-section">
+                            ${commentsHTML}
+                            <div class="comment-input-area">
+                                <input type="text" id="cmtInput_${id}" class="comment-input" placeholder="응원의 댓글 달기...">
+                                <button class="comment-btn" onclick="addComment('${id}')">등록</button>
+                            </div>
+                        </div>
                     </div>
                 `;
                 postList.insertAdjacentHTML('beforeend', postHTML);
@@ -418,6 +425,69 @@
         });
     };
 
+    // ★ 게시글 수정 함수
+    window.editPost = async function(postId, encodedContent) {
+        const oldContent = decodeURIComponent(encodedContent);
+        const newContent = prompt("내용을 수정하세요:", oldContent);
+        if(newContent !== null && newContent.trim() !== "") {
+            try {
+                await updateDoc(doc(db, "posts", postId), {
+                    content: newContent.trim(),
+                    editedAt: new Date().getTime()
+                });
+            } catch(e) { alert("수정 실패"); }
+        }
+    };
+
+    // ★ 게시글 삭제 함수
+    window.deletePost = async function(postId) {
+        if(confirm("정말 이 통신을 삭제하시겠습니까?")) {
+            try {
+                await deleteDoc(doc(db, "posts", postId));
+            } catch(e) { alert("삭제 실패"); }
+        }
+    };
+
+    // ★ 댓글 작성 함수
+    window.addComment = async function(postId) {
+        if (!userId) return alert("로그인이 필요합니다.");
+        const inputEl = document.getElementById(`cmtInput_${postId}`);
+        const text = inputEl.value.trim();
+        if(!text) return;
+
+        const newComment = {
+            uid: userId,
+            author: auth.currentUser.displayName || "익명의 생존자",
+            authorQuitDate: userQuitDate || null,
+            text: text,
+            createdAt: new Date().getTime()
+        };
+
+        try {
+            await updateDoc(doc(db, "posts", postId), {
+                comments: arrayUnion(newComment)
+            });
+            inputEl.value = '';
+        } catch(e) { alert("댓글 등록 실패"); }
+    };
+
+    // ★ 댓글 삭제 함수
+    window.deleteComment = async function(postId, commentIndex) {
+        if(confirm("댓글을 삭제하시겠습니까?")) {
+            try {
+                const postRef = doc(db, "posts", postId);
+                const postSnap = await getDoc(postRef);
+                if(postSnap.exists()) {
+                    const postData = postSnap.data();
+                    let newComments = [...(postData.comments || [])];
+                    newComments.splice(commentIndex, 1); // 해당 인덱스 삭제
+                    await updateDoc(postRef, { comments: newComments });
+                }
+            } catch(e) { alert("댓글 삭제 실패"); }
+        }
+    };
+
+    // (기존 시스템 함수 유지)
     window.startApp = function(startISO) {
         localStorage.setItem('quitDrinkingDateTime_server', startISO);
         document.getElementById('setupArea').style.display = 'none';
@@ -458,6 +528,7 @@
         if (!userId) return alert("로그인이 필요합니다.");
         const input = document.getElementById('dateTimeInput').value;
         if (!input) return alert("일시를 선택해 주세요.");
+        userQuitDate = input; // ★ 저장과 동시에 로컬 변수 업데이트
         try {
             await setDoc(doc(db, "users", userId), { quitDate: input, createdAt: new Date() }, { merge: true });
             startApp(input);
