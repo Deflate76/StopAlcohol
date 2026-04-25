@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="ko">
-<!--
+
+    <!--
 // Copyright (c) 2026 Kim Jung-hoon (김정훈). All rights reserved.
 // This project and its source code are the intellectual property of the author.
 // Unauthorized copying, distribution, or modification is strictly prohibited.
 -->
+    
 <head>
-
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>금주 서바이벌 리포트</title>
@@ -19,8 +19,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="금주서바이벌" />
 
-   
-    
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
 
@@ -75,7 +73,7 @@
         .chart-container { position: relative; height: 300px; width: 100%; margin: 10px 0 25px 0; }
         
         .tab-container { display: flex; justify-content: space-around; margin-top: 30px; border-bottom: 2px solid #e2e8f0; margin-bottom: 20px; }
-        .tab-btn { padding: 12px 15px; border: none; background: none; font-size: 0.95rem; font-weight: 700; color: #718096; cursor: pointer; transition: all 0.3s; border-bottom: 3px solid transparent; margin-bottom: -2px; }
+        .tab-btn { padding: 12px 10px; border: none; background: none; font-size: 0.9rem; font-weight: 700; color: #718096; cursor: pointer; transition: all 0.3s; border-bottom: 3px solid transparent; margin-bottom: -2px; }
         .tab-btn.active { color: var(--primary-color); border-bottom-color: var(--primary-color); }
 
         .change-card { background: #fff; border: 1px solid #e1e4e8; border-radius: 14px; padding: 15px; margin-bottom: 12px; text-align: left; transition: all 0.3s ease; }
@@ -91,6 +89,13 @@
         .reset-btn { background-color: transparent; color: #a0aec0; margin-top: 10px; border: none; text-decoration: underline; cursor: pointer; font-size: 0.85rem; width: 100%; }
         .highlight { color: var(--primary-color); font-weight: 700; }
         textarea, select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; margin-top: 10px; font-family: inherit; }
+
+        /* ★ 추가: 커뮤니티 게시판 전용 스타일 */
+        .post-card { background: #fff; padding: 16px; border-radius: 14px; border-left: 4px solid var(--warning-color); box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .post-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 0.85rem; }
+        .post-author { font-weight: 700; color: #2d3748; }
+        .post-date { color: #a0aec0; }
+        .post-body { font-size: 0.95rem; color: #4a5568; line-height: 1.5; word-break: break-all; }
     </style>
 </head>
 <body>
@@ -151,10 +156,21 @@
             <button class="tab-btn active" onclick="switchTab(this, 'physical')">신체 회복</button>
             <button class="tab-btn" onclick="switchTab(this, 'liver')">간 기능</button>
             <button class="tab-btn" onclick="switchTab(this, 'brain')">뇌 기능</button>
+            <button class="tab-btn" style="color: var(--warning-color);" onclick="switchTab(this, 'community')">📡 생존자 통신</button>
         </div>
 
-        <div class="change-section">
+        <div class="change-section" id="changeSection">
             <div id="changeList"></div>
+        </div>
+        
+        <div class="community-section" id="communitySection" style="display: none; text-align: left;">
+            <div style="background: #fff; padding: 15px; border-radius: 14px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                <textarea id="postContent" placeholder="오늘 하루, 어떤 고비가 있었나요? 생존자들과 나누어 보세요." rows="3" style="width: 100%; border: 1px solid #ddd; border-radius: 10px; padding: 12px; resize: none; margin-bottom: 10px; box-sizing: border-box; font-family: inherit;"></textarea>
+                <button onclick="submitPost()" style="width: 100%; background: var(--text-dark); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">통신 발송</button>
+            </div>
+            
+            <div id="postList" style="display: flex; flex-direction: column; gap: 12px;">
+                </div>
         </div>
         
         <div style="font-size: 0.8rem; color: #999; margin-top: 20px;">도전 세팅 일시: <span id="displaySettingDate">-</span></div>
@@ -191,8 +207,8 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
-    import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
-    // ★ 추가: Firebase Auth 모듈 임포트
+    // ★ 추가: 게시판 운영을 위해 collection, addDoc, query, orderBy, limit, onSnapshot 임포트
+    import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, deleteDoc, collection, addDoc, query, orderBy, limit, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
 
     const stages = [
@@ -252,16 +268,18 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    // ★ 추가: Auth 초기화
     const auth = getAuth(app);
     const googleProvider = new GoogleAuthProvider();
 
-    let userId = null; // 로그인 후 할당됨
+    let userId = null; 
     let mainChart = null;
     let statsChart = null;
     let cravingData = [];
     let timerInterval = null;
     let currentTabName = 'physical';
+    
+    // ★ 추가: 실시간 리스너 해제용 변수
+    let unsubscribePosts = null; 
 
     window.onload = function() {
         renderChangeCards(currentTabName);
@@ -270,19 +288,15 @@
         document.getElementById('dateTimeInput').value = now.toISOString().slice(0, 16);
     };
 
-    // ★ 추가: Firebase Auth 상태 감지
     onAuthStateChanged(auth, async (user) => {
         if (user) {
-            // 로그인 상태
-            userId = user.uid; // 고유 ID 할당
+            userId = user.uid;
             document.getElementById('loginArea').style.display = 'none';
             
-            // 사용자 이름 표시
             document.querySelectorAll('.user-display-name').forEach(el => {
                 el.innerText = `${user.displayName || '도전자'}님 환영합니다!`;
             });
 
-            // 데이터 불러오기
             try {
                 const userDoc = await getDoc(doc(db, "users", userId));
                 if (userDoc.exists() && userDoc.data().quitDate) {
@@ -296,7 +310,6 @@
                 console.error("데이터 로드 에러:", e); 
             }
         } else {
-            // 로그아웃 상태
             userId = null;
             if (timerInterval) clearInterval(timerInterval);
             document.getElementById('loginArea').style.display = 'flex';
@@ -305,17 +318,15 @@
         }
     });
 
-window.loginWithGoogle = async function() {
+    window.loginWithGoogle = async function() {
         try {
             await signInWithPopup(auth, googleProvider);
         } catch (error) {
             console.error("로그인 에러 전체:", error);
-            // 사용자에게 정확한 에러 코드와 메시지를 띄워줍니다.
             alert(`로그인 실패!\n에러 코드: ${error.code}\n에러 메시지: ${error.message}`);
         }
     };
 
-    // ★ 추가: 로그아웃 처리 함수
     window.logout = async function() {
         try {
             await signOut(auth);
@@ -325,17 +336,86 @@ window.loginWithGoogle = async function() {
         }
     };
 
+    // ★ 수정: 커뮤니티 탭 전환 로직 포함
     window.switchTab = function(btn, tabName) {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         currentTabName = tabName;
-        renderChangeCards(tabName);
+        
+        const changeSection = document.getElementById('changeSection');
+        const communitySection = document.getElementById('communitySection');
+
+        if (tabName === 'community') {
+            changeSection.style.display = 'none';
+            communitySection.style.display = 'block';
+            loadPosts(); // 게시글 로드
+        } else {
+            changeSection.style.display = 'block';
+            communitySection.style.display = 'none';
+            renderChangeCards(tabName);
+            if (unsubscribePosts) unsubscribePosts(); // 다른 탭 이동 시 리스너 해제
+        }
         
         const savedDate = localStorage.getItem('quitDrinkingDateTime_server') || null;
-        if(savedDate) {
+        if(savedDate && tabName !== 'community') {
             const diff = new Date() - new Date(savedDate);
             updateRoadmap(diff / 86400000);
         }
+    };
+
+    // ★ 추가: 통신(게시글) 쓰기 함수
+    window.submitPost = async function() {
+        if (!userId) return alert("로그인이 필요합니다.");
+        const content = document.getElementById('postContent').value.trim();
+        if (!content) return alert("내용을 입력해 주세요.");
+
+        try {
+            await addDoc(collection(db, "posts"), {
+                uid: userId,
+                author: auth.currentUser.displayName || "익명의 생존자",
+                content: content,
+                createdAt: new Date().getTime()
+            });
+            document.getElementById('postContent').value = '';
+        } catch (error) {
+            console.error("게시물 작성 실패:", error);
+            alert("작성에 실패했습니다.");
+        }
+    };
+
+    // ★ 추가: 실시간 게시글 불러오기 함수
+    window.loadPosts = function() {
+        const q = query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(50));
+        
+        unsubscribePosts = onSnapshot(q, (snapshot) => {
+            const postList = document.getElementById('postList');
+            postList.innerHTML = ''; 
+            
+            if (snapshot.empty) {
+                postList.innerHTML = '<div style="text-align:center; padding:20px; color:#999; font-size:0.9rem;">아직 발송된 통신이 없습니다.<br>첫 생존 신고를 남겨보세요!</div>';
+                return;
+            }
+
+            snapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                const dateStr = new Date(data.createdAt).toLocaleString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                
+                const isMe = data.uid === userId;
+                const authorText = isMe ? `${data.author} <span style="color:var(--primary-color);">(나)</span>` : data.author;
+                const borderStyle = isMe ? 'border-left: 4px solid var(--primary-color);' : '';
+
+                const postHTML = `
+                    <div class="post-card" style="${borderStyle}">
+                        <div class="post-header">
+                            <span class="post-author">${authorText}</span>
+                            <span class="post-date">${dateStr}</span>
+                        </div>
+                        <div class="post-body">${data.content.replace(/\n/g, '<br>')}</div>
+                    </div>
+                `;
+                postList.insertAdjacentHTML('beforeend', postHTML);
+            });
+        });
     };
 
     window.startApp = function(startISO) {
@@ -370,7 +450,7 @@ window.loginWithGoogle = async function() {
             document.getElementById('myRank').innerText = survivors.toLocaleString();
 
             updateChart(days, survivors);
-            updateRoadmap(days); 
+            if(currentTabName !== 'community') updateRoadmap(days); 
         }, 1000);
     };
 
