@@ -57,7 +57,7 @@
         .craving-btn { background-color: var(--warning-color); color: white; border: none; padding: 15px; border-radius: 14px; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 12px; font-size: 1rem; }
         .stat-btn { background-color: #fff; color: var(--warning-color); border: 2px solid var(--warning-color); padding: 10px; border-radius: 12px; font-size: 0.9rem; cursor: pointer; width: 100%; font-weight: bold; }
         
-        .chart-container { position: relative; height: 250px; width: 100%; margin: 10px 0 25px 0; }
+        .chart-container { position: relative; height: 260px; width: 100%; margin: 10px 0 25px 0; }
         
         /* 로드맵 카드 스타일 */
         .change-card { background: #fff; border: 1px solid #e1e4e8; border-radius: 14px; padding: 15px; margin-bottom: 12px; text-align: left; transition: all 0.3s ease; }
@@ -106,7 +106,9 @@
             <button class="stat-btn" onclick="openStats()">📈 총 <span id="cravingCount">0</span>번의 고비를 넘겼습니다</button>
         </div>
 
-        <div class="chart-container"><canvas id="survivalChart"></canvas></div>
+        <div class="chart-container">
+            <canvas id="survivalChart"></canvas>
+        </div>
 
         <div class="change-section">
             <h3 style="margin-bottom: 20px; text-align: center;">🧬 신체 회복 로드맵</h3>
@@ -171,8 +173,7 @@
     let timerInterval = null;
 
     window.onload = async function() {
-        // [수정 핵심] recovery.js에서 정의한 stages를 바로 사용합니다.
-        renderChangeCards();
+        renderChangeCards(); // recovery.js 데이터 사용
         
         const now = new Date();
         now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
@@ -221,8 +222,8 @@
             document.getElementById('survivors').innerText = survivors.toLocaleString();
             document.getElementById('myRank').innerText = survivors.toLocaleString();
 
-            updateChart(days);
-            updateRoadmap(days); // 타이머가 돌 때 로드맵도 같이 업데이트
+            updateChart(days, survivors);
+            updateRoadmap(days); 
         }, 1000);
     };
 
@@ -253,14 +254,11 @@
         } catch (e) { alert("저장 실패"); }
     };
 
-    // 로드맵 카드 생성 함수 (버그 수정됨)
     function renderChangeCards() {
-        // stages 변수가 선언되었는지 확인
         if (typeof stages === 'undefined') {
             console.error("recovery.js 파일에서 stages 데이터를 찾을 수 없습니다.");
             return;
         }
-        
         document.getElementById('changeList').innerHTML = stages.map((s, i) => `
             <div class="change-card" id="card${i}">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -275,7 +273,6 @@
         `).join('');
     }
 
-    // 로드맵 퍼센트 업데이트 함수
     function updateRoadmap(days) {
         if (typeof stages === 'undefined') return;
         stages.forEach((s, i) => {
@@ -292,7 +289,7 @@
         });
     }
 
-    // 차트 초기화 (기존 동일)
+    // ★ 차트 초기화 (수직, 수평 보조선 추가)
     function initSurvivalChart() {
         const ctx = document.getElementById('survivalChart').getContext('2d');
         mainChart = new Chart(ctx, {
@@ -301,24 +298,62 @@
                 { label: '탈락 영역', data: [], borderColor: '#e74c3c', backgroundColor: 'rgba(231, 76, 60, 0.4)', fill: true, pointRadius: 0, tension: 0.3 },
                 { label: '생존 영역', data: [], borderColor: '#2ecc71', backgroundColor: 'rgba(46, 204, 113, 0.4)', fill: true, pointRadius: 0, tension: 0.3 }
             ]},
-            options: { responsive: true, maintainAspectRatio: false, scales: { x: { type: 'linear', min: 0, max: 100 }, y: { beginAtZero: true, max: 1000 } }, plugins: { legend: { display: false }, annotation: { annotations: { line1: { type: 'line', xMin: 0, xMax: 0, borderColor: 'black', borderWidth: 2, label: { display: true, content: '현재', position: 'end' } } } } } }
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                scales: { 
+                    x: { type: 'linear', min: 0, max: 100, title: { display:true, text:'경과일수', font:{size:10} } }, 
+                    y: { beginAtZero: true, max: 1000, title: { display:true, text:'생존자수', font:{size:10} } } 
+                }, 
+                plugins: { 
+                    legend: { display: false }, 
+                    annotation: { 
+                        annotations: { 
+                            line1: { // x축 기준 (수직선)
+                                type: 'line', 
+                                xMin: 0, xMax: 0, 
+                                borderColor: '#2d3748', 
+                                borderWidth: 2, 
+                                borderDash: [4, 4],
+                                label: { display: true, content: '현재 경과', position: 'end', backgroundColor: '#2d3748' } 
+                            },
+                            line2: { // y축 기준 (수평선)
+                                type: 'line', 
+                                yMin: 0, yMax: 0, 
+                                borderColor: '#e74c3c', 
+                                borderWidth: 2, 
+                                borderDash: [4, 4],
+                                label: { display: true, content: '생존', position: 'start', backgroundColor: '#e74c3c' } 
+                            }
+                        } 
+                    } 
+                } 
+            }
         });
     }
 
-    function updateChart(days) {
+    // ★ 차트 및 보조선 위치 실시간 업데이트
+    function updateChart(days, survivors) {
         if (!mainChart) return;
         const past = []; const future = [];
         for (let i = 0; i <= days; i++) past.push({x: i, y: 1000 * Math.exp(-0.04 * i)});
         past.push({x: days, y: 1000 * Math.exp(-0.04 * days)});
         for (let i = Math.ceil(days); i <= 100; i++) future.push({x: i, y: 1000 * Math.exp(-0.04 * i)});
+        
         mainChart.data.datasets[0].data = past;
         mainChart.data.datasets[1].data = future;
+
+        // 보조선(크로스헤어) 위치 및 라벨 텍스트 변경
         mainChart.options.plugins.annotation.annotations.line1.xMin = days;
         mainChart.options.plugins.annotation.annotations.line1.xMax = days;
+        
+        mainChart.options.plugins.annotation.annotations.line2.yMin = survivors;
+        mainChart.options.plugins.annotation.annotations.line2.yMax = survivors;
+        mainChart.options.plugins.annotation.annotations.line2.label.content = survivors.toLocaleString() + '명';
+
         mainChart.update('none');
     }
 
-    // UI 모달 함수
     window.openStats = function() {
         if (cravingData.length === 0) return alert("기록된 고비가 없습니다.");
         openModal('statsModal');
