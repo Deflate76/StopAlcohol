@@ -171,7 +171,7 @@
     let timerInterval = null;
 
     window.onload = async function() {
-        // 1. 카드 먼저 생성
+        // [수정 핵심] recovery.js에서 정의한 stages를 바로 사용합니다.
         renderChangeCards();
         
         const now = new Date();
@@ -188,7 +188,7 @@
                     startApp(data.quitDate);
                 }
             }
-        } catch (e) { console.error(e); }
+        } catch (e) { console.error("데이터 로드 에러:", e); }
     };
 
     window.startApp = function(startISO) {
@@ -222,8 +222,7 @@
             document.getElementById('myRank').innerText = survivors.toLocaleString();
 
             updateChart(days);
-            // 로드맵 실시간 업데이트 호출
-            updateRoadmap(days);
+            updateRoadmap(days); // 타이머가 돌 때 로드맵도 같이 업데이트
         }, 1000);
     };
 
@@ -233,7 +232,7 @@
         try {
             await setDoc(doc(db, "users", userId), { quitDate: input, createdAt: new Date() }, { merge: true });
             startApp(input);
-        } catch (e) { alert("오류 코드: " + e.code); }
+        } catch (e) { alert("연동 에러: " + e.code); }
     };
 
     window.submitCraving = async function() {
@@ -250,16 +249,18 @@
             cravingData.push(entry);
             document.getElementById('cravingCount').innerText = cravingData.length;
             closeModal('cravingModal');
-            alert("기록 완료!");
-        } catch (e) { alert("기록 실패"); }
+            alert("고비를 잘 넘기셨습니다!");
+        } catch (e) { alert("저장 실패"); }
     };
 
-    // 로드맵 카드 생성 함수
+    // 로드맵 카드 생성 함수 (버그 수정됨)
     function renderChangeCards() {
-        if (!window.stages) {
-            console.error("recovery.js의 stages 데이터를 찾을 수 없습니다.");
+        // stages 변수가 선언되었는지 확인
+        if (typeof stages === 'undefined') {
+            console.error("recovery.js 파일에서 stages 데이터를 찾을 수 없습니다.");
             return;
         }
+        
         document.getElementById('changeList').innerHTML = stages.map((s, i) => `
             <div class="change-card" id="card${i}">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -276,7 +277,7 @@
 
     // 로드맵 퍼센트 업데이트 함수
     function updateRoadmap(days) {
-        if (!window.stages) return;
+        if (typeof stages === 'undefined') return;
         stages.forEach((s, i) => {
             const perc = Math.min((days / s.d) * 100, 100);
             const fill = document.getElementById(`fill${i}`);
@@ -291,7 +292,7 @@
         });
     }
 
-    // 차트 초기화 (기존 로직)
+    // 차트 초기화 (기존 동일)
     function initSurvivalChart() {
         const ctx = document.getElementById('survivalChart').getContext('2d');
         mainChart = new Chart(ctx, {
@@ -317,30 +318,32 @@
         mainChart.update('none');
     }
 
-    // 통계 및 UI 제어 (기존 로직)
+    // UI 모달 함수
     window.openStats = function() {
-        if (cravingData.length === 0) return alert("기록 없음");
+        if (cravingData.length === 0) return alert("기록된 고비가 없습니다.");
         openModal('statsModal');
         setTimeout(() => {
             const ctx = document.getElementById('cravingHistoryChart').getContext('2d');
             if (statsChart) statsChart.destroy();
+            const lastData = cravingData.slice(-10);
             statsChart = new Chart(ctx, {
                 type: 'bar',
-                data: { labels: cravingData.slice(-10).map(d => d.date), datasets: [{ data: cravingData.slice(-10).map(d => d.strength), backgroundColor: '#e74c3c' }] },
+                data: { labels: lastData.map(d => d.date), datasets: [{ label: '갈망 강도', data: lastData.map(d => d.strength), backgroundColor: '#e74c3c' }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
             });
         }, 200);
     };
 
     window.resetDate = async function() {
-        if (confirm("초기화하시겠습니까?")) {
-            try { await deleteDoc(doc(db, "users", userId)); location.reload(); } catch (e) { alert("실패"); }
+        if (confirm("서버의 모든 기록이 초기화됩니다. 계속할까요?")) {
+            try { await deleteDoc(doc(db, "users", userId)); location.reload(); } catch (e) { alert("초기화 실패"); }
         }
     };
 
     window.openModal = (id) => document.getElementById(id).style.display = 'flex';
     window.closeModal = (id) => document.getElementById(id).style.display = 'none';
     window.toggleEtc = (val) => document.getElementById('etcReason').style.display = (val === '기타') ? 'block' : 'none';
+
 </script>
 </body>
 </html>
