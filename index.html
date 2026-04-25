@@ -57,8 +57,13 @@
         .craving-btn { background-color: var(--warning-color); color: white; border: none; padding: 15px; border-radius: 14px; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 12px; font-size: 1rem; }
         .stat-btn { background-color: #fff; color: var(--warning-color); border: 2px solid var(--warning-color); padding: 10px; border-radius: 12px; font-size: 0.9rem; cursor: pointer; width: 100%; font-weight: bold; }
         
-        .chart-container { position: relative; height: 260px; width: 100%; margin: 10px 0 25px 0; }
+        .chart-container { position: relative; height: 300px; width: 100%; margin: 10px 0 25px 0; }
         
+        /* 탭 스타일 */
+        .tab-container { display: flex; justify-content: space-around; margin-top: 30px; border-bottom: 2px solid #e2e8f0; margin-bottom: 20px; }
+        .tab-btn { padding: 12px 15px; border: none; background: none; font-size: 0.95rem; font-weight: 700; color: #718096; cursor: pointer; transition: all 0.3s; border-bottom: 3px solid transparent; margin-bottom: -2px; }
+        .tab-btn.active { color: var(--primary-color); border-bottom-color: var(--primary-color); }
+
         /* 로드맵 카드 스타일 */
         .change-card { background: #fff; border: 1px solid #e1e4e8; border-radius: 14px; padding: 15px; margin-bottom: 12px; text-align: left; transition: all 0.3s ease; }
         .progress-bg { background: #eee; height: 16px; border-radius: 8px; overflow: hidden; width: 100px; position: relative; display: flex; align-items: center; justify-content: center; }
@@ -110,8 +115,13 @@
             <canvas id="survivalChart"></canvas>
         </div>
 
+        <div class="tab-container">
+            <button class="tab-btn active" onclick="switchTab(this, 'physical')">신체 회복</button>
+            <button class="tab-btn" onclick="switchTab(this, 'liver')">간 기능</button>
+            <button class="tab-btn" onclick="switchTab(this, 'brain')">뇌 기능</button>
+        </div>
+
         <div class="change-section">
-            <h3 style="margin-bottom: 20px; text-align: center;">🧬 신체 회복 로드맵</h3>
             <div id="changeList"></div>
         </div>
         
@@ -151,6 +161,38 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
     import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
+    // 데이터 로드맵 정의
+    const liverStages = [
+        { d: 1, t: "1일: 해독 공장 가동", desc: "간이 알코올 분해 업무를 끝내고, 쌓여있던 독소를 처리하는 본래 업무에 집중합니다." },
+        { d: 7, t: "1주: 염증 수치 하락", desc: "알코올로 인한 간의 미세한 염증들이 가라앉으며 혈액 검사상 간 수치가 하락하기 시작합니다." },
+        { d: 14, t: "2주: 지방 대사 재개", desc: "알코올 대신 지방을 연소하기 시작하여 간에 끼어있던 기름기가 빠져나가기 시작합니다." },
+        { d: 30, t: "1개월: 지방간 20% 감소", desc: "지방간 수치가 급격히 떨어지며, 간의 크기가 정상으로 돌아오고 혈색이 좋아집니다." },
+        { d: 90, t: "3개월: 단백질 합성 최적화", desc: "알부민 등 필수 단백질 합성이 원활해져 만성 피로가 사라지고 근육 성장이 효율적으로 변합니다." },
+        { d: 180, t: "6개월: 간 섬유화 억제", desc: "딱딱하게 굳으려던 간 조직의 손상이 멈추고, 건강한 간 세포가 그 자리를 대체합니다." },
+        { d: 365, t: "1년: 해독 능력 극대화", desc: "간의 정화 능력이 정점에 도달하여 약물 대사나 독소 배출 속도가 비약적으로 빨라집니다." },
+        { d: 1825, t: "5년: 간암 발생률 급감", desc: "간세포의 변이 가능성이 차단되어, 간암 및 간경변 위험이 일반인 수준에 근접합니다." },
+        { d: 3650, t: "10년: 완벽한 재생 완료", desc: "오랜 기간 손상받았던 간 조직이 완전히 새것처럼 리모델링되어 최상의 상태를 유지합니다." }
+    ];
+
+    const brainStages = [
+        { d: 1, t: "1일: 신경 과민기", desc: "알코올의 억제 효과가 사라지며 뇌가 과하게 흥분하지만, 독성 배출을 시작합니다." },
+        { d: 3, t: "3일: 금단 불안 정점", desc: "가장 힘든 고비입니다. 뇌가 술 없이 신호를 보내는 법을 다시 배우기 시작합니다." },
+        { d: 7, t: "1주: 수면 사이클 복구", desc: "알코올 없이 렘(REM) 수면에 진입하여 뇌의 노폐물(글림파틱 시스템)이 청소됩니다." },
+        { d: 14, t: "2주: 감정 조절 시작", desc: "충동을 조절하는 전두엽 기능이 살아나며 이유 없는 짜증과 감정 기복이 줄어듭니다." },
+        { d: 30, t: "1개월: 인지 능력 반등", desc: "기억력, 작업 속도, 의사결정 능력이 눈에 띄게 개선되며 업무 효율이 올라갑니다." },
+        { d: 90, t: "3개월: 도파민 수용체 재생", desc: "술이 주는 강한 자극 없이도 일상의 소소한 즐거움에서 행복감을 느끼기 시작합니다." },
+        { d: 180, t: "6개월: 신경 가소성 강화", desc: "알코올 갈망을 담당하는 뇌 회로가 약화되고, 새로운 건강한 습관이 뇌에 각인됩니다." },
+        { d: 365, t: "1년: 회백질 용적 증가", desc: "알코올로 수축되었던 뇌 부피가 물리적으로 회복되며 지능적 유연성을 되찾습니다." },
+        { d: 730, t: "2년: 신경계 완전 정상화", desc: "뇌의 화학적 균형이 비음주자와 거의 동일한 상태로 완벽하게 리셋됩니다." }
+    ];
+
+    // 기존 recovery.js 데이터 (stages)
+    const physicalStages = typeof stages !== 'undefined' ? stages : [
+        { d: 1, t: "1일: 알코올 완전 배출", desc: "혈중 알코올이 0이 되며, 몸이 본격적인 해독 스위치를 켭니다." },
+        { d: 7, t: "1주: 깊은 수면(REM) 회복", desc: "수면의 질이 극적으로 향상되어 아침에 일어날 때 진짜 '개운함'을 느낍니다." },
+        { d: 30, t: "1개월: 신체 컨디션 회복", desc: "전반적인 에너지가 상승하고 몸무게와 혈압이 안정화되기 시작합니다." }
+    ];
+
     const firebaseConfig = {
         apiKey: "AIzaSyBWDwueP3a0atxCqFIgqd96sgXc0EqYbEY",
         authDomain: "alcoholaway.firebaseapp.com",
@@ -171,9 +213,10 @@
     let statsChart = null;
     let cravingData = [];
     let timerInterval = null;
+    let currentTabName = 'physical'; // 현재 선택된 탭
 
     window.onload = async function() {
-        renderChangeCards(); // recovery.js 데이터 사용
+        renderChangeCards(currentTabName);
         
         const now = new Date();
         now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
@@ -192,7 +235,23 @@
         } catch (e) { console.error("데이터 로드 에러:", e); }
     };
 
+    // 탭 전환 함수
+    window.switchTab = function(btn, tabName) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentTabName = tabName;
+        renderChangeCards(tabName);
+        
+        // 현재 경과 일수를 기반으로 즉시 업데이트
+        const savedDate = localStorage.getItem('quitDrinkingDateTime_server') || null;
+        if(savedDate) {
+            const diff = new Date() - new Date(savedDate);
+            updateRoadmap(diff / 86400000);
+        }
+    };
+
     window.startApp = function(startISO) {
+        localStorage.setItem('quitDrinkingDateTime_server', startISO);
         document.getElementById('setupArea').style.display = 'none';
         document.getElementById('displayArea').style.display = 'block';
         document.getElementById('displaySettingDate').innerText = new Date(startISO).toLocaleString('ko-KR');
@@ -254,12 +313,13 @@
         } catch (e) { alert("저장 실패"); }
     };
 
-    function renderChangeCards() {
-        if (typeof stages === 'undefined') {
-            console.error("recovery.js 파일에서 stages 데이터를 찾을 수 없습니다.");
-            return;
-        }
-        document.getElementById('changeList').innerHTML = stages.map((s, i) => `
+    // 로드맵 카드 렌더링 (탭 기반)
+    function renderChangeCards(tabName) {
+        let activeStages = physicalStages;
+        if(tabName === 'liver') activeStages = liverStages;
+        if(tabName === 'brain') activeStages = brainStages;
+        
+        document.getElementById('changeList').innerHTML = activeStages.map((s, i) => `
             <div class="change-card" id="card${i}">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <span style="font-weight:700; font-size:0.95rem;">${s.t}</span>
@@ -274,8 +334,11 @@
     }
 
     function updateRoadmap(days) {
-        if (typeof stages === 'undefined') return;
-        stages.forEach((s, i) => {
+        let activeStages = physicalStages;
+        if(currentTabName === 'liver') activeStages = liverStages;
+        if(currentTabName === 'brain') activeStages = brainStages;
+
+        activeStages.forEach((s, i) => {
             const perc = Math.min((days / s.d) * 100, 100);
             const fill = document.getElementById(`fill${i}`);
             const text = document.getElementById(`text${i}`);
@@ -289,14 +352,30 @@
         });
     }
 
-    // ★ 차트 초기화 (수직, 수평 보조선 추가)
+    // ★ 차트 초기화 (범례 Legend 추가)
     function initSurvivalChart() {
         const ctx = document.getElementById('survivalChart').getContext('2d');
         mainChart = new Chart(ctx, {
             type: 'line',
             data: { datasets: [
-                { label: '탈락 영역', data: [], borderColor: '#e74c3c', backgroundColor: 'rgba(231, 76, 60, 0.4)', fill: true, pointRadius: 0, tension: 0.3 },
-                { label: '생존 영역', data: [], borderColor: '#2ecc71', backgroundColor: 'rgba(46, 204, 113, 0.4)', fill: true, pointRadius: 0, tension: 0.3 }
+                { 
+                    label: '탈락 영역 (과거)', 
+                    data: [], 
+                    borderColor: '#e74c3c', 
+                    backgroundColor: 'rgba(231, 76, 60, 0.4)', 
+                    fill: true, 
+                    pointRadius: 0, 
+                    tension: 0.3 
+                },
+                { 
+                    label: '생존 영역 (잠재)', 
+                    data: [], 
+                    borderColor: '#2ecc71', 
+                    backgroundColor: 'rgba(46, 204, 113, 0.4)', 
+                    fill: true, 
+                    pointRadius: 0, 
+                    tension: 0.3 
+                }
             ]},
             options: { 
                 responsive: true, 
@@ -306,24 +385,28 @@
                     y: { beginAtZero: true, max: 1000, title: { display:true, text:'생존자수', font:{size:10} } } 
                 }, 
                 plugins: { 
-                    legend: { display: false }, 
+                    legend: { 
+                        display: true, 
+                        position: 'top', 
+                        labels: { boxWidth: 12, font: { size: 11, weight: 'bold' }, padding: 15 } 
+                    }, 
                     annotation: { 
                         annotations: { 
-                            line1: { // x축 기준 (수직선)
+                            line1: { 
                                 type: 'line', 
                                 xMin: 0, xMax: 0, 
                                 borderColor: '#2d3748', 
                                 borderWidth: 2, 
                                 borderDash: [4, 4],
-                                label: { display: true, content: '현재 경과', position: 'end', backgroundColor: '#2d3748' } 
+                                label: { display: true, content: '현재 경과', position: 'end', backgroundColor: '#2d3748', font: { size: 10 } } 
                             },
-                            line2: { // y축 기준 (수평선)
+                            line2: { 
                                 type: 'line', 
                                 yMin: 0, yMax: 0, 
                                 borderColor: '#e74c3c', 
-                                borderWidth: 2, 
+                                borderWidth: 1.5, 
                                 borderDash: [4, 4],
-                                label: { display: true, content: '생존', position: 'start', backgroundColor: '#e74c3c' } 
+                                label: { display: true, content: '생존', position: 'start', backgroundColor: '#e74c3c', font: { size: 10 } } 
                             }
                         } 
                     } 
@@ -332,7 +415,6 @@
         });
     }
 
-    // ★ 차트 및 보조선 위치 실시간 업데이트
     function updateChart(days, survivors) {
         if (!mainChart) return;
         const past = []; const future = [];
@@ -343,10 +425,8 @@
         mainChart.data.datasets[0].data = past;
         mainChart.data.datasets[1].data = future;
 
-        // 보조선(크로스헤어) 위치 및 라벨 텍스트 변경
         mainChart.options.plugins.annotation.annotations.line1.xMin = days;
         mainChart.options.plugins.annotation.annotations.line1.xMax = days;
-        
         mainChart.options.plugins.annotation.annotations.line2.yMin = survivors;
         mainChart.options.plugins.annotation.annotations.line2.yMax = survivors;
         mainChart.options.plugins.annotation.annotations.line2.label.content = survivors.toLocaleString() + '명';
@@ -354,6 +434,7 @@
         mainChart.update('none');
     }
 
+    // 모달 및 초기화 함수들
     window.openStats = function() {
         if (cravingData.length === 0) return alert("기록된 고비가 없습니다.");
         openModal('statsModal');
@@ -371,7 +452,11 @@
 
     window.resetDate = async function() {
         if (confirm("서버의 모든 기록이 초기화됩니다. 계속할까요?")) {
-            try { await deleteDoc(doc(db, "users", userId)); location.reload(); } catch (e) { alert("초기화 실패"); }
+            try { 
+                await deleteDoc(doc(db, "users", userId)); 
+                localStorage.removeItem('quitDrinkingDateTime_server');
+                location.reload(); 
+            } catch (e) { alert("초기화 실패"); }
         }
     };
 
