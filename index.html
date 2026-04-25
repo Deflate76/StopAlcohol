@@ -81,7 +81,7 @@
         .close-btn-top { position: absolute; top: 25px; right: 25px; font-size: 1.8rem; color: #cbd5e0; background: none; border: none; cursor: pointer; line-height: 1; transition: color 0.2s ease; padding: 0; }
         .close-btn-top:hover { color: var(--danger-color); }
 
-        .reset-btn { background-color: transparent; color: #a0aec0; margin-top: 10px; border: none; text-decoration: underline; cursor: pointer; font-size: 0.85rem; width: 100%; }
+        .reset-btn { background-color: transparent; color: #e74c3c; margin-top: 10px; border: none; text-decoration: underline; cursor: pointer; font-size: 0.85rem; width: 100%; font-weight: bold; }
         .highlight { color: var(--primary-color); font-weight: 700; }
         textarea, select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; margin-top: 10px; font-family: inherit; }
 
@@ -139,6 +139,13 @@
         .comment-input { flex: 1; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.85rem; background: #f8f9fa; }
         .comment-btn { background: var(--text-dark); color: white; border: none; padding: 8px 14px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; cursor: pointer; }
 
+        /* 히스토리 리스트 항목 스타일 */
+        .history-item { background: #f8f9fa; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; margin-bottom: 10px; cursor: pointer; transition: background 0.2s; display: flex; flex-direction: column; gap: 5px; }
+        .history-item:hover { background: #edf2f7; border-color: #cbd5e0; }
+        .history-status { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; }
+        .status-active { background: #e3f2fd; color: #1976d2; }
+        .status-failed { background: #ffe3e3; color: #e74c3c; }
+
         /* 푸터 스타일 */
         footer { margin-top: 30px; padding: 15px 0; text-align: center; font-size: 0.75rem; color: #9ca3af; border-top: 1px solid #e2e8f0; width: 100%; max-width: 550px; align-self: center; }
     </style>
@@ -163,7 +170,9 @@
         </div>
         <p><span class="highlight">1,000명의 도전자</span>와 함께하는 레이스!<br>마지막으로 술을 드신 일시를 선택해 주세요.</p>
         <input type="datetime-local" id="dateTimeInput">
-        <button class="start-btn" onclick="saveDate()">도전 시작하기</button>
+        <button class="start-btn" onclick="saveDate()">새로운 도전 시작하기</button>
+        
+        <button class="stat-btn" style="margin-top:20px; border-color:var(--primary-color); color:var(--primary-color);" onclick="openHistoryList()">📚 나의 과거 기록 보기</button>
     </div>
 
     <div id="displayArea" style="display: none;">
@@ -188,7 +197,10 @@
 
         <div class="craving-section">
             <button class="craving-btn" onclick="openModal('cravingModal')">🔥 지금 고비가 왔어요!</button>
-            <button class="stat-btn" onclick="openStats()">📈 총 <span id="cravingCount">0</span>번의 고비를 넘겼습니다</button>
+            <div style="display: flex; gap: 8px;">
+                <button class="stat-btn" onclick="openStats()">📈 현재 <span id="cravingCount">0</span>번 고비 넘김</button>
+                <button class="stat-btn" style="border-color: var(--primary-color); color: var(--primary-color);" onclick="openHistoryList()">📚 과거 기록</button>
+            </div>
         </div>
 
         <div class="chart-container">
@@ -215,7 +227,7 @@
         </div>
         
         <div style="font-size: 0.8rem; color: #999; margin-top: 20px;">도전 세팅 일시: <span id="displaySettingDate">-</span></div>
-        <button class="reset-btn" onclick="resetDate()">기록 완전 초기화 및 재설정</button>
+        <button class="reset-btn" onclick="resetDate()">금주 실패... 새로운 단주 도전 및 재설정</button>
     </div>
 </div>
 
@@ -262,15 +274,33 @@
 <div id="statsModal" class="modal">
     <div class="modal-content" style="max-width: 500px;">
         <button class="close-btn-top" onclick="closeModal('statsModal')">&times;</button>
-        
-        <h3 style="margin-top:0; padding-right: 20px;">나의 고비 극복 리포트</h3>
+        <h3 style="margin-top:0; padding-right: 20px;">현재 도전 고비 극복 리포트</h3>
         <div style="height: 350px; margin-top: 20px;"><canvas id="cravingHistoryChart"></canvas></div>
+    </div>
+</div>
+
+<div id="historyListModal" class="modal">
+    <div class="modal-content" style="max-width: 500px;">
+        <button class="close-btn-top" onclick="closeModal('historyListModal')">&times;</button>
+        <h3 style="margin-top:0; padding-right: 20px;">나의 전체 단주 기록</h3>
+        <div id="historyListContainer" style="margin-top: 20px; max-height: 60vh; overflow-y: auto;">
+            </div>
+    </div>
+</div>
+
+<div id="historyDetailModal" class="modal">
+    <div class="modal-content" style="max-width: 500px;">
+        <button class="close-btn-top" onclick="closeModal('historyDetailModal')">&times;</button>
+        <button class="action-btn" style="margin-bottom: 15px;" onclick="openHistoryList()">← 리스트로 돌아가기</button>
+        <h3 style="margin-top:0; padding-right: 20px;" id="historyDetailTitle">도전 기록 상세</h3>
+        <p style="font-size: 0.85rem; color: #666;" id="historyDetailSummary"></p>
+        <div style="height: 350px; margin-top: 20px;"><canvas id="pastCravingHistoryChart"></canvas></div>
     </div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
-    import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, deleteDoc, collection, addDoc, query, orderBy, limit, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, deleteDoc, collection, addDoc, query, orderBy, limit, onSnapshot, getDocs, where } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
 
     const stages = [ { d: 1, t: "1일: 알코올 완전 배출", desc: "혈중 알코올이 0이 되며, 몸이 본격적인 해독 스위치를 켭니다." }, { d: 2, t: "2일: 숙취 및 갈증 해소", desc: "체내 수분 밸런스가 정상화되고 극심한 피로감과 두통이 사라집니다." }, { d: 3, t: "3일: 금단 증상 완화", desc: "초기 불안감과 손떨림이 잦아들며, 신체가 알코올 없는 상태에 적응하기 시작합니다." }, { d: 5, t: "5일: 피부 톤 및 탄력 개선", desc: "탈수 증상이 회복되어 푸석했던 피부가 맑아지고 생기가 돕니다." }, { d: 7, t: "1주: 깊은 수면(REM) 회복", desc: "수면의 질이 극적으로 향상되어 아침에 일어날 때 진짜 '개운함'을 느낍니다." }, { d: 10, t: "10일: 브레인 포그 걷힘", desc: "머릿속 안개가 걷힌 듯 인지 능력이 맑아지고 집중력이 상승합니다." }, { d: 14, t: "2주: 위장 및 소화력 회복", desc: "위점막이 재생되어 속쓰림, 역류성 식도염, 더부룩함이 크게 개선됩니다." }, { d: 21, t: "3주: 혈압 및 심박수 안정화", desc: "고혈압 수치가 제자리를 찾기 시작하며 심혈관계의 부담이 확 줄어듭니다." }, { d: 30, t: "1개월: 간 지방 수치 대폭 감소", desc: "지방간이 최대 15~20% 감소하며, 간 수치 정상화로 피로회복력이 급증합니다." }, { d: 60, t: "2개월: 강력한 면역력 형성", desc: "백혈구 기능이 완전히 회복되어 감기 등 외부 바이러스에 대한 저항력이 강해집니다." }, { d: 90, t: "3개월: 도파민 시스템 정상화", desc: "술 없이도 일상에서 자연스러운 행복과 스트레스 해소를 온전히 느낄 수 있게 됩니다." }, { d: 180, t: "6개월: 눈에 띄는 체형 변화", desc: "불필요한 '빈 칼로리' 섭취가 사라져 뱃살이 줄어들고 얼굴선이 뚜렷해집니다." }, { d: 365, t: "1년: 중증 질환 위험 급감", desc: "간경화, 유방암, 구강암 등 알코올 관련 치명적 질환의 위험이 비약적으로 떨어집니다." }, { d: 730, t: "2년: 뇌세포 용적 회복", desc: "알코올로 인해 위축되었던 뇌의 회백질이 건강한 비음주자 수준으로 재생됩니다." }, { d: 1825, t: "5년: 소화기계 완벽한 리셋", desc: "식도암, 위암 등의 발생 확률이 금주 전의 절반 수준으로 대폭 낮아집니다." }, { d: 3650, t: "10년: 완전한 리셋 및 자유", desc: "신체의 거의 모든 지표가 평생 술을 마시지 않은 사람과 유사한 수준으로 건강해집니다." } ];
@@ -294,9 +324,11 @@
     const googleProvider = new GoogleAuthProvider();
 
     let userId = null; 
+    let currentChallengeId = null; // 현재 진행중인 도전의 Document ID
     let userQuitDate = null; 
     let mainChart = null;
     let statsChart = null;
+    let pastStatsChart = null;
     let cravingData = [];
     let timerInterval = null;
     let currentTabName = 'physical';
@@ -317,11 +349,18 @@
                 el.innerText = `${user.displayName || '도전자'}님 환영합니다!`;
             });
 
+            // 1. users/{userId}/challenges 에서 status가 active인 문서를 가져옵니다.
             try {
-                const userDoc = await getDoc(doc(db, "users", userId));
-                if (userDoc.exists() && userDoc.data().quitDate) {
-                    userQuitDate = userDoc.data().quitDate;
-                    cravingData = userDoc.data().cravingHistory || [];
+                const q = query(collection(db, "users", userId, "challenges"), where("status", "==", "active"));
+                const snapshot = await getDocs(q);
+                
+                if (!snapshot.empty) {
+                    const activeDoc = snapshot.docs[0];
+                    currentChallengeId = activeDoc.id;
+                    const data = activeDoc.data();
+                    
+                    userQuitDate = data.startDate;
+                    cravingData = data.cravings || [];
                     document.getElementById('cravingCount').innerText = cravingData.length;
                     startApp(userQuitDate);
                 } else {
@@ -331,6 +370,7 @@
         } else {
             userId = null;
             userQuitDate = null;
+            currentChallengeId = null;
             if (timerInterval) clearInterval(timerInterval);
             document.getElementById('loginArea').style.display = 'flex';
             document.getElementById('setupArea').style.display = 'none';
@@ -582,19 +622,35 @@
         }, 1000);
     };
 
+    // 2. 단주 도전 시작 (서브컬렉션에 새로운 문서를 생성합니다)
     window.saveDate = async function() {
         if (!userId) return alert("로그인이 필요합니다.");
         const input = document.getElementById('dateTimeInput').value;
         if (!input) return alert("일시를 선택해 주세요.");
         userQuitDate = input; 
+        
         try {
-            await setDoc(doc(db, "users", userId), { quitDate: input, createdAt: new Date() }, { merge: true });
+            // 새 도전 기록 생성
+            const newChallenge = {
+                startDate: input,
+                endDate: null,
+                status: "active",
+                cravings: [],
+                createdAt: new Date().getTime()
+            };
+            
+            const docRef = await addDoc(collection(db, "users", userId, "challenges"), newChallenge);
+            currentChallengeId = docRef.id;
+            cravingData = [];
+            document.getElementById('cravingCount').innerText = 0;
+            
             startApp(input);
-        } catch (e) { alert("연동 에러: " + e.code); }
+        } catch (e) { alert("연동 에러: " + e.message); }
     };
 
+    // 3. 고비 기록 (현재 활성화된 도전 ID 하위에 저장)
     window.submitCraving = async function() {
-        if (!userId) return;
+        if (!userId || !currentChallengeId) return;
         
         const strength = document.getElementById('cravingRange').value;
         const reason = document.getElementById('cravingReason').value;
@@ -615,7 +671,9 @@
         };
 
         try {
-            await updateDoc(doc(db, "users", userId), { cravingHistory: arrayUnion(entry) });
+            const challengeRef = doc(db, "users", userId, "challenges", currentChallengeId);
+            await updateDoc(challengeRef, { cravings: arrayUnion(entry) });
+            
             cravingData.push(entry);
             document.getElementById('cravingCount').innerText = cravingData.length;
             closeModal('cravingModal');
@@ -704,63 +762,149 @@
         mainChart.update('none');
     }
 
+    // 통계 그래프를 렌더링하는 공통 함수
+    function renderChart(canvasId, targetChart, dataArray) {
+        const ctx = document.getElementById(canvasId).getContext('2d');
+        if (targetChart) targetChart.destroy();
+        const lastData = dataArray.slice(-10);
+        
+        return new Chart(ctx, {
+            type: 'bar',
+            data: { 
+                labels: lastData.map(d => d.date), 
+                datasets: [
+                    { 
+                        type: 'line',
+                        label: '🔥 갈망 강도', 
+                        data: lastData.map(d => d.strength), 
+                        borderColor: '#e74c3c', 
+                        backgroundColor: '#e74c3c',
+                        borderWidth: 3,
+                        pointRadius: 5,
+                        tension: 0.3,
+                        order: 0 
+                    },
+                    { label: '육체 피로', data: lastData.map(d => d.fatigue || 0), backgroundColor: 'rgba(52, 152, 219, 0.5)', order: 1 },
+                    { label: '정신 스트레스', data: lastData.map(d => d.stress || 0), backgroundColor: 'rgba(243, 156, 18, 0.5)', order: 1 },
+                    { label: '수면 부족', data: lastData.map(d => d.sleep || 0), backgroundColor: 'rgba(155, 89, 182, 0.5)', order: 1 },
+                    { label: '배고픔', data: lastData.map(d => d.hunger || 0), backgroundColor: 'rgba(46, 204, 113, 0.5)', order: 1 }
+                ] 
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                scales: { y: { beginAtZero: true, max: 10 } },
+                plugins: { legend: { display: true, position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } } 
+            }
+        });
+    }
+
     window.openStats = function() {
-        if (cravingData.length === 0) return alert("기록된 고비가 없습니다.");
+        if (cravingData.length === 0) return alert("현재 도전에 기록된 고비가 없습니다.");
         openModal('statsModal');
         setTimeout(() => {
-            const ctx = document.getElementById('cravingHistoryChart').getContext('2d');
-            if (statsChart) statsChart.destroy();
-            const lastData = cravingData.slice(-10);
-            
-            statsChart = new Chart(ctx, {
-                type: 'bar',
-                data: { 
-                    labels: lastData.map(d => d.date), 
-                    datasets: [
-                        { 
-                            type: 'line',
-                            label: '🔥 갈망 강도', 
-                            data: lastData.map(d => d.strength), 
-                            borderColor: '#e74c3c', 
-                            backgroundColor: '#e74c3c',
-                            borderWidth: 3,
-                            pointRadius: 5,
-                            tension: 0.3,
-                            order: 0 
-                        },
-                        { label: '육체 피로', data: lastData.map(d => d.fatigue || 0), backgroundColor: 'rgba(52, 152, 219, 0.5)', order: 1 },
-                        { label: '정신 스트레스', data: lastData.map(d => d.stress || 0), backgroundColor: 'rgba(243, 156, 18, 0.5)', order: 1 },
-                        { label: '수면 부족', data: lastData.map(d => d.sleep || 0), backgroundColor: 'rgba(155, 89, 182, 0.5)', order: 1 },
-                        { label: '배고픔', data: lastData.map(d => d.hunger || 0), backgroundColor: 'rgba(46, 204, 113, 0.5)', order: 1 }
-                    ] 
-                },
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false, 
-                    scales: {
-                        y: { beginAtZero: true, max: 10 }
-                    },
-                    plugins: { 
-                        legend: { display: true, position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } 
-                    } 
-                }
-            });
+            statsChart = renderChart('cravingHistoryChart', statsChart, cravingData);
         }, 200);
     };
 
+    // 4. 금주 실패 처리 (기존 기록 보존 및 종료 처리 후 새 화면)
     window.resetDate = async function() {
-        if (confirm("서버의 모든 기록이 초기화됩니다. 계속할까요?")) {
+        if (confirm("금주 실패를 기록하고, 새롭게 단주에 도전하시겠습니까?\n(과거의 도전 기록은 모두 보존됩니다.)")) {
             try { 
-                if (userId) await deleteDoc(doc(db, "users", userId)); 
+                if (userId && currentChallengeId) {
+                    const challengeRef = doc(db, "users", userId, "challenges", currentChallengeId);
+                    await updateDoc(challengeRef, { 
+                        status: 'failed', 
+                        endDate: new Date().toISOString() 
+                    });
+                }
+                
                 localStorage.removeItem('quitDrinkingDateTime_server');
+                currentChallengeId = null;
+                cravingData = [];
+                userQuitDate = null;
+                
                 document.getElementById('setupArea').style.display = 'flex';
                 document.getElementById('displayArea').style.display = 'none';
                 if (timerInterval) clearInterval(timerInterval);
-            } catch (e) { alert("초기화 실패"); }
+            } catch (e) { alert("재설정 실패: " + e.message); }
         }
     };
 
-    /* ★ JS 함수 추가: 슬라이더 값을 기반으로 실시간 색상(그라데이션 및 텍스트)을 계산합니다. */
+    // 5. 과거 단주 기록 리스트 조회
+    window.openHistoryList = async function() {
+        if (!userId) return alert("로그인이 필요합니다.");
+        openModal('historyListModal');
+        const container = document.getElementById('historyListContainer');
+        container.innerHTML = '<div style="text-align:center; padding:20px;">기록을 불러오는 중입니다...</div>';
+
+        try {
+            const q = query(collection(db, "users", userId, "challenges"), orderBy("createdAt", "desc"));
+            const snapshot = await getDocs(q);
+            
+            if (snapshot.empty) {
+                container.innerHTML = '<div style="text-align:center; padding:20px; color:#666;">아직 생성된 단주 도전 기록이 없습니다.</div>';
+                return;
+            }
+
+            container.innerHTML = '';
+            snapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                const startStr = new Date(data.startDate).toLocaleDateString('ko-KR');
+                const endStr = data.endDate ? new Date(data.endDate).toLocaleDateString('ko-KR') : '현재 진행 중';
+                const statusHtml = data.status === 'active' ? `<span class="history-status status-active">도전 중</span>` : `<span class="history-status status-failed">종료됨</span>`;
+                
+                // 지속 기간 계산
+                const start = new Date(data.startDate);
+                const end = data.endDate ? new Date(data.endDate) : new Date();
+                const diffDays = Math.max(0, Math.floor((end - start) / 86400000));
+                
+                const cravCount = data.cravings ? data.cravings.length : 0;
+                const encodedData = encodeURIComponent(JSON.stringify(data));
+
+                const itemHtml = `
+                    <div class="history-item" onclick="openHistoryDetail('${encodedData}')">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <strong style="color:var(--text-dark);">${startStr} ~ ${data.status === 'active' ? '' : endStr}</strong>
+                            ${statusHtml}
+                        </div>
+                        <div style="font-size:0.85rem; color:#666;">
+                            지속 기간: <b>${diffDays}일</b> | 넘긴 고비: <b>${cravCount}회</b>
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', itemHtml);
+            });
+        } catch (e) {
+            container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--danger-color);">기록을 불러오는데 실패했습니다.</div>';
+            console.error(e);
+        }
+    };
+
+    // 6. 과거 특정 단주 기록의 상세(고비 그래프) 보기
+    window.openHistoryDetail = function(encodedData) {
+        closeModal('historyListModal');
+        openModal('historyDetailModal');
+        
+        const data = JSON.parse(decodeURIComponent(encodedData));
+        const startStr = new Date(data.startDate).toLocaleDateString('ko-KR');
+        const cravCount = data.cravings ? data.cravings.length : 0;
+        
+        document.getElementById('historyDetailTitle').innerText = `${startStr} 도전 기록`;
+        document.getElementById('historyDetailSummary').innerText = `총 ${cravCount}번의 고비가 있었습니다.`;
+
+        setTimeout(() => {
+            if (cravCount === 0) {
+                document.getElementById('pastCravingHistoryChart').parentElement.innerHTML = '<div style="text-align:center; padding-top:100px; color:#999;">이 기간에 기록된 고비 데이터가 없습니다.</div><canvas id="pastCravingHistoryChart" style="display:none;"></canvas>';
+            } else {
+                // 이전에 '데이터 없음' 처리된 요소를 캔버스로 원상복구
+                document.getElementById('pastCravingHistoryChart').parentElement.innerHTML = '<canvas id="pastCravingHistoryChart"></canvas>';
+                pastStatsChart = renderChart('pastCravingHistoryChart', pastStatsChart, data.cravings);
+            }
+        }, 200);
+    };
+
+    /* ★ JS 함수: 슬라이더 값을 기반으로 실시간 색상(그라데이션 및 텍스트)을 계산합니다. */
     window.updateRangeStyle = function(el, textId) {
         const val = parseInt(el.value);
         const min = parseInt(el.min) || 1;
