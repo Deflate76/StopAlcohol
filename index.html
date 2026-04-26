@@ -104,6 +104,7 @@
         .highlight { color: var(--primary-color); font-weight: 700; }
         textarea, select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; margin-top: 10px; font-family: inherit; }
 
+        /* 동적 색상 변경 커스텀 프로그레스 바 스타일 */
         .dynamic-range {
             -webkit-appearance: none;
             width: 100%;
@@ -126,7 +127,18 @@
             cursor: pointer;
             transition: border-color 0.1s ease;
         }
+        .dynamic-range::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #fff;
+            border: 3px solid var(--range-color, #f39c12);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            cursor: pointer;
+            transition: border-color 0.1s ease;
+        }
 
+        /* 커뮤니티 게시판 상세 스타일 */
         .post-card { background: #fff; padding: 16px; border-radius: 14px; border-left: 4px solid var(--warning-color); box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 12px; }
         .post-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 0.85rem; }
         .post-author { font-weight: 700; color: #2d3748; }
@@ -136,19 +148,26 @@
         .day-badge { background: #e3f2fd; color: #1976d2; padding: 3px 6px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; margin-left: 6px; vertical-align: middle; }
         .post-actions { display: flex; gap: 12px; margin-top: 12px; font-size: 0.8rem; justify-content: flex-end; }
         .action-btn { background: none; border: none; color: #a0aec0; cursor: pointer; padding: 0; font-weight: 600; transition: color 0.2s; }
+        .action-btn:hover { color: var(--primary-color); }
         
         .comment-section { margin-top: 15px; padding-top: 12px; border-top: 1px dashed #e2e8f0; }
         .comment-item { font-size: 0.85rem; padding: 6px 0; border-bottom: 1px solid #f8f9fa; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+        .comment-item:last-child { border-bottom: none; }
         .comment-input-area { display: flex; gap: 8px; margin-top: 10px; }
         .comment-input { flex: 1; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.85rem; background: #f8f9fa; }
         .comment-btn { background: var(--text-dark); color: white; border: none; padding: 8px 14px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; cursor: pointer; }
 
+        /* 히스토리 리스트 항목 스타일 */
         .history-item { background: #f8f9fa; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; margin-bottom: 10px; cursor: pointer; transition: background 0.2s; display: flex; flex-direction: column; gap: 5px; }
+        .history-item:hover { background: #edf2f7; border-color: #cbd5e0; }
         .history-status { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; }
         .status-active { background: #e3f2fd; color: #1976d2; }
         .status-failed { background: #ffe3e3; color: #e74c3c; }
 
+        /* 푸터 스타일 */
         footer { margin-top: 30px; padding: 15px 0; text-align: center; font-size: 0.75rem; color: #9ca3af; border-top: 1px solid #e2e8f0; width: 100%; max-width: 550px; align-self: center; }
+
+        /* 차트 구분선 */
         .chart-divider { border-top: 1px dashed #e2e8f0; margin: 20px 0; }
     </style>
 </head>
@@ -188,12 +207,19 @@
             <div id="subTime">0시간 0분 0초</div>
             <div class="sub-progress-container">
                 <div style="position: relative;">
-                    <div class="sub-progress-bg" id="subProgressBar">
+                    <div class="sub-progress-bg">
                         <div class="sub-progress-fill" id="subFill"></div>
-                        </div>
-                    <div id="tickLabels" style="position: relative; height: 16px; margin-top: 5px;"></div>
+                        <div class="tick-mark" style="left: 25%;"></div>
+                        <div class="tick-mark" style="left: 50%;"></div>
+                        <div class="tick-mark" style="left: 75%;"></div>
+                    </div>
+                    <div id="tickLabels" style="position: relative; height: 16px; margin-top: 5px;">
+                        <div class="tick-label" style="left: 25%;">06시</div>
+                        <div class="tick-label" style="left: 50%;">12시</div>
+                        <div class="tick-label" style="left: 75%;">18시</div>
+                    </div>
                 </div>
-                <span class="sub-percent-text" id="subPercent" style="margin-top: 10px;">오늘의 목표: 0.0% 달성</span>
+                <span class="sub-percent-text" id="subPercent" style="margin-top: 10px;">오늘 하루: 0.0% 경과</span>
             </div>
         </div>
 
@@ -252,7 +278,9 @@
 <div id="cravingModal" class="modal">
     <div class="modal-content">
         <button class="close-btn-top" onclick="closeModal('cravingModal')">&times;</button>
+        
         <h3 style="margin-top:0; padding-right: 20px;">고비 기록하기</h3>
+        
         <label style="font-weight:700; font-size:0.9rem;">갈망 강도 (<span id="rangeVal" style="font-weight: 800;">5</span>/10)</label>
         <input type="range" id="cravingRange" min="1" max="10" value="5" class="dynamic-range" oninput="updateRangeStyle(this, 'rangeVal')">
         
@@ -269,11 +297,14 @@
 
         <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:25px;">육체피로 정도 (<span id="fatigueVal" style="font-weight: 800;">5</span>/10)</label>
         <input type="range" id="fatigueRange" min="1" max="10" value="5" class="dynamic-range" oninput="updateRangeStyle(this, 'fatigueVal')">
+
         <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:15px;">정신적 스트레스 정도 (<span id="stressVal" style="font-weight: 800;">5</span>/10)</label>
         <input type="range" id="stressRange" min="1" max="10" value="5" class="dynamic-range" oninput="updateRangeStyle(this, 'stressVal')">
-        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:15px;">수면 상태 (<span id="sleepVal" style="font-weight: 800;">5</span>/10)</label>
+
+        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:15px;">수면 상태 (<span id="sleepVal" style="font-weight: 800;">5</span>/10) <br><span style="font-size:0.75rem; color:#999; font-weight:normal;">1: 충분함 ~ 10: 최고로 부족함</span></label>
         <input type="range" id="sleepRange" min="1" max="10" value="5" class="dynamic-range" oninput="updateRangeStyle(this, 'sleepVal')">
-        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:15px;">배고픔 정도 (<span id="hungerVal" style="font-weight: 800;">5</span>/10)</label>
+
+        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:15px;">배고픔 정도 (<span id="hungerVal" style="font-weight: 800;">5</span>/10) <br><span style="font-size:0.75rem; color:#999; font-weight:normal;">1: 충분함 ~ 10: 너무 배고픔</span></label>
         <input type="range" id="hungerRange" min="1" max="10" value="5" class="dynamic-range" oninput="updateRangeStyle(this, 'hungerVal')">
 
         <button class="start-btn" style="margin-top:25px; width:100%;" onclick="submitCraving()">이 고비 기록하고 참기</button>
@@ -311,11 +342,10 @@
     import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, deleteDoc, collection, addDoc, query, orderBy, limit, onSnapshot, getDocs, where } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
 
-    // 스테이지 데이터 정의 (생략/유지)
-    const stages = [ { d: 1, t: "1일: 알코올 완전 배출", desc: "혈중 알코올이 0이 되며, 몸이 본격적인 해독 스위치를 켭니다." }, { d: 7, t: "1주: 깊은 수면(REM) 회복", desc: "수면의 질이 극적으로 향상되어 아침에 일어날 때 진짜 '개운함'을 느낍니다." }, { d: 30, t: "1개월: 간 지방 수치 대폭 감소", desc: "지방간이 최대 15~20% 감소하며, 간 수치 정상화로 피로회복력이 급증합니다." }, { d: 100, t: "100일: 습관의 완성", desc: "단주가 일상이 되어 술에 대한 생각 자체가 현저히 줄어듭니다." } ];
-    const liverStages = [ { d: 1, t: "1일: 해독 공장 가동", desc: "간이 독소 처리에 집중합니다." }, { d: 14, t: "2주: 지방 대사 재개", desc: "간에 쌓인 지방 연소가 활발해집니다." }, { d: 30, t: "1개월: 수치 정상화", desc: "간 수치가 확연히 낮아집니다." } ];
-    const brainStages = [ { d: 1, t: "1일: 신경 회로 복구", desc: "뇌세포의 화학적 불균형이 해소되기 시작합니다." }, { d: 30, t: "1개월: 도파민 안정", desc: "술 없이도 일상의 기쁨을 느낄 수 있게 됩니다." } ];
-    const physicalStages = stages;
+    const stages = [ { d: 1, t: "1일: 알코올 완전 배출", desc: "혈중 알코올이 0이 되며, 몸이 본격적인 해독 스위치를 켭니다." }, { d: 2, t: "2일: 숙취 및 갈증 해소", desc: "체내 수분 밸런스가 정상화되고 극심한 피로감과 두통이 사라집니다." }, { d: 3, t: "3일: 금단 증상 완화", desc: "초기 불안감과 손떨림이 잦아들며, 신체가 알코올 없는 상태에 적응하기 시작합니다." }, { d: 5, t: "5일: 피부 톤 및 탄력 개선", desc: "탈수 증상이 회복되어 푸석했던 피부가 맑아지고 생기가 돕니다." }, { d: 7, t: "1주: 깊은 수면(REM) 회복", desc: "수면의 질이 극적으로 향상되어 아침에 일어날 때 진짜 '개운함'을 느낍니다." }, { d: 10, t: "10일: 브레인 포그 걷힘", desc: "머릿속 안개가 걷힌 듯 인지 능력이 맑아지고 집중력이 상승합니다." }, { d: 14, t: "2주: 위장 및 소화력 회복", desc: "위점막이 재생되어 속쓰림, 역류성 식도염, 더부룩함이 크게 개선됩니다." }, { d: 21, t: "3주: 혈압 및 심박수 안정화", desc: "고혈압 수치가 제자리를 찾기 시작하며 심혈관계의 부담이 확 줄어듭니다." }, { d: 30, t: "1개월: 간 지방 수치 대폭 감소", desc: "지방간이 최대 15~20% 감소하며, 간 수치 정상화로 피로회복력이 급증합니다." }, { d: 60, t: "2개월: 강력한 면역력 형성", desc: "백혈구 기능이 완전히 회복되어 감기 등 외부 바이러스에 대한 저항력이 강해집니다." }, { d: 90, t: "3개월: 도파민 시스템 정상화", desc: "술 없이도 일상에서 자연스러운 행복과 스트레스 해소를 온전히 느낄 수 있게 됩니다." }, { d: 180, t: "6개월: 눈에 띄는 체형 변화", desc: "불필요한 '빈 칼로리' 섭취가 사라져 뱃살이 줄어들고 얼굴선이 뚜렷해집니다." }, { d: 365, t: "1년: 중증 질환 위험 급감", desc: "간경화, 유방암, 구강암 등 알코올 관련 치명적 질환의 위험이 비약적으로 떨어집니다." }, { d: 730, t: "2년: 뇌세포 용적 회복", desc: "알코올로 인해 위축되었던 뇌의 회백질이 건강한 비음주자 수준으로 재생됩니다." }, { d: 1825, t: "5년: 소화기계 완벽한 리셋", desc: "식도암, 위암 등의 발생 확률이 금주 전의 절반 수준으로 대폭 낮아집니다." }, { d: 3650, t: "10년: 완전한 리셋 및 자유", desc: "신체의 거의 모든 지표가 평생 술을 마시지 않은 사람과 유사한 수준으로 건강해집니다." } ];
+    const liverStages = [ { d: 1, t: "1일: 해독 공장 가동", desc: "간이 알코올 분해 업무를 끝내고, 쌓여있던 독소를 처리하는 본래 업무에 집중합니다." }, { d: 7, t: "1주: 염증 수치 하락", desc: "알코올로 인한 간의 미세한 염증들이 가라앉으며 혈액 검사상 간 수치가 하락하기 시작합니다." }, { d: 14, t: "2주: 지방 대사 재개", desc: "알코올 대신 지방을 연소하기 시작하여 간에 끼어있던 기름기가 빠져나가기 시작합니다." }, { d: 30, t: "1개월: 지방간 20% 감소", desc: "지방간 수치가 급격히 떨어지며, 간의 크기가 정상으로 돌아오고 혈색이 좋아집니다." }, { d: 90, t: "3개월: 단백질 합성 최적화", desc: "알부민 등 필수 단백질 합성이 원활해져 만성 피로가 사라지고 근육 성장이 효율적으로 변합니다." }, { d: 180, t: "6개월: 간 섬유화 억제", desc: "딱딱하게 굳으려던 간 조직의 손상이 멈추고, 건강한 간 세포가 그 자리를 대체합니다." }, { d: 365, t: "1년: 해독 능력 극대화", desc: "간의 정화 능력이 정점에 도달하여 약물 대사나 독소 배출 속도가 비약적으로 빨라집니다." }, { d: 1825, t: "5년: 간암 발생률 급감", desc: "간세포의 변이 가능성이 차단되어, 간암 및 간경변 위험이 일반인 수준에 근접합니다." }, { d: 3650, t: "10년: 완벽한 재생 완료", desc: "오랜 기간 손상받았던 간 조직이 완전히 새것처럼 리모델링되어 최상의 상태를 유지합니다." } ];
+    const brainStages = [ { d: 1, t: "1일: 신경 과민기", desc: "알코올의 억제 효과가 사라지며 뇌가 과하게 흥분하지만, 독성 배출을 시작합니다." }, { d: 3, t: "3일: 금단 불안 정점", desc: "가장 힘든 고비입니다. 뇌가 술 없이 신호를 보내는 법을 다시 배우기 시작합니다." }, { d: 7, t: "1주: 수면 사이클 복구", desc: "알코올 없이 렘(REM) 수면에 진입하여 뇌의 노폐물(글림파틱 시스템)이 청소됩니다." }, { d: 14, t: "2주: 감정 조절 시작", desc: "충동을 조절하는 전두엽 기능이 살아나며 이유 없는 짜증과 감정 기복이 줄어듭니다." }, { d: 30, t: "1개월: 인지 능력 반등", desc: "기억력, 작업 속도, 의사결정 능력이 눈에 띄게 개선되며 업무 효율이 올라갑니다." }, { d: 90, t: "3개월: 도파민 수용체 재생", desc: "술이 주는 강한 자극 없이도 일상의 소소한 즐거움에서 행복감을 느끼기 시작합니다." }, { d: 180, t: "6개월: 신경 가소성 강화", desc: "알코올 갈망을 담당하는 뇌 회로가 약화되고, 새로운 건강한 습관이 뇌에 각인됩니다." }, { d: 365, t: "1년: 회백질 용적 증가", desc: "알코올로 수축되었던 뇌 부피가 물리적으로 회복되며 지능적 유연성을 되찾습니다." }, { d: 730, t: "2년: 신경계 완전 정상화", desc: "뇌의 화학적 균형이 비음주자와 거의 동일한 상태로 완벽하게 리셋됩니다." } ];
+    const physicalStages = typeof stages !== 'undefined' ? stages : [];
 
     const firebaseConfig = {
         apiKey: "AIzaSyBWDwueP3a0atxCqFIgqd96sgXc0EqYbEY",
@@ -324,6 +354,7 @@
         storageBucket: "alcoholaway.firebasestorage.app",
         messagingSenderId: "1001199235857",
         appId: "1:1001199235857:web:362c4aae36b44c7eae12b0",
+        measurementId: "G-JBE26PCZMF"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -354,21 +385,31 @@
         if (user) {
             userId = user.uid;
             document.getElementById('loginArea').style.display = 'none';
-            document.querySelectorAll('.user-display-name').forEach(el => { el.innerText = `${user.displayName || '도전자'}님 환영합니다!`; });
+            document.querySelectorAll('.user-display-name').forEach(el => {
+                el.innerText = `${user.displayName || '도전자'}님 환영합니다!`;
+            });
+
             try {
                 const q = query(collection(db, "users", userId, "challenges"), where("status", "==", "active"));
                 const snapshot = await getDocs(q);
+                
                 if (!snapshot.empty) {
                     const activeDoc = snapshot.docs[0];
                     currentChallengeId = activeDoc.id;
-                    userQuitDate = activeDoc.data().startDate;
-                    cravingData = activeDoc.data().cravings || [];
+                    const data = activeDoc.data();
+                    
+                    userQuitDate = data.startDate;
+                    cravingData = data.cravings || [];
                     document.getElementById('cravingCount').innerText = cravingData.length;
                     startApp(userQuitDate);
-                } else { document.getElementById('setupArea').style.display = 'flex'; }
-            } catch (e) { console.error(e); }
+                } else {
+                    document.getElementById('setupArea').style.display = 'flex';
+                }
+            } catch (e) { console.error("데이터 로드 에러:", e); }
         } else {
-            userId = null; userQuitDate = null; currentChallengeId = null;
+            userId = null;
+            userQuitDate = null;
+            currentChallengeId = null;
             if (timerInterval) clearInterval(timerInterval);
             document.getElementById('loginArea').style.display = 'flex';
             document.getElementById('setupArea').style.display = 'none';
@@ -376,40 +417,386 @@
         }
     });
 
-    window.loginWithGoogle = async function() { try { await signInWithPopup(auth, googleProvider); } catch (e) { alert(e.message); } };
-    window.logout = async function() { try { await signOut(auth); } catch (e) { alert(e.message); } };
+    window.loginWithGoogle = async function() {
+        try { await signInWithPopup(auth, googleProvider); } 
+        catch (error) { alert(`로그인 실패!\n에러 메시지: ${error.message}`); }
+    };
 
-    // ★ 오늘의 "고정 시간대" 눈금을 렌더링하는 핵심 함수
-    function renderFixedTimeTicks() {
-        const labelsContainer = document.getElementById('tickLabels');
-        const progressBar = document.getElementById('subProgressBar');
+    window.logout = async function() {
+        try {
+            await signOut(auth);
+            localStorage.removeItem('quitDrinkingDateTime_server');
+        } catch (error) { alert("로그아웃 실패"); }
+    };
+
+    window.switchTab = function(btn, tabName) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentTabName = tabName;
         
-        // 기존 눈금 및 라벨 제거
-        labelsContainer.innerHTML = '';
-        progressBar.querySelectorAll('.tick-mark').forEach(m => m.remove());
+        const changeSection = document.getElementById('changeSection');
+        const communitySection = document.getElementById('communitySection');
 
-        // 표시할 기준 시간 (06시, 12시, 18시)
-        const checkPoints = [
-            { hour: 6, label: "06시", pos: 25 },
-            { hour: 12, label: "12시", pos: 50 },
-            { hour: 18, label: "18시", pos: 75 }
-        ];
+        if (tabName === 'community') {
+            changeSection.style.display = 'none';
+            communitySection.style.display = 'block';
+            loadPosts(); 
+        } else {
+            changeSection.style.display = 'block';
+            communitySection.style.display = 'none';
+            renderChangeCards(tabName);
+            if (unsubscribePosts) unsubscribePosts(); 
+        }
+        
+        const savedDate = localStorage.getItem('quitDrinkingDateTime_server') || null;
+        if(savedDate && tabName !== 'community') {
+            const diff = new Date() - new Date(savedDate);
+            updateRoadmap(diff / 86400000);
+        }
+    };
 
-        checkPoints.forEach(cp => {
-            // 눈금 바(Mark) 추가
-            const mark = document.createElement('div');
-            mark.className = 'tick-mark';
-            mark.style.left = cp.pos + '%';
-            progressBar.appendChild(mark);
+    function calcDday(quitISO) {
+        if(!quitISO) return "?";
+        const diff = new Date() - new Date(quitISO);
+        if(diff < 0) return "0";
+        return Math.floor(diff / 86400000) + 1;
+    }
 
-            // 시간 라벨(Label) 추가
-            const label = document.createElement('div');
-            label.className = 'tick-label';
-            label.style.left = cp.pos + '%';
-            label.innerText = cp.label;
-            labelsContainer.appendChild(label);
+    window.submitPost = async function() {
+        if (!userId) return alert("로그인이 필요합니다.");
+        const content = document.getElementById('postContent').value.trim();
+        if (!content) return alert("내용을 입력해 주세요.");
+
+        try {
+            await addDoc(collection(db, "posts"), {
+                uid: userId,
+                author: auth.currentUser.displayName || "익명의 생존자",
+                authorQuitDate: userQuitDate || null,
+                content: content,
+                createdAt: new Date().getTime(),
+                comments: []
+            });
+            document.getElementById('postContent').value = '';
+        } catch (error) { alert("작성에 실패했습니다: " + error.message); }
+    };
+
+    window.loadPosts = function() {
+        const q = query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(50));
+        
+        unsubscribePosts = onSnapshot(q, (snapshot) => {
+            const postList = document.getElementById('postList');
+            postList.innerHTML = ''; 
+            
+            if (snapshot.empty) {
+                postList.innerHTML = '<div style="text-align:center; padding:20px; color:#999; font-size:0.9rem;">아직 발송된 통신이 없습니다.<br>첫 생존 신고를 남겨보세요!</div>';
+                return;
+            }
+
+            snapshot.forEach((docSnap) => {
+                const id = docSnap.id;
+                const data = docSnap.data();
+                const dateStr = new Date(data.createdAt).toLocaleString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                
+                const authorDays = calcDday(data.authorQuitDate);
+                const dayBadge = `<span class="day-badge">D+${authorDays}</span>`;
+
+                const isMe = data.uid === userId;
+                const authorText = isMe ? `${data.author} <span style="color:var(--primary-color);">(나)</span>` : data.author;
+                const borderStyle = isMe ? 'border-left: 4px solid var(--primary-color);' : '';
+
+                const encodedContent = encodeURIComponent(data.content);
+                const actionHTML = isMe ? `
+                    <div class="post-actions">
+                        <button class="action-btn" onclick="editPost('${id}', '${encodedContent}')">수정</button>
+                        <button class="action-btn" style="color:var(--danger-color);" onclick="deletePost('${id}')">삭제</button>
+                    </div>
+                ` : '';
+
+                let commentsHTML = '';
+                if(data.comments && data.comments.length > 0) {
+                    commentsHTML = data.comments.map((c, cIdx) => {
+                        const cDay = calcDday(c.authorQuitDate);
+                        const isCMe = c.uid === userId;
+                        const delBtn = isCMe ? `<button class="action-btn" style="font-size:0.75rem; color:var(--danger-color); margin-left:8px;" onclick="deleteComment('${id}', ${cIdx})">지우기</button>` : '';
+                        
+                        return `
+                            <div class="comment-item">
+                                <strong style="color:#2d3748">${c.author}</strong>
+                                <span class="day-badge" style="font-size:0.65rem; padding:1px 4px;">D+${cDay}</span>
+                                <span style="margin-left:5px; color:#4a5568;">${c.text}</span>
+                                ${delBtn}
+                            </div>
+                        `;
+                    }).join('');
+                }
+
+                const postHTML = `
+                    <div class="post-card" style="${borderStyle}">
+                        <div class="post-header">
+                            <div><span class="post-author">${authorText}</span>${dayBadge}</div>
+                            <span class="post-date">${dateStr}</span>
+                        </div>
+                        <div class="post-body">
+                            ${data.content.replace(/\n/g, '<br>')}
+                            ${data.editedAt ? '<span style="font-size:0.75rem; color:#a0aec0;"> (수정됨)</span>' : ''}
+                        </div>
+                        ${actionHTML}
+                        <div class="comment-section">
+                            ${commentsHTML}
+                            <div class="comment-input-area">
+                                <input type="text" id="cmtInput_${id}" class="comment-input" placeholder="응원의 댓글 달기...">
+                                <button class="comment-btn" onclick="addComment('${id}')">등록</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                postList.insertAdjacentHTML('beforeend', postHTML);
+            });
+        });
+    };
+
+    window.editPost = async function(postId, encodedContent) {
+        const oldContent = decodeURIComponent(encodedContent);
+        const newContent = prompt("내용을 수정하세요:", oldContent);
+        if(newContent !== null && newContent.trim() !== "") {
+            try {
+                await updateDoc(doc(db, "posts", postId), {
+                    content: newContent.trim(),
+                    editedAt: new Date().getTime()
+                });
+            } catch(e) { 
+                console.error("게시글 수정 에러:", e);
+                alert("수정 실패: " + e.message); 
+            }
+        }
+    };
+
+    window.deletePost = async function(postId) {
+        if(confirm("정말 이 통신을 삭제하시겠습니까?")) {
+            try {
+                await deleteDoc(doc(db, "posts", postId));
+            } catch(e) { 
+                console.error("게시글 삭제 에러:", e);
+                alert("삭제 실패: " + e.message); 
+            }
+        }
+    };
+
+    window.addComment = async function(postId) {
+        if (!userId) return alert("로그인이 필요합니다.");
+        const inputEl = document.getElementById(`cmtInput_${postId}`);
+        const text = inputEl.value.trim();
+        if(!text) return;
+
+        const newComment = {
+            uid: userId,
+            author: auth.currentUser.displayName || "익명의 생존자",
+            authorQuitDate: userQuitDate || null,
+            text: text,
+            createdAt: new Date().getTime()
+        };
+
+        try {
+            await updateDoc(doc(db, "posts", postId), {
+                comments: arrayUnion(newComment)
+            });
+            inputEl.value = '';
+        } catch(e) { 
+            console.error("댓글 등록 에러:", e);
+            alert("댓글 등록 실패: " + e.message); 
+        }
+    };
+
+    window.deleteComment = async function(postId, commentIndex) {
+        if(confirm("댓글을 삭제하시겠습니까?")) {
+            try {
+                const postRef = doc(db, "posts", postId);
+                const postSnap = await getDoc(postRef);
+                if(postSnap.exists()) {
+                    const postData = postSnap.data();
+                    let newComments = [...(postData.comments || [])];
+                    newComments.splice(commentIndex, 1);
+                    await updateDoc(postRef, { comments: newComments });
+                }
+            } catch(e) { 
+                console.error("댓글 삭제 에러:", e);
+                alert("댓글 삭제 실패: " + e.message); 
+            }
+        }
+    };
+
+    function renderChangeCards(tabName) {
+        let activeStages = physicalStages;
+        if(tabName === 'liver') activeStages = liverStages;
+        if(tabName === 'brain') activeStages = brainStages;
+        
+        document.getElementById('changeList').innerHTML = activeStages.map((s, i) => `
+            <div class="change-card" id="card${i}">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-weight:700; font-size:0.95rem;">${s.t}</span>
+                    <div class="progress-bg">
+                        <span class="progress-text" id="text${i}">0%</span>
+                        <div class="progress-fill" id="fill${i}"></div>
+                    </div>
+                </div>
+                <p style="font-size:0.85rem; color:#666; margin-top:6px;">${s.desc}</p>
+            </div>
+        `).join('');
+    }
+
+    function updateRoadmap(days) {
+        let activeStages = physicalStages;
+        if(currentTabName === 'liver') activeStages = liverStages;
+        if(currentTabName === 'brain') activeStages = brainStages;
+
+        activeStages.forEach((s, i) => {
+            const perc = Math.min((days / s.d) * 100, 100);
+            const fill = document.getElementById(`fill${i}`);
+            const text = document.getElementById(`text${i}`);
+            const card = document.getElementById(`card${i}`);
+            if (fill) fill.style.width = perc + '%';
+            if (text) text.innerText = Math.floor(perc) + '%';
+            if (card) {
+                if (perc >= 100) card.classList.add('active');
+                else card.classList.remove('active');
+            }
         });
     }
+
+    function initSurvivalChart() {
+        const ctx = document.getElementById('survivalChart').getContext('2d');
+        mainChart = new Chart(ctx, {
+            type: 'line',
+            data: { datasets: [
+                { label: '탈락 영역 (과거)', data: [], borderColor: '#e74c3c', backgroundColor: 'rgba(231, 76, 60, 0.4)', fill: true, pointRadius: 0, tension: 0.3 },
+                { label: '생존 영역 (잠재)', data: [], borderColor: '#2ecc71', backgroundColor: 'rgba(46, 204, 113, 0.4)', fill: true, pointRadius: 0, tension: 0.3 }
+            ]},
+            options: { 
+                responsive: true, maintainAspectRatio: false, 
+                scales: { x: { type: 'linear', min: 0, max: 100, title: { display:true, text:'경과일수', font:{size:10} } }, y: { beginAtZero: true, max: 1000, title: { display:true, text:'생존자수', font:{size:10} } } }, 
+                plugins: { 
+                    legend: { display: true, position: 'top', labels: { boxWidth: 12, font: { size: 11, weight: 'bold' }, padding: 15 } }, 
+                    annotation: { 
+                        annotations: { 
+                            line1: { type: 'line', xMin: 0, xMax: 0, borderColor: '#2d3748', borderWidth: 2, borderDash: [4, 4], label: { display: true, content: '현재 경과', position: 'end', backgroundColor: '#2d3748', font: { size: 10 } } },
+                            line2: { type: 'line', yMin: 0, yMax: 0, borderColor: '#e74c3c', borderWidth: 1.5, borderDash: [4, 4], label: { display: true, content: '생존', position: 'start', backgroundColor: '#e74c3c', font: { size: 10 } } }
+                        } 
+                    } 
+                } 
+            }
+        });
+    }
+
+    function initDistributionChart() {
+        const ctx = document.getElementById('distributionChart').getContext('2d');
+        
+        const distData = [];
+        for(let i = 0; i <= 100; i+=2) {
+            const y = (1 / (i + 5)) * Math.exp(-Math.pow(Math.log((i+1)/15), 2) / (2 * Math.pow(0.8, 2))) * 1000;
+            distData.push({x: i, y: y});
+        }
+
+        distChart = new Chart(ctx, {
+            type: 'line',
+            data: { 
+                datasets: [{ 
+                    label: '도전자 분포', 
+                    data: distData, 
+                    borderColor: '#9b59b6', 
+                    backgroundColor: 'rgba(155, 89, 182, 0.2)', 
+                    fill: true, 
+                    pointRadius: 0, 
+                    tension: 0.4 
+                }]
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                scales: { 
+                    x: { type: 'linear', min: 0, max: 100, title: { display:true, text:'금주 일수', font:{size:10} } }, 
+                    y: { display: false } 
+                }, 
+                plugins: { 
+                    legend: { display: false }, 
+                    annotation: { 
+                        annotations: { 
+                            myPosition: { type: 'line', xMin: 0, xMax: 0, borderColor: '#e74c3c', borderWidth: 2, label: { display: true, content: '나의 위치', position: 'top', backgroundColor: '#e74c3c', font: { size: 10 } } }
+                        } 
+                    } 
+                } 
+            }
+        });
+    }
+
+    function updateChart(days, survivors) {
+        if (!mainChart) return;
+        const past = []; const future = [];
+        for (let i = 0; i <= days; i++) past.push({x: i, y: 1000 * Math.exp(-0.04 * i)});
+        past.push({x: days, y: 1000 * Math.exp(-0.04 * days)});
+        for (let i = Math.ceil(days); i <= 100; i++) future.push({x: i, y: 1000 * Math.exp(-0.04 * i)});
+        
+        mainChart.data.datasets[0].data = past;
+        mainChart.data.datasets[1].data = future;
+
+        mainChart.options.plugins.annotation.annotations.line1.xMin = days;
+        mainChart.options.plugins.annotation.annotations.line1.xMax = days;
+        mainChart.options.plugins.annotation.annotations.line2.yMin = survivors;
+        mainChart.options.plugins.annotation.annotations.line2.yMax = survivors;
+        mainChart.options.plugins.annotation.annotations.line2.label.content = survivors.toLocaleString() + '명';
+
+        mainChart.update('none');
+
+        if (distChart) {
+            const displayDays = Math.min(days, 100); 
+            distChart.options.plugins.annotation.annotations.myPosition.xMin = displayDays;
+            distChart.options.plugins.annotation.annotations.myPosition.xMax = displayDays;
+            distChart.update('none');
+        }
+    }
+
+    function renderChart(canvasId, targetChart, dataArray) {
+        const ctx = document.getElementById(canvasId).getContext('2d');
+        if (targetChart) targetChart.destroy();
+        const lastData = dataArray.slice(-10);
+        
+        return new Chart(ctx, {
+            type: 'bar',
+            data: { 
+                labels: lastData.map(d => d.date), 
+                datasets: [
+                    { 
+                        type: 'line',
+                        label: '🔥 갈망 강도', 
+                        data: lastData.map(d => d.strength), 
+                        borderColor: '#e74c3c', 
+                        backgroundColor: '#e74c3c',
+                        borderWidth: 3,
+                        pointRadius: 5,
+                        tension: 0.3,
+                        order: 0 
+                    },
+                    { label: '육체 피로', data: lastData.map(d => d.fatigue || 0), backgroundColor: 'rgba(52, 152, 219, 0.5)', order: 1 },
+                    { label: '정신 스트레스', data: lastData.map(d => d.stress || 0), backgroundColor: 'rgba(243, 156, 18, 0.5)', order: 1 },
+                    { label: '수면 부족', data: lastData.map(d => d.sleep || 0), backgroundColor: 'rgba(155, 89, 182, 0.5)', order: 1 },
+                    { label: '배고픔', data: lastData.map(d => d.hunger || 0), backgroundColor: 'rgba(46, 204, 113, 0.5)', order: 1 }
+                ] 
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                scales: { y: { beginAtZero: true, max: 10 } },
+                plugins: { legend: { display: true, position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } } 
+            }
+        });
+    }
+
+    window.openStats = function() {
+        if (cravingData.length === 0) return alert("현재 도전에 기록된 고비가 없습니다.");
+        openModal('statsModal');
+        setTimeout(() => {
+            statsChart = renderChart('cravingHistoryChart', statsChart, cravingData);
+        }, 200);
+    };
 
     window.startApp = function(startISO) {
         localStorage.setItem('quitDrinkingDateTime_server', startISO);
@@ -419,81 +806,236 @@
 
         initSurvivalChart();
         initDistributionChart(); 
-        renderFixedTimeTicks(); // 고정 눈금 렌더링
 
         if (timerInterval) clearInterval(timerInterval);
         timerInterval = setInterval(() => {
-            const now = new Date();
             const start = new Date(startISO);
+            const now = new Date();
             const diff = now - start;
             if (diff < 0) return;
 
             const days = diff / 86400000;
-            const h = Math.floor((diff/3600000)%24);
-            const m = Math.floor((diff/60000)%60);
-            const s = Math.floor((diff/1000)%60);
+            const hours = Math.floor((diff/3600000)%24);
+            const minutes = Math.floor((diff/60000)%60);
+            const seconds = Math.floor((diff/1000)%60);
 
             document.getElementById('mainDays').innerText = Math.floor(days) + "일";
-            document.getElementById('subTime').innerText = `${h}시간 ${m}분 ${s}초`;
+            document.getElementById('subTime').innerText = `${hours}시간 ${minutes}분 ${seconds}초`;
             
-            // ★ 프로그레스 바의 진행도는 현재 시각(00시~24시)을 기준으로 표시
+            // ★ 오늘 하루 00:00 ~ 24:00 기준 진행도로 변경 (기존 상대 시간 계산 제거)
             const nowH = now.getHours();
             const nowM = now.getMinutes();
             const nowS = now.getSeconds();
             const dailyProgress = ((nowH * 3600 + nowM * 60 + nowS) / 86400) * 100;
             
             document.getElementById('subFill').style.width = dailyProgress + '%';
-            document.getElementById('subPercent').innerText = `현재 시각 기준: ${dailyProgress.toFixed(1)}% 경과`;
+            document.getElementById('subPercent').innerText = `오늘 하루: ${dailyProgress.toFixed(1)}% 경과`;
 
             const survivors = Math.max(1, Math.round(1000 * Math.exp(-0.04 * days)));
+            const yesterdaySurvivors = Math.max(1, Math.round(1000 * Math.exp(-0.04 * Math.max(0, days - 1))));
+            const rankUp = yesterdaySurvivors - survivors;
+
             document.getElementById('survivors').innerText = survivors.toLocaleString();
             document.getElementById('myRank').innerText = survivors.toLocaleString();
+
+            const rankChangeEl = document.getElementById('rankChange');
+            if (rankUp > 0) {
+                rankChangeEl.innerHTML = `<span style="color: var(--danger-color);">▲ ${rankUp.toLocaleString()}</span>`;
+            } else {
+                rankChangeEl.innerHTML = `<span style="color: #a0aec0;">-</span>`;
+            }
 
             updateChart(days, survivors);
             if(currentTabName !== 'community') updateRoadmap(days); 
         }, 1000);
     };
 
-    // 나머지 차트 로직, 게시판 로직 등 기존과 동일하게 유지...
-    // (이하 생략 - 기존 코드의 saveDate, switchTab, renderChart 등 기능은 동일하게 삽입)
-    
     window.saveDate = async function() {
         if (!userId) return alert("로그인이 필요합니다.");
         const input = document.getElementById('dateTimeInput').value;
         if (!input) return alert("일시를 선택해 주세요.");
         userQuitDate = input; 
+        
         try {
-            const docRef = await addDoc(collection(db, "users", userId, "challenges"), {
-                startDate: input, status: "active", cravings: [], createdAt: new Date().getTime()
-            });
+            const newChallenge = {
+                startDate: input,
+                endDate: null,
+                status: "active",
+                cravings: [],
+                createdAt: new Date().getTime()
+            };
+            
+            const docRef = await addDoc(collection(db, "users", userId, "challenges"), newChallenge);
             currentChallengeId = docRef.id;
             cravingData = [];
+            document.getElementById('cravingCount').innerText = 0;
+            
             startApp(input);
-        } catch (e) { alert(e.message); }
+        } catch (e) { alert("연동 에러: " + e.message); }
     };
 
-    window.openModal = (id) => document.getElementById(id).style.display = 'flex';
-    window.closeModal = (id) => document.getElementById(id).style.display = 'none';
+    window.submitCraving = async function() {
+        if (!userId || !currentChallengeId) return;
+        
+        const strength = document.getElementById('cravingRange').value;
+        const reason = document.getElementById('cravingReason').value;
+        const fatigue = document.getElementById('fatigueRange').value;
+        const stress = document.getElementById('stressRange').value;
+        const sleep = document.getElementById('sleepRange').value;
+        const hunger = document.getElementById('hungerRange').value;
+
+        const entry = {
+            date: new Date().toLocaleString('ko-KR', {month:'short', day:'numeric', hour:'numeric'}),
+            strength: parseInt(strength),
+            reason: reason === '기타' ? document.getElementById('etcReason').value : reason,
+            fatigue: parseInt(fatigue),
+            stress: parseInt(stress),
+            sleep: parseInt(sleep),
+            hunger: parseInt(hunger),
+            timestamp: new Date().getTime()
+        };
+
+        try {
+            const challengeRef = doc(db, "users", userId, "challenges", currentChallengeId);
+            await updateDoc(challengeRef, { cravings: arrayUnion(entry) });
+            
+            cravingData.push(entry);
+            document.getElementById('cravingCount').innerText = cravingData.length;
+            closeModal('cravingModal');
+            alert("고비를 잘 넘기셨습니다!");
+        } catch (e) { alert("저장 실패: " + e.message); }
+    };
+
+    window.resetDate = async function() {
+        if (confirm("금주 실패를 기록하고, 새롭게 단주에 도전하시겠습니까?\n(과거의 도전 기록은 모두 보존됩니다.)")) {
+            try { 
+                if (userId && currentChallengeId) {
+                    const challengeRef = doc(db, "users", userId, "challenges", currentChallengeId);
+                    await updateDoc(challengeRef, { 
+                        status: 'failed', 
+                        endDate: new Date().toISOString() 
+                    });
+                }
+                
+                localStorage.removeItem('quitDrinkingDateTime_server');
+                currentChallengeId = null;
+                cravingData = [];
+                userQuitDate = null;
+                
+                document.getElementById('setupArea').style.display = 'flex';
+                document.getElementById('displayArea').style.display = 'none';
+                if (timerInterval) clearInterval(timerInterval);
+            } catch (e) { alert("재설정 실패: " + e.message); }
+        }
+    };
+
+    window.openHistoryList = async function() {
+        if (!userId) return alert("로그인이 필요합니다.");
+        
+        closeModal('historyDetailModal');
+        openModal('historyListModal');
+        
+        const container = document.getElementById('historyListContainer');
+        container.innerHTML = '<div style="text-align:center; padding:20px;">기록을 불러오는 중입니다...</div>';
+
+        try {
+            const q = query(collection(db, "users", userId, "challenges"), orderBy("createdAt", "desc"));
+            const snapshot = await getDocs(q);
+            
+            if (snapshot.empty) {
+                container.innerHTML = '<div style="text-align:center; padding:20px; color:#666;">아직 생성된 단주 도전 기록이 없습니다.</div>';
+                return;
+            }
+
+            container.innerHTML = '';
+            snapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                const startStr = new Date(data.startDate).toLocaleDateString('ko-KR');
+                const endStr = data.endDate ? new Date(data.endDate).toLocaleDateString('ko-KR') : '현재 진행 중';
+                const statusHtml = data.status === 'active' ? `<span class="history-status status-active">도전 중</span>` : `<span class="history-status status-failed">종료됨</span>`;
+                
+                const start = new Date(data.startDate);
+                const end = data.endDate ? new Date(data.endDate) : new Date();
+                const diffDays = Math.max(0, Math.floor((end - start) / 86400000));
+                
+                const cravCount = data.cravings ? data.cravings.length : 0;
+                const encodedData = encodeURIComponent(JSON.stringify(data));
+
+                const itemHtml = `
+                    <div class="history-item" onclick="openHistoryDetail('${encodedData}')">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <strong style="color:var(--text-dark);">${startStr} ~ ${data.status === 'active' ? '' : endStr}</strong>
+                            ${statusHtml}
+                        </div>
+                        <div style="font-size:0.85rem; color:#666;">
+                            지속 기간: <b>${diffDays}일</b> | 넘긴 고비: <b>${cravCount}회</b>
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', itemHtml);
+            });
+        } catch (e) {
+            container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--danger-color);">기록을 불러오는데 실패했습니다.</div>';
+            console.error(e);
+        }
+    };
+
+    window.openHistoryDetail = function(encodedData) {
+        closeModal('historyListModal');
+        openModal('historyDetailModal');
+        
+        const data = JSON.parse(decodeURIComponent(encodedData));
+        const startStr = new Date(data.startDate).toLocaleDateString('ko-KR');
+        const cravCount = data.cravings ? data.cravings.length : 0;
+        
+        document.getElementById('historyDetailTitle').innerText = `${startStr} 도전 기록`;
+        document.getElementById('historyDetailSummary').innerText = `총 ${cravCount}번의 고비가 있었습니다.`;
+
+        setTimeout(() => {
+            if (cravCount === 0) {
+                document.getElementById('pastCravingHistoryChart').parentElement.innerHTML = '<div style="text-align:center; padding-top:100px; color:#999;">이 기간에 기록된 고비 데이터가 없습니다.</div><canvas id="pastCravingHistoryChart" style="display:none;"></canvas>';
+            } else {
+                document.getElementById('pastCravingHistoryChart').parentElement.innerHTML = '<canvas id="pastCravingHistoryChart"></canvas>';
+                pastStatsChart = renderChart('pastCravingHistoryChart', pastStatsChart, data.cravings);
+            }
+        }, 200);
+    };
+
     window.updateRangeStyle = function(el, textId) {
         const val = parseInt(el.value);
-        const percent = ((val - 1) / 9) * 100;
-        const color = `hsl(${120 - (val-1)*12}, 85%, 45%)`;
+        const min = parseInt(el.min) || 1;
+        const max = parseInt(el.max) || 10;
+        const percent = ((val - min) / (max - min)) * 100;
+        
+        const hue = 120 - ((val - min) / (max - min)) * 120;
+        const color = `hsl(${hue}, 85%, 45%)`; 
+        
         el.style.setProperty('--range-color', color);
         el.style.setProperty('--range-percent', `${percent}%`);
+        
         if (textId) {
             const textEl = document.getElementById(textId);
-            textEl.innerText = val; textEl.style.color = color;
+            if (textEl) {
+                textEl.innerText = val;
+                textEl.style.color = color;
+            }
+        }
+    };
+
+    window.openModal = (id) => {
+        document.getElementById(id).style.display = 'flex';
+        if (id === 'cravingModal') {
+            updateRangeStyle(document.getElementById('cravingRange'), 'rangeVal');
+            updateRangeStyle(document.getElementById('fatigueRange'), 'fatigueVal');
+            updateRangeStyle(document.getElementById('stressRange'), 'stressVal');
+            updateRangeStyle(document.getElementById('sleepRange'), 'sleepVal');
+            updateRangeStyle(document.getElementById('hungerRange'), 'hungerVal');
         }
     };
     
-    // 차트 초기화 함수들 (간략화된 예시)
-    function initSurvivalChart() { /* 기존 Chart.js 코드 */ }
-    function initDistributionChart() { /* 기존 Chart.js 코드 */ }
-    function updateChart(days, survivors) { /* 기존 Chart.js 코드 */ }
-    function renderChangeCards(tab) { /* 기존 카드 렌더링 코드 */ }
-    function updateRoadmap(days) { /* 기존 로드맵 업데이트 코드 */ }
-    function switchTab(btn, tab) { /* 기존 탭 전환 코드 */ }
-    
+    window.closeModal = (id) => document.getElementById(id).style.display = 'none';
+    window.toggleEtc = (val) => document.getElementById('etcReason').style.display = (val === '기타') ? 'block' : 'none';
+
 </script>
 </body>
 </html>
