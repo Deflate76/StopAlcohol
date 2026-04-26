@@ -48,10 +48,30 @@
         .timer-display { margin: 15px 0; padding: 25px 20px; background: #fff5f5; border-radius: 20px; border: 1px solid #ffe3e3; }
         .time-unit { display: block; font-size: 3rem; font-weight: 800; color: var(--danger-color); line-height: 1.2; }
         #subTime { font-size: 1.2rem; font-weight: 600; color: #555; margin-top: 5px; }
+        
         .sub-progress-container { width: 100%; max-width: 300px; margin: 12px auto 0; }
         .sub-progress-bg { background: #ffe3e3; height: 10px; border-radius: 5px; overflow: hidden; position: relative; }
         .sub-progress-fill { background: var(--danger-color); height: 100%; width: 0%; transition: width 1s linear; }
-        .sub-percent-text { font-size: 0.8rem; color: #e74c3c; font-weight: 700; margin-top: 4px; display: block; }
+        .sub-percent-text { font-size: 0.8rem; color: #e74c3c; font-weight: 700; display: block; }
+        
+        /* 프로그레스 바 시간 눈금 스타일 */
+        .tick-mark { 
+            position: absolute; 
+            top: 0; 
+            width: 2px; 
+            height: 100%; 
+            background-color: rgba(255, 255, 255, 0.75); 
+            z-index: 5; 
+        }
+        .tick-label { 
+            position: absolute; 
+            font-size: 0.7rem; 
+            color: #a0aec0; 
+            font-weight: 700; 
+            transform: translateX(-50%); 
+            top: 0; 
+        }
+
         .rank-info { background: #e3f2fd; padding: 20px 15px; border-radius: 20px; margin: 15px 0; border: 1px solid #bbdefb; display: flex; flex-direction: column; gap: 10px; }
         .rank-item { display: flex; justify-content: center; align-items: baseline; gap: 6px; }
         .rank-number { font-size: 1.5rem; font-weight: 800; color: #1976d2; }
@@ -186,8 +206,16 @@
             <span id="mainDays" class="time-unit">0일</span>
             <div id="subTime">0시간 0분 0초</div>
             <div class="sub-progress-container">
-                <div class="sub-progress-bg"><div class="sub-progress-fill" id="subFill"></div></div>
-                <span class="sub-percent-text" id="subPercent">오늘의 목표: 0.0% 달성</span>
+                <div style="position: relative;">
+                    <div class="sub-progress-bg">
+                        <div class="sub-progress-fill" id="subFill"></div>
+                        <div class="tick-mark" style="left: 25%;"></div>
+                        <div class="tick-mark" style="left: 50%;"></div>
+                        <div class="tick-mark" style="left: 75%;"></div>
+                    </div>
+                    <div id="tickLabels" style="position: relative; height: 16px; margin-top: 5px;"></div>
+                </div>
+                <span class="sub-percent-text" id="subPercent" style="margin-top: 10px;">오늘의 목표: 0.0% 달성</span>
             </div>
         </div>
 
@@ -334,7 +362,7 @@
     let currentChallengeId = null; 
     let userQuitDate = null; 
     let mainChart = null;
-    let distChart = null; // ★ 정규 분포 차트 객체 추가
+    let distChart = null; 
     let statsChart = null;
     let pastStatsChart = null;
     let cravingData = [];
@@ -655,14 +683,11 @@
         });
     }
 
-    // ★ 추가: 정규 분포 형태의 곡선 초기화 함수
     function initDistributionChart() {
         const ctx = document.getElementById('distributionChart').getContext('2d');
         
-        // 간단한 로그 정규 분포 형태를 흉내낸 데이터 생성 (동기부여용 가상 데이터)
         const distData = [];
         for(let i = 0; i <= 100; i+=2) {
-            // 평균 약 15일, 우측으로 꼬리가 긴 형태
             const y = (1 / (i + 5)) * Math.exp(-Math.pow(Math.log((i+1)/15), 2) / (2 * Math.pow(0.8, 2))) * 1000;
             distData.push({x: i, y: y});
         }
@@ -685,7 +710,7 @@
                 maintainAspectRatio: false, 
                 scales: { 
                     x: { type: 'linear', min: 0, max: 100, title: { display:true, text:'금주 일수', font:{size:10} } }, 
-                    y: { display: false } // y축 숫자는 숨김 처리 (상대적 위치만 중요)
+                    y: { display: false } 
                 }, 
                 plugins: { 
                     legend: { display: false }, 
@@ -717,9 +742,8 @@
 
         mainChart.update('none');
 
-        // ★ 추가: 정규 분포 차트 상의 내 위치 업데이트
         if (distChart) {
-            const displayDays = Math.min(days, 100); // 100일까지만 그래프 표시 제한
+            const displayDays = Math.min(days, 100); 
             distChart.options.plugins.annotation.annotations.myPosition.xMin = displayDays;
             distChart.options.plugins.annotation.annotations.myPosition.xMax = displayDays;
             distChart.update('none');
@@ -770,6 +794,27 @@
         }, 200);
     };
 
+    // ★ 프로그레스 바 눈금 시간 렌더링 함수
+    function renderProgressTicks(startISO) {
+        const start = new Date(startISO);
+        const labelsContainer = document.getElementById('tickLabels');
+        labelsContainer.innerHTML = '';
+
+        const intervals = [25, 50, 75]; // 6시간, 12시간, 18시간 (24시간 기준)
+        const addHours = [6, 12, 18];
+
+        intervals.forEach((percent, index) => {
+            let tickDate = new Date(start.getTime() + (addHours[index] * 60 * 60 * 1000));
+            let hh = tickDate.getHours().toString().padStart(2, '0');
+            let mm = tickDate.getMinutes().toString().padStart(2, '0');
+
+            let timeStr = (mm === '00') ? `${hh}시` : `${hh}:${mm}`;
+
+            let labelHtml = `<div class="tick-label" style="left: ${percent}%;">${timeStr}</div>`;
+            labelsContainer.insertAdjacentHTML('beforeend', labelHtml);
+        });
+    }
+
     window.startApp = function(startISO) {
         localStorage.setItem('quitDrinkingDateTime_server', startISO);
         document.getElementById('setupArea').style.display = 'none';
@@ -777,7 +822,10 @@
         document.getElementById('displaySettingDate').innerText = new Date(startISO).toLocaleString('ko-KR');
 
         initSurvivalChart();
-        initDistributionChart(); // ★ 추가: 정규 분포 차트 초기화
+        initDistributionChart(); 
+        
+        // ★ 눈금 렌더링 함수 호출
+        renderProgressTicks(startISO); 
 
         if (timerInterval) clearInterval(timerInterval);
         timerInterval = setInterval(() => {
