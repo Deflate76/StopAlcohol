@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
-
-    <head>
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>금주 서바이벌 리포트</title>
@@ -85,13 +84,12 @@
         .highlight { color: var(--primary-color); font-weight: 700; }
         textarea, select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; margin-top: 10px; font-family: inherit; }
 
-        /* ★ 추가: 동적 색상 변경 커스텀 프로그레스 바 스타일 */
+        /* 동적 색상 변경 커스텀 프로그레스 바 스타일 */
         .dynamic-range {
             -webkit-appearance: none;
             width: 100%;
             height: 8px;
             border-radius: 4px;
-            /* JS에서 설정한 CSS 변수(var)를 읽어와 배경 그라데이션에 적용 */
             background: linear-gradient(to right, var(--range-color, #f39c12) 0%, var(--range-color, #f39c12) var(--range-percent, 50%), #e2e8f0 var(--range-percent, 50%), #e2e8f0 100%);
             outline: none;
             margin: 15px 0;
@@ -283,8 +281,7 @@
     <div class="modal-content" style="max-width: 500px;">
         <button class="close-btn-top" onclick="closeModal('historyListModal')">&times;</button>
         <h3 style="margin-top:0; padding-right: 20px;">나의 전체 단주 기록</h3>
-        <div id="historyListContainer" style="margin-top: 20px; max-height: 60vh; overflow-y: auto;">
-            </div>
+        <div id="historyListContainer" style="margin-top: 20px; max-height: 60vh; overflow-y: auto;"></div>
     </div>
 </div>
 
@@ -324,7 +321,7 @@
     const googleProvider = new GoogleAuthProvider();
 
     let userId = null; 
-    let currentChallengeId = null; // 현재 진행중인 도전의 Document ID
+    let currentChallengeId = null; 
     let userQuitDate = null; 
     let mainChart = null;
     let statsChart = null;
@@ -349,7 +346,6 @@
                 el.innerText = `${user.displayName || '도전자'}님 환영합니다!`;
             });
 
-            // 1. users/{userId}/challenges 에서 status가 active인 문서를 가져옵니다.
             try {
                 const q = query(collection(db, "users", userId, "challenges"), where("status", "==", "active"));
                 const snapshot = await getDocs(q);
@@ -423,6 +419,7 @@
         return Math.floor(diff / 86400000) + 1;
     }
 
+    // 커뮤니티 게시판 작성 (본인 기록 저장)
     window.submitPost = async function() {
         if (!userId) return alert("로그인이 필요합니다.");
         const content = document.getElementById('postContent').value.trim();
@@ -438,9 +435,10 @@
                 comments: []
             });
             document.getElementById('postContent').value = '';
-        } catch (error) { alert("작성에 실패했습니다."); }
+        } catch (error) { alert("작성에 실패했습니다: " + error.message); }
     };
 
+    // 실시간 커뮤니티 로드 (수정, 삭제, 댓글 포함)
     window.loadPosts = function() {
         const q = query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(50));
         
@@ -586,101 +584,6 @@
         }
     };
 
-    window.startApp = function(startISO) {
-        localStorage.setItem('quitDrinkingDateTime_server', startISO);
-        document.getElementById('setupArea').style.display = 'none';
-        document.getElementById('displayArea').style.display = 'block';
-        document.getElementById('displaySettingDate').innerText = new Date(startISO).toLocaleString('ko-KR');
-
-        initSurvivalChart();
-
-        if (timerInterval) clearInterval(timerInterval);
-        timerInterval = setInterval(() => {
-            const start = new Date(startISO);
-            const now = new Date();
-            const diff = now - start;
-            if (diff < 0) return;
-
-            const days = diff / 86400000;
-            const hours = Math.floor((diff/3600000)%24);
-            const minutes = Math.floor((diff/60000)%60);
-            const seconds = Math.floor((diff/1000)%60);
-
-            document.getElementById('mainDays').innerText = Math.floor(days) + "일";
-            document.getElementById('subTime').innerText = `${hours}시간 ${minutes}분 ${seconds}초`;
-            
-            const dailyProgress = ((hours * 3600 + minutes * 60 + seconds) / 86400) * 100;
-            document.getElementById('subFill').style.width = dailyProgress + '%';
-            document.getElementById('subPercent').innerText = `오늘의 목표: ${dailyProgress.toFixed(1)}% 달성`;
-
-            const survivors = Math.max(1, Math.round(1000 * Math.exp(-0.04 * days)));
-            document.getElementById('survivors').innerText = survivors.toLocaleString();
-            document.getElementById('myRank').innerText = survivors.toLocaleString();
-
-            updateChart(days, survivors);
-            if(currentTabName !== 'community') updateRoadmap(days); 
-        }, 1000);
-    };
-
-    // 2. 단주 도전 시작 (서브컬렉션에 새로운 문서를 생성합니다)
-    window.saveDate = async function() {
-        if (!userId) return alert("로그인이 필요합니다.");
-        const input = document.getElementById('dateTimeInput').value;
-        if (!input) return alert("일시를 선택해 주세요.");
-        userQuitDate = input; 
-        
-        try {
-            // 새 도전 기록 생성
-            const newChallenge = {
-                startDate: input,
-                endDate: null,
-                status: "active",
-                cravings: [],
-                createdAt: new Date().getTime()
-            };
-            
-            const docRef = await addDoc(collection(db, "users", userId, "challenges"), newChallenge);
-            currentChallengeId = docRef.id;
-            cravingData = [];
-            document.getElementById('cravingCount').innerText = 0;
-            
-            startApp(input);
-        } catch (e) { alert("연동 에러: " + e.message); }
-    };
-
-    // 3. 고비 기록 (현재 활성화된 도전 ID 하위에 저장)
-    window.submitCraving = async function() {
-        if (!userId || !currentChallengeId) return;
-        
-        const strength = document.getElementById('cravingRange').value;
-        const reason = document.getElementById('cravingReason').value;
-        const fatigue = document.getElementById('fatigueRange').value;
-        const stress = document.getElementById('stressRange').value;
-        const sleep = document.getElementById('sleepRange').value;
-        const hunger = document.getElementById('hungerRange').value;
-
-        const entry = {
-            date: new Date().toLocaleString('ko-KR', {month:'short', day:'numeric', hour:'numeric'}),
-            strength: parseInt(strength),
-            reason: reason === '기타' ? document.getElementById('etcReason').value : reason,
-            fatigue: parseInt(fatigue),
-            stress: parseInt(stress),
-            sleep: parseInt(sleep),
-            hunger: parseInt(hunger),
-            timestamp: new Date().getTime()
-        };
-
-        try {
-            const challengeRef = doc(db, "users", userId, "challenges", currentChallengeId);
-            await updateDoc(challengeRef, { cravings: arrayUnion(entry) });
-            
-            cravingData.push(entry);
-            document.getElementById('cravingCount').innerText = cravingData.length;
-            closeModal('cravingModal');
-            alert("고비를 잘 넘기셨습니다!");
-        } catch (e) { alert("저장 실패: " + e.message); }
-    };
-
     function renderChangeCards(tabName) {
         let activeStages = physicalStages;
         if(tabName === 'liver') activeStages = liverStages;
@@ -762,7 +665,7 @@
         mainChart.update('none');
     }
 
-    // 통계 그래프를 렌더링하는 공통 함수
+    // 공통 차트 렌더링 함수
     function renderChart(canvasId, targetChart, dataArray) {
         const ctx = document.getElementById(canvasId).getContext('2d');
         if (targetChart) targetChart.destroy();
@@ -807,7 +710,98 @@
         }, 200);
     };
 
-    // 4. 금주 실패 처리 (기존 기록 보존 및 종료 처리 후 새 화면)
+    window.startApp = function(startISO) {
+        localStorage.setItem('quitDrinkingDateTime_server', startISO);
+        document.getElementById('setupArea').style.display = 'none';
+        document.getElementById('displayArea').style.display = 'block';
+        document.getElementById('displaySettingDate').innerText = new Date(startISO).toLocaleString('ko-KR');
+
+        initSurvivalChart();
+
+        if (timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            const start = new Date(startISO);
+            const now = new Date();
+            const diff = now - start;
+            if (diff < 0) return;
+
+            const days = diff / 86400000;
+            const hours = Math.floor((diff/3600000)%24);
+            const minutes = Math.floor((diff/60000)%60);
+            const seconds = Math.floor((diff/1000)%60);
+
+            document.getElementById('mainDays').innerText = Math.floor(days) + "일";
+            document.getElementById('subTime').innerText = `${hours}시간 ${minutes}분 ${seconds}초`;
+            
+            const dailyProgress = ((hours * 3600 + minutes * 60 + seconds) / 86400) * 100;
+            document.getElementById('subFill').style.width = dailyProgress + '%';
+            document.getElementById('subPercent').innerText = `오늘의 목표: ${dailyProgress.toFixed(1)}% 달성`;
+
+            const survivors = Math.max(1, Math.round(1000 * Math.exp(-0.04 * days)));
+            document.getElementById('survivors').innerText = survivors.toLocaleString();
+            document.getElementById('myRank').innerText = survivors.toLocaleString();
+
+            updateChart(days, survivors);
+            if(currentTabName !== 'community') updateRoadmap(days); 
+        }, 1000);
+    };
+
+    window.saveDate = async function() {
+        if (!userId) return alert("로그인이 필요합니다.");
+        const input = document.getElementById('dateTimeInput').value;
+        if (!input) return alert("일시를 선택해 주세요.");
+        userQuitDate = input; 
+        
+        try {
+            const newChallenge = {
+                startDate: input,
+                endDate: null,
+                status: "active",
+                cravings: [],
+                createdAt: new Date().getTime()
+            };
+            
+            const docRef = await addDoc(collection(db, "users", userId, "challenges"), newChallenge);
+            currentChallengeId = docRef.id;
+            cravingData = [];
+            document.getElementById('cravingCount').innerText = 0;
+            
+            startApp(input);
+        } catch (e) { alert("연동 에러: " + e.message); }
+    };
+
+    window.submitCraving = async function() {
+        if (!userId || !currentChallengeId) return;
+        
+        const strength = document.getElementById('cravingRange').value;
+        const reason = document.getElementById('cravingReason').value;
+        const fatigue = document.getElementById('fatigueRange').value;
+        const stress = document.getElementById('stressRange').value;
+        const sleep = document.getElementById('sleepRange').value;
+        const hunger = document.getElementById('hungerRange').value;
+
+        const entry = {
+            date: new Date().toLocaleString('ko-KR', {month:'short', day:'numeric', hour:'numeric'}),
+            strength: parseInt(strength),
+            reason: reason === '기타' ? document.getElementById('etcReason').value : reason,
+            fatigue: parseInt(fatigue),
+            stress: parseInt(stress),
+            sleep: parseInt(sleep),
+            hunger: parseInt(hunger),
+            timestamp: new Date().getTime()
+        };
+
+        try {
+            const challengeRef = doc(db, "users", userId, "challenges", currentChallengeId);
+            await updateDoc(challengeRef, { cravings: arrayUnion(entry) });
+            
+            cravingData.push(entry);
+            document.getElementById('cravingCount').innerText = cravingData.length;
+            closeModal('cravingModal');
+            alert("고비를 잘 넘기셨습니다!");
+        } catch (e) { alert("저장 실패: " + e.message); }
+    };
+
     window.resetDate = async function() {
         if (confirm("금주 실패를 기록하고, 새롭게 단주에 도전하시겠습니까?\n(과거의 도전 기록은 모두 보존됩니다.)")) {
             try { 
@@ -831,10 +825,13 @@
         }
     };
 
-    // 5. 과거 단주 기록 리스트 조회
     window.openHistoryList = async function() {
         if (!userId) return alert("로그인이 필요합니다.");
+        
+        // ★ 버그 수정: 상세 모달이 열려있다면 완전히 닫아줌 (검은 배경 중첩 방지)
+        closeModal('historyDetailModal');
         openModal('historyListModal');
+        
         const container = document.getElementById('historyListContainer');
         container.innerHTML = '<div style="text-align:center; padding:20px;">기록을 불러오는 중입니다...</div>';
 
@@ -854,7 +851,6 @@
                 const endStr = data.endDate ? new Date(data.endDate).toLocaleDateString('ko-KR') : '현재 진행 중';
                 const statusHtml = data.status === 'active' ? `<span class="history-status status-active">도전 중</span>` : `<span class="history-status status-failed">종료됨</span>`;
                 
-                // 지속 기간 계산
                 const start = new Date(data.startDate);
                 const end = data.endDate ? new Date(data.endDate) : new Date();
                 const diffDays = Math.max(0, Math.floor((end - start) / 86400000));
@@ -881,8 +877,8 @@
         }
     };
 
-    // 6. 과거 특정 단주 기록의 상세(고비 그래프) 보기
     window.openHistoryDetail = function(encodedData) {
+        // ★ 버그 수정: 리스트 모달을 숨김
         closeModal('historyListModal');
         openModal('historyDetailModal');
         
@@ -897,29 +893,24 @@
             if (cravCount === 0) {
                 document.getElementById('pastCravingHistoryChart').parentElement.innerHTML = '<div style="text-align:center; padding-top:100px; color:#999;">이 기간에 기록된 고비 데이터가 없습니다.</div><canvas id="pastCravingHistoryChart" style="display:none;"></canvas>';
             } else {
-                // 이전에 '데이터 없음' 처리된 요소를 캔버스로 원상복구
                 document.getElementById('pastCravingHistoryChart').parentElement.innerHTML = '<canvas id="pastCravingHistoryChart"></canvas>';
                 pastStatsChart = renderChart('pastCravingHistoryChart', pastStatsChart, data.cravings);
             }
         }, 200);
     };
 
-    /* ★ JS 함수: 슬라이더 값을 기반으로 실시간 색상(그라데이션 및 텍스트)을 계산합니다. */
     window.updateRangeStyle = function(el, textId) {
         const val = parseInt(el.value);
         const min = parseInt(el.min) || 1;
         const max = parseInt(el.max) || 10;
         const percent = ((val - min) / (max - min)) * 100;
         
-        // Hue 값 계산: 좌측 1(녹색=120)부터 우측 10(적색=0)까지 부드럽게 변환
         const hue = 120 - ((val - min) / (max - min)) * 120;
         const color = `hsl(${hue}, 85%, 45%)`; 
         
-        // CSS 변수 업데이트 (track 채워짐 효과 및 thumb 테두리 색상)
         el.style.setProperty('--range-color', color);
         el.style.setProperty('--range-percent', `${percent}%`);
         
-        // 숫자 텍스트 업데이트
         if (textId) {
             const textEl = document.getElementById(textId);
             if (textEl) {
@@ -931,7 +922,6 @@
 
     window.openModal = (id) => {
         document.getElementById(id).style.display = 'flex';
-        // 모달이 열릴 때 초기 값들에 대해서도 색상을 렌더링합니다.
         if (id === 'cravingModal') {
             updateRangeStyle(document.getElementById('cravingRange'), 'rangeVal');
             updateRangeStyle(document.getElementById('fatigueRange'), 'fatigueVal');
