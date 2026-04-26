@@ -190,7 +190,7 @@
 
         <div class="rank-info">
             <div class="rank-item">현재 1,000명 중 <span class="rank-number" id="survivors">1,000</span>명 생존</div>
-            <div class="rank-item">나의 현재 순위 : <span class="rank-number" id="myRank">1</span>위</div>
+            <div class="rank-item">나의 현재 순위 : <span class="rank-number" id="myRank">1</span>위 <span id="rankChange" style="font-size: 0.95rem; font-weight: 800; margin-left: 8px;"></span></div>
         </div>
 
         <div class="craving-section">
@@ -419,7 +419,6 @@
         return Math.floor(diff / 86400000) + 1;
     }
 
-    // 커뮤니티 게시판 작성 (본인 기록 저장)
     window.submitPost = async function() {
         if (!userId) return alert("로그인이 필요합니다.");
         const content = document.getElementById('postContent').value.trim();
@@ -438,7 +437,6 @@
         } catch (error) { alert("작성에 실패했습니다: " + error.message); }
     };
 
-    // 실시간 커뮤니티 로드 (수정, 삭제, 댓글 포함)
     window.loadPosts = function() {
         const q = query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(50));
         
@@ -737,9 +735,20 @@
             document.getElementById('subFill').style.width = dailyProgress + '%';
             document.getElementById('subPercent').innerText = `오늘의 목표: ${dailyProgress.toFixed(1)}% 달성`;
 
+            // ★ 추가: 순위 및 전날 대비 순위 상승 폭 계산
             const survivors = Math.max(1, Math.round(1000 * Math.exp(-0.04 * days)));
+            const yesterdaySurvivors = Math.max(1, Math.round(1000 * Math.exp(-0.04 * Math.max(0, days - 1))));
+            const rankUp = yesterdaySurvivors - survivors;
+
             document.getElementById('survivors').innerText = survivors.toLocaleString();
             document.getElementById('myRank').innerText = survivors.toLocaleString();
+
+            const rankChangeEl = document.getElementById('rankChange');
+            if (rankUp > 0) {
+                rankChangeEl.innerHTML = `<span style="color: var(--danger-color);">▲ ${rankUp.toLocaleString()}</span>`;
+            } else {
+                rankChangeEl.innerHTML = `<span style="color: #a0aec0;">-</span>`;
+            }
 
             updateChart(days, survivors);
             if(currentTabName !== 'community') updateRoadmap(days); 
