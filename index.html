@@ -58,7 +58,7 @@
         .craving-section { margin-top: 25px; padding: 20px; background: #fff9f0; border-radius: 20px; border: 1px dashed var(--warning-color); }
         .craving-btn { background-color: var(--warning-color); color: white; border: none; padding: 15px; border-radius: 14px; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 12px; font-size: 1rem; }
         .stat-btn { background-color: #fff; color: var(--warning-color); border: 2px solid var(--warning-color); padding: 10px; border-radius: 12px; font-size: 0.9rem; cursor: pointer; width: 100%; font-weight: bold; }
-        .chart-container { position: relative; height: 300px; width: 100%; margin: 10px 0 25px 0; }
+        .chart-container { position: relative; height: 250px; width: 100%; margin: 10px 0; }
         
         .tab-container { display: flex; justify-content: space-around; margin-top: 30px; border-bottom: 2px solid #e2e8f0; margin-bottom: 20px; }
         .tab-btn { padding: 8px 5px; border: none; background: none; font-size: 0.95rem; font-weight: 700; color: #718096; cursor: pointer; transition: all 0.3s; border-bottom: 3px solid transparent; margin-bottom: -2px; line-height: 1.3; }
@@ -146,6 +146,9 @@
 
         /* 푸터 스타일 */
         footer { margin-top: 30px; padding: 15px 0; text-align: center; font-size: 0.75rem; color: #9ca3af; border-top: 1px solid #e2e8f0; width: 100%; max-width: 550px; align-self: center; }
+
+        /* 차트 구분선 */
+        .chart-divider { border-top: 1px dashed #e2e8f0; margin: 20px 0; }
     </style>
 </head>
 <body>
@@ -203,6 +206,13 @@
 
         <div class="chart-container">
             <canvas id="survivalChart"></canvas>
+        </div>
+        
+        <div class="chart-divider"></div>
+
+        <div style="font-size: 0.9rem; font-weight: 700; color: #4a5568; margin-bottom: 5px; text-align: left; padding-left: 10px;">📊 전체 도전자 중 나의 위치 (상대 분포)</div>
+        <div class="chart-container" style="height: 180px;">
+            <canvas id="distributionChart"></canvas>
         </div>
 
         <div class="tab-container">
@@ -324,6 +334,7 @@
     let currentChallengeId = null; 
     let userQuitDate = null; 
     let mainChart = null;
+    let distChart = null; // ★ 정규 분포 차트 객체 추가
     let statsChart = null;
     let pastStatsChart = null;
     let cravingData = [];
@@ -644,6 +655,50 @@
         });
     }
 
+    // ★ 추가: 정규 분포 형태의 곡선 초기화 함수
+    function initDistributionChart() {
+        const ctx = document.getElementById('distributionChart').getContext('2d');
+        
+        // 간단한 로그 정규 분포 형태를 흉내낸 데이터 생성 (동기부여용 가상 데이터)
+        const distData = [];
+        for(let i = 0; i <= 100; i+=2) {
+            // 평균 약 15일, 우측으로 꼬리가 긴 형태
+            const y = (1 / (i + 5)) * Math.exp(-Math.pow(Math.log((i+1)/15), 2) / (2 * Math.pow(0.8, 2))) * 1000;
+            distData.push({x: i, y: y});
+        }
+
+        distChart = new Chart(ctx, {
+            type: 'line',
+            data: { 
+                datasets: [{ 
+                    label: '도전자 분포', 
+                    data: distData, 
+                    borderColor: '#9b59b6', 
+                    backgroundColor: 'rgba(155, 89, 182, 0.2)', 
+                    fill: true, 
+                    pointRadius: 0, 
+                    tension: 0.4 
+                }]
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                scales: { 
+                    x: { type: 'linear', min: 0, max: 100, title: { display:true, text:'금주 일수', font:{size:10} } }, 
+                    y: { display: false } // y축 숫자는 숨김 처리 (상대적 위치만 중요)
+                }, 
+                plugins: { 
+                    legend: { display: false }, 
+                    annotation: { 
+                        annotations: { 
+                            myPosition: { type: 'line', xMin: 0, xMax: 0, borderColor: '#e74c3c', borderWidth: 2, label: { display: true, content: '나의 위치', position: 'top', backgroundColor: '#e74c3c', font: { size: 10 } } }
+                        } 
+                    } 
+                } 
+            }
+        });
+    }
+
     function updateChart(days, survivors) {
         if (!mainChart) return;
         const past = []; const future = [];
@@ -661,9 +716,16 @@
         mainChart.options.plugins.annotation.annotations.line2.label.content = survivors.toLocaleString() + '명';
 
         mainChart.update('none');
+
+        // ★ 추가: 정규 분포 차트 상의 내 위치 업데이트
+        if (distChart) {
+            const displayDays = Math.min(days, 100); // 100일까지만 그래프 표시 제한
+            distChart.options.plugins.annotation.annotations.myPosition.xMin = displayDays;
+            distChart.options.plugins.annotation.annotations.myPosition.xMax = displayDays;
+            distChart.update('none');
+        }
     }
 
-    // 공통 차트 렌더링 함수
     function renderChart(canvasId, targetChart, dataArray) {
         const ctx = document.getElementById(canvasId).getContext('2d');
         if (targetChart) targetChart.destroy();
@@ -715,6 +777,7 @@
         document.getElementById('displaySettingDate').innerText = new Date(startISO).toLocaleString('ko-KR');
 
         initSurvivalChart();
+        initDistributionChart(); // ★ 추가: 정규 분포 차트 초기화
 
         if (timerInterval) clearInterval(timerInterval);
         timerInterval = setInterval(() => {
@@ -735,7 +798,6 @@
             document.getElementById('subFill').style.width = dailyProgress + '%';
             document.getElementById('subPercent').innerText = `오늘의 목표: ${dailyProgress.toFixed(1)}% 달성`;
 
-            // ★ 추가: 순위 및 전날 대비 순위 상승 폭 계산
             const survivors = Math.max(1, Math.round(1000 * Math.exp(-0.04 * days)));
             const yesterdaySurvivors = Math.max(1, Math.round(1000 * Math.exp(-0.04 * Math.max(0, days - 1))));
             const rankUp = yesterdaySurvivors - survivors;
@@ -837,7 +899,6 @@
     window.openHistoryList = async function() {
         if (!userId) return alert("로그인이 필요합니다.");
         
-        // ★ 버그 수정: 상세 모달이 열려있다면 완전히 닫아줌 (검은 배경 중첩 방지)
         closeModal('historyDetailModal');
         openModal('historyListModal');
         
@@ -887,7 +948,6 @@
     };
 
     window.openHistoryDetail = function(encodedData) {
-        // ★ 버그 수정: 리스트 모달을 숨김
         closeModal('historyListModal');
         openModal('historyDetailModal');
         
