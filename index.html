@@ -93,18 +93,18 @@
         .change-card.active .progress-fill { background: linear-gradient(90deg, #2ecc71, #27ae60); }
         .change-card.active .progress-text { color: #fff; }
 
-        /* 모달 등 */
+        /* 모달 등 - 패딩 및 여백 축소 */
         .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; backdrop-filter: blur(4px); }
-        .modal-content { background: white; padding: 30px 25px; border-radius: 24px; width: 88%; max-width: 400px; max-height: 90vh; overflow-y: auto; text-align: left; position: relative; box-sizing: border-box; }
+        .modal-content { background: white; padding: 20px; border-radius: 24px; width: 88%; max-width: 400px; max-height: 90vh; overflow-y: auto; text-align: left; position: relative; box-sizing: border-box; }
         
-        .close-btn-top { position: absolute; top: 25px; right: 25px; font-size: 1.8rem; color: #cbd5e0; background: none; border: none; cursor: pointer; line-height: 1; transition: color 0.2s ease; padding: 0; }
+        .close-btn-top { position: absolute; top: 18px; right: 20px; font-size: 1.8rem; color: #cbd5e0; background: none; border: none; cursor: pointer; line-height: 1; transition: color 0.2s ease; padding: 0; }
         .close-btn-top:hover { color: var(--danger-color); }
 
         .reset-btn { background-color: transparent; color: #e74c3c; margin-top: 10px; border: none; text-decoration: underline; cursor: pointer; font-size: 0.85rem; width: 100%; font-weight: bold; }
         .highlight { color: var(--primary-color); font-weight: 700; }
-        textarea, select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; margin-top: 10px; font-family: inherit; }
+        textarea, select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; margin-top: 8px; font-family: inherit; }
 
-        /* 동적 색상 변경 커스텀 프로그레스 바 스타일 */
+        /* 동적 색상 변경 커스텀 프로그레스 바 스타일 - 여백 축소 */
         .dynamic-range {
             -webkit-appearance: none;
             width: 100%;
@@ -112,7 +112,7 @@
             border-radius: 4px;
             background: linear-gradient(to right, var(--range-color, #f39c12) 0%, var(--range-color, #f39c12) var(--range-percent, 50%), #e2e8f0 var(--range-percent, 50%), #e2e8f0 100%);
             outline: none;
-            margin: 15px 0;
+            margin: 10px 0;
             transition: background 0.1s ease;
         }
         .dynamic-range::-webkit-slider-thumb {
@@ -279,12 +279,12 @@
     <div class="modal-content">
         <button class="close-btn-top" onclick="closeModal('cravingModal')">&times;</button>
         
-        <h3 style="margin-top:0; padding-right: 20px;">고비 기록하기</h3>
+        <h3 style="margin-top:0; margin-bottom: 12px; padding-right: 20px;">고비 기록하기</h3>
         
         <label style="font-weight:700; font-size:0.9rem;">갈망 강도 (<span id="rangeVal" style="font-weight: 800;">5</span>/10)</label>
         <input type="range" id="cravingRange" min="1" max="10" value="5" class="dynamic-range" oninput="updateRangeStyle(this, 'rangeVal')">
         
-        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:15px;">갈망의 원인</label>
+        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:10px;">갈망의 원인</label>
         <select id="cravingReason" onchange="toggleEtc(this.value)">
             <option value="스트레스">업무 및 일상 스트레스</option>
             <option value="회식/모임">회식 또는 사교 모임</option>
@@ -295,19 +295,19 @@
         </select>
         <textarea id="etcReason" style="display:none;" placeholder="구체적인 사유를 적어주세요"></textarea>
 
-        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:25px;">육체피로 정도 (<span id="fatigueVal" style="font-weight: 800;">5</span>/10)</label>
+        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px;">육체피로 정도 (<span id="fatigueVal" style="font-weight: 800;">5</span>/10)</label>
         <input type="range" id="fatigueRange" min="1" max="10" value="5" class="dynamic-range" oninput="updateRangeStyle(this, 'fatigueVal')">
 
-        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:15px;">정신적 스트레스 정도 (<span id="stressVal" style="font-weight: 800;">5</span>/10)</label>
+        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px;">정신적 스트레스 정도 (<span id="stressVal" style="font-weight: 800;">5</span>/10)</label>
         <input type="range" id="stressRange" min="1" max="10" value="5" class="dynamic-range" oninput="updateRangeStyle(this, 'stressVal')">
 
-        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:15px;">수면 상태 (<span id="sleepVal" style="font-weight: 800;">5</span>/10) <br><span style="font-size:0.75rem; color:#999; font-weight:normal;">1: 충분함 ~ 10: 최고로 부족함</span></label>
+        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px;">수면 상태 (<span id="sleepVal" style="font-weight: 800;">5</span>/10) <br><span style="font-size:0.75rem; color:#999; font-weight:normal;">1: 충분함 ~ 10: 최고로 부족함</span></label>
         <input type="range" id="sleepRange" min="1" max="10" value="5" class="dynamic-range" oninput="updateRangeStyle(this, 'sleepVal')">
 
-        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:15px;">배고픔 정도 (<span id="hungerVal" style="font-weight: 800;">5</span>/10) <br><span style="font-size:0.75rem; color:#999; font-weight:normal;">1: 충분함 ~ 10: 너무 배고픔</span></label>
+        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px;">배고픔 정도 (<span id="hungerVal" style="font-weight: 800;">5</span>/10) <br><span style="font-size:0.75rem; color:#999; font-weight:normal;">1: 충분함 ~ 10: 너무 배고픔</span></label>
         <input type="range" id="hungerRange" min="1" max="10" value="5" class="dynamic-range" oninput="updateRangeStyle(this, 'hungerVal')">
 
-        <button class="start-btn" style="margin-top:25px; width:100%;" onclick="submitCraving()">이 고비 기록하고 참기</button>
+        <button class="start-btn" style="margin-top:15px; width:100%; padding: 14px; font-size: 1.1rem;" onclick="submitCraving()">이 고비 기록하고 참기</button>
     </div>
 </div>
 
@@ -822,7 +822,6 @@
             document.getElementById('mainDays').innerText = Math.floor(days) + "일";
             document.getElementById('subTime').innerText = `${hours}시간 ${minutes}분 ${seconds}초`;
             
-            // ★ 오늘 하루 00:00 ~ 24:00 기준 진행도로 변경 (기존 상대 시간 계산 제거)
             const nowH = now.getHours();
             const nowM = now.getMinutes();
             const nowS = now.getSeconds();
