@@ -190,7 +190,7 @@
             <button class="logout-btn" onclick="logout()">로그아웃</button>
         </div>
 
-        <!-- 동기 부여 누적 데이터 섹션 (새로 추가됨) -->
+        <!-- 동기 부여 누적 데이터 섹션 -->
         <div id="motivationalSummary" style="display: none; width: 100%; margin-bottom: 25px;"></div>
 
         <p><span class="highlight">1,000명의 도전자</span>와 함께하는 레이스!<br>마지막으로 술을 드신 일시를 선택해 주세요.</p>
@@ -423,7 +423,7 @@
         }
     });
 
-    // 동기부여 리포트 생성 함수 (새로 추가)
+    // 동기부여 리포트 생성 함수
     async function loadMotivationalStats() {
         if (!userId) return;
         try {
@@ -728,6 +728,7 @@
     }
 
     function initSurvivalChart() {
+        if (mainChart) mainChart.destroy(); // 기존 차트 초기화 추가
         const ctx = document.getElementById('survivalChart').getContext('2d');
         mainChart = new Chart(ctx, {
             type: 'line',
@@ -752,6 +753,7 @@
     }
 
     function initDistributionChart() {
+        if (distChart) distChart.destroy(); // 기존 차트 초기화 추가
         const ctx = document.getElementById('distributionChart').getContext('2d');
         
         const distData = [];
