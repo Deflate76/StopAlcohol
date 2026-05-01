@@ -928,6 +928,33 @@
         }
     };
 
+    window.deleteHistory = async function(event, historyDocId) {
+        event.stopPropagation(); // 모달 띄우기 방지
+        if (confirm("정말 이 단주 기록을 완전히 삭제하시겠습니까?\n(삭제된 데이터는 복구할 수 없습니다)")) {
+            try {
+                await deleteDoc(doc(db, "users", userId, "challenges", historyDocId));
+                
+                // 만약 삭제한 기록이 현재 진행 중인 기록이라면 UI도 초기화합니다.
+                if (historyDocId === currentChallengeId) {
+                    localStorage.removeItem('quitDrinkingDateTime_server');
+                    currentChallengeId = null;
+                    cravingData = [];
+                    userQuitDate = null;
+                    if (timerInterval) clearInterval(timerInterval);
+                    document.getElementById('setupArea').style.display = 'flex';
+                    document.getElementById('displayArea').style.display = 'none';
+                    closeModal('historyListModal');
+                } else {
+                    // 과거 기록이라면 리스트만 새로고침
+                    openHistoryList(); 
+                }
+            } catch(e) {
+                console.error("기록 삭제 에러:", e);
+                alert("삭제 실패: " + e.message);
+            }
+        }
+    };
+
     window.openHistoryList = async function() {
         if (!userId) return alert("로그인이 필요합니다.");
         
@@ -948,6 +975,7 @@
 
             container.innerHTML = '';
             snapshot.forEach((docSnap) => {
+                const historyDocId = docSnap.id;
                 const data = docSnap.data();
                 const startStr = new Date(data.startDate).toLocaleDateString('ko-KR');
                 const endStr = data.endDate ? new Date(data.endDate).toLocaleDateString('ko-KR') : '현재 진행 중';
@@ -963,8 +991,11 @@
                 const itemHtml = `
                     <div class="history-item" onclick="openHistoryDetail('${encodedData}')">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <strong style="color:var(--text-dark);">${startStr} ~ ${data.status === 'active' ? '' : endStr}</strong>
-                            ${statusHtml}
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <strong style="color:var(--text-dark);">${startStr} ~ ${data.status === 'active' ? '' : endStr}</strong>
+                                ${statusHtml}
+                            </div>
+                            <button class="action-btn" style="color:var(--danger-color); font-size:1.3rem; padding:0; line-height:1;" onclick="deleteHistory(event, '${historyDocId}')" title="삭제">&times;</button>
                         </div>
                         <div style="font-size:0.85rem; color:#666;">
                             지속 기간: <b>${diffDays}일</b> | 넘긴 고비: <b>${cravCount}회</b>
