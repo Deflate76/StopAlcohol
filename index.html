@@ -756,84 +756,97 @@
         }
     };
 
-    window.openHistoryList = async function() {
-        if (!userId) return alert("로그인이 필요합니다.");
-        
-        closeModal('historyDetailModal');
-        openModal('historyListModal');
-        
-        const container = document.getElementById('historyListContainer');
-        container.innerHTML = '<div style="text-align:center; padding:20px;">기록을 불러오는 중입니다...</div>';
+  window.openHistoryList = async function() {
+    if (!userId) return alert("로그인이 필요합니다.");
+    
+    closeModal('historyDetailModal');
+    openModal('historyListModal');
+    
+    const container = document.getElementById('historyListContainer');
+    container.innerHTML = '<div style="text-align:center; padding:20px;">기록을 불러오는 중입니다...</div>';
 
-        try {
-            const q = query(collection(db, "users", userId, "challenges"), orderBy("createdAt", "desc"));
-            const snapshot = await getDocs(q);
+    try {
+        const q = query(collection(db, "users", userId, "challenges"), orderBy("createdAt", "desc"));
+        const snapshot = await getDocs(q);
+        
+        if (snapshot.empty) {
+            container.innerHTML = '<div style="text-align:center; padding:20px; color:#666;">아직 생성된 단주 도전 기록이 없습니다.</div>';
+            return;
+        }
+
+        container.innerHTML = '';
+        const docs = snapshot.docs;
+
+        for (let i = 0; i < docs.length; i++) {
+            const data = docs[i].data();
+            const historyDocId = docs[i].id;
             
-            if (snapshot.empty) {
-                container.innerHTML = '<div style="text-align:center; padding:20px; color:#666;">아직 생성된 단주 도전 기록이 없습니다.</div>';
-                return;
-            }
+            const startStr = new Date(data.startDate).toLocaleDateString('ko-KR');
+            const endStr = data.endDate ? new Date(data.endDate).toLocaleDateString('ko-KR') : '현재 진행 중';
+            const statusHtml = data.status === 'active' ? `<span class="history-status status-active">도전 중</span>` : `<span class="history-status status-failed">종료됨</span>`;
+            
+            const start = new Date(data.startDate);
+            const end = data.endDate ? new Date(data.endDate) : new Date();
+            const diffDays = Math.max(0, Math.floor((end - start) / 86400000));
+            
+            const cravCount = data.cravings ? data.cravings.length : 0;
+            const encodedData = encodeURIComponent(JSON.stringify(data));
 
-            container.innerHTML = '';
-            const docs = snapshot.docs;
-
-            for (let i = 0; i < docs.length; i++) {
-                const data = docs[i].data();
-                const historyDocId = docs[i].id;
-                
-                const startStr = new Date(data.startDate).toLocaleDateString('ko-KR');
-                const endStr = data.endDate ? new Date(data.endDate).toLocaleDateString('ko-KR') : '현재 진행 중';
-                const statusHtml = data.status === 'active' ? `<span class="history-status status-active">도전 중</span>` : `<span class="history-status status-failed">종료됨</span>`;
-                
-                const start = new Date(data.startDate);
-                const end = data.endDate ? new Date(data.endDate) : new Date();
-                const diffDays = Math.max(0, Math.floor((end - start) / 86400000));
-                
-                const cravCount = data.cravings ? data.cravings.length : 0;
-                const encodedData = encodeURIComponent(JSON.stringify(data));
-
-                const itemHtml = `
-                    <div class="history-item" onclick="openHistoryDetail('${encodedData}')">
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <div style="display:flex; align-items:center; gap:8px;">
-                                <strong style="color:var(--text-dark);">${startStr} ~ ${data.status === 'active' ? '' : endStr}</strong>
-                                ${statusHtml}
-                            </div>
-                            <button class="action-btn" style="color:var(--danger-color); font-size:1.3rem; padding:0; line-height:1;" onclick="deleteHistory(event, '${historyDocId}')" title="삭제">&times;</button>
+            const itemHtml = `
+                <div class="history-item" onclick="openHistoryDetail('${encodedData}')">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <strong style="color:var(--text-dark);">${startStr} ~ ${data.status === 'active' ? '' : endStr}</strong>
+                            ${statusHtml}
                         </div>
-                        <div style="font-size:0.85rem; color:#666;">
-                            지속 기간: <b>${diffDays}일</b> | 넘긴 고비: <b>${cravCount}회</b>
-                        </div>
+                        <button class="action-btn" style="color:var(--danger-color); font-size:1.3rem; padding:0; line-height:1;" onclick="deleteHistory(event, '${historyDocId}')" title="삭제">&times;</button>
                     </div>
-                `;
-                container.insertAdjacentHTML('beforeend', itemHtml);
+                    <div style="font-size:0.85rem; color:#666;">
+                        지속 기간: <b>${diffDays}일</b> | 넘긴 고비: <b>${cravCount}회</b>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', itemHtml);
 
-                if (i < docs.length - 1) {
-                    const prevData = docs[i + 1].data();
+            // ▼▼▼ 공백(음주 및 재정비) 기간 정밀 계산 추가 ▼▼▼
+            if (i < docs.length - 1) {
+                const prevData = docs[i + 1].data();
+                
+                if (prevData.endDate) {
+                    const prevEnd = new Date(prevData.endDate);
+                    const currStart = new Date(data.startDate);
                     
-                    if (prevData.endDate) {
-                        const prevEnd = new Date(prevData.endDate);
-                        const currStart = new Date(data.startDate);
-                        
-                        const gapMs = currStart.getTime() - prevEnd.getTime();
-                        const gapDays = Math.floor(gapMs / 86400000);
+                    // 이전 도전 종료 시점부터 현재 도전 시작 시점까지의 밀리초 차이
+                    const gapMs = currStart.getTime() - prevEnd.getTime();
 
-                        if (gapDays > 0) {
-                            const gapHtml = `
-                                <div class="history-gap">
-                                    <span class="gap-days">${gapDays}일</span> 동안의 재정비 및 음주 기간
-                                </div>
-                            `;
-                            container.insertAdjacentHTML('beforeend', gapHtml);
-                        }
+                    if (gapMs > 0) {
+                        const gapDays = Math.floor(gapMs / (1000 * 60 * 60 * 24));
+                        const gapHours = Math.floor((gapMs / (1000 * 60 * 60)) % 24);
+                        const gapMinutes = Math.floor((gapMs / 1000 / 60) % 60);
+
+                        let gapText = [];
+                        if (gapDays > 0) gapText.push(`${gapDays}일`);
+                        if (gapHours > 0) gapText.push(`${gapHours}시간`);
+                        if (gapMinutes > 0) gapText.push(`${gapMinutes}분`);
+
+                        if (gapText.length === 0) gapText.push("1분 미만");
+
+                        const gapHtml = `
+                            <div class="history-gap">
+                                <span class="gap-days">${gapText.join(' ')}</span> 간의 음주 및 재정비 기간
+                            </div>
+                        `;
+                        container.insertAdjacentHTML('beforeend', gapHtml);
                     }
                 }
             }
-        } catch (e) {
-            container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--danger-color);">기록을 불러오는데 실패했습니다.</div>';
-            console.error(e);
+            // ▲▲▲ 추가 로직 끝 ▲▲▲
         }
-    };
+    } catch (e) {
+        container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--danger-color);">기록을 불러오는데 실패했습니다.</div>';
+        console.error(e);
+    }
+};
 
     window.openHistoryDetail = function(encodedData) {
         closeModal('historyListModal');
