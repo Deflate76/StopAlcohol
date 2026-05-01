@@ -230,11 +230,6 @@
         <!-- 동기 부여 누적 데이터 섹션 (타이머 아래, 진행 중일 때) -->
         <div id="activeMotivationalSummary" style="display: none; width: 100%; margin-bottom: 15px;"></div>
 
-        <div class="rank-info">
-            <div class="rank-item">현재 1,000명 중 <span class="rank-number" id="survivors">1,000</span>명 생존</div>
-            <div class="rank-item">나의 현재 순위 : <span class="rank-number" id="myRank">1</span>위 <span id="rankChange" style="font-size: 0.95rem; font-weight: 800; margin-left: 8px;"></span></div>
-        </div>
-
         <div class="craving-section">
             <button class="craving-btn" onclick="openModal('cravingModal')">🔥 지금 고비가 왔어요!</button>
             <div style="display: flex; gap: 8px;">
@@ -247,6 +242,11 @@
             <canvas id="survivalChart"></canvas>
         </div>
         
+        <div class="rank-info">
+            <div class="rank-item">현재 1,000명 중 <span class="rank-number" id="survivors">1,000</span>명 생존</div>
+            <div class="rank-item">나의 현재 순위 : <span class="rank-number" id="myRank">1</span>위 <span id="rankChange" style="font-size: 0.95rem; font-weight: 800; margin-left: 8px;"></span></div>
+        </div>
+
         <div class="chart-divider"></div>
 
         <div style="font-size: 0.9rem; font-weight: 700; color: #4a5568; margin-bottom: 5px; text-align: left; padding-left: 10px;">📊 전체 도전자 중 나의 위치 (상대 분포)</div>
@@ -380,6 +380,7 @@
     let timerInterval = null;
     let currentTabName = 'physical';
     let unsubscribePosts = null; 
+    let totalPastDays = 0; // 누적 일수 계산용 변수 추가
 
     window.onload = function() {
         renderChangeCards(currentTabName);
@@ -443,6 +444,7 @@
             let maxDays = 0;
             let totalCravings = 0;
             let challengeCount = 0;
+            totalPastDays = 0; // 초기화
 
             snapshot.forEach(docSnap => {
                 const data = docSnap.data();
@@ -451,6 +453,12 @@
                 const diffDays = Math.max(0, Math.floor((end - start) / 86400000));
                 
                 totalDays += diffDays;
+                
+                // 진행 중인 도전을 제외한 '과거'의 순수 누적 일수만 저장
+                if (docSnap.id !== currentChallengeId) {
+                    totalPastDays += diffDays;
+                }
+
                 if (diffDays > maxDays) maxDays = diffDays;
                 if (data.cravings) totalCravings += data.cravings.length;
                 challengeCount++;
@@ -896,7 +904,11 @@
             const minutes = Math.floor((diff/60000)%60);
             const seconds = Math.floor((diff/1000)%60);
 
-            document.getElementById('mainDays').innerText = Math.floor(days) + "일";
+            // 누적 일수 실시간 렌더링 추가
+            const currentDays = Math.floor(days);
+            const totalCumul = totalPastDays + currentDays;
+            document.getElementById('mainDays').innerHTML = `${currentDays}일 <span style="font-size: 1.1rem; color: #a0aec0; font-weight: 700; margin-left: 5px;">(누적 ${totalCumul}일)</span>`;
+            
             document.getElementById('subTime').innerText = `${hours}시간 ${minutes}분 ${seconds}초`;
             
             const nowH = now.getHours();
