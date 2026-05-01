@@ -116,7 +116,7 @@
         .highlight { color: var(--primary-color); font-weight: 700; }
         textarea, select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; margin-top: 8px; font-family: inherit; }
 
-        /* 동적 색상 변경 커스텀 프로그레스 바 스타일 - 여백 축소 */
+        /* 동적 색상 변경 커스텀 프로그레스 바 스타일 */
         .dynamic-range {
             -webkit-appearance: none;
             width: 100%;
@@ -172,7 +172,7 @@
         /* 히스토리 리스트 항목 스타일 */
         .history-item { background: #f8f9fa; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; margin-bottom: 10px; cursor: pointer; transition: background 0.2s; display: flex; flex-direction: column; gap: 5px; position: relative; }
         .history-item:hover { background: #edf2f7; border-color: #cbd5e0; }
-        .history-status { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; }
+        .history-status { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; vertical-align: middle; }
         .status-active { background: #e3f2fd; color: #1976d2; }
         .status-failed { background: #ffe3e3; color: #e74c3c; }
 
@@ -222,7 +222,7 @@
         <p><span class="highlight">1,000명의 도전자</span>와 함께하는 레이스!<br>마지막으로 술을 드신 일시를 선택해 주세요.</p>
         <input type="datetime-local" id="dateTimeInput">
         
-        <!-- 시작 사유 입력칸 추가 -->
+        <!-- 시작 사유 입력칸 -->
         <input type="text" id="startReasonInput" class="reason-input" placeholder="이번에 단주를 결심한 사유/각오 (선택)">
         
         <button class="start-btn" onclick="saveDate()">새로운 도전 시작하기</button>
@@ -374,6 +374,17 @@
     </div>
 </div>
 
+<!-- 시작 시간 수정 모달 -->
+<div id="editTimeModal" class="modal">
+    <div class="modal-content">
+        <button class="close-btn-top" onclick="closeModal('editTimeModal')">&times;</button>
+        <h3 style="margin-top:0; padding-right: 20px;">시작 시간 재설정</h3>
+        <p style="font-size: 0.9rem; color: #666;">도전 시작 시간을 다시 설정합니다.</p>
+        <input type="datetime-local" id="editDateTimeInput" class="reason-input" style="margin-bottom: 15px;">
+        <button class="start-btn" style="width:100%; padding: 14px; font-size: 1.1rem;" onclick="saveEditedTime()">수정된 시간 저장</button>
+    </div>
+</div>
+
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
     import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, deleteDoc, collection, addDoc, query, orderBy, limit, onSnapshot, getDocs, where } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
@@ -411,6 +422,9 @@
     let currentTabName = 'physical';
     let unsubscribePosts = null; 
     let totalPastDays = 0;
+    
+    // 시간 수정을 위한 변수 추가
+    let editingChallengeId = null;
 
     window.onload = function() {
         renderChangeCards(currentTabName);
@@ -761,101 +775,147 @@
         }
     };
 
-  window.openHistoryList = async function() {
-    if (!userId) return alert("로그인이 필요합니다.");
-    
-    closeModal('historyDetailModal');
-    openModal('historyListModal');
-    
-    const container = document.getElementById('historyListContainer');
-    container.innerHTML = '<div style="text-align:center; padding:20px;">기록을 불러오는 중입니다...</div>';
-
-    try {
-        const q = query(collection(db, "users", userId, "challenges"), orderBy("createdAt", "desc"));
-        const snapshot = await getDocs(q);
+    // ★ 추가: 시간 수정 모달 열기 함수
+    window.openEditTimeModal = function(event, historyDocId, currentStartDate) {
+        event.stopPropagation();
+        editingChallengeId = historyDocId;
         
-        if (snapshot.empty) {
-            container.innerHTML = '<div style="text-align:center; padding:20px; color:#666;">아직 생성된 단주 도전 기록이 없습니다.</div>';
-            return;
+        // datetime-local 형식(YYYY-MM-DDTHH:mm)으로 변환
+        const d = new Date(currentStartDate);
+        d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+        document.getElementById('editDateTimeInput').value = d.toISOString().slice(0, 16);
+        
+        openModal('editTimeModal');
+    };
+
+    // ★ 추가: 수정된 시간 저장 함수
+    window.saveEditedTime = async function() {
+        if (!userId || !editingChallengeId) return;
+        
+        const newDate = document.getElementById('editDateTimeInput').value;
+        if (!newDate) return alert("일시를 선택해 주세요.");
+
+        try {
+            const challengeRef = doc(db, "users", userId, "challenges", editingChallengeId);
+            await updateDoc(challengeRef, {
+                startDate: newDate
+            });
+
+            // 현재 진행중인 도전의 시간을 바꿨다면 타이머도 업데이트
+            if (editingChallengeId === currentChallengeId) {
+                userQuitDate = newDate;
+                startApp(newDate); 
+            }
+            
+            alert("시작 시간이 성공적으로 수정되었습니다.");
+            closeModal('editTimeModal');
+            openHistoryList(); // 리스트 새로고침
+            loadMotivationalStats();
+        } catch (e) {
+            console.error("시간 수정 에러:", e);
+            alert("수정 실패: " + e.message);
         }
+    };
 
-        container.innerHTML = '';
-        const docs = snapshot.docs;
+    window.openHistoryList = async function() {
+        if (!userId) return alert("로그인이 필요합니다.");
+        
+        closeModal('historyDetailModal');
+        openModal('historyListModal');
+        
+        const container = document.getElementById('historyListContainer');
+        container.innerHTML = '<div style="text-align:center; padding:20px;">기록을 불러오는 중입니다...</div>';
 
-        for (let i = 0; i < docs.length; i++) {
-            const data = docs[i].data();
-            const historyDocId = docs[i].id;
+        try {
+            const q = query(collection(db, "users", userId, "challenges"), orderBy("createdAt", "desc"));
+            const snapshot = await getDocs(q);
             
-            const startStr = new Date(data.startDate).toLocaleDateString('ko-KR');
-            const endStr = data.endDate ? new Date(data.endDate).toLocaleDateString('ko-KR') : '현재 진행 중';
-            const statusHtml = data.status === 'active' ? `<span class="history-status status-active">도전 중</span>` : `<span class="history-status status-failed">종료됨</span>`;
-            
-            const start = new Date(data.startDate);
-            const end = data.endDate ? new Date(data.endDate) : new Date();
-            const diffDays = Math.max(0, Math.floor((end - start) / 86400000));
-            
-            const cravCount = data.cravings ? data.cravings.length : 0;
-            const encodedData = encodeURIComponent(JSON.stringify(data));
+            if (snapshot.empty) {
+                container.innerHTML = '<div style="text-align:center; padding:20px; color:#666;">아직 생성된 단주 도전 기록이 없습니다.</div>';
+                return;
+            }
 
-            // ★ 추가된 사유 표시 텍스트
-            const startReasonText = data.startReason ? `<div style="margin-top:6px; font-size:0.8rem; color:#2c3e50; text-align:left;">🌱 <b>시작 각오:</b> ${data.startReason}</div>` : '';
-            const failReasonText = data.failReason ? `<div style="margin-top:4px; font-size:0.8rem; color:#e74c3c; text-align:left;">🥀 <b>중단 사유:</b> ${data.failReason}</div>` : '';
+            container.innerHTML = '';
+            const docs = snapshot.docs;
 
-            const itemHtml = `
-                <div class="history-item" onclick="openHistoryDetail('${encodedData}')">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <div style="display:flex; align-items:center; gap:8px;">
-                            <strong style="color:var(--text-dark);">${startStr} ~ ${data.status === 'active' ? '' : endStr}</strong>
-                            ${statusHtml}
-                        </div>
-                        <button class="action-btn" style="color:var(--danger-color); font-size:1.3rem; padding:0; line-height:1;" onclick="deleteHistory(event, '${historyDocId}')" title="삭제">&times;</button>
-                    </div>
-                    <div style="font-size:0.85rem; color:#666;">
-                        지속 기간: <b>${diffDays}일</b> | 넘긴 고비: <b>${cravCount}회</b>
-                    </div>
-                    ${startReasonText}
-                    ${failReasonText}
-                </div>
-            `;
-            container.insertAdjacentHTML('beforeend', itemHtml);
-
-            // 공백(음주 및 재정비) 기간 정밀 계산
-            if (i < docs.length - 1) {
-                const prevData = docs[i + 1].data();
+            for (let i = 0; i < docs.length; i++) {
+                const data = docs[i].data();
+                const historyDocId = docs[i].id;
                 
-                if (prevData.endDate) {
-                    const prevEnd = new Date(prevData.endDate);
-                    const currStart = new Date(data.startDate);
-                    
-                    const gapMs = currStart.getTime() - prevEnd.getTime();
+                const startStr = new Date(data.startDate).toLocaleDateString('ko-KR', {
+                    year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
+                });
+                const endStr = data.endDate ? new Date(data.endDate).toLocaleDateString('ko-KR') : '';
+                
+                // ★ 수정: '도전 중' 상태일 때 톱니바퀴 아이콘 추가
+                const statusHtml = data.status === 'active' 
+                    ? `<span class="history-status status-active">도전 중</span><button class="action-btn" style="font-size:1.1rem; padding:0; margin-left:6px; vertical-align:middle;" onclick="openEditTimeModal(event, '${historyDocId}', '${data.startDate}')" title="시작 시간 수정">⚙️</button>` 
+                    : `<span class="history-status status-failed">종료됨</span>`;
+                
+                const start = new Date(data.startDate);
+                const end = data.endDate ? new Date(data.endDate) : new Date();
+                const diffDays = Math.max(0, Math.floor((end - start) / 86400000));
+                
+                const cravCount = data.cravings ? data.cravings.length : 0;
+                const encodedData = encodeURIComponent(JSON.stringify(data));
 
-                    if (gapMs > 0) {
-                        const gapDays = Math.floor(gapMs / (1000 * 60 * 60 * 24));
-                        const gapHours = Math.floor((gapMs / (1000 * 60 * 60)) % 24);
-                        const gapMinutes = Math.floor((gapMs / 1000 / 60) % 60);
+                const startReasonText = data.startReason ? `<div style="margin-top:6px; font-size:0.8rem; color:#2c3e50; text-align:left;">🌱 <b>시작 각오:</b> ${data.startReason}</div>` : '';
+                const failReasonText = data.failReason ? `<div style="margin-top:4px; font-size:0.8rem; color:#e74c3c; text-align:left;">🥀 <b>중단 사유:</b> ${data.failReason}</div>` : '';
 
-                        let gapText = [];
-                        if (gapDays > 0) gapText.push(`${gapDays}일`);
-                        if (gapHours > 0) gapText.push(`${gapHours}시간`);
-                        if (gapMinutes > 0) gapText.push(`${gapMinutes}분`);
-
-                        if (gapText.length === 0) gapText.push("1분 미만");
-
-                        const gapHtml = `
-                            <div class="history-gap">
-                                <span class="gap-days">${gapText.join(' ')}</span> 간의 음주 및 재정비 기간
+                const itemHtml = `
+                    <div class="history-item" onclick="openHistoryDetail('${encodedData}')">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <strong style="color:var(--text-dark); font-size:0.9rem;">${startStr} ${data.status === 'active' ? '' : '~ ' + endStr}</strong>
+                                ${statusHtml}
                             </div>
-                        `;
-                        container.insertAdjacentHTML('beforeend', gapHtml);
+                            <button class="action-btn" style="color:var(--danger-color); font-size:1.3rem; padding:0; line-height:1;" onclick="deleteHistory(event, '${historyDocId}')" title="삭제">&times;</button>
+                        </div>
+                        <div style="font-size:0.85rem; color:#666; text-align:left; margin-top:4px;">
+                            지속 기간: <b>${diffDays}일</b> | 넘긴 고비: <b>${cravCount}회</b>
+                        </div>
+                        ${startReasonText}
+                        ${failReasonText}
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', itemHtml);
+
+                if (i < docs.length - 1) {
+                    const prevData = docs[i + 1].data();
+                    
+                    if (prevData.endDate) {
+                        const prevEnd = new Date(prevData.endDate);
+                        const currStart = new Date(data.startDate);
+                        
+                        const gapMs = currStart.getTime() - prevEnd.getTime();
+
+                        if (gapMs > 0) {
+                            const gapDays = Math.floor(gapMs / (1000 * 60 * 60 * 24));
+                            const gapHours = Math.floor((gapMs / (1000 * 60 * 60)) % 24);
+                            const gapMinutes = Math.floor((gapMs / 1000 / 60) % 60);
+
+                            let gapText = [];
+                            if (gapDays > 0) gapText.push(`${gapDays}일`);
+                            if (gapHours > 0) gapText.push(`${gapHours}시간`);
+                            if (gapMinutes > 0) gapText.push(`${gapMinutes}분`);
+
+                            if (gapText.length === 0) gapText.push("1분 미만");
+
+                            const gapHtml = `
+                                <div class="history-gap">
+                                    <span class="gap-days">${gapText.join(' ')}</span> 간의 음주 및 재정비 기간
+                                </div>
+                            `;
+                            container.insertAdjacentHTML('beforeend', gapHtml);
+                        }
                     }
                 }
             }
+        } catch (e) {
+            container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--danger-color);">기록을 불러오는데 실패했습니다.</div>';
+            console.error(e);
         }
-    } catch (e) {
-        container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--danger-color);">기록을 불러오는데 실패했습니다.</div>';
-        console.error(e);
-    }
-};
+    };
 
     window.openHistoryDetail = function(encodedData) {
         closeModal('historyListModal');
@@ -867,7 +927,6 @@
         
         document.getElementById('historyDetailTitle').innerText = `${startStr} 도전 기록`;
         
-        // ★ 상세 모달에 사유 업데이트
         let summaryHtml = `총 <b>${cravCount}번</b>의 고비가 있었습니다.`;
         if (data.startReason) summaryHtml += `<br><span style="color:#2c3e50; font-size:0.8rem;">🌱 시작 각오: ${data.startReason}</span>`;
         if (data.failReason) summaryHtml += `<br><span style="color:#e74c3c; font-size:0.8rem;">🥀 중단 사유: ${data.failReason}</span>`;
@@ -1062,7 +1121,11 @@
         localStorage.setItem('quitDrinkingDateTime_server', startISO);
         document.getElementById('setupArea').style.display = 'none';
         document.getElementById('displayArea').style.display = 'block';
-        document.getElementById('displaySettingDate').innerText = new Date(startISO).toLocaleString('ko-KR');
+        
+        // 날짜 형식 예쁘게 처리
+        const d = new Date(startISO);
+        const dateString = `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일 ${d.getHours()}시 ${d.getMinutes()}분`;
+        document.getElementById('displaySettingDate').innerText = dateString;
 
         initSurvivalChart();
         initDistributionChart(); 
@@ -1119,7 +1182,6 @@
         if (!input) return alert("일시를 선택해 주세요.");
         userQuitDate = input; 
         
-        // ★ 추가: 시작 사유 가져오기
         const startReason = document.getElementById('startReasonInput').value.trim();
         
         try {
@@ -1128,7 +1190,7 @@
                 endDate: null,
                 status: "active",
                 cravings: [],
-                startReason: startReason, // ★ 추가: DB 저장
+                startReason: startReason,
                 createdAt: new Date().getTime()
             };
             
@@ -1137,7 +1199,7 @@
             cravingData = [];
             document.getElementById('cravingCount').innerText = 0;
             
-            document.getElementById('startReasonInput').value = ''; // 초기화
+            document.getElementById('startReasonInput').value = ''; 
             
             startApp(input);
             loadMotivationalStats();
@@ -1180,7 +1242,6 @@
 
     window.resetDate = async function() {
         if (confirm("금주 실패를 기록하고, 새롭게 단주에 도전하시겠습니까?\n(과거의 도전 기록은 모두 보존됩니다.)")) {
-            // ★ 추가: 중단 사유 입력받기
             const failReason = prompt("다음 도전을 위해 이번 단주 중단(실패) 사유를 기록해 주세요. (선택)") || "";
             
             try { 
@@ -1189,7 +1250,7 @@
                     await updateDoc(challengeRef, { 
                         status: 'failed', 
                         endDate: new Date().toISOString(),
-                        failReason: failReason.trim() // ★ 추가: DB 업데이트
+                        failReason: failReason.trim()
                     });
                 }
                 
