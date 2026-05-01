@@ -190,7 +190,7 @@
             <button class="logout-btn" onclick="logout()">로그아웃</button>
         </div>
 
-        <!-- 동기 부여 누적 데이터 섹션 -->
+        <!-- 동기 부여 누적 데이터 섹션 (새로 시작할 때) -->
         <div id="motivationalSummary" style="display: none; width: 100%; margin-bottom: 25px;"></div>
 
         <p><span class="highlight">1,000명의 도전자</span>와 함께하는 레이스!<br>마지막으로 술을 드신 일시를 선택해 주세요.</p>
@@ -226,6 +226,9 @@
                 <span class="sub-percent-text" id="subPercent" style="margin-top: 10px;">오늘 하루: 0.0% 경과</span>
             </div>
         </div>
+
+        <!-- 동기 부여 누적 데이터 섹션 (타이머 아래, 진행 중일 때) -->
+        <div id="activeMotivationalSummary" style="display: none; width: 100%; margin-bottom: 15px;"></div>
 
         <div class="rank-info">
             <div class="rank-item">현재 1,000명 중 <span class="rank-number" id="survivors">1,000</span>명 생존</div>
@@ -392,6 +395,9 @@
             document.querySelectorAll('.user-display-name').forEach(el => {
                 el.innerText = `${user.displayName || '도전자'}님 환영합니다!`;
             });
+            
+            // 로그인 완료 즉시 동기부여 데이터 로드 (setupArea, displayArea 양쪽 모두 채움)
+            loadMotivationalStats();
 
             try {
                 const q = query(collection(db, "users", userId, "challenges"), where("status", "==", "active"));
@@ -408,8 +414,6 @@
                     startApp(userQuitDate);
                 } else {
                     document.getElementById('setupArea').style.display = 'flex';
-                    // 진행 중인 도전이 없을 때 동기부여 데이터 로드
-                    loadMotivationalStats();
                 }
             } catch (e) { console.error("데이터 로드 에러:", e); }
         } else {
@@ -423,13 +427,17 @@
         }
     });
 
-    // 동기부여 리포트 생성 함수
+    // 동기부여 리포트 생성 및 양쪽 화면 렌더링 함수
     async function loadMotivationalStats() {
         if (!userId) return;
         try {
             const q = query(collection(db, "users", userId, "challenges"));
             const snapshot = await getDocs(q);
-            if (snapshot.empty) return;
+            if (snapshot.empty) {
+                document.getElementById('motivationalSummary').style.display = 'none';
+                document.getElementById('activeMotivationalSummary').style.display = 'none';
+                return;
+            }
 
             let totalDays = 0;
             let maxDays = 0;
@@ -449,14 +457,13 @@
             });
 
             if (challengeCount > 0 && totalDays > 0) {
-                const container = document.getElementById('motivationalSummary');
-                container.innerHTML = `
+                const htmlContent = `
                     <div style="background: linear-gradient(135deg, #f0f7ff, #ffffff); border: 1px solid #cbe3fa; border-radius: 18px; padding: 20px; text-align: left; box-shadow: 0 4px 10px rgba(52, 152, 219, 0.1);">
                         <h3 style="margin-top: 0; margin-bottom: 10px; color: var(--primary-color); font-size: 1.15rem; display: flex; align-items: center; gap: 8px;">
                             <span>🌱</span> 당신의 노력은 사라지지 않았습니다
                         </h3>
                         <p style="font-size: 0.85rem; color: #4a5568; line-height: 1.5; margin-bottom: 18px; word-break: keep-all;">
-                            비록 기록은 초기화되었지만, 지금까지 간과 뇌가 회복할 수 있도록 스스로에게 선물한 시간들은 고스란히 <b>단주 내공</b>으로 당신의 몸에 축적되어 있습니다.
+                            지금까지 간과 뇌가 회복할 수 있도록 스스로에게 선물한 시간들은 고스란히 <b>단주 내공</b>으로 당신의 몸에 축적되어 있습니다.
                         </p>
                         <div style="display: flex; gap: 10px; text-align: center;">
                             <div style="flex: 1; background: #fff; padding: 12px 5px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
@@ -474,9 +481,13 @@
                         </div>
                     </div>
                 `;
-                container.style.display = 'block';
+                document.getElementById('motivationalSummary').innerHTML = htmlContent;
+                document.getElementById('motivationalSummary').style.display = 'block';
+                document.getElementById('activeMotivationalSummary').innerHTML = htmlContent;
+                document.getElementById('activeMotivationalSummary').style.display = 'block';
             } else {
                 document.getElementById('motivationalSummary').style.display = 'none';
+                document.getElementById('activeMotivationalSummary').style.display = 'none';
             }
         } catch(e) { console.error(e); }
     }
@@ -936,6 +947,7 @@
             document.getElementById('cravingCount').innerText = 0;
             
             startApp(input);
+            loadMotivationalStats(); // 새 도전 시작 시 누적 데이터 갱신
         } catch (e) { alert("연동 에러: " + e.message); }
     };
 
@@ -968,6 +980,8 @@
             document.getElementById('cravingCount').innerText = cravingData.length;
             closeModal('cravingModal');
             alert("고비를 잘 넘기셨습니다!");
+            
+            loadMotivationalStats(); // 고비를 넘긴 후 데이터 갱신
         } catch (e) { alert("저장 실패: " + e.message); }
     };
 
@@ -991,8 +1005,7 @@
                 document.getElementById('displayArea').style.display = 'none';
                 if (timerInterval) clearInterval(timerInterval);
                 
-                // 리셋 후 동기부여 리포트 즉시 노출
-                loadMotivationalStats();
+                loadMotivationalStats(); // 실패 후 새 화면 전환 시 데이터 갱신
             } catch (e) { alert("재설정 실패: " + e.message); }
         }
     };
@@ -1017,6 +1030,7 @@
                     // 과거 기록이라면 리스트만 새로고침
                     openHistoryList(); 
                 }
+                loadMotivationalStats(); // 삭제 후 누적 데이터 갱신
             } catch(e) {
                 console.error("기록 삭제 에러:", e);
                 alert("삭제 실패: " + e.message);
