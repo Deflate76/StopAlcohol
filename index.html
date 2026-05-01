@@ -169,7 +169,31 @@
 
         /* 차트 구분선 */
         .chart-divider { border-top: 1px dashed #e2e8f0; margin: 20px 0; }
+
+        /* 도전 사이 공백(음주/휴식) 기간 스타일 */
+.history-gap {
+    position: relative;
+    margin: -5px 0 10px 30px;
+    padding: 8px 15px;
+    border-left: 2px dashed #cbd5e0;
+    color: #718096;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.history-gap::before {
+    content: '⚠️';
+    font-size: 0.9rem;
+}
+.gap-days {
+    font-weight: 800;
+    color: #ed8936; /* 오렌지색 강조 */
+}
     </style>
+
+
+    
 </head>
 <body>
 
@@ -1050,7 +1074,7 @@
         }
     };
 
-    window.openHistoryList = async function() {
+ window.openHistoryList = async function() {
         if (!userId) return alert("로그인이 필요합니다.");
         
         closeModal('historyDetailModal');
@@ -1069,9 +1093,13 @@
             }
 
             container.innerHTML = '';
-            snapshot.forEach((docSnap) => {
-                const historyDocId = docSnap.id;
-                const data = docSnap.data();
+            const docs = snapshot.docs; // 인덱스 접근을 위해 배열로 변환
+
+            for (let i = 0; i < docs.length; i++) {
+                const data = docs[i].data();
+                const historyDocId = docs[i].id;
+                
+                // --- 1. 단주 도전 항목 렌더링 ---
                 const startStr = new Date(data.startDate).toLocaleDateString('ko-KR');
                 const endStr = data.endDate ? new Date(data.endDate).toLocaleDateString('ko-KR') : '현재 진행 중';
                 const statusHtml = data.status === 'active' ? `<span class="history-status status-active">도전 중</span>` : `<span class="history-status status-failed">종료됨</span>`;
@@ -1098,7 +1126,32 @@
                     </div>
                 `;
                 container.insertAdjacentHTML('beforeend', itemHtml);
-            });
+
+                // --- 2. 과거 기록과의 공백(재정비/음주) 기간 렌더링 ---
+                // 현재 항목(i)이 마지막 항목이 아니라면, 다음 항목(i+1, 즉 더 과거의 기록)과의 간격을 계산
+                if (i < docs.length - 1) {
+                    const prevData = docs[i + 1].data();
+                    
+                    if (prevData.endDate) {
+                        const prevEnd = new Date(prevData.endDate);
+                        const currStart = new Date(data.startDate);
+                        
+                        // 현재 도전의 시작일 - 과거 도전의 종료일
+                        const gapMs = currStart.getTime() - prevEnd.getTime();
+                        const gapDays = Math.floor(gapMs / 86400000); // 일 단위로 변환
+
+                        // 간격이 1일 이상일 경우에만 표시
+                        if (gapDays > 0) {
+                            const gapHtml = `
+                                <div class="history-gap">
+                                    <span class="gap-days">${gapDays}일</span> 동안의 재정비 및 음주 기간
+                                </div>
+                            `;
+                            container.insertAdjacentHTML('beforeend', gapHtml);
+                        }
+                    }
+                }
+            }
         } catch (e) {
             container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--danger-color);">기록을 불러오는데 실패했습니다.</div>';
             console.error(e);
