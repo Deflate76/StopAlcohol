@@ -1,3 +1,9 @@
+<!--
+ * Copyright (c) 2026 Kim Jung-hoon (김정훈). All rights reserved.
+ * This project and its source code are the intellectual property of the author.
+ * Unauthorized copying, distribution, or modification is strictly prohibited.
+-->
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -49,20 +55,21 @@
         .time-unit { display: block; font-size: 3rem; font-weight: 800; color: var(--danger-color); line-height: 1.2; }
         #subTime { font-size: 1.2rem; font-weight: 600; color: #555; margin-top: 5px; }
         
+        /* 일일 진행도 (Sub Progress) 영역 */
         .sub-progress-container { width: 100%; max-width: 300px; margin: 12px auto 0; }
-        .sub-progress-bg { background: #ffe3e3; height: 10px; border-radius: 5px; overflow: hidden; position: relative; }
-        .sub-progress-fill { background: var(--danger-color); height: 100%; width: 0%; transition: width 1s linear; }
-        .sub-percent-text { font-size: 0.8rem; color: #e74c3c; font-weight: 700; display: block; }
+        .sub-progress-bg { background: #ffe3e3; height: 12px; border-radius: 6px; overflow: hidden; position: relative; margin-bottom: 6px; }
+        .sub-progress-fill { background: var(--danger-color); height: 100%; width: 0%; transition: width 1s linear; position: absolute; left: 0; top: 0; z-index: 1; }
         
-        /* 프로그레스 바 시간 눈금 스타일 */
+        /* 6, 12, 18시간 눈금자 (Tick Marks) */
         .tick-mark { 
             position: absolute; 
             top: 0; 
             width: 2px; 
             height: 100%; 
-            background-color: rgba(255, 255, 255, 0.75); 
+            background-color: rgba(255, 255, 255, 0.9); 
             z-index: 5; 
         }
+        .tick-label-container { position: relative; height: 16px; width: 100%; margin-top: 2px; }
         .tick-label { 
             position: absolute; 
             font-size: 0.7rem; 
@@ -71,7 +78,8 @@
             transform: translateX(-50%); 
             top: 0; 
         }
-
+        .sub-percent-text { font-size: 0.8rem; color: #e74c3c; font-weight: 700; display: block; margin-top: 10px; }
+        
         .rank-info { background: #e3f2fd; padding: 20px 15px; border-radius: 20px; margin: 15px 0; border: 1px solid #bbdefb; display: flex; flex-direction: column; gap: 10px; }
         .rank-item { display: flex; justify-content: center; align-items: baseline; gap: 6px; }
         .rank-number { font-size: 1.5rem; font-weight: 800; color: #1976d2; }
@@ -171,29 +179,20 @@
         .chart-divider { border-top: 1px dashed #e2e8f0; margin: 20px 0; }
 
         /* 도전 사이 공백(음주/휴식) 기간 스타일 */
-.history-gap {
-    position: relative;
-    margin: -5px 0 10px 30px;
-    padding: 8px 15px;
-    border-left: 2px dashed #cbd5e0;
-    color: #718096;
-    font-size: 0.8rem;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-.history-gap::before {
-    content: '⚠️';
-    font-size: 0.9rem;
-}
-.gap-days {
-    font-weight: 800;
-    color: #ed8936; /* 오렌지색 강조 */
-}
+        .history-gap {
+            position: relative;
+            margin: -5px 0 10px 30px;
+            padding: 8px 15px;
+            border-left: 2px dashed #cbd5e0;
+            color: #718096;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .history-gap::before { content: '⚠️'; font-size: 0.9rem; }
+        .gap-days { font-weight: 800; color: #ed8936; }
     </style>
-
-
-    
 </head>
 <body>
 
@@ -214,7 +213,6 @@
             <button class="logout-btn" onclick="logout()">로그아웃</button>
         </div>
 
-        <!-- 동기 부여 누적 데이터 섹션 (새로 시작할 때) -->
         <div id="motivationalSummary" style="display: none; width: 100%; margin-bottom: 25px;"></div>
 
         <p><span class="highlight">1,000명의 도전자</span>와 함께하는 레이스!<br>마지막으로 술을 드신 일시를 선택해 주세요.</p>
@@ -233,25 +231,28 @@
         <div class="timer-display">
             <span id="mainDays" class="time-unit">0일</span>
             <div id="subTime">0시간 0분 0초</div>
+            
+            <!-- ★ 수정된 일일 진행도(Sub Progress) 영역 -->
             <div class="sub-progress-container">
                 <div style="position: relative;">
                     <div class="sub-progress-bg">
                         <div class="sub-progress-fill" id="subFill"></div>
+                        <!-- 6시간, 12시간, 18시간 눈금 -->
                         <div class="tick-mark" style="left: 25%;"></div>
                         <div class="tick-mark" style="left: 50%;"></div>
                         <div class="tick-mark" style="left: 75%;"></div>
                     </div>
-                    <div id="tickLabels" style="position: relative; height: 16px; margin-top: 5px;">
+                    <div class="tick-label-container">
                         <div class="tick-label" style="left: 25%;">06시</div>
                         <div class="tick-label" style="left: 50%;">12시</div>
                         <div class="tick-label" style="left: 75%;">18시</div>
                     </div>
                 </div>
-                <span class="sub-percent-text" id="subPercent" style="margin-top: 10px;">오늘 하루: 0.0% 경과</span>
+                <!-- 텍스트 영역 (시간 포맷으로 업데이트됨) -->
+                <span class="sub-percent-text" id="subPercent">오늘의 목표: 진행 중...</span>
             </div>
         </div>
 
-        <!-- 동기 부여 누적 데이터 섹션 (타이머 아래, 진행 중일 때) -->
         <div id="activeMotivationalSummary" style="display: none; width: 100%; margin-bottom: 15px;"></div>
 
         <div class="craving-section">
@@ -404,7 +405,7 @@
     let timerInterval = null;
     let currentTabName = 'physical';
     let unsubscribePosts = null; 
-    let totalPastDays = 0; // 누적 일수 계산용 변수 추가
+    let totalPastDays = 0;
 
     window.onload = function() {
         renderChangeCards(currentTabName);
@@ -421,7 +422,6 @@
                 el.innerText = `${user.displayName || '도전자'}님 환영합니다!`;
             });
             
-            // 로그인 완료 즉시 동기부여 데이터 로드 (setupArea, displayArea 양쪽 모두 채움)
             loadMotivationalStats();
 
             try {
@@ -452,7 +452,6 @@
         }
     });
 
-    // 동기부여 리포트 생성 및 양쪽 화면 렌더링 함수
     async function loadMotivationalStats() {
         if (!userId) return;
         try {
@@ -468,7 +467,7 @@
             let maxDays = 0;
             let totalCravings = 0;
             let challengeCount = 0;
-            totalPastDays = 0; // 초기화
+            totalPastDays = 0;
 
             snapshot.forEach(docSnap => {
                 const data = docSnap.data();
@@ -478,7 +477,6 @@
                 
                 totalDays += diffDays;
                 
-                // 진행 중인 도전을 제외한 '과거'의 순수 누적 일수만 저장
                 if (docSnap.id !== currentChallengeId) {
                     totalPastDays += diffDays;
                 }
@@ -732,6 +730,132 @@
         }
     };
 
+    window.deleteHistory = async function(event, historyDocId) {
+        event.stopPropagation();
+        if (confirm("정말 이 단주 기록을 완전히 삭제하시겠습니까?\n(삭제된 데이터는 복구할 수 없습니다)")) {
+            try {
+                await deleteDoc(doc(db, "users", userId, "challenges", historyDocId));
+                
+                if (historyDocId === currentChallengeId) {
+                    localStorage.removeItem('quitDrinkingDateTime_server');
+                    currentChallengeId = null;
+                    cravingData = [];
+                    userQuitDate = null;
+                    if (timerInterval) clearInterval(timerInterval);
+                    document.getElementById('setupArea').style.display = 'flex';
+                    document.getElementById('displayArea').style.display = 'none';
+                    closeModal('historyListModal');
+                } else {
+                    openHistoryList(); 
+                }
+                loadMotivationalStats();
+            } catch(e) {
+                console.error("기록 삭제 에러:", e);
+                alert("삭제 실패: " + e.message);
+            }
+        }
+    };
+
+    window.openHistoryList = async function() {
+        if (!userId) return alert("로그인이 필요합니다.");
+        
+        closeModal('historyDetailModal');
+        openModal('historyListModal');
+        
+        const container = document.getElementById('historyListContainer');
+        container.innerHTML = '<div style="text-align:center; padding:20px;">기록을 불러오는 중입니다...</div>';
+
+        try {
+            const q = query(collection(db, "users", userId, "challenges"), orderBy("createdAt", "desc"));
+            const snapshot = await getDocs(q);
+            
+            if (snapshot.empty) {
+                container.innerHTML = '<div style="text-align:center; padding:20px; color:#666;">아직 생성된 단주 도전 기록이 없습니다.</div>';
+                return;
+            }
+
+            container.innerHTML = '';
+            const docs = snapshot.docs;
+
+            for (let i = 0; i < docs.length; i++) {
+                const data = docs[i].data();
+                const historyDocId = docs[i].id;
+                
+                const startStr = new Date(data.startDate).toLocaleDateString('ko-KR');
+                const endStr = data.endDate ? new Date(data.endDate).toLocaleDateString('ko-KR') : '현재 진행 중';
+                const statusHtml = data.status === 'active' ? `<span class="history-status status-active">도전 중</span>` : `<span class="history-status status-failed">종료됨</span>`;
+                
+                const start = new Date(data.startDate);
+                const end = data.endDate ? new Date(data.endDate) : new Date();
+                const diffDays = Math.max(0, Math.floor((end - start) / 86400000));
+                
+                const cravCount = data.cravings ? data.cravings.length : 0;
+                const encodedData = encodeURIComponent(JSON.stringify(data));
+
+                const itemHtml = `
+                    <div class="history-item" onclick="openHistoryDetail('${encodedData}')">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <strong style="color:var(--text-dark);">${startStr} ~ ${data.status === 'active' ? '' : endStr}</strong>
+                                ${statusHtml}
+                            </div>
+                            <button class="action-btn" style="color:var(--danger-color); font-size:1.3rem; padding:0; line-height:1;" onclick="deleteHistory(event, '${historyDocId}')" title="삭제">&times;</button>
+                        </div>
+                        <div style="font-size:0.85rem; color:#666;">
+                            지속 기간: <b>${diffDays}일</b> | 넘긴 고비: <b>${cravCount}회</b>
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', itemHtml);
+
+                if (i < docs.length - 1) {
+                    const prevData = docs[i + 1].data();
+                    
+                    if (prevData.endDate) {
+                        const prevEnd = new Date(prevData.endDate);
+                        const currStart = new Date(data.startDate);
+                        
+                        const gapMs = currStart.getTime() - prevEnd.getTime();
+                        const gapDays = Math.floor(gapMs / 86400000);
+
+                        if (gapDays > 0) {
+                            const gapHtml = `
+                                <div class="history-gap">
+                                    <span class="gap-days">${gapDays}일</span> 동안의 재정비 및 음주 기간
+                                </div>
+                            `;
+                            container.insertAdjacentHTML('beforeend', gapHtml);
+                        }
+                    }
+                }
+            }
+        } catch (e) {
+            container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--danger-color);">기록을 불러오는데 실패했습니다.</div>';
+            console.error(e);
+        }
+    };
+
+    window.openHistoryDetail = function(encodedData) {
+        closeModal('historyListModal');
+        openModal('historyDetailModal');
+        
+        const data = JSON.parse(decodeURIComponent(encodedData));
+        const startStr = new Date(data.startDate).toLocaleDateString('ko-KR');
+        const cravCount = data.cravings ? data.cravings.length : 0;
+        
+        document.getElementById('historyDetailTitle').innerText = `${startStr} 도전 기록`;
+        document.getElementById('historyDetailSummary').innerText = `총 ${cravCount}번의 고비가 있었습니다.`;
+
+        setTimeout(() => {
+            if (cravCount === 0) {
+                document.getElementById('pastCravingHistoryChart').parentElement.innerHTML = '<div style="text-align:center; padding-top:100px; color:#999;">이 기간에 기록된 고비 데이터가 없습니다.</div><canvas id="pastCravingHistoryChart" style="display:none;"></canvas>';
+            } else {
+                document.getElementById('pastCravingHistoryChart').parentElement.innerHTML = '<canvas id="pastCravingHistoryChart"></canvas>';
+                pastStatsChart = renderChart('pastCravingHistoryChart', pastStatsChart, data.cravings);
+            }
+        }, 200);
+    };
+
     function renderChangeCards(tabName) {
         let activeStages = physicalStages;
         if(tabName === 'liver') activeStages = liverStages;
@@ -771,7 +895,7 @@
     }
 
     function initSurvivalChart() {
-        if (mainChart) mainChart.destroy(); // 기존 차트 초기화 추가
+        if (mainChart) mainChart.destroy();
         const ctx = document.getElementById('survivalChart').getContext('2d');
         mainChart = new Chart(ctx, {
             type: 'line',
@@ -796,7 +920,7 @@
     }
 
     function initDistributionChart() {
-        if (distChart) distChart.destroy(); // 기존 차트 초기화 추가
+        if (distChart) distChart.destroy();
         const ctx = document.getElementById('distributionChart').getContext('2d');
         
         const distData = [];
@@ -928,20 +1052,22 @@
             const minutes = Math.floor((diff/60000)%60);
             const seconds = Math.floor((diff/1000)%60);
 
-            // 누적 일수 실시간 렌더링 추가
             const currentDays = Math.floor(days);
             const totalCumul = totalPastDays + currentDays;
             document.getElementById('mainDays').innerHTML = `${currentDays}일 <span style="font-size: 1.1rem; color: #a0aec0; font-weight: 700; margin-left: 5px;">(누적 ${totalCumul}일)</span>`;
             
             document.getElementById('subTime').innerText = `${hours}시간 ${minutes}분 ${seconds}초`;
             
+            // ★ 수정: 오늘 하루 중 '현재 시각'을 기준으로 퍼센트 계산
             const nowH = now.getHours();
             const nowM = now.getMinutes();
             const nowS = now.getSeconds();
             const dailyProgress = ((nowH * 3600 + nowM * 60 + nowS) / 86400) * 100;
             
             document.getElementById('subFill').style.width = dailyProgress + '%';
-            document.getElementById('subPercent').innerText = `오늘 하루: ${dailyProgress.toFixed(1)}% 경과`;
+            
+            // ★ 수정: 텍스트를 %가 아닌, 현재 시간 포맷으로 직관적으로 변경
+            document.getElementById('subPercent').innerText = `오늘 하루 진행도: ${nowH}시간 ${nowM}분 경과`;
 
             const survivors = Math.max(1, Math.round(1000 * Math.exp(-0.04 * days)));
             const yesterdaySurvivors = Math.max(1, Math.round(1000 * Math.exp(-0.04 * Math.max(0, days - 1))));
@@ -983,7 +1109,7 @@
             document.getElementById('cravingCount').innerText = 0;
             
             startApp(input);
-            loadMotivationalStats(); // 새 도전 시작 시 누적 데이터 갱신
+            loadMotivationalStats();
         } catch (e) { alert("연동 에러: " + e.message); }
     };
 
@@ -1017,7 +1143,7 @@
             closeModal('cravingModal');
             alert("고비를 잘 넘기셨습니다!");
             
-            loadMotivationalStats(); // 고비를 넘긴 후 데이터 갱신
+            loadMotivationalStats();
         } catch (e) { alert("저장 실패: " + e.message); }
     };
 
@@ -1041,142 +1167,9 @@
                 document.getElementById('displayArea').style.display = 'none';
                 if (timerInterval) clearInterval(timerInterval);
                 
-                loadMotivationalStats(); // 실패 후 새 화면 전환 시 데이터 갱신
+                loadMotivationalStats();
             } catch (e) { alert("재설정 실패: " + e.message); }
         }
-    };
-
-    window.deleteHistory = async function(event, historyDocId) {
-        event.stopPropagation(); // 모달 띄우기 방지
-        if (confirm("정말 이 단주 기록을 완전히 삭제하시겠습니까?\n(삭제된 데이터는 복구할 수 없습니다)")) {
-            try {
-                await deleteDoc(doc(db, "users", userId, "challenges", historyDocId));
-                
-                // 만약 삭제한 기록이 현재 진행 중인 기록이라면 UI도 초기화합니다.
-                if (historyDocId === currentChallengeId) {
-                    localStorage.removeItem('quitDrinkingDateTime_server');
-                    currentChallengeId = null;
-                    cravingData = [];
-                    userQuitDate = null;
-                    if (timerInterval) clearInterval(timerInterval);
-                    document.getElementById('setupArea').style.display = 'flex';
-                    document.getElementById('displayArea').style.display = 'none';
-                    closeModal('historyListModal');
-                } else {
-                    // 과거 기록이라면 리스트만 새로고침
-                    openHistoryList(); 
-                }
-                loadMotivationalStats(); // 삭제 후 누적 데이터 갱신
-            } catch(e) {
-                console.error("기록 삭제 에러:", e);
-                alert("삭제 실패: " + e.message);
-            }
-        }
-    };
-
- window.openHistoryList = async function() {
-        if (!userId) return alert("로그인이 필요합니다.");
-        
-        closeModal('historyDetailModal');
-        openModal('historyListModal');
-        
-        const container = document.getElementById('historyListContainer');
-        container.innerHTML = '<div style="text-align:center; padding:20px;">기록을 불러오는 중입니다...</div>';
-
-        try {
-            const q = query(collection(db, "users", userId, "challenges"), orderBy("createdAt", "desc"));
-            const snapshot = await getDocs(q);
-            
-            if (snapshot.empty) {
-                container.innerHTML = '<div style="text-align:center; padding:20px; color:#666;">아직 생성된 단주 도전 기록이 없습니다.</div>';
-                return;
-            }
-
-            container.innerHTML = '';
-            const docs = snapshot.docs; // 인덱스 접근을 위해 배열로 변환
-
-            for (let i = 0; i < docs.length; i++) {
-                const data = docs[i].data();
-                const historyDocId = docs[i].id;
-                
-                // --- 1. 단주 도전 항목 렌더링 ---
-                const startStr = new Date(data.startDate).toLocaleDateString('ko-KR');
-                const endStr = data.endDate ? new Date(data.endDate).toLocaleDateString('ko-KR') : '현재 진행 중';
-                const statusHtml = data.status === 'active' ? `<span class="history-status status-active">도전 중</span>` : `<span class="history-status status-failed">종료됨</span>`;
-                
-                const start = new Date(data.startDate);
-                const end = data.endDate ? new Date(data.endDate) : new Date();
-                const diffDays = Math.max(0, Math.floor((end - start) / 86400000));
-                
-                const cravCount = data.cravings ? data.cravings.length : 0;
-                const encodedData = encodeURIComponent(JSON.stringify(data));
-
-                const itemHtml = `
-                    <div class="history-item" onclick="openHistoryDetail('${encodedData}')">
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <div style="display:flex; align-items:center; gap:8px;">
-                                <strong style="color:var(--text-dark);">${startStr} ~ ${data.status === 'active' ? '' : endStr}</strong>
-                                ${statusHtml}
-                            </div>
-                            <button class="action-btn" style="color:var(--danger-color); font-size:1.3rem; padding:0; line-height:1;" onclick="deleteHistory(event, '${historyDocId}')" title="삭제">&times;</button>
-                        </div>
-                        <div style="font-size:0.85rem; color:#666;">
-                            지속 기간: <b>${diffDays}일</b> | 넘긴 고비: <b>${cravCount}회</b>
-                        </div>
-                    </div>
-                `;
-                container.insertAdjacentHTML('beforeend', itemHtml);
-
-                // --- 2. 과거 기록과의 공백(재정비/음주) 기간 렌더링 ---
-                // 현재 항목(i)이 마지막 항목이 아니라면, 다음 항목(i+1, 즉 더 과거의 기록)과의 간격을 계산
-                if (i < docs.length - 1) {
-                    const prevData = docs[i + 1].data();
-                    
-                    if (prevData.endDate) {
-                        const prevEnd = new Date(prevData.endDate);
-                        const currStart = new Date(data.startDate);
-                        
-                        // 현재 도전의 시작일 - 과거 도전의 종료일
-                        const gapMs = currStart.getTime() - prevEnd.getTime();
-                        const gapDays = Math.floor(gapMs / 86400000); // 일 단위로 변환
-
-                        // 간격이 1일 이상일 경우에만 표시
-                        if (gapDays > 0) {
-                            const gapHtml = `
-                                <div class="history-gap">
-                                    <span class="gap-days">${gapDays}일</span> 동안의 재정비 및 음주 기간
-                                </div>
-                            `;
-                            container.insertAdjacentHTML('beforeend', gapHtml);
-                        }
-                    }
-                }
-            }
-        } catch (e) {
-            container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--danger-color);">기록을 불러오는데 실패했습니다.</div>';
-            console.error(e);
-        }
-    };
-
-    window.openHistoryDetail = function(encodedData) {
-        closeModal('historyListModal');
-        openModal('historyDetailModal');
-        
-        const data = JSON.parse(decodeURIComponent(encodedData));
-        const startStr = new Date(data.startDate).toLocaleDateString('ko-KR');
-        const cravCount = data.cravings ? data.cravings.length : 0;
-        
-        document.getElementById('historyDetailTitle').innerText = `${startStr} 도전 기록`;
-        document.getElementById('historyDetailSummary').innerText = `총 ${cravCount}번의 고비가 있었습니다.`;
-
-        setTimeout(() => {
-            if (cravCount === 0) {
-                document.getElementById('pastCravingHistoryChart').parentElement.innerHTML = '<div style="text-align:center; padding-top:100px; color:#999;">이 기간에 기록된 고비 데이터가 없습니다.</div><canvas id="pastCravingHistoryChart" style="display:none;"></canvas>';
-            } else {
-                document.getElementById('pastCravingHistoryChart').parentElement.innerHTML = '<canvas id="pastCravingHistoryChart"></canvas>';
-                pastStatsChart = renderChart('pastCravingHistoryChart', pastStatsChart, data.cravings);
-            }
-        }, 200);
     };
 
     window.updateRangeStyle = function(el, textId) {
