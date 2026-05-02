@@ -423,6 +423,9 @@
     let unsubscribePosts = null; 
     let totalPastDays = 0;
     
+    // 글로벌 차트용 변수 추가
+    let globalMaxDays = 0;
+    
     // 시간 수정을 위한 변수 추가
     let editingChallengeId = null;
 
@@ -441,8 +444,6 @@
                 el.innerText = `${user.displayName || '도전자'}님 환영합니다!`;
             });
             
-            loadMotivationalStats();
-
             try {
                 const q = query(collection(db, "users", userId, "challenges"), where("status", "==", "active"));
                 const snapshot = await getDocs(q);
@@ -459,6 +460,9 @@
                 } else {
                     document.getElementById('setupArea').style.display = 'flex';
                 }
+                
+                // 현재 도전 ID가 결정된 후에 통계를 호출해야 정확히 분리됨
+                loadMotivationalStats();
             } catch (e) { console.error("데이터 로드 에러:", e); }
         } else {
             userId = null;
@@ -496,6 +500,7 @@
                 
                 totalDays += diffDays;
                 
+                // 버그 수정: active 상태인 도전의 일수는 과거 일수 누적에서 제외
                 if (docSnap.id !== currentChallengeId) {
                     totalPastDays += diffDays;
                 }
@@ -504,6 +509,8 @@
                 if (data.cravings) totalCravings += data.cravings.length;
                 challengeCount++;
             });
+
+            globalMaxDays = maxDays;
 
             if (challengeCount > 0 && totalDays > 0) {
                 const htmlContent = `
@@ -517,11 +524,11 @@
                         <div style="display: flex; gap: 10px; text-align: center;">
                             <div style="flex: 1; background: #fff; padding: 12px 5px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
                                 <div style="font-size: 0.75rem; color: #718096; font-weight: 700;">내 인생 누적 단주</div>
-                                <div style="font-size: 1.1rem; font-weight: 800; color: var(--primary-color); margin-top: 2px;">${totalDays}일</div>
+                                <div class="dynamic-total-days" style="font-size: 1.1rem; font-weight: 800; color: var(--primary-color); margin-top: 2px;">${totalDays}일</div>
                             </div>
                             <div style="flex: 1; background: #fff; padding: 12px 5px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
                                 <div style="font-size: 0.75rem; color: #718096; font-weight: 700;">최장 생존 기록</div>
-                                <div style="font-size: 1.1rem; font-weight: 800; color: var(--success-color); margin-top: 2px;">${maxDays}일</div>
+                                <div class="dynamic-max-days" style="font-size: 1.1rem; font-weight: 800; color: var(--success-color); margin-top: 2px;">${maxDays}일</div>
                             </div>
                             <div style="flex: 1; background: #fff; padding: 12px 5px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
                                 <div style="font-size: 0.75rem; color: #718096; font-weight: 700;">이겨냈던 고비</div>
@@ -775,7 +782,6 @@
         }
     };
 
-    // ★ 추가: 시간 수정 모달 열기 함수
     window.openEditTimeModal = function(event, historyDocId, currentStartDate) {
         event.stopPropagation();
         editingChallengeId = historyDocId;
@@ -788,7 +794,6 @@
         openModal('editTimeModal');
     };
 
-    // ★ 추가: 수정된 시간 저장 함수
     window.saveEditedTime = async function() {
         if (!userId || !editingChallengeId) return;
         
@@ -847,7 +852,6 @@
                 });
                 const endStr = data.endDate ? new Date(data.endDate).toLocaleDateString('ko-KR') : '';
                 
-                // ★ 수정: '도전 중' 상태일 때 톱니바퀴 아이콘 추가
                 const statusHtml = data.status === 'active' 
                     ? `<span class="history-status status-active">도전 중</span><button class="action-btn" style="font-size:1.1rem; padding:0; margin-left:6px; vertical-align:middle;" onclick="openEditTimeModal(event, '${historyDocId}', '${data.startDate}')" title="시작 시간 수정">⚙️</button>` 
                     : `<span class="history-status status-failed">종료됨</span>`;
@@ -997,7 +1001,8 @@
                     annotation: { 
                         annotations: { 
                             line1: { type: 'line', xMin: 0, xMax: 0, borderColor: '#2d3748', borderWidth: 2, borderDash: [4, 4], label: { display: true, content: '현재 경과', position: 'end', backgroundColor: '#2d3748', font: { size: 10 } } },
-                            line2: { type: 'line', yMin: 0, yMax: 0, borderColor: '#e74c3c', borderWidth: 1.5, borderDash: [4, 4], label: { display: true, content: '생존', position: 'start', backgroundColor: '#e74c3c', font: { size: 10 } } }
+                            line2: { type: 'line', yMin: 0, yMax: 0, borderColor: '#e74c3c', borderWidth: 1.5, borderDash: [4, 4], label: { display: true, content: '생존', position: 'start', backgroundColor: '#e74c3c', font: { size: 10 } } },
+                            line3: { type: 'line', xMin: 0, xMax: 0, borderColor: '#f39c12', borderWidth: 1.5, borderDash: [2, 2], label: { display: true, content: '최장 기록', position: 'start', yAdjust: 20, backgroundColor: '#f39c12', font: { size: 10 } } }
                         } 
                     } 
                 } 
@@ -1039,7 +1044,8 @@
                     legend: { display: false }, 
                     annotation: { 
                         annotations: { 
-                            myPosition: { type: 'line', xMin: 0, xMax: 0, borderColor: '#e74c3c', borderWidth: 2, label: { display: true, content: '나의 위치', position: 'top', backgroundColor: '#e74c3c', font: { size: 10 } } }
+                            myPosition: { type: 'line', xMin: 0, xMax: 0, borderColor: '#e74c3c', borderWidth: 2, label: { display: true, content: '나의 위치', position: 'top', backgroundColor: '#e74c3c', font: { size: 10 } } },
+                            maxPosition: { type: 'line', xMin: 0, xMax: 0, borderColor: '#f39c12', borderWidth: 2, borderDash: [2, 2], label: { display: true, content: '최장 기록', position: 'center', backgroundColor: '#f39c12', font: { size: 10 } } }
                         } 
                     } 
                 } 
@@ -1063,12 +1069,33 @@
         mainChart.options.plugins.annotation.annotations.line2.yMax = survivors;
         mainChart.options.plugins.annotation.annotations.line2.label.content = survivors.toLocaleString() + '명';
 
+        // 최장 생존 기록 표시 (현재 일수가 더 높으면 업데이트)
+        let currentMaxDays = Math.max(globalMaxDays, Math.floor(days));
+        if (currentMaxDays > 0) {
+            mainChart.options.plugins.annotation.annotations.line3.xMin = currentMaxDays;
+            mainChart.options.plugins.annotation.annotations.line3.xMax = currentMaxDays;
+            mainChart.options.plugins.annotation.annotations.line3.label.content = `최장 ${currentMaxDays}일`;
+            mainChart.options.plugins.annotation.annotations.line3.display = true;
+        } else if (mainChart.options.plugins.annotation.annotations.line3) {
+            mainChart.options.plugins.annotation.annotations.line3.display = false;
+        }
+
         mainChart.update('none');
 
         if (distChart) {
             const displayDays = Math.min(days, 100); 
             distChart.options.plugins.annotation.annotations.myPosition.xMin = displayDays;
             distChart.options.plugins.annotation.annotations.myPosition.xMax = displayDays;
+            
+            if (currentMaxDays > 0) {
+                const displayMax = Math.min(currentMaxDays, 100);
+                distChart.options.plugins.annotation.annotations.maxPosition.xMin = displayMax;
+                distChart.options.plugins.annotation.annotations.maxPosition.xMax = displayMax;
+                distChart.options.plugins.annotation.annotations.maxPosition.label.content = `최장 ${currentMaxDays}일`;
+                distChart.options.plugins.annotation.annotations.maxPosition.display = true;
+            } else if (distChart.options.plugins.annotation.annotations.maxPosition) {
+                distChart.options.plugins.annotation.annotations.maxPosition.display = false;
+            }
             distChart.update('none');
         }
     }
@@ -1144,8 +1171,14 @@
 
             const currentDays = Math.floor(days);
             const totalCumul = totalPastDays + currentDays;
+            let currentMax = Math.max(globalMaxDays, currentDays);
+
             document.getElementById('mainDays').innerHTML = `${currentDays}일 <span style="font-size: 1.1rem; color: #a0aec0; font-weight: 700; margin-left: 5px;">(누적 ${totalCumul}일)</span>`;
             
+            // 상단의 누적/최장 일수 동적 업데이트 처리
+            document.querySelectorAll('.dynamic-total-days').forEach(el => el.innerText = `${totalCumul}일`);
+            document.querySelectorAll('.dynamic-max-days').forEach(el => el.innerText = `${currentMax}일`);
+
             document.getElementById('subTime').innerText = `${hours}시간 ${minutes}분 ${seconds}초`;
             
             const nowH = now.getHours();
