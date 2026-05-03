@@ -87,8 +87,8 @@
         .rank-info { background: #e3f2fd; padding: 20px 15px; border-radius: 20px; margin: 15px 0; border: 1px solid #bbdefb; display: flex; flex-direction: column; gap: 10px; }
         .rank-item { display: flex; justify-content: center; align-items: baseline; gap: 6px; }
         .rank-number { font-size: 1.5rem; font-weight: 800; color: #1976d2; }
-        .craving-section { margin-top: 25px; padding: 20px; background: #fff9f0; border-radius: 20px; border: 1px dashed var(--warning-color); }
-        .craving-btn { background-color: var(--warning-color); color: white; border: none; padding: 15px; border-radius: 14px; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 12px; font-size: 1rem; }
+        .craving-section { margin-top: 25px; padding: 20px; background: #fff9f0; border-radius: 20px; border: 1px dashed var(--warning-color); display: flex; flex-direction: column; }
+        .craving-btn { background-color: var(--warning-color); color: white; border: none; padding: 15px; border-radius: 14px; font-weight: bold; cursor: pointer; width: 100%; font-size: 1rem; }
         .stat-btn { background-color: #fff; color: var(--warning-color); border: 2px solid var(--warning-color); padding: 10px; border-radius: 12px; font-size: 0.9rem; cursor: pointer; width: 100%; font-weight: bold; }
         .chart-container { position: relative; height: 250px; width: 100%; margin: 10px 0; }
         
@@ -261,7 +261,8 @@
         <div id="activeMotivationalSummary" style="display: none; width: 100%; margin-bottom: 15px;"></div>
 
         <div class="craving-section">
-            <button class="craving-btn" onclick="openModal('cravingModal')">🔥 지금 고비가 왔어요!</button>
+            <button class="craving-btn" style="background-color: var(--primary-color); margin-bottom: 12px;" onclick="openModal('stateModal')">📝 현재 몸상태 기록</button>
+            <button class="craving-btn" style="margin-bottom: 12px;" onclick="openModal('cravingModal')">🔥 지금 고비가 왔어요!</button>
             <button class="craving-btn" style="background-color: var(--success-color); margin-bottom: 15px;" onclick="openModal('actionModal')">🛡️ 고비 극복 행동 개시!</button>
             
             <div style="display: flex; gap: 8px;">
@@ -314,6 +315,25 @@
     &copy; 2026 Alcoholaway.com All rights reserved.
 </footer>
 
+<!-- 현재 몸상태 기록 모달 -->
+<div id="stateModal" class="modal">
+    <div class="modal-content">
+        <button class="close-btn-top" onclick="closeModal('stateModal')">&times;</button>
+        <h3 style="margin-top:0; margin-bottom: 12px; padding-right: 20px;">📝 현재 몸상태 기록</h3>
+        
+        <label style="font-weight:700; font-size:0.9rem;">기분 상태 (<span id="moodVal" style="font-weight: 800;">5</span>/10) <br><span style="font-size:0.75rem; color:#999; font-weight:normal;">0: 최고 좋음 ~ 10: 최악으로 나쁨</span></label>
+        <input type="range" id="moodRange" min="0" max="10" value="5" class="dynamic-range" oninput="updateRangeStyle(this, 'moodVal')">
+        
+        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px;">갈증 상태 (<span id="thirstVal" style="font-weight: 800;">5</span>/10) <br><span style="font-size:0.75rem; color:#999; font-weight:normal;">0: 갈증 없음 ~ 10: 극심한 갈증</span></label>
+        <input type="range" id="thirstRange" min="0" max="10" value="5" class="dynamic-range" oninput="updateRangeStyle(this, 'thirstVal')">
+
+        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px;">금단증상 정도 (<span id="withdrawalVal" style="font-weight: 800;">5</span>/10) <br><span style="font-size:0.75rem; color:#999; font-weight:normal;">0: 전혀 없음 ~ 10: 극심함</span></label>
+        <input type="range" id="withdrawalRange" min="0" max="10" value="5" class="dynamic-range" oninput="updateRangeStyle(this, 'withdrawalVal')">
+
+        <button class="start-btn" style="margin-top:15px; width:100%; padding: 14px; font-size: 1.1rem; background: linear-gradient(135deg, #3498db, #2980b9);" onclick="submitState()">현재 몸상태 기록하기</button>
+    </div>
+</div>
+
 <!-- 고비 극복 행동 모달 -->
 <div id="actionModal" class="modal">
     <div class="modal-content">
@@ -327,6 +347,14 @@
                 <div style="font-weight: 800; color: #3498db; margin-bottom: 4px;">💧 시원한 냉수 들이키기</div>
                 <div style="font-size: 0.75rem; font-weight: normal; color: #555;">순간적인 체온 변화와 위장 자극으로 주의 환기</div>
             </button>
+            <button class="stat-btn" style="text-align: left; padding: 15px; border-color: #34495e; color: #2d3748; background: #f4f6f7;" onclick="submitAction('얼음+탄산/청량음료 마시기', '강한 탄산과 차가운 온도로 식도를 자극하여 뇌의 보상 기전을 일시적으로 만족시킵니다.')">
+                <div style="font-weight: 800; color: #34495e; margin-bottom: 4px;">🧊 얼음+탄산음료 등 청량음료 마시기</div>
+                <div style="font-size: 0.75rem; font-weight: normal; color: #555;">식도 자극 및 청량감으로 뇌의 보상 기전 충족</div>
+            </button>
+            <button class="stat-btn" style="text-align: left; padding: 15px; border-color: #d35400; color: #2d3748; background: #fdfae6;" onclick="submitAction('무알콜 맥주 마시기', '알코올 없이 맥주의 맛과 목넘김을 제공하여 심리적 갈망을 즉각적으로 해소합니다.')">
+                <div style="font-weight: 800; color: #d35400; margin-bottom: 4px;">🍺 무알콜 맥주 마시기</div>
+                <div style="font-size: 0.75rem; font-weight: normal; color: #555;">시각/미각적 모방으로 심리적 갈망 즉각 해소</div>
+            </button>
             <button class="stat-btn" style="text-align: left; padding: 15px; border-color: #e67e22; color: #2d3748; background: #fff8f0;" onclick="submitAction('단당류 섭취', '알코올 갈망의 상당수는 뇌의 일시적 저혈당 상태(가짜 갈망)에서 비롯됩니다. 초콜릿이나 사탕이 효과적입니다.')">
                 <div style="font-weight: 800; color: #e67e22; margin-bottom: 4px;">🍬 단당류(초콜릿/사탕) 섭취</div>
                 <div style="font-size: 0.75rem; font-weight: normal; color: #555;">알코올 갈망을 유발하는 뇌의 '가짜 저혈당' 해소</div>
@@ -338,6 +366,14 @@
             <button class="stat-btn" style="text-align: left; padding: 15px; border-color: #9b59b6; color: #2d3748; background: #fbf0ff;" onclick="submitAction('가벼운 산책', '신체 활동을 통해 자연스러운 엔돌핀과 도파민을 분비시켜, 알코올이 주는 보상을 대체합니다.')">
                 <div style="font-weight: 800; color: #9b59b6; margin-bottom: 4px;">🏃‍♂️ 10분 가벼운 산책/운동</div>
                 <div style="font-size: 0.75rem; font-weight: normal; color: #555;">자연스러운 엔돌핀 분비로 보상 회로 대체</div>
+            </button>
+            <button class="stat-btn" style="text-align: left; padding: 15px; border-color: #e74c3c; color: #2d3748; background: #fdf0ed;" onclick="submitAction('장소/사람 회피하기', '갈망을 유발하는 강력한 환경적 트리거(술자리, 유혹하는 사람)로부터 물리적으로 벗어납니다.')">
+                <div style="font-weight: 800; color: #e74c3c; margin-bottom: 4px;">🏃 장소 및 사람 회피하기</div>
+                <div style="font-size: 0.75rem; font-weight: normal; color: #555;">환경적 트리거로부터 물리적 단절 및 도피</div>
+            </button>
+            <button class="stat-btn" style="text-align: left; padding: 15px; border-color: #7f8c8d; color: #2d3748; background: #f8f9f9;" onclick="submitAction('고비행동 현재불가', '현재 상황상 적극적 대처는 어렵지만, 고비가 왔음을 인지하고 버티는 상태를 기록합니다.')">
+                <div style="font-weight: 800; color: #7f8c8d; margin-bottom: 4px;">⏳ 고비행동 현재불가</div>
+                <div style="font-size: 0.75rem; font-weight: normal; color: #555;">적극적 개입은 어렵지만 인지하며 묵묵히 버티기</div>
             </button>
         </div>
     </div>
@@ -487,8 +523,8 @@
                     userQuitDate = data.startDate;
                     cravingData = data.cravings || [];
                     
-                    // action 타입은 고비 횟수에서 제외
-                    const actualCravings = cravingData.filter(d => d.type !== 'action').length;
+                    // action, state 타입은 고비 횟수에서 제외
+                    const actualCravings = cravingData.filter(d => d.type !== 'action' && d.type !== 'state').length;
                     document.getElementById('cravingCount').innerText = actualCravings;
                     
                     startApp(userQuitDate);
@@ -541,8 +577,8 @@
                 }
 
                 if (diffDays > maxDays) maxDays = diffDays;
-                // action 타입은 고비 횟수에서 제외
-                if (data.cravings) totalCravings += data.cravings.filter(d => d.type !== 'action').length;
+                // action, state 타입은 고비 횟수에서 제외
+                if (data.cravings) totalCravings += data.cravings.filter(d => d.type !== 'action' && d.type !== 'state').length;
                 challengeCount++;
             });
 
@@ -896,8 +932,8 @@
                 const end = data.endDate ? new Date(data.endDate) : new Date();
                 const diffDays = Math.max(0, Math.floor((end - start) / 86400000));
                 
-                // action 타입 필터링
-                const cravCount = data.cravings ? data.cravings.filter(d => d.type !== 'action').length : 0;
+                // action 및 state 타입 필터링
+                const cravCount = data.cravings ? data.cravings.filter(d => d.type !== 'action' && d.type !== 'state').length : 0;
                 const encodedData = encodeURIComponent(JSON.stringify(data));
 
                 const startReasonText = data.startReason ? `<div style="margin-top:6px; font-size:0.8rem; color:#2c3e50; text-align:left;">🌱 <b>시작 각오:</b> ${data.startReason}</div>` : '';
@@ -964,8 +1000,8 @@
         
         const data = JSON.parse(decodeURIComponent(encodedData));
         const startStr = new Date(data.startDate).toLocaleDateString('ko-KR');
-        // action 타입 필터링
-        const cravCount = data.cravings ? data.cravings.filter(d => d.type !== 'action').length : 0;
+        // action 및 state 타입 필터링
+        const cravCount = data.cravings ? data.cravings.filter(d => d.type !== 'action' && d.type !== 'state').length : 0;
         
         document.getElementById('historyDetailTitle').innerText = `${startStr} 도전 기록`;
         
@@ -1165,6 +1201,23 @@
                         yAdjust: -5
                     }
                 };
+            } else if (d.type === 'state') {
+                customAnnotations['state' + i] = {
+                    type: 'line',
+                    xMin: i,
+                    xMax: i,
+                    borderColor: '#3498db',
+                    borderWidth: 2,
+                    borderDash: [2, 2],
+                    label: {
+                        display: true,
+                        content: '📝 상태 기록',
+                        position: 'start',
+                        backgroundColor: '#3498db',
+                        font: { size: 10, weight: 'bold' },
+                        yAdjust: 15
+                    }
+                };
             }
         });
 
@@ -1176,7 +1229,7 @@
                     { 
                         type: 'line',
                         label: '🔥 갈망 강도', 
-                        data: lastData.map(d => d.type === 'action' ? null : d.strength), 
+                        data: lastData.map(d => (d.type === 'action' || d.type === 'state') ? null : d.strength), 
                         borderColor: '#e74c3c', 
                         backgroundColor: '#e74c3c',
                         borderWidth: 3,
@@ -1185,10 +1238,10 @@
                         spanGaps: true, 
                         order: 0 
                     },
-                    { label: '육체 피로', data: lastData.map(d => d.type === 'action' ? null : (d.fatigue || 0)), backgroundColor: 'rgba(52, 152, 219, 0.5)', order: 1 },
-                    { label: '정신 스트레스', data: lastData.map(d => d.type === 'action' ? null : (d.stress || 0)), backgroundColor: 'rgba(243, 156, 18, 0.5)', order: 1 },
-                    { label: '수면 부족', data: lastData.map(d => d.type === 'action' ? null : (d.sleep || 0)), backgroundColor: 'rgba(155, 89, 182, 0.5)', order: 1 },
-                    { label: '배고픔', data: lastData.map(d => d.type === 'action' ? null : (d.hunger || 0)), backgroundColor: 'rgba(46, 204, 113, 0.5)', order: 1 }
+                    { label: '육체 피로', data: lastData.map(d => (d.type === 'action' || d.type === 'state') ? null : (d.fatigue || 0)), backgroundColor: 'rgba(52, 152, 219, 0.5)', order: 1 },
+                    { label: '정신 스트레스', data: lastData.map(d => (d.type === 'action' || d.type === 'state') ? null : (d.stress || 0)), backgroundColor: 'rgba(243, 156, 18, 0.5)', order: 1 },
+                    { label: '수면 부족', data: lastData.map(d => (d.type === 'action' || d.type === 'state') ? null : (d.sleep || 0)), backgroundColor: 'rgba(155, 89, 182, 0.5)', order: 1 },
+                    { label: '배고픔', data: lastData.map(d => (d.type === 'action' || d.type === 'state') ? null : (d.hunger || 0)), backgroundColor: 'rgba(46, 204, 113, 0.5)', order: 1 }
                 ] 
             },
             options: { 
@@ -1205,8 +1258,9 @@
                                 
                                 if (d.type === 'action') {
                                     return `💡 행동 의의: ${d.actionDesc}`;
-                                } 
-                                else if (context.datasetIndex === 0) {
+                                } else if (d.type === 'state') {
+                                    return `기분: ${d.mood}, 갈증: ${d.thirst}, 금단: ${d.withdrawal}`;
+                                } else if (context.datasetIndex === 0) {
                                     const reason = d.reason;
                                     if (reason) return `💡 고비 원인: ${reason}`;
                                 }
@@ -1348,7 +1402,7 @@
             await updateDoc(challengeRef, { cravings: arrayUnion(entry) });
             
             cravingData.push(entry);
-            const actualCravings = cravingData.filter(d => d.type !== 'action').length;
+            const actualCravings = cravingData.filter(d => d.type !== 'action' && d.type !== 'state').length;
             document.getElementById('cravingCount').innerText = actualCravings;
             closeModal('cravingModal');
             alert("고비를 잘 넘기셨습니다!");
@@ -1374,11 +1428,43 @@
             
             cravingData.push(entry);
             
-            const actualCravings = cravingData.filter(d => d.type !== 'action').length;
+            const actualCravings = cravingData.filter(d => d.type !== 'action' && d.type !== 'state').length;
             document.getElementById('cravingCount').innerText = actualCravings;
             
             closeModal('actionModal');
             alert(`훌륭합니다! [${actionName}] 행동을 기록했습니다.\n고비를 넘기는 힘이 점점 더 강해지고 있습니다.`);
+            
+            loadMotivationalStats();
+        } catch (e) { alert("저장 실패: " + e.message); }
+    };
+
+    window.submitState = async function() {
+        if (!userId || !currentChallengeId) return;
+        
+        const mood = document.getElementById('moodRange').value;
+        const thirst = document.getElementById('thirstRange').value;
+        const withdrawal = document.getElementById('withdrawalRange').value;
+
+        const entry = {
+            type: 'state',
+            date: new Date().toLocaleString('ko-KR', {month:'short', day:'numeric', hour:'numeric', minute:'numeric'}),
+            mood: parseInt(mood),
+            thirst: parseInt(thirst),
+            withdrawal: parseInt(withdrawal),
+            timestamp: new Date().getTime()
+        };
+
+        try {
+            const challengeRef = doc(db, "users", userId, "challenges", currentChallengeId);
+            await updateDoc(challengeRef, { cravings: arrayUnion(entry) });
+            
+            cravingData.push(entry);
+            
+            const actualCravings = cravingData.filter(d => d.type !== 'action' && d.type !== 'state').length;
+            document.getElementById('cravingCount').innerText = actualCravings;
+            
+            closeModal('stateModal');
+            alert("현재 몸상태가 성공적으로 기록되었습니다.");
             
             loadMotivationalStats();
         } catch (e) { alert("저장 실패: " + e.message); }
@@ -1414,8 +1500,10 @@
 
     window.updateRangeStyle = function(el, textId) {
         const val = parseInt(el.value);
-        const min = parseInt(el.min) || 1;
-        const max = parseInt(el.max) || 10;
+        const minStr = el.getAttribute('min');
+        const min = minStr !== null ? parseInt(minStr) : 1;
+        const maxStr = el.getAttribute('max');
+        const max = maxStr !== null ? parseInt(maxStr) : 10;
         const percent = ((val - min) / (max - min)) * 100;
         
         const hue = 120 - ((val - min) / (max - min)) * 120;
@@ -1441,6 +1529,11 @@
             updateRangeStyle(document.getElementById('stressRange'), 'stressVal');
             updateRangeStyle(document.getElementById('sleepRange'), 'sleepVal');
             updateRangeStyle(document.getElementById('hungerRange'), 'hungerVal');
+        }
+        if (id === 'stateModal') {
+            updateRangeStyle(document.getElementById('moodRange'), 'moodVal');
+            updateRangeStyle(document.getElementById('thirstRange'), 'thirstVal');
+            updateRangeStyle(document.getElementById('withdrawalRange'), 'withdrawalVal');
         }
     };
     
