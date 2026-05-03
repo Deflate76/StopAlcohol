@@ -105,7 +105,7 @@
         .change-card.active .progress-fill { background: linear-gradient(90deg, #2ecc71, #27ae60); }
         .change-card.active .progress-text { color: #fff; }
 
-        /* 모달 등 - 패딩 및 여백 축소 */
+        /* 모달 등 */
         .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; backdrop-filter: blur(4px); }
         .modal-content { background: white; padding: 20px; border-radius: 24px; width: 88%; max-width: 400px; max-height: 90vh; overflow-y: auto; text-align: left; position: relative; box-sizing: border-box; }
         
@@ -222,7 +222,6 @@
         <p><span class="highlight">1,000명의 도전자</span>와 함께하는 레이스!<br>마지막으로 술을 드신 일시를 선택해 주세요.</p>
         <input type="datetime-local" id="dateTimeInput">
         
-        <!-- 시작 사유 입력칸 -->
         <input type="text" id="startReasonInput" class="reason-input" placeholder="이번에 단주를 결심한 사유/각오 (선택)">
         
         <button class="start-btn" onclick="saveDate()">새로운 도전 시작하기</button>
@@ -331,6 +330,23 @@
         <input type="range" id="withdrawalRange" min="0" max="10" value="5" class="dynamic-range" oninput="updateRangeStyle(this, 'withdrawalVal')">
 
         <button class="start-btn" style="margin-top:15px; width:100%; padding: 14px; font-size: 1.1rem; background: linear-gradient(135deg, #3498db, #2980b9);" onclick="submitState()">현재 몸상태 기록하기</button>
+    </div>
+</div>
+
+<!-- 고비 극복 행동 평가 모달 -->
+<div id="evalModal" class="modal">
+    <div class="modal-content">
+        <button class="close-btn-top" onclick="closeModal('evalModal')">&times;</button>
+        <h3 style="margin-top:0; margin-bottom: 12px; padding-right: 20px;">🛡️ 극복 행동 효과 점검</h3>
+        <p id="evalMessage" style="font-size: 0.85rem; color: #666; margin-bottom: 20px; line-height: 1.5;"></p>
+
+        <label style="font-weight:700; font-size:0.9rem;">대책의 효과 (<span id="evalEffectVal" style="font-weight: 800;">5</span>/10) <br><span style="font-size:0.75rem; color:#999; font-weight:normal;">0: 전혀 없음 ~ 10: 매우 효과적</span></label>
+        <input type="range" id="evalEffectRange" min="0" max="10" value="5" class="dynamic-range" oninput="updateRangeStyle(this, 'evalEffectVal')">
+
+        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px;">현재 갈망 강도 (<span id="evalCravingVal" style="font-weight: 800;">5</span>/10)</label>
+        <input type="range" id="evalCravingRange" min="1" max="10" value="5" class="dynamic-range" oninput="updateRangeStyle(this, 'evalCravingVal')">
+
+        <button class="start-btn" style="margin-top:15px; width:100%; padding: 14px; font-size: 1.1rem; background: linear-gradient(135deg, #2ecc71, #27ae60);" onclick="submitEval()">평가 결과 기록하기</button>
     </div>
 </div>
 
@@ -490,11 +506,11 @@
     let unsubscribePosts = null; 
     let totalPastDays = 0;
     
-    // 글로벌 차트용 변수 추가
     let globalMaxDays = 0;
-    
-    // 시간 수정을 위한 변수 추가
     let editingChallengeId = null;
+    
+    // 알람 중복 방지 변수
+    let evalPromptedFor = null;
 
     window.onload = function() {
         renderChangeCards(currentTabName);
@@ -523,8 +539,8 @@
                     userQuitDate = data.startDate;
                     cravingData = data.cravings || [];
                     
-                    // action, state 타입은 고비 횟수에서 제외
-                    const actualCravings = cravingData.filter(d => d.type !== 'action' && d.type !== 'state').length;
+                    // 순수 고비만 카운트
+                    const actualCravings = cravingData.filter(d => !['action', 'state', 'eval'].includes(d.type)).length;
                     document.getElementById('cravingCount').innerText = actualCravings;
                     
                     startApp(userQuitDate);
@@ -532,7 +548,6 @@
                     document.getElementById('setupArea').style.display = 'flex';
                 }
                 
-                // 현재 도전 ID가 결정된 후에 통계를 호출해야 정확히 분리됨
                 loadMotivationalStats();
             } catch (e) { console.error("데이터 로드 에러:", e); }
         } else {
@@ -571,14 +586,12 @@
                 
                 totalDays += diffDays;
                 
-                // active 상태인 도전의 일수는 과거 일수 누적에서 제외
                 if (docSnap.id !== currentChallengeId) {
                     totalPastDays += diffDays;
                 }
 
                 if (diffDays > maxDays) maxDays = diffDays;
-                // action, state 타입은 고비 횟수에서 제외
-                if (data.cravings) totalCravings += data.cravings.filter(d => d.type !== 'action' && d.type !== 'state').length;
+                if (data.cravings) totalCravings += data.cravings.filter(d => !['action', 'state', 'eval'].includes(d.type)).length;
                 challengeCount++;
             });
 
@@ -858,7 +871,6 @@
         event.stopPropagation();
         editingChallengeId = historyDocId;
         
-        // datetime-local 형식(YYYY-MM-DDTHH:mm)으로 변환
         const d = new Date(currentStartDate);
         d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
         document.getElementById('editDateTimeInput').value = d.toISOString().slice(0, 16);
@@ -878,7 +890,6 @@
                 startDate: newDate
             });
 
-            // 현재 진행중인 도전의 시간을 바꿨다면 타이머도 업데이트
             if (editingChallengeId === currentChallengeId) {
                 userQuitDate = newDate;
                 startApp(newDate); 
@@ -886,7 +897,7 @@
             
             alert("시작 시간이 성공적으로 수정되었습니다.");
             closeModal('editTimeModal');
-            openHistoryList(); // 리스트 새로고침
+            openHistoryList(); 
             loadMotivationalStats();
         } catch (e) {
             console.error("시간 수정 에러:", e);
@@ -932,8 +943,7 @@
                 const end = data.endDate ? new Date(data.endDate) : new Date();
                 const diffDays = Math.max(0, Math.floor((end - start) / 86400000));
                 
-                // action 및 state 타입 필터링
-                const cravCount = data.cravings ? data.cravings.filter(d => d.type !== 'action' && d.type !== 'state').length : 0;
+                const cravCount = data.cravings ? data.cravings.filter(d => !['action', 'state', 'eval'].includes(d.type)).length : 0;
                 const encodedData = encodeURIComponent(JSON.stringify(data));
 
                 const startReasonText = data.startReason ? `<div style="margin-top:6px; font-size:0.8rem; color:#2c3e50; text-align:left;">🌱 <b>시작 각오:</b> ${data.startReason}</div>` : '';
@@ -1000,8 +1010,8 @@
         
         const data = JSON.parse(decodeURIComponent(encodedData));
         const startStr = new Date(data.startDate).toLocaleDateString('ko-KR');
-        // action 및 state 타입 필터링
-        const cravCount = data.cravings ? data.cravings.filter(d => d.type !== 'action' && d.type !== 'state').length : 0;
+        
+        const cravCount = data.cravings ? data.cravings.filter(d => !['action', 'state', 'eval'].includes(d.type)).length : 0;
         
         document.getElementById('historyDetailTitle').innerText = `${startStr} 도전 기록`;
         
@@ -1143,7 +1153,6 @@
         mainChart.options.plugins.annotation.annotations.line2.yMax = survivors;
         mainChart.options.plugins.annotation.annotations.line2.label.content = survivors.toLocaleString() + '명';
 
-        // 최장 생존 기록 표시 (현재 일수가 더 높으면 업데이트)
         let currentMaxDays = Math.max(globalMaxDays, Math.floor(days));
         if (currentMaxDays > 0) {
             mainChart.options.plugins.annotation.annotations.line3.xMin = currentMaxDays;
@@ -1178,10 +1187,8 @@
         const ctx = document.getElementById(canvasId).getContext('2d');
         if (targetChart) targetChart.destroy();
         
-        // 차트에 그릴 최근 데이터 (15개)
         const lastData = dataArray.slice(-15); 
         
-        // Annotation 플러그인을 위한 동적 객체 생성
         const customAnnotations = {};
         lastData.forEach((d, i) => {
             if (d.type === 'action') {
@@ -1189,16 +1196,19 @@
                     type: 'line',
                     xMin: i,
                     xMax: i,
+                    yMin: 0,
+                    yMax: 10,
                     borderColor: '#2ecc71',
                     borderWidth: 2,
                     borderDash: [4, 4],
                     label: {
                         display: true,
                         content: '🛡️ ' + d.actionName,
-                        position: 'start',
+                        position: 'center',
                         backgroundColor: '#2ecc71',
-                        font: { size: 10, weight: 'bold' },
-                        yAdjust: -5
+                        color: '#fff',
+                        font: { size: 11, weight: 'bold' },
+                        rotation: 90
                     }
                 };
             } else if (d.type === 'state') {
@@ -1216,6 +1226,23 @@
                         backgroundColor: '#3498db',
                         font: { size: 10, weight: 'bold' },
                         yAdjust: 15
+                    }
+                };
+            } else if (d.type === 'eval') {
+                customAnnotations['eval' + i] = {
+                    type: 'line',
+                    xMin: i,
+                    xMax: i,
+                    borderColor: '#27ae60',
+                    borderWidth: 2,
+                    borderDash: [2, 2],
+                    label: {
+                        display: true,
+                        content: '✓ 효과: ' + d.effect + '/10',
+                        position: 'start',
+                        backgroundColor: '#27ae60',
+                        font: { size: 10, weight: 'bold' },
+                        yAdjust: 35
                     }
                 };
             }
@@ -1238,10 +1265,10 @@
                         spanGaps: true, 
                         order: 0 
                     },
-                    { label: '육체 피로', data: lastData.map(d => (d.type === 'action' || d.type === 'state') ? null : (d.fatigue || 0)), backgroundColor: 'rgba(52, 152, 219, 0.5)', order: 1 },
-                    { label: '정신 스트레스', data: lastData.map(d => (d.type === 'action' || d.type === 'state') ? null : (d.stress || 0)), backgroundColor: 'rgba(243, 156, 18, 0.5)', order: 1 },
-                    { label: '수면 부족', data: lastData.map(d => (d.type === 'action' || d.type === 'state') ? null : (d.sleep || 0)), backgroundColor: 'rgba(155, 89, 182, 0.5)', order: 1 },
-                    { label: '배고픔', data: lastData.map(d => (d.type === 'action' || d.type === 'state') ? null : (d.hunger || 0)), backgroundColor: 'rgba(46, 204, 113, 0.5)', order: 1 }
+                    { label: '육체 피로', data: lastData.map(d => (d.type === 'action' || d.type === 'state' || d.type === 'eval') ? null : (d.fatigue || 0)), backgroundColor: 'rgba(52, 152, 219, 0.5)', order: 1 },
+                    { label: '정신 스트레스', data: lastData.map(d => (d.type === 'action' || d.type === 'state' || d.type === 'eval') ? null : (d.stress || 0)), backgroundColor: 'rgba(243, 156, 18, 0.5)', order: 1 },
+                    { label: '수면 부족', data: lastData.map(d => (d.type === 'action' || d.type === 'state' || d.type === 'eval') ? null : (d.sleep || 0)), backgroundColor: 'rgba(155, 89, 182, 0.5)', order: 1 },
+                    { label: '배고픔', data: lastData.map(d => (d.type === 'action' || d.type === 'state' || d.type === 'eval') ? null : (d.hunger || 0)), backgroundColor: 'rgba(46, 204, 113, 0.5)', order: 1 }
                 ] 
             },
             options: { 
@@ -1260,6 +1287,8 @@
                                     return `💡 행동 의의: ${d.actionDesc}`;
                                 } else if (d.type === 'state') {
                                     return `기분: ${d.mood}, 갈증: ${d.thirst}, 금단: ${d.withdrawal}`;
+                                } else if (d.type === 'eval') {
+                                    return `🛡️ 효과 점수: ${d.effect}/10`;
                                 } else if (context.datasetIndex === 0) {
                                     const reason = d.reason;
                                     if (reason) return `💡 고비 원인: ${reason}`;
@@ -1286,7 +1315,6 @@
         document.getElementById('setupArea').style.display = 'none';
         document.getElementById('displayArea').style.display = 'block';
         
-        // 날짜 형식 예쁘게 처리
         const d = new Date(startISO);
         const dateString = `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일 ${d.getHours()}시 ${d.getMinutes()}분`;
         document.getElementById('displaySettingDate').innerText = dateString;
@@ -1312,7 +1340,6 @@
 
             document.getElementById('mainDays').innerHTML = `${currentDays}일 <span style="font-size: 1.1rem; color: #a0aec0; font-weight: 700; margin-left: 5px;">(누적 ${totalCumul}일)</span>`;
             
-            // 상단의 누적/최장 일수 동적 업데이트 처리
             document.querySelectorAll('.dynamic-total-days').forEach(el => el.innerText = `${totalCumul}일`);
             document.querySelectorAll('.dynamic-max-days').forEach(el => el.innerText = `${currentMax}일`);
 
@@ -1324,7 +1351,6 @@
             const dailyProgress = ((nowH * 3600 + nowM * 60 + nowS) / 86400) * 100;
             
             document.getElementById('subFill').style.width = dailyProgress + '%';
-            
             document.getElementById('subPercent').innerText = `오늘 하루 진행도: ${nowH}시간 ${nowM}분 경과`;
 
             const survivors = Math.max(1, Math.round(1000 * Math.exp(-0.04 * days)));
@@ -1343,6 +1369,23 @@
 
             updateChart(days, survivors);
             if(currentTabName !== 'community') updateRoadmap(days); 
+
+            // ==========================================
+            // 주기적인 극복 행동 평가(3분 경과) 알람 체크
+            // ==========================================
+            if (cravingData.length > 0) {
+                const lastEntry = cravingData[cravingData.length - 1];
+                if (lastEntry && lastEntry.type === 'action' && evalPromptedFor !== lastEntry.timestamp) {
+                    const currentTime = new Date().getTime();
+                    // 3분(180,000ms) 경과 확인
+                    if (currentTime - lastEntry.timestamp > 3 * 60 * 1000) {
+                        evalPromptedFor = lastEntry.timestamp;
+                        document.getElementById('evalMessage').innerHTML = `최근 <b>[${lastEntry.actionName}]</b> 행동을 실천한 지 일정 시간이 지났습니다.<br>효과가 있었는지, 현재 갈망은 어떤지 평가해주세요.`;
+                        openModal('evalModal');
+                    }
+                }
+            }
+
         }, 1000);
     };
 
@@ -1402,7 +1445,7 @@
             await updateDoc(challengeRef, { cravings: arrayUnion(entry) });
             
             cravingData.push(entry);
-            const actualCravings = cravingData.filter(d => d.type !== 'action' && d.type !== 'state').length;
+            const actualCravings = cravingData.filter(d => !['action', 'state', 'eval'].includes(d.type)).length;
             document.getElementById('cravingCount').innerText = actualCravings;
             closeModal('cravingModal');
             alert("고비를 잘 넘기셨습니다!");
@@ -1428,7 +1471,7 @@
             
             cravingData.push(entry);
             
-            const actualCravings = cravingData.filter(d => d.type !== 'action' && d.type !== 'state').length;
+            const actualCravings = cravingData.filter(d => !['action', 'state', 'eval'].includes(d.type)).length;
             document.getElementById('cravingCount').innerText = actualCravings;
             
             closeModal('actionModal');
@@ -1460,11 +1503,41 @@
             
             cravingData.push(entry);
             
-            const actualCravings = cravingData.filter(d => d.type !== 'action' && d.type !== 'state').length;
+            const actualCravings = cravingData.filter(d => !['action', 'state', 'eval'].includes(d.type)).length;
             document.getElementById('cravingCount').innerText = actualCravings;
             
             closeModal('stateModal');
             alert("현재 몸상태가 성공적으로 기록되었습니다.");
+            
+            loadMotivationalStats();
+        } catch (e) { alert("저장 실패: " + e.message); }
+    };
+
+    window.submitEval = async function() {
+        if (!userId || !currentChallengeId) return;
+        
+        const effect = document.getElementById('evalEffectRange').value;
+        const craving = document.getElementById('evalCravingRange').value;
+
+        const entry = {
+            type: 'eval',
+            date: new Date().toLocaleString('ko-KR', {month:'short', day:'numeric', hour:'numeric', minute:'numeric'}),
+            effect: parseInt(effect),
+            strength: parseInt(craving), // 평가에 따른 새로운 갈망 수치
+            timestamp: new Date().getTime()
+        };
+
+        try {
+            const challengeRef = doc(db, "users", userId, "challenges", currentChallengeId);
+            await updateDoc(challengeRef, { cravings: arrayUnion(entry) });
+            
+            cravingData.push(entry);
+            
+            const actualCravings = cravingData.filter(d => !['action', 'state', 'eval'].includes(d.type)).length;
+            document.getElementById('cravingCount').innerText = actualCravings;
+            
+            closeModal('evalModal');
+            alert("평가가 훌륭하게 기록되었습니다!");
             
             loadMotivationalStats();
         } catch (e) { alert("저장 실패: " + e.message); }
@@ -1534,6 +1607,10 @@
             updateRangeStyle(document.getElementById('moodRange'), 'moodVal');
             updateRangeStyle(document.getElementById('thirstRange'), 'thirstVal');
             updateRangeStyle(document.getElementById('withdrawalRange'), 'withdrawalVal');
+        }
+        if (id === 'evalModal') {
+            updateRangeStyle(document.getElementById('evalEffectRange'), 'evalEffectVal');
+            updateRangeStyle(document.getElementById('evalCravingRange'), 'evalCravingVal');
         }
     };
     
