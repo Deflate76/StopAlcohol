@@ -262,6 +262,8 @@
 
         <div class="craving-section">
             <button class="craving-btn" onclick="openModal('cravingModal')">🔥 지금 고비가 왔어요!</button>
+            <button class="craving-btn" style="background-color: var(--success-color); margin-bottom: 15px;" onclick="openModal('actionModal')">🛡️ 고비 극복 행동 개시!</button>
+            
             <div style="display: flex; gap: 8px;">
                 <button class="stat-btn" onclick="openStats()">📈 현재 <span id="cravingCount">0</span>번 고비 넘김</button>
                 <button class="stat-btn" style="border-color: var(--primary-color); color: var(--primary-color);" onclick="openHistoryList()">📚 과거 기록</button>
@@ -311,6 +313,35 @@
 <footer>
     &copy; 2026 Alcoholaway.com All rights reserved.
 </footer>
+
+<!-- 고비 극복 행동 모달 -->
+<div id="actionModal" class="modal">
+    <div class="modal-content">
+        <button class="close-btn-top" onclick="closeModal('actionModal')">&times;</button>
+        
+        <h3 style="margin-top:0; margin-bottom: 12px; padding-right: 20px;">🛡️ 고비 극복 대책</h3>
+        <p style="font-size: 0.85rem; color: #666; margin-bottom: 20px; word-break: keep-all;">지금 당장 실천할 수 있는 대책을 선택하세요. 뇌의 주의를 분산시키고 도파민 보상 회로를 리셋합니다.</p>
+        
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+            <button class="stat-btn" style="text-align: left; padding: 15px; border-color: #3498db; color: #2d3748; background: #f0f8ff;" onclick="submitAction('냉수 마시기', '순간적인 체온 변화와 위장 자극으로 뇌의 주의를 알코올에서 물로 전환시킵니다.')">
+                <div style="font-weight: 800; color: #3498db; margin-bottom: 4px;">💧 시원한 냉수 들이키기</div>
+                <div style="font-size: 0.75rem; font-weight: normal; color: #555;">순간적인 체온 변화와 위장 자극으로 주의 환기</div>
+            </button>
+            <button class="stat-btn" style="text-align: left; padding: 15px; border-color: #e67e22; color: #2d3748; background: #fff8f0;" onclick="submitAction('단당류 섭취', '알코올 갈망의 상당수는 뇌의 일시적 저혈당 상태(가짜 갈망)에서 비롯됩니다. 초콜릿이나 사탕이 효과적입니다.')">
+                <div style="font-weight: 800; color: #e67e22; margin-bottom: 4px;">🍬 단당류(초콜릿/사탕) 섭취</div>
+                <div style="font-size: 0.75rem; font-weight: normal; color: #555;">알코올 갈망을 유발하는 뇌의 '가짜 저혈당' 해소</div>
+            </button>
+            <button class="stat-btn" style="text-align: left; padding: 15px; border-color: #2ecc71; color: #2d3748; background: #f0fff4;" onclick="submitAction('심호흡 1분', '부교감 신경을 활성화하여 순간적으로 치솟는 코르티솔(스트레스 호르몬)을 억제하고 충동을 가라앉힙니다.')">
+                <div style="font-weight: 800; color: #2ecc71; margin-bottom: 4px;">🧘 1분 심호흡 및 스트레칭</div>
+                <div style="font-size: 0.75rem; font-weight: normal; color: #555;">부교감 신경 활성화로 충동 억제력 회복</div>
+            </button>
+            <button class="stat-btn" style="text-align: left; padding: 15px; border-color: #9b59b6; color: #2d3748; background: #fbf0ff;" onclick="submitAction('가벼운 산책', '신체 활동을 통해 자연스러운 엔돌핀과 도파민을 분비시켜, 알코올이 주는 보상을 대체합니다.')">
+                <div style="font-weight: 800; color: #9b59b6; margin-bottom: 4px;">🏃‍♂️ 10분 가벼운 산책/운동</div>
+                <div style="font-size: 0.75rem; font-weight: normal; color: #555;">자연스러운 엔돌핀 분비로 보상 회로 대체</div>
+            </button>
+        </div>
+    </div>
+</div>
 
 <div id="cravingModal" class="modal">
     <div class="modal-content">
@@ -455,7 +486,11 @@
                     
                     userQuitDate = data.startDate;
                     cravingData = data.cravings || [];
-                    document.getElementById('cravingCount').innerText = cravingData.length;
+                    
+                    // action 타입은 고비 횟수에서 제외
+                    const actualCravings = cravingData.filter(d => d.type !== 'action').length;
+                    document.getElementById('cravingCount').innerText = actualCravings;
+                    
                     startApp(userQuitDate);
                 } else {
                     document.getElementById('setupArea').style.display = 'flex';
@@ -500,13 +535,14 @@
                 
                 totalDays += diffDays;
                 
-                // 버그 수정: active 상태인 도전의 일수는 과거 일수 누적에서 제외
+                // active 상태인 도전의 일수는 과거 일수 누적에서 제외
                 if (docSnap.id !== currentChallengeId) {
                     totalPastDays += diffDays;
                 }
 
                 if (diffDays > maxDays) maxDays = diffDays;
-                if (data.cravings) totalCravings += data.cravings.length;
+                // action 타입은 고비 횟수에서 제외
+                if (data.cravings) totalCravings += data.cravings.filter(d => d.type !== 'action').length;
                 challengeCount++;
             });
 
@@ -860,7 +896,8 @@
                 const end = data.endDate ? new Date(data.endDate) : new Date();
                 const diffDays = Math.max(0, Math.floor((end - start) / 86400000));
                 
-                const cravCount = data.cravings ? data.cravings.length : 0;
+                // action 타입 필터링
+                const cravCount = data.cravings ? data.cravings.filter(d => d.type !== 'action').length : 0;
                 const encodedData = encodeURIComponent(JSON.stringify(data));
 
                 const startReasonText = data.startReason ? `<div style="margin-top:6px; font-size:0.8rem; color:#2c3e50; text-align:left;">🌱 <b>시작 각오:</b> ${data.startReason}</div>` : '';
@@ -927,7 +964,8 @@
         
         const data = JSON.parse(decodeURIComponent(encodedData));
         const startStr = new Date(data.startDate).toLocaleDateString('ko-KR');
-        const cravCount = data.cravings ? data.cravings.length : 0;
+        // action 타입 필터링
+        const cravCount = data.cravings ? data.cravings.filter(d => d.type !== 'action').length : 0;
         
         document.getElementById('historyDetailTitle').innerText = `${startStr} 도전 기록`;
         
@@ -937,7 +975,7 @@
         document.getElementById('historyDetailSummary').innerHTML = summaryHtml;
 
         setTimeout(() => {
-            if (cravCount === 0) {
+            if (cravCount === 0 && (!data.cravings || data.cravings.length === 0)) {
                 document.getElementById('pastCravingHistoryChart').parentElement.innerHTML = '<div style="text-align:center; padding-top:100px; color:#999;">이 기간에 기록된 고비 데이터가 없습니다.</div><canvas id="pastCravingHistoryChart" style="display:none;"></canvas>';
             } else {
                 document.getElementById('pastCravingHistoryChart').parentElement.innerHTML = '<canvas id="pastCravingHistoryChart"></canvas>';
@@ -1100,12 +1138,36 @@
         }
     }
 
-    // ====== [수정된 부분] 툴팁 콜백 함수를 추가하여 갈망 원인을 병기합니다. ======
     function renderChart(canvasId, targetChart, dataArray) {
         const ctx = document.getElementById(canvasId).getContext('2d');
         if (targetChart) targetChart.destroy();
-        const lastData = dataArray.slice(-10);
         
+        // 차트에 그릴 최근 데이터 (15개)
+        const lastData = dataArray.slice(-15); 
+        
+        // Annotation 플러그인을 위한 동적 객체 생성
+        const customAnnotations = {};
+        lastData.forEach((d, i) => {
+            if (d.type === 'action') {
+                customAnnotations['action' + i] = {
+                    type: 'line',
+                    xMin: i,
+                    xMax: i,
+                    borderColor: '#2ecc71',
+                    borderWidth: 2,
+                    borderDash: [4, 4],
+                    label: {
+                        display: true,
+                        content: '🛡️ ' + d.actionName,
+                        position: 'start',
+                        backgroundColor: '#2ecc71',
+                        font: { size: 10, weight: 'bold' },
+                        yAdjust: -5
+                    }
+                };
+            }
+        });
+
         return new Chart(ctx, {
             type: 'bar',
             data: { 
@@ -1114,18 +1176,19 @@
                     { 
                         type: 'line',
                         label: '🔥 갈망 강도', 
-                        data: lastData.map(d => d.strength), 
+                        data: lastData.map(d => d.type === 'action' ? null : d.strength), 
                         borderColor: '#e74c3c', 
                         backgroundColor: '#e74c3c',
                         borderWidth: 3,
                         pointRadius: 5,
                         tension: 0.3,
+                        spanGaps: true, 
                         order: 0 
                     },
-                    { label: '육체 피로', data: lastData.map(d => d.fatigue || 0), backgroundColor: 'rgba(52, 152, 219, 0.5)', order: 1 },
-                    { label: '정신 스트레스', data: lastData.map(d => d.stress || 0), backgroundColor: 'rgba(243, 156, 18, 0.5)', order: 1 },
-                    { label: '수면 부족', data: lastData.map(d => d.sleep || 0), backgroundColor: 'rgba(155, 89, 182, 0.5)', order: 1 },
-                    { label: '배고픔', data: lastData.map(d => d.hunger || 0), backgroundColor: 'rgba(46, 204, 113, 0.5)', order: 1 }
+                    { label: '육체 피로', data: lastData.map(d => d.type === 'action' ? null : (d.fatigue || 0)), backgroundColor: 'rgba(52, 152, 219, 0.5)', order: 1 },
+                    { label: '정신 스트레스', data: lastData.map(d => d.type === 'action' ? null : (d.stress || 0)), backgroundColor: 'rgba(243, 156, 18, 0.5)', order: 1 },
+                    { label: '수면 부족', data: lastData.map(d => d.type === 'action' ? null : (d.sleep || 0)), backgroundColor: 'rgba(155, 89, 182, 0.5)', order: 1 },
+                    { label: '배고픔', data: lastData.map(d => d.type === 'action' ? null : (d.hunger || 0)), backgroundColor: 'rgba(46, 204, 113, 0.5)', order: 1 }
                 ] 
             },
             options: { 
@@ -1134,16 +1197,18 @@
                 scales: { y: { beginAtZero: true, max: 10 } },
                 plugins: { 
                     legend: { display: true, position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } },
+                    annotation: { annotations: customAnnotations }, 
                     tooltip: {
                         callbacks: {
-                            // 툴팁 텍스트 하단에 갈망 원인을 추가합니다.
                             afterLabel: function(context) {
-                                // '🔥 갈망 강도' 데이터셋(인덱스 0)일 때만 원인 표시
-                                if (context.datasetIndex === 0) {
-                                    const reason = lastData[context.dataIndex].reason;
-                                    if (reason) {
-                                        return `💡 원인: ${reason}`;
-                                    }
+                                const d = lastData[context.dataIndex];
+                                
+                                if (d.type === 'action') {
+                                    return `💡 행동 의의: ${d.actionDesc}`;
+                                } 
+                                else if (context.datasetIndex === 0) {
+                                    const reason = d.reason;
+                                    if (reason) return `💡 고비 원인: ${reason}`;
                                 }
                                 return null;
                             }
@@ -1155,7 +1220,7 @@
     }
 
     window.openStats = function() {
-        if (cravingData.length === 0) return alert("현재 도전에 기록된 고비가 없습니다.");
+        if (cravingData.length === 0) return alert("현재 도전에 기록된 데이터가 없습니다.");
         openModal('statsModal');
         setTimeout(() => {
             statsChart = renderChart('cravingHistoryChart', statsChart, cravingData);
@@ -1268,7 +1333,7 @@
         const hunger = document.getElementById('hungerRange').value;
 
         const entry = {
-            date: new Date().toLocaleString('ko-KR', {month:'short', day:'numeric', hour:'numeric'}),
+            date: new Date().toLocaleString('ko-KR', {month:'short', day:'numeric', hour:'numeric', minute:'numeric'}),
             strength: parseInt(strength),
             reason: reason === '기타' ? document.getElementById('etcReason').value : reason,
             fatigue: parseInt(fatigue),
@@ -1283,9 +1348,37 @@
             await updateDoc(challengeRef, { cravings: arrayUnion(entry) });
             
             cravingData.push(entry);
-            document.getElementById('cravingCount').innerText = cravingData.length;
+            const actualCravings = cravingData.filter(d => d.type !== 'action').length;
+            document.getElementById('cravingCount').innerText = actualCravings;
             closeModal('cravingModal');
             alert("고비를 잘 넘기셨습니다!");
+            
+            loadMotivationalStats();
+        } catch (e) { alert("저장 실패: " + e.message); }
+    };
+
+    window.submitAction = async function(actionName, actionDesc) {
+        if (!userId || !currentChallengeId) return;
+
+        const entry = {
+            type: 'action',
+            date: new Date().toLocaleString('ko-KR', {month:'short', day:'numeric', hour:'numeric', minute:'numeric'}),
+            actionName: actionName,
+            actionDesc: actionDesc,
+            timestamp: new Date().getTime()
+        };
+
+        try {
+            const challengeRef = doc(db, "users", userId, "challenges", currentChallengeId);
+            await updateDoc(challengeRef, { cravings: arrayUnion(entry) });
+            
+            cravingData.push(entry);
+            
+            const actualCravings = cravingData.filter(d => d.type !== 'action').length;
+            document.getElementById('cravingCount').innerText = actualCravings;
+            
+            closeModal('actionModal');
+            alert(`훌륭합니다! [${actionName}] 행동을 기록했습니다.\n고비를 넘기는 힘이 점점 더 강해지고 있습니다.`);
             
             loadMotivationalStats();
         } catch (e) { alert("저장 실패: " + e.message); }
