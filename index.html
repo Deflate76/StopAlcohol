@@ -1002,7 +1002,6 @@
                         annotations: { 
                             line1: { type: 'line', xMin: 0, xMax: 0, borderColor: '#2d3748', borderWidth: 2, borderDash: [4, 4], label: { display: true, content: '현재 경과', position: 'end', backgroundColor: '#2d3748', font: { size: 10 } } },
                             line2: { type: 'line', yMin: 0, yMax: 0, borderColor: '#e74c3c', borderWidth: 1.5, borderDash: [4, 4], label: { display: true, content: '생존', position: 'start', backgroundColor: '#e74c3c', font: { size: 10 } } },
-                            // 이 부분의 위치를 중앙으로 변경했습니다. (position: 'center'로 변경 및 yAdjust 제거)
                             line3: { type: 'line', xMin: 0, xMax: 0, borderColor: '#f39c12', borderWidth: 1.5, borderDash: [2, 2], label: { display: true, content: '최장 기록', position: 'center', backgroundColor: '#f39c12', font: { size: 10 } } }
                         } 
                     } 
@@ -1101,6 +1100,7 @@
         }
     }
 
+    // ====== [수정된 부분] 툴팁 콜백 함수를 추가하여 갈망 원인을 병기합니다. ======
     function renderChart(canvasId, targetChart, dataArray) {
         const ctx = document.getElementById(canvasId).getContext('2d');
         if (targetChart) targetChart.destroy();
@@ -1132,7 +1132,24 @@
                 responsive: true, 
                 maintainAspectRatio: false, 
                 scales: { y: { beginAtZero: true, max: 10 } },
-                plugins: { legend: { display: true, position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } } 
+                plugins: { 
+                    legend: { display: true, position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } },
+                    tooltip: {
+                        callbacks: {
+                            // 툴팁 텍스트 하단에 갈망 원인을 추가합니다.
+                            afterLabel: function(context) {
+                                // '🔥 갈망 강도' 데이터셋(인덱스 0)일 때만 원인 표시
+                                if (context.datasetIndex === 0) {
+                                    const reason = lastData[context.dataIndex].reason;
+                                    if (reason) {
+                                        return `💡 원인: ${reason}`;
+                                    }
+                                }
+                                return null;
+                            }
+                        }
+                    }
+                } 
             }
         });
     }
