@@ -255,31 +255,33 @@
 <div id="stateModal" class="modal">
     <div class="modal-content">
         <button class="close-btn-top" onclick="closeModal('stateModal')">&times;</button>
-        <h3 style="margin-top:0; margin-bottom: 12px; padding-right: 20px;">📝 현재 몸상태 기록</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-right: 25px;">
+            <h3 style="margin:0;">📝 현재 몸상태 기록</h3>
+            <button onclick="resetStateModal()" style="background:none; border:none; color:#718096; font-weight:bold; cursor:pointer; font-size:0.85rem; text-decoration:underline; padding:0;">초기화</button>
+        </div>
         
-        <label style="font-weight:700; font-size:0.9rem;">기분 상태 (<span id="moodVal" style="font-weight: 800;">5</span>/10) <br><span style="font-size:0.75rem; color:#999; font-weight:normal;">0: 최고 좋음 ~ 10: 최악으로 나쁨</span></label>
+        <label style="font-weight:700; font-size:0.9rem;">기분 상태 (<span id="moodVal" style="font-weight: 800;">5</span>/10)</label>
         <input type="range" id="moodRange" min="0" max="10" value="5" class="dynamic-range" oninput="updateRangeStyle(this, 'moodVal')">
         
-        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px;">갈증 상태 (<span id="thirstVal" style="font-weight: 800;">5</span>/10) <br><span style="font-size:0.75rem; color:#999; font-weight:normal;">0: 갈증 없음 ~ 10: 극심한 갈증</span></label>
+        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px;">갈증 상태 (<span id="thirstVal" style="font-weight: 800;">5</span>/10)</label>
         <input type="range" id="thirstRange" min="0" max="10" value="5" class="dynamic-range" oninput="updateRangeStyle(this, 'thirstVal')">
 
-        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px;">금단증상 정도 (<span id="withdrawalVal" style="font-weight: 800;">5</span>/10) <br><span style="font-size:0.75rem; color:#999; font-weight:normal;">0: 전혀 없음 ~ 10: 극심함</span></label>
+        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px;">금단증상 정도 (<span id="withdrawalVal" style="font-weight: 800;">5</span>/10)</label>
         <input type="range" id="withdrawalRange" min="0" max="10" value="5" class="dynamic-range" oninput="updateRangeStyle(this, 'withdrawalVal')">
 
-        <!-- 고비 기록에서 이동된 4가지 상태값 -->
         <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px;">육체피로 정도 (<span id="fatigueVal" style="font-weight: 800;">5</span>/10)</label>
         <input type="range" id="fatigueRange" min="1" max="10" value="5" class="dynamic-range" oninput="updateRangeStyle(this, 'fatigueVal')">
 
         <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px;">정신적 스트레스 정도 (<span id="stressVal" style="font-weight: 800;">5</span>/10)</label>
         <input type="range" id="stressRange" min="1" max="10" value="5" class="dynamic-range" oninput="updateRangeStyle(this, 'stressVal')">
 
-        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px;">수면 상태 (<span id="sleepVal" style="font-weight: 800;">5</span>/10) <br><span style="font-size:0.75rem; color:#999; font-weight:normal;">1: 충분함 ~ 10: 최고로 부족함</span></label>
+        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px;">수면 상태 (<span id="sleepVal" style="font-weight: 800;">5</span>/10)</label>
         <input type="range" id="sleepRange" min="1" max="10" value="5" class="dynamic-range" oninput="updateRangeStyle(this, 'sleepVal')">
 
-        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px;">배고픔 정도 (<span id="hungerVal" style="font-weight: 800;">5</span>/10) <br><span style="font-size:0.75rem; color:#999; font-weight:normal;">1: 충분함 ~ 10: 너무 배고픔</span></label>
+        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px;">배고픔 정도 (<span id="hungerVal" style="font-weight: 800;">5</span>/10)</label>
         <input type="range" id="hungerRange" min="1" max="10" value="5" class="dynamic-range" oninput="updateRangeStyle(this, 'hungerVal')">
 
-        <button class="start-btn" style="margin-top:15px; width:100%; padding: 14px; font-size: 1.1rem; background: linear-gradient(135deg, #3498db, #2980b9);" onclick="submitState()">현재 몸상태 기록하기</button>
+        <button class="start-btn" style="margin-top:20px; width:100%; padding: 14px; font-size: 1.1rem; background: linear-gradient(135deg, #3498db, #2980b9);" onclick="submitState()">현재 몸상태 기록하기</button>
     </div>
 </div>
 
@@ -288,7 +290,6 @@
     <div class="modal-content">
         <button class="close-btn-top" onclick="closeModal('evalModal')">&times;</button>
         <h3 style="margin-top:0; margin-bottom: 12px; padding-right: 20px;">🛡️ 극복 행동 효과 점검</h3>
-        <!-- 동적으로 경과 시간이 표시되는 영역 -->
         <p id="evalMessage" style="font-size: 0.85rem; color: #666; margin-bottom: 20px; line-height: 1.5;"></p>
 
         <label style="font-weight:700; font-size:0.9rem;">대책의 효과 (<span id="evalEffectVal" style="font-weight: 800;">5</span>/10) <br><span style="font-size:0.75rem; color:#999; font-weight:normal;">0: 전혀 없음 ~ 10: 매우 효과적</span></label>
@@ -1243,7 +1244,6 @@
                         spanGaps: true, 
                         order: 0 
                     },
-                    // 과거 데이터(type 없음)와 새로운 state 데이터를 모두 지원하기 위한 하위 호환성 적용
                     { label: '육체 피로', data: lastData.map(d => (d.type === 'state' || !d.type) && d.fatigue != null ? d.fatigue : null), backgroundColor: 'rgba(52, 152, 219, 0.5)', order: 1 },
                     { label: '정신 스트레스', data: lastData.map(d => (d.type === 'state' || !d.type) && d.stress != null ? d.stress : null), backgroundColor: 'rgba(243, 156, 18, 0.5)', order: 1 },
                     { label: '수면 부족', data: lastData.map(d => (d.type === 'state' || !d.type) && d.sleep != null ? d.sleep : null), backgroundColor: 'rgba(155, 89, 182, 0.5)', order: 1 },
@@ -1372,7 +1372,6 @@
             updateChart(days, survivors);
             if(currentTabName !== 'community') updateRoadmap(days); 
 
-            // 평가 팝업 - 시간 표시 로직 추가
             if (cravingData.length > 0) {
                 const lastEntry = cravingData[cravingData.length - 1];
                 if (lastEntry && lastEntry.type === 'action' && evalPromptedFor !== lastEntry.timestamp) {
@@ -1382,7 +1381,6 @@
                     if (diffMs > 3 * 60 * 1000) {
                         evalPromptedFor = lastEntry.timestamp;
                         
-                        // 실천 시각과 경과 시간(분) 계산
                         const actTime = new Date(lastEntry.timestamp);
                         const timeStr = actTime.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
                         const passedMins = Math.floor(diffMs / 60000);
@@ -1432,7 +1430,6 @@
         const strength = document.getElementById('cravingRange').value;
         const reason = document.getElementById('cravingReason').value;
 
-        // 고비 기록에서는 strength와 reason만 기록합니다.
         const entry = {
             date: new Date().toLocaleString('ko-KR', {month:'short', day:'numeric', hour:'numeric', minute:'numeric'}),
             strength: parseInt(strength),
@@ -1492,7 +1489,6 @@
         const sleep = document.getElementById('sleepRange').value;
         const hunger = document.getElementById('hungerRange').value;
 
-        // 현재 상태 기록에서 상세 4가지 항목을 모두 기록합니다.
         const entry = {
             type: 'state',
             date: new Date().toLocaleString('ko-KR', {month:'short', day:'numeric', hour:'numeric', minute:'numeric'}),
@@ -1601,6 +1597,20 @@
                 textEl.style.color = color;
             }
         }
+    };
+
+    // 범위 값들 초기화 함수 추가
+    window.resetStateModal = function() {
+        const ranges = ['moodRange', 'thirstRange', 'withdrawalRange', 'fatigueRange', 'stressRange', 'sleepRange', 'hungerRange'];
+        const valIds = ['moodVal', 'thirstVal', 'withdrawalVal', 'fatigueVal', 'stressVal', 'sleepVal', 'hungerVal'];
+        
+        ranges.forEach((id, index) => {
+            const el = document.getElementById(id);
+            if(el) {
+                el.value = 5;
+                updateRangeStyle(el, valIds[index]);
+            }
+        });
     };
 
     window.openModal = (id) => {
