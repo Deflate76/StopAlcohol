@@ -884,7 +884,7 @@
         }
     };
 
-  window.openHistoryList = async function() {
+    window.openHistoryList = async function() {
         if (!userId) return alert("로그인이 필요합니다.");
         
         closeModal('historyDetailModal');
@@ -914,11 +914,6 @@
                 });
                 const endStr = data.endDate ? new Date(data.endDate).toLocaleDateString('ko-KR') : '';
                 
-                // 💡 수정된 부분: 종료된 상태일 때 '이어하기' 버튼 추가
-                const statusHtml = data.status === 'active' 
-                    ? `<span class="history-status status-active">도전 중</span><button class="action-btn" style="font-size:1.1rem; padding:0; margin-left:6px; vertical-align:middle;" onclick="openEditTimeModal(event, '${historyDocId}', '${data.startDate}')" title="시작 시간 수정">⚙️</button>` 
-                    : `<span class="history-status status-failed">종료됨</span><button class="action-btn" style="font-size:0.75rem; padding:4px 8px; margin-left:8px; vertical-align:middle; background-color:var(--primary-color); color:white; border-radius:6px; font-weight:bold;" onclick="resumeHistory(event, '${historyDocId}')">🔄 이어하기</button>`;
-                
                 const start = new Date(data.startDate);
                 const end = data.endDate ? new Date(data.endDate) : new Date();
                 const diffDays = Math.max(0, Math.floor((end - start) / 86400000));
@@ -929,13 +924,19 @@
                 const startReasonText = data.startReason ? `<div style="margin-top:6px; font-size:0.8rem; color:#2c3e50; text-align:left;">🌱 <b>시작 각오:</b> ${data.startReason}</div>` : '';
                 const failReasonText = data.failReason ? `<div style="margin-top:4px; font-size:0.8rem; color:#e74c3c; text-align:left;">🥀 <b>중단 사유:</b> ${data.failReason}</div>` : '';
 
+                // 💡 새롭게 분리된 상태 뱃지와 액션 버튼 구역
+                const statusBadge = data.status === 'active' 
+                    ? `<span class="history-status status-active">도전 중</span>` 
+                    : `<span class="history-status status-failed">종료됨</span>`;
+                
+                const actionButton = data.status === 'active'
+                    ? `<button class="action-btn" style="font-size:0.8rem; padding:4px 8px; background-color:#e2e8f0; color:#4a5568; border-radius:6px; font-weight:bold;" onclick="openEditTimeModal(event, '${historyDocId}', '${data.startDate}')">⚙️ 시작시간 수정</button>`
+                    : `<button class="action-btn" style="font-size:0.8rem; padding:4px 10px; background-color:var(--primary-color); color:white; border-radius:6px; font-weight:bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" onclick="resumeHistory(event, '${historyDocId}')">🔄 이어하기</button>`;
+
                 const itemHtml = `
                     <div class="history-item" onclick="openHistoryDetail('${encodedData}')">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <div style="display:flex; align-items:center; gap:8px;">
-                                <strong style="color:var(--text-dark); font-size:0.9rem;">${startStr} ${data.status === 'active' ? '' : '~ ' + endStr}</strong>
-                                ${statusHtml}
-                            </div>
+                            <strong style="color:var(--text-dark); font-size:0.9rem;">${startStr} ${data.status === 'active' ? '' : '~ ' + endStr}</strong>
                             <button class="action-btn" style="color:var(--danger-color); font-size:1.3rem; padding:0; line-height:1;" onclick="deleteHistory(event, '${historyDocId}')" title="삭제">&times;</button>
                         </div>
                         <div style="font-size:0.85rem; color:#666; text-align:left; margin-top:4px;">
@@ -943,6 +944,11 @@
                         </div>
                         ${startReasonText}
                         ${failReasonText}
+                        
+                        <div style="margin-top: 12px; padding-top: 10px; border-top: 1px dashed #cbd5e0; display: flex; justify-content: space-between; align-items: center;">
+                            ${statusBadge}
+                            ${actionButton}
+                        </div>
                     </div>
                 `;
                 container.insertAdjacentHTML('beforeend', itemHtml);
@@ -984,14 +990,12 @@
         }
     };
 
-    // 💡 새롭게 추가된 이어하기 로직
     window.resumeHistory = async function(event, historyDocId) {
-        event.stopPropagation(); // 모달 오픈 이벤트 전파 방지
+        event.stopPropagation(); 
         if (!userId) return;
 
         if (confirm("정말 이 단주 기록을 다시 이어서 진행하시겠습니까?\n(현재 진행 중인 새로운 도전이 있다면 자동으로 종료 처리됩니다.)")) {
             try {
-                // 1. 현재 진행 중인 도전이 있다면 실패(종료) 처리
                 if (currentChallengeId && currentChallengeId !== historyDocId) {
                     const currentRef = doc(db, "users", userId, "challenges", currentChallengeId);
                     await updateDoc(currentRef, {
@@ -1001,15 +1005,13 @@
                     });
                 }
 
-                // 2. 선택한 과거 기록을 활성화(active) 상태로 변경
                 const targetRef = doc(db, "users", userId, "challenges", historyDocId);
                 await updateDoc(targetRef, {
                     status: 'active',
-                    endDate: null,      // 종료일 초기화
-                    failReason: null    // 실패 사유 초기화
+                    endDate: null,      
+                    failReason: null    
                 });
 
-                // 3. 로컬 상태 업데이트
                 currentChallengeId = historyDocId;
                 const targetSnap = await getDoc(targetRef);
                 
@@ -1022,7 +1024,6 @@
                     document.getElementById('cravingCount').innerText = actualCravings;
                 }
 
-                // 4. UI 갱신 및 앱 타이머 재시작
                 closeModal('historyListModal');
                 alert("선택한 단주 기록을 성공적으로 복구하여 이어서 진행합니다!");
                 
