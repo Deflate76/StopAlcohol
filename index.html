@@ -447,7 +447,7 @@
     let totalPastDays = 0;
     
     let globalMaxDays = 0;
-    let globalBestStartDate = null; // 최고 기록 시작일 저장용 변수 추가
+    let globalBestStartDate = null; 
     let editingChallengeId = null;
     
     // 알람 중복 방지 변수
@@ -1029,7 +1029,6 @@
                     legend: { display: true, position: 'top', labels: { boxWidth: 12, font: { size: 11, weight: 'bold' }, padding: 15 } }, 
                     annotation: { 
                         annotations: { 
-                            // 현재 경과 라벨의 position을 center로 변경하고, rotation: 90을 추가하여 세로로 표시
                             line1: { type: 'line', xMin: 0, xMax: 0, borderColor: '#2d3748', borderWidth: 2, borderDash: [4, 4], label: { display: true, content: '현재 경과', position: 'center', rotation: 90, backgroundColor: '#2d3748', color: '#fff', font: { size: 10 }, padding: { top: 4, bottom: 4, left: 6, right: 6 }, borderRadius: 4 } },
                             line2: { type: 'line', yMin: 0, yMax: 0, borderColor: '#e74c3c', borderWidth: 1.5, borderDash: [4, 4], label: { display: true, content: '생존', position: 'start', backgroundColor: '#e74c3c', font: { size: 10 } } },
                             line3: { type: 'line', xMin: 0, xMax: 0, borderColor: '#f39c12', borderWidth: 1.5, borderDash: [2, 2], label: { display: true, content: '최장 기록', position: 'center', backgroundColor: '#f39c12', font: { size: 10 } } }
@@ -1104,11 +1103,14 @@
         mainChart.options.plugins.annotation.annotations.line2.yMax = survivors;
         mainChart.options.plugins.annotation.annotations.line2.label.content = survivors.toLocaleString() + '명';
 
-        let currentMaxDays = Math.max(globalMaxDays, Math.floor(days));
-        if (currentMaxDays > 0) {
-            mainChart.options.plugins.annotation.annotations.line3.xMin = currentMaxDays;
-            mainChart.options.plugins.annotation.annotations.line3.xMax = currentMaxDays;
-            mainChart.options.plugins.annotation.annotations.line3.label.content = `최장 ${currentMaxDays}일`;
+        // 겹침 여부를 판단 (현재 경과일의 내림 값과 과거 최장 기록이 같거나 클 때)
+        let isOverlapping = (Math.floor(days) >= globalMaxDays);
+
+        // 과거 최장 기록이 존재하고, 현재 위치와 겹치지 않을 때만 "최장 O일" 선을 표시
+        if (globalMaxDays > 0 && !isOverlapping) {
+            mainChart.options.plugins.annotation.annotations.line3.xMin = globalMaxDays;
+            mainChart.options.plugins.annotation.annotations.line3.xMax = globalMaxDays;
+            mainChart.options.plugins.annotation.annotations.line3.label.content = `최장 ${globalMaxDays}일`;
             mainChart.options.plugins.annotation.annotations.line3.display = true;
         } else if (mainChart.options.plugins.annotation.annotations.line3) {
             mainChart.options.plugins.annotation.annotations.line3.display = false;
@@ -1141,11 +1143,12 @@
             distChart.options.plugins.annotation.annotations.myPosition.xMin = displayDays;
             distChart.options.plugins.annotation.annotations.myPosition.xMax = displayDays;
             
-            if (currentMaxDays > 0) {
-                const displayMax = Math.min(currentMaxDays, 100);
+            // 분포도 차트도 동일하게 겹칠 때는 "최장 O일" 표시 숨김
+            if (globalMaxDays > 0 && !isOverlapping) {
+                const displayMax = Math.min(globalMaxDays, 100);
                 distChart.options.plugins.annotation.annotations.maxPosition.xMin = displayMax;
                 distChart.options.plugins.annotation.annotations.maxPosition.xMax = displayMax;
-                distChart.options.plugins.annotation.annotations.maxPosition.label.content = `최장 ${currentMaxDays}일`;
+                distChart.options.plugins.annotation.annotations.maxPosition.label.content = `최장 ${globalMaxDays}일`;
                 distChart.options.plugins.annotation.annotations.maxPosition.display = true;
             } else if (distChart.options.plugins.annotation.annotations.maxPosition) {
                 distChart.options.plugins.annotation.annotations.maxPosition.display = false;
