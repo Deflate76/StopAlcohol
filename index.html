@@ -244,6 +244,9 @@
         </div>
         
         <button class="craving-btn" style="background-color: #7f8c8d; margin-top: 30px; font-size: 0.95rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" onclick="resetDate()">🔄 금주 실패... 새로운 단주 도전 및 재설정</button>
+        
+        <!-- 새롭게 추가된 음주 조절 모드 버튼 -->
+        <button class="craving-btn" style="background-color: #9b59b6; margin-top: 15px; font-size: 0.95rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" onclick="goToControlMode()">🍷 금주 실패... 음주 조절 모드로 전환</button>
     </div>
 </div>
 
@@ -588,6 +591,14 @@
             await signOut(auth);
             localStorage.removeItem('quitDrinkingDateTime_server');
         } catch (error) { alert("로그아웃 실패"); }
+    };
+
+    window.goToControlMode = function() {
+        if (!userId) {
+            alert("음주 조절 모드를 사용하려면 로그인이 필요합니다.");
+            return;
+        }
+        window.location.href = 'control.html';
     };
 
     window.switchTab = function(btn, tabName) {
@@ -1599,7 +1610,6 @@
         }
     };
 
-    // 범위 값들 초기화 함수 추가
     window.resetStateModal = function() {
         const ranges = ['moodRange', 'thirstRange', 'withdrawalRange', 'fatigueRange', 'stressRange', 'sleepRange', 'hungerRange'];
         const valIds = ['moodVal', 'thirstVal', 'withdrawalVal', 'fatigueVal', 'stressVal', 'sleepVal', 'hungerVal'];
