@@ -150,7 +150,7 @@
             
             <div style="margin-top: 20px;"></div>
             
-            <!-- 실시간 요약 리포트 영역 (그래프 상단에 위치) -->
+            <!-- 실시간 요약 리포트 영역 -->
             <p id="activeSummary" style="font-size: 0.85rem; color: #4a5568; line-height: 1.5; text-align: left; margin-bottom: 10px; display: none; padding: 10px; background: #fdfdfd; border-radius: 8px; border: 1px solid #edf2f7;"></p>
             
             <!-- 실시간 차트 영역 -->
@@ -165,7 +165,6 @@
 
             <div style="border-top: 1px solid #e2e8f0; margin: 25px 0 15px 0;"></div>
             
-            <!-- 수동 저장 버튼 제거됨, 자동 저장만 작동 -->
             <button class="action-btn btn-end" onclick="finishDrinkingSession()">🛑 음주 세션 완전히 종료 및 저장</button>
             <button class="back-btn" style="width: 100%; padding: 12px; margin-top: 10px;" onclick="cancelDrinkingSession()">현재 세션 취소 및 삭제</button>
         </div>
@@ -216,6 +215,16 @@
     let pastSessionsData = [];
     
     let currentSessionDocId = null; 
+
+    // === Firestore Timestamp 호환 안전장치 함수 ===
+    function toMs(t) {
+        if (!t) return 0;
+        if (typeof t === 'number') return t;
+        if (t.seconds !== undefined) return t.seconds * 1000;
+        if (typeof t.toMillis === 'function') return t.toMillis();
+        if (t instanceof Date) return t.getTime();
+        return new Date(t).getTime();
+    }
 
     // 로그인 상태 감지
     onAuthStateChanged(auth, (user) => {
@@ -276,7 +285,7 @@
 
         let html = '';
         pastSessionsData.forEach((data) => {
-            const startDate = new Date(data.startTime);
+            const startDate = new Date(toMs(data.startTime));
             const dateStr = startDate.toLocaleDateString('ko-KR', { year:'numeric', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
             const totalDrinks = data.drinksList ? data.drinksList.length : 0;
             const statusStr = data.isFinished ? "종료됨" : "중단됨";
@@ -295,7 +304,7 @@
     }
 
     function resumeActiveSession(sessionData) {
-        sessionStartTime = new Date(sessionData.startTime);
+        sessionStartTime = new Date(toMs(sessionData.startTime));
         drinksList = sessionData.drinksList || [];
         currentSessionDocId = sessionData.id;
         
@@ -343,7 +352,6 @@
         renderDrinkList();
         startTimer();
 
-        // 자동 생성 및 백그라운드 저장
         executeSaveProcess(false, true); 
     };
 
@@ -393,8 +401,8 @@
         if(!volume || volume <= 0) return alert("용량을 올바르게 입력해주세요.");
 
         const now = new Date();
-        const prevTime = drinksList.length > 0 ? new Date(drinksList[drinksList.length - 1].endTime) : sessionStartTime;
-        const gapMs = now.getTime() - prevTime.getTime();
+        const prevTimeMs = drinksList.length > 0 ? toMs(drinksList[drinksList.length - 1].endTime) : sessionStartTime.getTime();
+        const gapMs = now.getTime() - prevTimeMs;
         const gapMinutes = Math.round(gapMs / 60000);
 
         const r = gender === 'male' ? 0.86 : 0.64;
@@ -406,7 +414,7 @@
             drinkName: drinkName,
             abv: abv,
             volume: volume,
-            prevTime: prevTime.getTime(), 
+            prevTime: prevTimeMs, 
             endTime: now.getTime(),
             gapMinutes: gapMinutes,
             alcoholGrams: alcoholGrams,
@@ -416,10 +424,7 @@
         renderDrinkList();
         document.getElementById('activeChartContainer').style.display = 'block';
         
-        // 차트와 실시간 요약 업데이트 수행
         updateActiveChart(); 
-        
-        // 추가 즉시 백그라운드 저장
         executeSaveProcess(false, true);
     };
 
@@ -432,15 +437,13 @@
                 document.getElementById('activeSummary').style.display = 'none';
             } else {
                 for(let i = 0; i < drinksList.length; i++) {
-                    const prevTime = i > 0 ? drinksList[i-1].endTime : sessionStartTime.getTime();
-                    drinksList[i].prevTime = prevTime;
-                    drinksList[i].gapMinutes = Math.round((drinksList[i].endTime - prevTime) / 60000);
+                    const prevMs = i > 0 ? toMs(drinksList[i-1].endTime) : sessionStartTime.getTime();
+                    drinksList[i].prevTime = prevMs;
+                    drinksList[i].gapMinutes = Math.round((toMs(drinksList[i].endTime) - prevMs) / 60000);
                 }
                 updateActiveChart();
             }
             renderDrinkList();
-            
-            // 삭제 즉시 백그라운드 저장
             executeSaveProcess(false, true);
         }
     };
@@ -460,8 +463,8 @@
         for (let i = 0; i < drinksList.length; i++) {
             const d = drinksList[i];
             
-            const pTime = new Date(d.prevTime);
-            const eTime = new Date(d.endTime);
+            const pTime = new Date(toMs(d.prevTime));
+            const eTime = new Date(toMs(d.endTime));
 
             const startStr = pTime.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
             const endStr = eTime.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
@@ -500,7 +503,6 @@
         const mealOffsetHrs = parseFloat(document.getElementById('userMeal').value);
         const chartData = generateChartData(drinksList, sessionStartTime.getTime(), mealOffsetHrs);
         
-        // 실시간 종합 리포트 텍스트 업데이트
         const totalAlcoholGrams = drinksList.reduce((sum, d) => sum + d.alcoholGrams, 0);
         const totalClearHrs = chartData.dataPoints.length * 15 / 60; 
         
@@ -512,11 +514,9 @@
             • 알코올 완전 분해 예상 소요: <b style="color:var(--info-color);">${totalClearHrs.toFixed(1)}시간</b>
         `;
         
-        // 차트 업데이트
         drawChart(chartData, 'activeBacChart', activeChartInstance, (instance) => activeChartInstance = instance);
     }
 
-    // 최종 종료 저장 버튼
     window.finishDrinkingSession = async function() {
         if(drinksList.length === 0) {
             alert("기록된 음주 내역이 없어 세션을 종료할 수 없습니다.");
@@ -525,7 +525,6 @@
         await executeSaveProcess(true, false);
     };
 
-    // 저장 통합 로직 (isFinal: 완전종료여부, isSilent: 백그라운드 자동저장 여부)
     async function executeSaveProcess(isFinal, isSilent = false) {
         if(drinksList.length === 0 && !isFinal && !isSilent) {
             alert("저장할 음주 기록이 없습니다.");
@@ -562,11 +561,9 @@
 
         try {
             if (currentSessionDocId) {
-                // 업데이트
                 const docRef = doc(db, "drinking_sessions", currentSessionDocId);
                 await updateDoc(docRef, sessionData);
             } else {
-                // 신규 생성
                 sessionData.createdAt = serverTimestamp();
                 const docRef = await addDoc(collection(db, "drinking_sessions"), sessionData);
                 currentSessionDocId = docRef.id; 
@@ -601,13 +598,14 @@
         document.getElementById('setupCard').style.display = 'none';
         document.getElementById('historyCard').style.display = 'block';
 
-        const chartData = generateChartData(sessionData.drinksList, sessionData.startTime, sessionData.mealOffsetHrs);
+        const chartData = generateChartData(sessionData.drinksList, toMs(sessionData.startTime), sessionData.mealOffsetHrs);
         const totalClearHrs = chartData.dataPoints.length * 15 / 60; 
         const statusStr = sessionData.isFinished ? "종료됨" : "진행중 (또는 중단됨)";
+        const sessionDate = new Date(toMs(sessionData.startTime));
 
         document.getElementById('historySummary').innerHTML = `
             세션 상태: <b>${statusStr}</b><br>
-            세션 일시: <b>${new Date(sessionData.startTime).toLocaleString('ko-KR')}</b><br>
+            세션 일시: <b>${sessionDate.toLocaleString('ko-KR')}</b><br>
             총 <b>${sessionData.drinksList ? sessionData.drinksList.length : 0}잔</b> / 알코올 <b>${(sessionData.totalAlcoholGrams || 0).toFixed(1)}g</b> 섭취<br>
             • 종합 예상 최고 농도: <b style="color:var(--danger-color);">${(chartData.maxBac || 0).toFixed(3)}%</b><br>
             • 알코올 완전 분해 소요: 약 <b style="color:var(--info-color);">${totalClearHrs.toFixed(1)}시간</b>
@@ -619,7 +617,7 @@
         let html = '';
         if(sessionData.drinksList) {
             sessionData.drinksList.forEach((d, i) => {
-                const eTime = new Date(d.endTime);
+                const eTime = new Date(toMs(d.endTime));
                 const endStr = eTime.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
                 const maxBacDate = new Date(eTime.getTime() + (sessionData.mealOffsetHrs * 60 * 60000));
                 const maxBacTimeStr = maxBacDate.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
@@ -657,7 +655,7 @@
             return { labels: ['00:00'], dataPoints: [0], maxBac: 0 };
         }
 
-        const lastDrinkFullyAbsorbedTime = targetDrinksList[targetDrinksList.length - 1].endTime + (mealOffsetMin * 60000);
+        const lastDrinkFullyAbsorbedTime = toMs(targetDrinksList[targetDrinksList.length - 1].endTime) + (mealOffsetMin * 60000);
         
         for (let m = 0; m <= 24 * 60; m += 15) {
             let currentMs = startMs + (m * 60000);
@@ -666,8 +664,9 @@
             
             let totalAbsorbedBAC = 0;
             targetDrinksList.forEach(d => {
-                if (currentMs >= d.endTime) {
-                    let elapsedSinceDrinkMin = (currentMs - d.endTime) / 60000;
+                const eMs = toMs(d.endTime);
+                if (currentMs >= eMs) {
+                    let elapsedSinceDrinkMin = (currentMs - eMs) / 60000;
                     if (elapsedSinceDrinkMin >= mealOffsetMin) {
                         totalAbsorbedBAC += d.cMaxContribution; 
                     } else {
