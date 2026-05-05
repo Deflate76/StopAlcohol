@@ -884,7 +884,7 @@
         }
     };
 
-    window.openHistoryList = async function() {
+  window.openHistoryList = async function() {
         if (!userId) return alert("로그인이 필요합니다.");
         
         closeModal('historyDetailModal');
@@ -914,9 +914,10 @@
                 });
                 const endStr = data.endDate ? new Date(data.endDate).toLocaleDateString('ko-KR') : '';
                 
+                // 💡 수정된 부분: 종료된 상태일 때 '이어하기' 버튼 추가
                 const statusHtml = data.status === 'active' 
                     ? `<span class="history-status status-active">도전 중</span><button class="action-btn" style="font-size:1.1rem; padding:0; margin-left:6px; vertical-align:middle;" onclick="openEditTimeModal(event, '${historyDocId}', '${data.startDate}')" title="시작 시간 수정">⚙️</button>` 
-                    : `<span class="history-status status-failed">종료됨</span>`;
+                    : `<span class="history-status status-failed">종료됨</span><button class="action-btn" style="font-size:0.75rem; padding:4px 8px; margin-left:8px; vertical-align:middle; background-color:var(--primary-color); color:white; border-radius:6px; font-weight:bold;" onclick="resumeHistory(event, '${historyDocId}')">🔄 이어하기</button>`;
                 
                 const start = new Date(data.startDate);
                 const end = data.endDate ? new Date(data.endDate) : new Date();
@@ -980,6 +981,58 @@
         } catch (e) {
             container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--danger-color);">기록을 불러오는데 실패했습니다.</div>';
             console.error(e);
+        }
+    };
+
+    // 💡 새롭게 추가된 이어하기 로직
+    window.resumeHistory = async function(event, historyDocId) {
+        event.stopPropagation(); // 모달 오픈 이벤트 전파 방지
+        if (!userId) return;
+
+        if (confirm("정말 이 단주 기록을 다시 이어서 진행하시겠습니까?\n(현재 진행 중인 새로운 도전이 있다면 자동으로 종료 처리됩니다.)")) {
+            try {
+                // 1. 현재 진행 중인 도전이 있다면 실패(종료) 처리
+                if (currentChallengeId && currentChallengeId !== historyDocId) {
+                    const currentRef = doc(db, "users", userId, "challenges", currentChallengeId);
+                    await updateDoc(currentRef, {
+                        status: 'failed',
+                        endDate: new Date().toISOString(),
+                        failReason: '과거 기록 이어하기로 전환'
+                    });
+                }
+
+                // 2. 선택한 과거 기록을 활성화(active) 상태로 변경
+                const targetRef = doc(db, "users", userId, "challenges", historyDocId);
+                await updateDoc(targetRef, {
+                    status: 'active',
+                    endDate: null,      // 종료일 초기화
+                    failReason: null    // 실패 사유 초기화
+                });
+
+                // 3. 로컬 상태 업데이트
+                currentChallengeId = historyDocId;
+                const targetSnap = await getDoc(targetRef);
+                
+                if (targetSnap.exists()) {
+                    const data = targetSnap.data();
+                    userQuitDate = data.startDate;
+                    cravingData = data.cravings || [];
+                    
+                    const actualCravings = cravingData.filter(d => !['action', 'state', 'eval'].includes(d.type)).length;
+                    document.getElementById('cravingCount').innerText = actualCravings;
+                }
+
+                // 4. UI 갱신 및 앱 타이머 재시작
+                closeModal('historyListModal');
+                alert("선택한 단주 기록을 성공적으로 복구하여 이어서 진행합니다!");
+                
+                startApp(userQuitDate);
+                loadMotivationalStats();
+                
+            } catch (e) {
+                console.error("기록 이어하기 에러:", e);
+                alert("기록 이어하기에 실패했습니다: " + e.message);
+            }
         }
     };
 
