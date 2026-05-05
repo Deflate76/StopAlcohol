@@ -190,7 +190,6 @@
                 </div>
                 <span class="sub-percent-text" id="subPercent">오늘의 목표: 진행 중...</span>
                 
-                <!-- 설정 날짜 텍스트 위치 변경 -->
                 <div style="font-size: 0.8rem; color: #999; margin-top: 10px;">도전 시작 일시: <span id="displaySettingDate">-</span></div>
             </div>
         </div>
@@ -215,7 +214,6 @@
         <div class="rank-info">
             <div class="rank-item">현재 1,000명 중 <span class="rank-number" id="survivors">1,000</span>명 생존</div>
             <div class="rank-item">나의 현재 순위 : <span class="rank-number" id="myRank">1</span>위 <span id="rankChange" style="font-size: 0.95rem; font-weight: 800; margin-left: 8px;"></span></div>
-            <!-- 최고 순위 표시 추가 -->
             <div class="rank-item" style="font-size: 0.85rem; color: #666; margin-top: 2px;">(나의 최고 순위: <span id="myBestRank">-</span>위 <span id="myBestRankDate"></span>)</div>
         </div>
 
@@ -245,7 +243,6 @@
             <div id="postList" style="display: flex; flex-direction: column; gap: 0px;"></div>
         </div>
         
-        <!-- 초기화 버튼 스타일 변경 (craving-btn 형태 적용) -->
         <button class="craving-btn" style="background-color: #7f8c8d; margin-top: 30px; font-size: 0.95rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" onclick="resetDate()">🔄 금주 실패... 새로운 단주 도전 및 재설정</button>
     </div>
 </div>
@@ -269,6 +266,19 @@
         <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px;">금단증상 정도 (<span id="withdrawalVal" style="font-weight: 800;">5</span>/10) <br><span style="font-size:0.75rem; color:#999; font-weight:normal;">0: 전혀 없음 ~ 10: 극심함</span></label>
         <input type="range" id="withdrawalRange" min="0" max="10" value="5" class="dynamic-range" oninput="updateRangeStyle(this, 'withdrawalVal')">
 
+        <!-- 고비 기록에서 이동된 4가지 상태값 -->
+        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px;">육체피로 정도 (<span id="fatigueVal" style="font-weight: 800;">5</span>/10)</label>
+        <input type="range" id="fatigueRange" min="1" max="10" value="5" class="dynamic-range" oninput="updateRangeStyle(this, 'fatigueVal')">
+
+        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px;">정신적 스트레스 정도 (<span id="stressVal" style="font-weight: 800;">5</span>/10)</label>
+        <input type="range" id="stressRange" min="1" max="10" value="5" class="dynamic-range" oninput="updateRangeStyle(this, 'stressVal')">
+
+        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px;">수면 상태 (<span id="sleepVal" style="font-weight: 800;">5</span>/10) <br><span style="font-size:0.75rem; color:#999; font-weight:normal;">1: 충분함 ~ 10: 최고로 부족함</span></label>
+        <input type="range" id="sleepRange" min="1" max="10" value="5" class="dynamic-range" oninput="updateRangeStyle(this, 'sleepVal')">
+
+        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px;">배고픔 정도 (<span id="hungerVal" style="font-weight: 800;">5</span>/10) <br><span style="font-size:0.75rem; color:#999; font-weight:normal;">1: 충분함 ~ 10: 너무 배고픔</span></label>
+        <input type="range" id="hungerRange" min="1" max="10" value="5" class="dynamic-range" oninput="updateRangeStyle(this, 'hungerVal')">
+
         <button class="start-btn" style="margin-top:15px; width:100%; padding: 14px; font-size: 1.1rem; background: linear-gradient(135deg, #3498db, #2980b9);" onclick="submitState()">현재 몸상태 기록하기</button>
     </div>
 </div>
@@ -278,6 +288,7 @@
     <div class="modal-content">
         <button class="close-btn-top" onclick="closeModal('evalModal')">&times;</button>
         <h3 style="margin-top:0; margin-bottom: 12px; padding-right: 20px;">🛡️ 극복 행동 효과 점검</h3>
+        <!-- 동적으로 경과 시간이 표시되는 영역 -->
         <p id="evalMessage" style="font-size: 0.85rem; color: #666; margin-bottom: 20px; line-height: 1.5;"></p>
 
         <label style="font-weight:700; font-size:0.9rem;">대책의 효과 (<span id="evalEffectVal" style="font-weight: 800;">5</span>/10) <br><span style="font-size:0.75rem; color:#999; font-weight:normal;">0: 전혀 없음 ~ 10: 매우 효과적</span></label>
@@ -354,18 +365,6 @@
             <option value="기타">기타 (직접 입력)</option>
         </select>
         <textarea id="etcReason" style="display:none;" placeholder="구체적인 사유를 적어주세요"></textarea>
-
-        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px;">육체피로 정도 (<span id="fatigueVal" style="font-weight: 800;">5</span>/10)</label>
-        <input type="range" id="fatigueRange" min="1" max="10" value="5" class="dynamic-range" oninput="updateRangeStyle(this, 'fatigueVal')">
-
-        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px;">정신적 스트레스 정도 (<span id="stressVal" style="font-weight: 800;">5</span>/10)</label>
-        <input type="range" id="stressRange" min="1" max="10" value="5" class="dynamic-range" oninput="updateRangeStyle(this, 'stressVal')">
-
-        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px;">수면 상태 (<span id="sleepVal" style="font-weight: 800;">5</span>/10) <br><span style="font-size:0.75rem; color:#999; font-weight:normal;">1: 충분함 ~ 10: 최고로 부족함</span></label>
-        <input type="range" id="sleepRange" min="1" max="10" value="5" class="dynamic-range" oninput="updateRangeStyle(this, 'sleepVal')">
-
-        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px;">배고픔 정도 (<span id="hungerVal" style="font-weight: 800;">5</span>/10) <br><span style="font-size:0.75rem; color:#999; font-weight:normal;">1: 충분함 ~ 10: 너무 배고픔</span></label>
-        <input type="range" id="hungerRange" min="1" max="10" value="5" class="dynamic-range" oninput="updateRangeStyle(this, 'hungerVal')">
 
         <button class="start-btn" style="margin-top:15px; width:100%; padding: 14px; font-size: 1.1rem;" onclick="submitCraving()">이 고비 기록하고 참기</button>
     </div>
@@ -1103,10 +1102,8 @@
         mainChart.options.plugins.annotation.annotations.line2.yMax = survivors;
         mainChart.options.plugins.annotation.annotations.line2.label.content = survivors.toLocaleString() + '명';
 
-        // 겹침 여부를 판단 (현재 경과일의 내림 값과 과거 최장 기록이 같거나 클 때)
         let isOverlapping = (Math.floor(days) >= globalMaxDays);
 
-        // 과거 최장 기록이 존재하고, 현재 위치와 겹치지 않을 때만 "최장 O일" 선을 표시
         if (globalMaxDays > 0 && !isOverlapping) {
             mainChart.options.plugins.annotation.annotations.line3.xMin = globalMaxDays;
             mainChart.options.plugins.annotation.annotations.line3.xMax = globalMaxDays;
@@ -1130,20 +1127,18 @@
             }
             const currentY = (1 / (displayDays + 5)) * Math.exp(-Math.pow(Math.log((displayDays+1)/15), 2) / (2 * Math.pow(0.8, 2))) * 1000;
             
-            // 양측 데이터셋이 끊기지 않도록 현재 시점을 추가합니다.
             distPast.push({x: displayDays, y: currentY});
             distFuture.unshift({x: displayDays, y: currentY});
 
             distPast.sort((a,b)=>a.x - b.x);
             distFuture.sort((a,b)=>a.x - b.x);
 
-            distChart.data.datasets[0].data = distPast; // 좌측 AUC (빨간색)
-            distChart.data.datasets[1].data = distFuture; // 우측 AUC (보라색)
+            distChart.data.datasets[0].data = distPast; 
+            distChart.data.datasets[1].data = distFuture; 
 
             distChart.options.plugins.annotation.annotations.myPosition.xMin = displayDays;
             distChart.options.plugins.annotation.annotations.myPosition.xMax = displayDays;
             
-            // 분포도 차트도 동일하게 겹칠 때는 "최장 O일" 표시 숨김
             if (globalMaxDays > 0 && !isOverlapping) {
                 const displayMax = Math.min(globalMaxDays, 100);
                 distChart.options.plugins.annotation.annotations.maxPosition.xMin = displayMax;
@@ -1248,10 +1243,11 @@
                         spanGaps: true, 
                         order: 0 
                     },
-                    { label: '육체 피로', data: lastData.map(d => (d.type === 'action' || d.type === 'state' || d.type === 'eval') ? null : (d.fatigue || 0)), backgroundColor: 'rgba(52, 152, 219, 0.5)', order: 1 },
-                    { label: '정신 스트레스', data: lastData.map(d => (d.type === 'action' || d.type === 'state' || d.type === 'eval') ? null : (d.stress || 0)), backgroundColor: 'rgba(243, 156, 18, 0.5)', order: 1 },
-                    { label: '수면 부족', data: lastData.map(d => (d.type === 'action' || d.type === 'state' || d.type === 'eval') ? null : (d.sleep || 0)), backgroundColor: 'rgba(155, 89, 182, 0.5)', order: 1 },
-                    { label: '배고픔', data: lastData.map(d => (d.type === 'action' || d.type === 'state' || d.type === 'eval') ? null : (d.hunger || 0)), backgroundColor: 'rgba(46, 204, 113, 0.5)', order: 1 }
+                    // 과거 데이터(type 없음)와 새로운 state 데이터를 모두 지원하기 위한 하위 호환성 적용
+                    { label: '육체 피로', data: lastData.map(d => (d.type === 'state' || !d.type) && d.fatigue != null ? d.fatigue : null), backgroundColor: 'rgba(52, 152, 219, 0.5)', order: 1 },
+                    { label: '정신 스트레스', data: lastData.map(d => (d.type === 'state' || !d.type) && d.stress != null ? d.stress : null), backgroundColor: 'rgba(243, 156, 18, 0.5)', order: 1 },
+                    { label: '수면 부족', data: lastData.map(d => (d.type === 'state' || !d.type) && d.sleep != null ? d.sleep : null), backgroundColor: 'rgba(155, 89, 182, 0.5)', order: 1 },
+                    { label: '배고픔', data: lastData.map(d => (d.type === 'state' || !d.type) && d.hunger != null ? d.hunger : null), backgroundColor: 'rgba(46, 204, 113, 0.5)', order: 1 }
                 ] 
             },
             options: { 
@@ -1269,7 +1265,11 @@
                                 if (d.type === 'action') {
                                     return `💡 행동 의의: ${d.actionDesc}`;
                                 } else if (d.type === 'state') {
-                                    return `기분: ${d.mood}, 갈증: ${d.thirst}, 금단: ${d.withdrawal}`;
+                                    let txt = [`기분: ${d.mood}, 갈증: ${d.thirst}, 금단: ${d.withdrawal}`];
+                                    if (d.fatigue != null) {
+                                        txt.push(`피로: ${d.fatigue}, 스트레스: ${d.stress}, 수면: ${d.sleep}, 허기: ${d.hunger}`);
+                                    }
+                                    return txt;
                                 } else if (d.type === 'eval') {
                                     return `🛡️ 효과 점수: ${d.effect}/10`;
                                 } else if (context.datasetIndex === 0) {
@@ -1350,12 +1350,10 @@
                 rankChangeEl.innerHTML = `<span style="color: #a0aec0;">-</span>`;
             }
             
-            // 최고 순위 및 날짜 업데이트 로직
             if (currentMax > 0) {
                 const bestRank = Math.max(1, Math.round(1000 * Math.exp(-0.04 * currentMax)));
                 document.getElementById('myBestRank').innerText = bestRank.toLocaleString();
                 
-                // 만약 현재 기록이 과거 최고기록을 깼다면 시작일은 현재 도전의 시작일로 표시
                 let targetStartDateStr = globalBestStartDate;
                 if (currentDays >= globalMaxDays) {
                     targetStartDateStr = startISO;
@@ -1374,17 +1372,22 @@
             updateChart(days, survivors);
             if(currentTabName !== 'community') updateRoadmap(days); 
 
-            // ==========================================
-            // 주기적인 극복 행동 평가(3분 경과) 알람 체크
-            // ==========================================
+            // 평가 팝업 - 시간 표시 로직 추가
             if (cravingData.length > 0) {
                 const lastEntry = cravingData[cravingData.length - 1];
                 if (lastEntry && lastEntry.type === 'action' && evalPromptedFor !== lastEntry.timestamp) {
                     const currentTime = new Date().getTime();
-                    // 3분(180,000ms) 경과 확인
-                    if (currentTime - lastEntry.timestamp > 3 * 60 * 1000) {
+                    const diffMs = currentTime - lastEntry.timestamp;
+                    
+                    if (diffMs > 3 * 60 * 1000) {
                         evalPromptedFor = lastEntry.timestamp;
-                        document.getElementById('evalMessage').innerHTML = `최근 <b>[${lastEntry.actionName}]</b> 행동을 실천한 지 일정 시간이 지났습니다.<br>효과가 있었는지, 현재 갈망은 어떤지 평가해주세요.`;
+                        
+                        // 실천 시각과 경과 시간(분) 계산
+                        const actTime = new Date(lastEntry.timestamp);
+                        const timeStr = actTime.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+                        const passedMins = Math.floor(diffMs / 60000);
+                        
+                        document.getElementById('evalMessage').innerHTML = `최근 <b>[${lastEntry.actionName}]</b> 행동을 실천한 지 <b>${passedMins}분</b> 지났습니다.<br><span style="font-size:0.8rem; color:#999;">(실천 시각: ${timeStr})</span><br><br>효과가 있었는지, 현재 갈망은 어떤지 평가해주세요.`;
                         openModal('evalModal');
                     }
                 }
@@ -1428,19 +1431,12 @@
         
         const strength = document.getElementById('cravingRange').value;
         const reason = document.getElementById('cravingReason').value;
-        const fatigue = document.getElementById('fatigueRange').value;
-        const stress = document.getElementById('stressRange').value;
-        const sleep = document.getElementById('sleepRange').value;
-        const hunger = document.getElementById('hungerRange').value;
 
+        // 고비 기록에서는 strength와 reason만 기록합니다.
         const entry = {
             date: new Date().toLocaleString('ko-KR', {month:'short', day:'numeric', hour:'numeric', minute:'numeric'}),
             strength: parseInt(strength),
             reason: reason === '기타' ? document.getElementById('etcReason').value : reason,
-            fatigue: parseInt(fatigue),
-            stress: parseInt(stress),
-            sleep: parseInt(sleep),
-            hunger: parseInt(hunger),
             timestamp: new Date().getTime()
         };
 
@@ -1491,13 +1487,22 @@
         const mood = document.getElementById('moodRange').value;
         const thirst = document.getElementById('thirstRange').value;
         const withdrawal = document.getElementById('withdrawalRange').value;
+        const fatigue = document.getElementById('fatigueRange').value;
+        const stress = document.getElementById('stressRange').value;
+        const sleep = document.getElementById('sleepRange').value;
+        const hunger = document.getElementById('hungerRange').value;
 
+        // 현재 상태 기록에서 상세 4가지 항목을 모두 기록합니다.
         const entry = {
             type: 'state',
             date: new Date().toLocaleString('ko-KR', {month:'short', day:'numeric', hour:'numeric', minute:'numeric'}),
             mood: parseInt(mood),
             thirst: parseInt(thirst),
             withdrawal: parseInt(withdrawal),
+            fatigue: parseInt(fatigue),
+            stress: parseInt(stress),
+            sleep: parseInt(sleep),
+            hunger: parseInt(hunger),
             timestamp: new Date().getTime()
         };
 
@@ -1527,7 +1532,7 @@
             type: 'eval',
             date: new Date().toLocaleString('ko-KR', {month:'short', day:'numeric', hour:'numeric', minute:'numeric'}),
             effect: parseInt(effect),
-            strength: parseInt(craving), // 평가에 따른 새로운 갈망 수치
+            strength: parseInt(craving), 
             timestamp: new Date().getTime()
         };
 
@@ -1602,15 +1607,15 @@
         document.getElementById(id).style.display = 'flex';
         if (id === 'cravingModal') {
             updateRangeStyle(document.getElementById('cravingRange'), 'rangeVal');
-            updateRangeStyle(document.getElementById('fatigueRange'), 'fatigueVal');
-            updateRangeStyle(document.getElementById('stressRange'), 'stressVal');
-            updateRangeStyle(document.getElementById('sleepRange'), 'sleepVal');
-            updateRangeStyle(document.getElementById('hungerRange'), 'hungerVal');
         }
         if (id === 'stateModal') {
             updateRangeStyle(document.getElementById('moodRange'), 'moodVal');
             updateRangeStyle(document.getElementById('thirstRange'), 'thirstVal');
             updateRangeStyle(document.getElementById('withdrawalRange'), 'withdrawalVal');
+            updateRangeStyle(document.getElementById('fatigueRange'), 'fatigueVal');
+            updateRangeStyle(document.getElementById('stressRange'), 'stressVal');
+            updateRangeStyle(document.getElementById('sleepRange'), 'sleepVal');
+            updateRangeStyle(document.getElementById('hungerRange'), 'hungerVal');
         }
         if (id === 'evalModal') {
             updateRangeStyle(document.getElementById('evalEffectRange'), 'evalEffectVal');
