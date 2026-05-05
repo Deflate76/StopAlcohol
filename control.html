@@ -44,12 +44,11 @@
         .action-btn:active { transform: scale(0.97); }
         .btn-start { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
         .btn-add { background: linear-gradient(135deg, #3498db, #2980b9); }
-        .btn-save { background: linear-gradient(135deg, #27ae60, #2ecc71); }
         .btn-end { background: linear-gradient(135deg, #e74c3c, #c0392b); }
         
         .status-display { font-size: 1.1rem; font-weight: 800; color: var(--text-dark); background: #f0f7ff; padding: 15px; border-radius: 12px; margin-bottom: 5px; border: 1px dashed #3498db; }
         
-        .chart-container { position: relative; height: 250px; width: 100%; margin-top: 15px; margin-bottom: 20px; display: none; }
+        .chart-container { position: relative; height: 250px; width: 100%; margin-top: 10px; margin-bottom: 20px; display: none; }
         #loadingArea { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 50vh; color: #718096; font-weight: bold; gap: 10px; }
 
         /* 음주 리스트 스타일 */
@@ -127,7 +126,7 @@
             <div class="card-title"><span>⏳</span> 통제 하에 음주 중...</div>
             
             <div class="status-display" id="elapsedTimeDisplay">음주 진행 시간: 00:00:00</div>
-            <!-- 음주 시작 시각 표시 영역 추가 -->
+            <!-- 음주 시작 시각 표시 영역 -->
             <div id="startTimeDisplay" style="font-size: 0.85rem; color: #718096; margin-bottom: 20px; font-weight: 600;">시작 시각: --:--</div>
             
             <div style="border-top: 1px dashed #e2e8f0; margin: 15px 0 20px 0;"></div>
@@ -149,7 +148,12 @@
 
             <button class="action-btn btn-add" onclick="addDrinkItem()">🍺 해당 용량 음주완료 기록</button>
             
-            <!-- 실시간 차트 영역 (최초엔 숨김) -->
+            <div style="margin-top: 20px;"></div>
+            
+            <!-- 실시간 요약 리포트 영역 (그래프 상단에 위치) -->
+            <p id="activeSummary" style="font-size: 0.85rem; color: #4a5568; line-height: 1.5; text-align: left; margin-bottom: 10px; display: none; padding: 10px; background: #fdfdfd; border-radius: 8px; border: 1px solid #edf2f7;"></p>
+            
+            <!-- 실시간 차트 영역 -->
             <div class="chart-container" id="activeChartContainer">
                 <canvas id="activeBacChart"></canvas>
             </div>
@@ -161,7 +165,7 @@
 
             <div style="border-top: 1px solid #e2e8f0; margin: 25px 0 15px 0;"></div>
             
-            <button class="action-btn btn-save" onclick="saveCurrentSession()">💾 현재 음주 내용 수동 저장</button>
+            <!-- 수동 저장 버튼 제거됨, 자동 저장만 작동 -->
             <button class="action-btn btn-end" onclick="finishDrinkingSession()">🛑 음주 세션 완전히 종료 및 저장</button>
             <button class="back-btn" style="width: 100%; padding: 12px; margin-top: 10px;" onclick="cancelDrinkingSession()">현재 세션 취소 및 삭제</button>
         </div>
@@ -187,7 +191,6 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
-    // deleteDoc 추가
     import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, getDocs, query, where, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -219,7 +222,6 @@
         if (user) {
             userId = user.uid;
             document.getElementById('userNameDisplay').innerText = (user.displayName || '도전자') + '님의 조절 모드';
-            // 과거 기록 및 활성 상태 불러오기
             loadSessionsAndCheckActive();
         } else {
             alert("로그인이 필요합니다. 메인 리포트 화면으로 이동합니다.");
@@ -227,7 +229,6 @@
         }
     });
 
-    // DB에서 과거 기록 불러오면서 동시에 진행중인 세션이 있는지 확인
     async function loadSessionsAndCheckActive() {
         const container = document.getElementById('pastSessionsContainer');
         container.innerHTML = '<div style="font-size: 0.85rem; color: #a0aec0;">데이터를 불러오는 중...</div>';
@@ -241,7 +242,6 @@
             
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
-                // 아직 완료되지 않은 가장 최근 세션 1개를 진행중인 세션으로 간주
                 if (data.isFinished === false && !activeSessionFound) {
                     activeSessionFound = { id: doc.id, ...data };
                 } else {
@@ -249,15 +249,12 @@
                 }
             });
 
-            // 화면 표시 처리
             document.getElementById('loadingArea').style.display = 'none';
             document.getElementById('mainControlArea').style.display = 'block';
 
             if (activeSessionFound) {
-                // 진행 중인 세션이 발견되면 바로 해당 세션으로 복구 (자동 재개)
                 resumeActiveSession(activeSessionFound);
             } else {
-                // 진행 중인 세션이 없으면 정상적으로 설정/히스토리 화면 출력
                 document.getElementById('setupCard').style.display = 'block';
                 renderHistoryList(container);
             }
@@ -271,7 +268,6 @@
         }
     }
 
-    // 히스토리 리스트 렌더링 함수
     function renderHistoryList(container) {
         if (pastSessionsData.length === 0) {
             container.innerHTML = '<div style="font-size: 0.85rem; color: #a0aec0;">아직 완료된 기록이 없습니다. 첫 조절 모드를 시작해보세요!</div>';
@@ -298,36 +294,31 @@
         container.innerHTML = html;
     }
 
-    // 이전에 중단된/진행중인 세션 화면 복구 로직
     function resumeActiveSession(sessionData) {
         sessionStartTime = new Date(sessionData.startTime);
         drinksList = sessionData.drinksList || [];
         currentSessionDocId = sessionData.id;
         
-        // 기존 셋팅값 복원 (UI 동기화)
         document.getElementById('userGender').value = sessionData.gender;
         document.getElementById('userWeight').value = sessionData.weight;
         document.getElementById('userMeal').value = sessionData.mealOffsetHrs;
 
-        // 화면 전환
         document.getElementById('setupCard').style.display = 'none';
         document.getElementById('historyCard').style.display = 'none';
         document.getElementById('activeCard').style.display = 'block';
         
-        // 시작 시각 출력
         const startStr = sessionStartTime.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
         document.getElementById('startTimeDisplay').innerText = `시작 시각: ${startStr}`;
 
-        // 리스트 및 차트 렌더링
         renderDrinkList();
         if (drinksList.length > 0) {
             document.getElementById('activeChartContainer').style.display = 'block'; 
             updateActiveChart();
         } else {
             document.getElementById('activeChartContainer').style.display = 'none'; 
+            document.getElementById('activeSummary').style.display = 'none';
         }
 
-        // 타이머 시작
         startTimer();
     }
 
@@ -343,15 +334,16 @@
         document.getElementById('historyCard').style.display = 'none';
         document.getElementById('activeCard').style.display = 'block';
         
-        // 시작 시각 출력
         const startStr = sessionStartTime.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
         document.getElementById('startTimeDisplay').innerText = `시작 시각: ${startStr}`;
 
         document.getElementById('activeChartContainer').style.display = 'none'; 
+        document.getElementById('activeSummary').style.display = 'none';
+        
         renderDrinkList();
         startTimer();
 
-        // [중요] 시작하자마자 DB에 초기 상태를 백그라운드 저장하여 추후 복구가 가능하게 함
+        // 자동 생성 및 백그라운드 저장
         executeSaveProcess(false, true); 
     };
 
@@ -369,7 +361,6 @@
     window.cancelDrinkingSession = async function() {
         if(confirm("기록 중인 음주 세션을 완전히 취소하시겠습니까?\n(이후 내용은 저장되지 않으며, 서버에서 현재 진행중인 세션 기록이 완전히 삭제됩니다.)")) {
             
-            // 삭제 처리
             if(currentSessionDocId) {
                 try {
                     await deleteDoc(doc(db, "drinking_sessions", currentSessionDocId));
@@ -385,7 +376,6 @@
             document.getElementById('activeCard').style.display = 'none';
             document.getElementById('drinkVolume').value = '500';
             
-            // 삭제 후 리스트 갱신을 위해 재로드 (active 검사 포함)
             document.getElementById('mainControlArea').style.display = 'none';
             document.getElementById('loadingArea').style.display = 'flex';
             loadSessionsAndCheckActive();
@@ -425,9 +415,11 @@
 
         renderDrinkList();
         document.getElementById('activeChartContainer').style.display = 'block';
+        
+        // 차트와 실시간 요약 업데이트 수행
         updateActiveChart(); 
         
-        // 잔 추가 시 자동 백그라운드 저장 (새로고침 방어)
+        // 추가 즉시 백그라운드 저장
         executeSaveProcess(false, true);
     };
 
@@ -437,6 +429,7 @@
             
             if(drinksList.length === 0) {
                 document.getElementById('activeChartContainer').style.display = 'none';
+                document.getElementById('activeSummary').style.display = 'none';
             } else {
                 for(let i = 0; i < drinksList.length; i++) {
                     const prevTime = i > 0 ? drinksList[i-1].endTime : sessionStartTime.getTime();
@@ -446,8 +439,8 @@
                 updateActiveChart();
             }
             renderDrinkList();
-
-            // 잔 삭제 시 자동 백그라운드 저장
+            
+            // 삭제 즉시 백그라운드 저장
             executeSaveProcess(false, true);
         }
     };
@@ -506,13 +499,22 @@
         if(drinksList.length === 0) return;
         const mealOffsetHrs = parseFloat(document.getElementById('userMeal').value);
         const chartData = generateChartData(drinksList, sessionStartTime.getTime(), mealOffsetHrs);
+        
+        // 실시간 종합 리포트 텍스트 업데이트
+        const totalAlcoholGrams = drinksList.reduce((sum, d) => sum + d.alcoholGrams, 0);
+        const totalClearHrs = chartData.dataPoints.length * 15 / 60; 
+        
+        const summaryEl = document.getElementById('activeSummary');
+        summaryEl.style.display = 'block';
+        summaryEl.innerHTML = `
+            🍻 현재까지 누적 <b>${drinksList.length}잔</b> / 알코올 <b>${totalAlcoholGrams.toFixed(1)}g</b> 섭취<br>
+            • 종합 예상 최고 농도: <b style="color:var(--danger-color);">${chartData.maxBac.toFixed(3)}%</b><br>
+            • 알코올 완전 분해 예상 소요: <b style="color:var(--info-color);">${totalClearHrs.toFixed(1)}시간</b>
+        `;
+        
+        // 차트 업데이트
         drawChart(chartData, 'activeBacChart', activeChartInstance, (instance) => activeChartInstance = instance);
     }
-
-    // 사용자가 직접 누르는 중간 저장 버튼
-    window.saveCurrentSession = async function() {
-        await executeSaveProcess(false, false);
-    };
 
     // 최종 종료 저장 버튼
     window.finishDrinkingSession = async function() {
@@ -552,7 +554,6 @@
 
         const prevDisplay = document.getElementById('activeCard').style.display;
         
-        // 조용한 저장이 아니고, 최종 저장일 경우에만 로딩 UI 출력
         if(isFinal && !isSilent) {
             document.getElementById('activeCard').style.display = 'none';
             document.getElementById('loadingText').innerText = "결과를 저장하고 있습니다...";
@@ -564,24 +565,20 @@
                 // 업데이트
                 const docRef = doc(db, "drinking_sessions", currentSessionDocId);
                 await updateDoc(docRef, sessionData);
-                if(!isFinal && !isSilent) alert("현재 음주 상태가 수동으로 저장되었습니다.");
             } else {
                 // 신규 생성
                 sessionData.createdAt = serverTimestamp();
                 const docRef = await addDoc(collection(db, "drinking_sessions"), sessionData);
                 currentSessionDocId = docRef.id; 
-                if(!isFinal && !isSilent) alert("현재 음주 상태가 생성 및 저장되었습니다.");
             }
             
             if(isFinal) {
                 if(!isSilent) alert("음주 세션이 성공적으로 기록 및 종료되었습니다.");
-                // 초기화 및 셋업 카드로 복귀
                 sessionStartTime = null;
                 drinksList = [];
                 currentSessionDocId = null;
                 document.getElementById('drinkVolume').value = '500';
                 
-                // 데이터 다시 로딩
                 document.getElementById('loadingText').innerText = "데이터 갱신 중...";
                 loadSessionsAndCheckActive();
             }
@@ -650,7 +647,6 @@
         document.getElementById('setupCard').style.display = 'block';
     };
 
-    // === 공통 시뮬레이터 및 차트 그리기 모듈 ===
     function generateChartData(targetDrinksList, startMs, mealOffsetHrs) {
         const mealOffsetMin = mealOffsetHrs * 60;
         const dataPoints = [];
@@ -673,9 +669,9 @@
                 if (currentMs >= d.endTime) {
                     let elapsedSinceDrinkMin = (currentMs - d.endTime) / 60000;
                     if (elapsedSinceDrinkMin >= mealOffsetMin) {
-                        totalAbsorbedBAC += d.cMaxContribution; // 100% 흡수
+                        totalAbsorbedBAC += d.cMaxContribution; 
                     } else {
-                        totalAbsorbedBAC += d.cMaxContribution * (elapsedSinceDrinkMin / mealOffsetMin); // 선형 부분 흡수
+                        totalAbsorbedBAC += d.cMaxContribution * (elapsedSinceDrinkMin / mealOffsetMin); 
                     }
                 }
             });
