@@ -93,6 +93,62 @@
         .change-card.active .progress-fill { background: linear-gradient(90deg, #2ecc71, #27ae60); }
         .change-card.active .progress-text { color: #fff; }
 
+        /* 신규 추가: 달성 완료 아코디언 관련 스타일 */
+        details.achieved-details {
+            background: #fff;
+            border-radius: 14px;
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            transition: all 0.3s ease;
+        }
+        details.achieved-details summary {
+            font-weight: 800;
+            font-size: 0.9rem;
+            color: #718096;
+            cursor: pointer;
+            list-style: none; /* Hide default arrow */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            outline: none;
+        }
+        details.achieved-details summary::-webkit-details-marker { display: none; }
+        details.achieved-details summary::after {
+            content: '▼';
+            font-size: 0.8rem;
+            color: #cbd5e0;
+            transition: transform 0.3s ease;
+        }
+        details.achieved-details[open] summary::after {
+            transform: rotate(180deg);
+        }
+        details.achieved-details[open] summary {
+            margin-bottom: 15px;
+            border-bottom: 1px dashed #e2e8f0;
+            padding-bottom: 10px;
+            color: var(--success-color);
+        }
+        .details-content {
+            animation: fadeIn 0.4s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .upcoming-title {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin: 20px 0 12px;
+            text-align: left;
+            padding-left: 5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
         .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; backdrop-filter: blur(4px); }
         .modal-content { background: white; padding: 20px; border-radius: 24px; width: 88%; max-width: 400px; max-height: 90vh; overflow-y: auto; text-align: left; position: relative; box-sizing: border-box; }
         .close-btn-top { position: absolute; top: 18px; right: 20px; font-size: 1.8rem; color: #cbd5e0; background: none; border: none; cursor: pointer; line-height: 1; transition: color 0.2s ease; padding: 0; }
@@ -259,6 +315,7 @@
     &copy; 2026 Alcoholaway.com All rights reserved.
 </footer>
 
+<!-- 모달 부분 동일 유지 생략 방지 -->
 <!-- 현재 몸상태 기록 모달 -->
 <div id="stateModal" class="modal">
     <div class="modal-content">
@@ -509,6 +566,7 @@
         }
     });
 
+    // --- 생략 불필요한 기존 기능 및 데이터 로드 함수들 ---
     async function loadMotivationalStats() {
         if (!userId) return;
         try {
@@ -586,6 +644,7 @@
         } catch(e) { console.error(e); }
     }
 
+    // 기타 인증/게시판/이력 관련 코드는 기존과 동일하게 유지
     window.loginWithGoogle = async function() {
         try { await signInWithPopup(auth, googleProvider); } 
         catch (error) { alert(`로그인 실패!\n에러 메시지: ${error.message}`); }
@@ -603,7 +662,6 @@
             alert("음주 조절 모드를 사용하려면 로그인이 필요합니다.");
             return;
         }
-        
         if (currentChallengeId) {
             if (confirm("정말 현재 단주 도전을 종료하고 음주 조절 모드로 전환하시겠습니까?\n(현재 도전 기록은 '실패'로 저장됩니다.)")) {
                 try {
@@ -623,6 +681,14 @@
             window.location.href = 'control.html';
         }
     };
+
+    // 현재 저장된 날짜 기준으로 며칠이 지났는지 계산하는 헬퍼 함수
+    function getCurrentDaysPassed() {
+        const savedDate = localStorage.getItem('quitDrinkingDateTime_server');
+        if (!savedDate) return 0;
+        const diff = new Date() - new Date(savedDate);
+        return Math.max(0, diff / 86400000);
+    }
 
     window.switchTab = function(btn, tabName) {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -650,6 +716,99 @@
         }
     };
 
+    // 💡 핵심 수정: 카드를 달성/진행으로 나누고 아코디언 UI 적용
+    function renderChangeCards(tabName) {
+        let activeStages = physicalStages;
+        if(tabName === 'liver') activeStages = liverStages;
+        if(tabName === 'brain') activeStages = brainStages;
+        
+        const currentDays = getCurrentDaysPassed();
+
+        let achievedCards = '';
+        let upcomingCards = '';
+        let achievedCount = 0;
+
+        activeStages.forEach((s, i) => {
+            const perc = Math.min((currentDays / s.d) * 100, 100);
+            const isActive = perc >= 100;
+            
+            // 기존과 동일한 ID 체계를 유지하여 updateRoadmap 타이머와 완벽 호환
+            const cardHTML = `
+                <div class="change-card ${isActive ? 'active' : ''}" id="card${i}">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-weight:700; font-size:0.95rem;">${s.t}</span>
+                        <div class="progress-bg">
+                            <span class="progress-text" id="text${i}">${Math.floor(perc)}%</span>
+                            <div class="progress-fill" id="fill${i}" style="width: ${perc}%"></div>
+                        </div>
+                    </div>
+                    <p style="font-size:0.85rem; color:#666; margin-top:6px;">${s.desc}</p>
+                </div>
+            `;
+
+            if (isActive) {
+                achievedCards += cardHTML;
+                achievedCount++;
+            } else {
+                upcomingCards += cardHTML;
+            }
+        });
+
+        let finalHTML = '';
+
+        // 1. 달성 완료 영역 (아코디언)
+        if (achievedCount > 0) {
+            finalHTML += `
+                <details class="achieved-details">
+                    <summary>✅ 달성 완료한 변화 (${achievedCount})</summary>
+                    <div class="details-content">
+                        ${achievedCards}
+                    </div>
+                </details>
+            `;
+        }
+
+        // 2. 진행 중 및 다음 목표 영역
+        if (upcomingCards) {
+            finalHTML += `
+                <div class="upcoming-title">🚀 진행 중 및 다음 목표</div>
+                ${upcomingCards}
+            `;
+        }
+
+        if (achievedCount === activeStages.length) {
+            finalHTML += `
+                <div style="text-align: center; padding: 20px; color: var(--success-color); font-weight: bold; background: #f0fff4; border-radius: 14px; margin-top: 10px;">
+                    🎉 모든 변화를 성공적으로 달성했습니다! 🎉
+                </div>
+            `;
+        }
+
+        document.getElementById('changeList').innerHTML = finalHTML;
+    }
+
+    function updateRoadmap(days) {
+        let activeStages = physicalStages;
+        if(currentTabName === 'liver') activeStages = liverStages;
+        if(currentTabName === 'brain') activeStages = brainStages;
+
+        // renderChangeCards가 감싸준 구조 내에 id값은 그대로 존재하므로 문제없이 작동합니다.
+        // 화면을 보고 있는 도중 목표를 100% 달성하면, 카드 테두리가 초록색으로 켜지는(active) 실시간 레벨업 효과를 줍니다.
+        activeStages.forEach((s, i) => {
+            const perc = Math.min((days / s.d) * 100, 100);
+            const fill = document.getElementById(`fill${i}`);
+            const text = document.getElementById(`text${i}`);
+            const card = document.getElementById(`card${i}`);
+            if (fill) fill.style.width = perc + '%';
+            if (text) text.innerText = Math.floor(perc) + '%';
+            if (card) {
+                if (perc >= 100) card.classList.add('active');
+                else card.classList.remove('active');
+            }
+        });
+    }
+
+    // 생존일자 포맷 함수
     function calcDday(quitISO) {
         if(!quitISO) return "?";
         const diff = new Date() - new Date(quitISO);
@@ -657,6 +816,7 @@
         return Math.floor(diff / 86400000) + 1;
     }
 
+    // 생존자 통신 및 게시판 관련 로직
     window.submitPost = async function() {
         if (!userId) return alert("로그인이 필요합니다.");
         const content = document.getElementById('postContent').value.trim();
@@ -924,7 +1084,6 @@
                 const startReasonText = data.startReason ? `<div style="margin-top:6px; font-size:0.8rem; color:#2c3e50; text-align:left;">🌱 <b>시작 각오:</b> ${data.startReason}</div>` : '';
                 const failReasonText = data.failReason ? `<div style="margin-top:4px; font-size:0.8rem; color:#e74c3c; text-align:left;">🥀 <b>중단 사유:</b> ${data.failReason}</div>` : '';
 
-                // 💡 새롭게 분리된 상태 뱃지와 액션 버튼 구역
                 const statusBadge = data.status === 'active' 
                     ? `<span class="history-status status-active">도전 중</span>` 
                     : `<span class="history-status status-failed">종료됨</span>`;
@@ -1062,44 +1221,6 @@
             }
         }, 200);
     };
-
-    function renderChangeCards(tabName) {
-        let activeStages = physicalStages;
-        if(tabName === 'liver') activeStages = liverStages;
-        if(tabName === 'brain') activeStages = brainStages;
-        
-        document.getElementById('changeList').innerHTML = activeStages.map((s, i) => `
-            <div class="change-card" id="card${i}">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <span style="font-weight:700; font-size:0.95rem;">${s.t}</span>
-                    <div class="progress-bg">
-                        <span class="progress-text" id="text${i}">0%</span>
-                        <div class="progress-fill" id="fill${i}"></div>
-                    </div>
-                </div>
-                <p style="font-size:0.85rem; color:#666; margin-top:6px;">${s.desc}</p>
-            </div>
-        `).join('');
-    }
-
-    function updateRoadmap(days) {
-        let activeStages = physicalStages;
-        if(currentTabName === 'liver') activeStages = liverStages;
-        if(currentTabName === 'brain') activeStages = brainStages;
-
-        activeStages.forEach((s, i) => {
-            const perc = Math.min((days / s.d) * 100, 100);
-            const fill = document.getElementById(`fill${i}`);
-            const text = document.getElementById(`text${i}`);
-            const card = document.getElementById(`card${i}`);
-            if (fill) fill.style.width = perc + '%';
-            if (text) text.innerText = Math.floor(perc) + '%';
-            if (card) {
-                if (perc >= 100) card.classList.add('active');
-                else card.classList.remove('active');
-            }
-        });
-    }
 
     function initSurvivalChart() {
         if (mainChart) mainChart.destroy();
@@ -1392,6 +1513,9 @@
 
         initSurvivalChart();
         initDistributionChart(); 
+        
+        // 데이터가 확정된 후 한 번 더 카드를 재분류하여 렌더링합니다.
+        renderChangeCards(currentTabName);
 
         if (timerInterval) clearInterval(timerInterval);
         timerInterval = setInterval(() => {
