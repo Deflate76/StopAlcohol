@@ -93,8 +93,8 @@
         .change-card.active .progress-fill { background: linear-gradient(90deg, #2ecc71, #27ae60); }
         .change-card.active .progress-text { color: #fff; }
 
-        /* 신규 추가: 달성 완료 아코디언 관련 스타일 */
-        details.achieved-details {
+        /* 아코디언 공통 및 개별 스타일 */
+        details.achieved-details, details.upcoming-details {
             background: #fff;
             border-radius: 14px;
             padding: 12px 15px;
@@ -103,50 +103,44 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.02);
             transition: all 0.3s ease;
         }
-        details.achieved-details summary {
+        details.achieved-details summary, details.upcoming-details summary {
             font-weight: 800;
-            font-size: 0.9rem;
-            color: #718096;
+            font-size: 0.95rem;
             cursor: pointer;
-            list-style: none; /* Hide default arrow */
+            list-style: none;
             display: flex;
             justify-content: space-between;
             align-items: center;
             outline: none;
         }
-        details.achieved-details summary::-webkit-details-marker { display: none; }
-        details.achieved-details summary::after {
+        details.achieved-details summary { color: #718096; }
+        details.upcoming-details summary { color: var(--text-dark); }
+        
+        details.achieved-details summary::-webkit-details-marker, details.upcoming-details summary::-webkit-details-marker { display: none; }
+        
+        details.achieved-details summary::after, details.upcoming-details summary::after {
             content: '▼';
             font-size: 0.8rem;
             color: #cbd5e0;
             transition: transform 0.3s ease;
         }
-        details.achieved-details[open] summary::after {
+        details.achieved-details[open] summary::after, details.upcoming-details[open] summary::after {
             transform: rotate(180deg);
         }
-        details.achieved-details[open] summary {
+        details.achieved-details[open] summary, details.upcoming-details[open] summary {
             margin-bottom: 15px;
             border-bottom: 1px dashed #e2e8f0;
             padding-bottom: 10px;
-            color: var(--success-color);
         }
+        details.achieved-details[open] summary { color: var(--success-color); }
+        details.upcoming-details[open] summary { color: var(--text-dark); }
+        
         .details-content {
             animation: fadeIn 0.4s ease;
         }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-5px); }
             to { opacity: 1; transform: translateY(0); }
-        }
-        .upcoming-title {
-            font-size: 0.95rem;
-            font-weight: 800;
-            color: var(--text-dark);
-            margin: 20px 0 12px;
-            text-align: left;
-            padding-left: 5px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
         }
 
         .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; backdrop-filter: blur(4px); }
@@ -155,7 +149,7 @@
         .close-btn-top:hover { color: var(--danger-color); }
 
         .highlight { color: var(--primary-color); font-weight: 700; }
-        textarea, select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; margin-top: 8px; font-family: inherit; box-sizing: border-box; }
+        textarea, select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; margin-top: 8px; font-family: inherit; box-sizing: border-box; resize: none; }
 
         .dynamic-range { -webkit-appearance: none; width: 100%; height: 8px; border-radius: 4px; background: linear-gradient(to right, var(--range-color, #f39c12) 0%, var(--range-color, #f39c12) var(--range-percent, 50%), #e2e8f0 var(--range-percent, 50%), #e2e8f0 100%); outline: none; margin: 10px 0; transition: background 0.1s ease; }
         .dynamic-range::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 24px; height: 24px; border-radius: 50%; background: #fff; border: 3px solid var(--range-color, #f39c12); box-shadow: 0 2px 4px rgba(0,0,0,0.15); cursor: pointer; transition: border-color 0.1s ease; }
@@ -315,7 +309,6 @@
     &copy; 2026 Alcoholaway.com All rights reserved.
 </footer>
 
-<!-- 모달 부분 동일 유지 생략 방지 -->
 <!-- 현재 몸상태 기록 모달 -->
 <div id="stateModal" class="modal">
     <div class="modal-content">
@@ -430,7 +423,7 @@
             <option value="보상심리">고생한 나에 대한 보상</option>
             <option value="기타">기타 (직접 입력)</option>
         </select>
-        <textarea id="etcReason" style="display:none;" placeholder="구체적인 사유를 적어주세요"></textarea>
+        <textarea id="etcReason" style="display:none;" placeholder="구체적인 사유를 적어주세요" maxlength="300"></textarea>
 
         <button class="start-btn" style="margin-top:15px; width:100%; padding: 14px; font-size: 1.1rem;" onclick="submitCraving()">이 고비 기록하고 참기</button>
     </div>
@@ -470,6 +463,22 @@
         <p style="font-size: 0.9rem; color: #666;">도전 시작 시간을 다시 설정합니다.</p>
         <input type="datetime-local" id="editDateTimeInput" class="reason-input" style="margin-bottom: 15px;">
         <button class="start-btn" style="width:100%; padding: 14px; font-size: 1.1rem;" onclick="saveEditedTime()">수정된 시간 저장</button>
+    </div>
+</div>
+
+<!-- 사유 수정/추가 모달 -->
+<div id="editReasonModal" class="modal">
+    <div class="modal-content">
+        <button class="close-btn-top" onclick="closeModal('editReasonModal')">&times;</button>
+        <h3 style="margin-top:0; padding-right: 20px;">도전 사유 기록하기</h3>
+        
+        <label style="font-weight:700; font-size:0.9rem; margin-top:10px; display:block;">🌱 시작 각오 (최대 300자)</label>
+        <textarea id="editStartReasonInput" rows="4" maxlength="300" placeholder="이번 도전을 시작하며 다짐했던 각오를 적어주세요."></textarea>
+        
+        <label style="font-weight:700; font-size:0.9rem; margin-top:15px; display:block;">🥀 중단 사유 (최대 300자)</label>
+        <textarea id="editFailReasonInput" rows="4" maxlength="300" placeholder="도전을 중단하게 된 사유를 적어주세요. (실패한 기록인 경우)"></textarea>
+        
+        <button class="start-btn" style="width:100%; padding: 14px; font-size: 1.1rem; margin-top: 20px;" onclick="saveEditedReasons()">사유 저장</button>
     </div>
 </div>
 
@@ -515,7 +524,6 @@
     let globalBestStartDate = null; 
     let editingChallengeId = null;
     
-    // 알람 중복 방지 변수
     let evalPromptedFor = null;
 
     window.onload = function() {
@@ -566,7 +574,6 @@
         }
     });
 
-    // --- 생략 불필요한 기존 기능 및 데이터 로드 함수들 ---
     async function loadMotivationalStats() {
         if (!userId) return;
         try {
@@ -644,7 +651,6 @@
         } catch(e) { console.error(e); }
     }
 
-    // 기타 인증/게시판/이력 관련 코드는 기존과 동일하게 유지
     window.loginWithGoogle = async function() {
         try { await signInWithPopup(auth, googleProvider); } 
         catch (error) { alert(`로그인 실패!\n에러 메시지: ${error.message}`); }
@@ -682,7 +688,6 @@
         }
     };
 
-    // 현재 저장된 날짜 기준으로 며칠이 지났는지 계산하는 헬퍼 함수
     function getCurrentDaysPassed() {
         const savedDate = localStorage.getItem('quitDrinkingDateTime_server');
         if (!savedDate) return 0;
@@ -716,7 +721,6 @@
         }
     };
 
-    // 💡 핵심 수정: 카드를 달성/진행으로 나누고 아코디언 UI 적용
     function renderChangeCards(tabName) {
         let activeStages = physicalStages;
         if(tabName === 'liver') activeStages = liverStages;
@@ -732,7 +736,6 @@
             const perc = Math.min((currentDays / s.d) * 100, 100);
             const isActive = perc >= 100;
             
-            // 기존과 동일한 ID 체계를 유지하여 updateRoadmap 타이머와 완벽 호환
             const cardHTML = `
                 <div class="change-card ${isActive ? 'active' : ''}" id="card${i}">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -756,7 +759,6 @@
 
         let finalHTML = '';
 
-        // 1. 달성 완료 영역 (아코디언)
         if (achievedCount > 0) {
             finalHTML += `
                 <details class="achieved-details">
@@ -768,11 +770,14 @@
             `;
         }
 
-        // 2. 진행 중 및 다음 목표 영역
         if (upcomingCards) {
             finalHTML += `
-                <div class="upcoming-title">🚀 진행 중 및 다음 목표</div>
-                ${upcomingCards}
+                <details class="upcoming-details" open>
+                    <summary>🚀 진행 중 및 다음 목표 (${activeStages.length - achievedCount})</summary>
+                    <div class="details-content">
+                        ${upcomingCards}
+                    </div>
+                </details>
             `;
         }
 
@@ -792,8 +797,6 @@
         if(currentTabName === 'liver') activeStages = liverStages;
         if(currentTabName === 'brain') activeStages = brainStages;
 
-        // renderChangeCards가 감싸준 구조 내에 id값은 그대로 존재하므로 문제없이 작동합니다.
-        // 화면을 보고 있는 도중 목표를 100% 달성하면, 카드 테두리가 초록색으로 켜지는(active) 실시간 레벨업 효과를 줍니다.
         activeStages.forEach((s, i) => {
             const perc = Math.min((days / s.d) * 100, 100);
             const fill = document.getElementById(`fill${i}`);
@@ -808,7 +811,6 @@
         });
     }
 
-    // 생존일자 포맷 함수
     function calcDday(quitISO) {
         if(!quitISO) return "?";
         const diff = new Date() - new Date(quitISO);
@@ -816,7 +818,6 @@
         return Math.floor(diff / 86400000) + 1;
     }
 
-    // 생존자 통신 및 게시판 관련 로직
     window.submitPost = async function() {
         if (!userId) return alert("로그인이 필요합니다.");
         const content = document.getElementById('postContent').value.trim();
@@ -1044,6 +1045,42 @@
         }
     };
 
+    // 사유 추가/수정용 함수 모음
+    window.openEditReasonModal = function(event, historyDocId, startReasonEncoded, failReasonEncoded) {
+        event.stopPropagation();
+        editingChallengeId = historyDocId;
+        
+        const startReason = decodeURIComponent(startReasonEncoded);
+        const failReason = decodeURIComponent(failReasonEncoded);
+        
+        document.getElementById('editStartReasonInput').value = (startReason && startReason !== 'undefined') ? startReason : '';
+        document.getElementById('editFailReasonInput').value = (failReason && failReason !== 'undefined') ? failReason : '';
+        
+        openModal('editReasonModal');
+    };
+
+    window.saveEditedReasons = async function() {
+        if (!userId || !editingChallengeId) return;
+        
+        const newStartReason = document.getElementById('editStartReasonInput').value.trim();
+        const newFailReason = document.getElementById('editFailReasonInput').value.trim();
+
+        try {
+            const challengeRef = doc(db, "users", userId, "challenges", editingChallengeId);
+            await updateDoc(challengeRef, {
+                startReason: newStartReason,
+                failReason: newFailReason
+            });
+
+            alert("사유가 성공적으로 반영되었습니다.");
+            closeModal('editReasonModal');
+            openHistoryList(); 
+        } catch (e) {
+            console.error("사유 수정 에러:", e);
+            alert("수정 실패: " + e.message);
+        }
+    };
+
     window.openHistoryList = async function() {
         if (!userId) return alert("로그인이 필요합니다.");
         
@@ -1081,15 +1118,24 @@
                 const cravCount = data.cravings ? data.cravings.filter(d => !['action', 'state', 'eval'].includes(d.type)).length : 0;
                 const encodedData = encodeURIComponent(JSON.stringify(data));
 
-                const startReasonText = data.startReason ? `<div style="margin-top:6px; font-size:0.8rem; color:#2c3e50; text-align:left;">🌱 <b>시작 각오:</b> ${data.startReason}</div>` : '';
-                const failReasonText = data.failReason ? `<div style="margin-top:4px; font-size:0.8rem; color:#e74c3c; text-align:left;">🥀 <b>중단 사유:</b> ${data.failReason}</div>` : '';
+                // 줄바꿈이 있는 텍스트를 제대로 화면에 그려주기 위한 처리
+                const startReasonHtml = data.startReason ? data.startReason.replace(/\n/g, '<br>') : '';
+                const failReasonHtml = data.failReason ? data.failReason.replace(/\n/g, '<br>') : '';
+
+                const startReasonText = data.startReason ? `<div style="margin-top:8px; font-size:0.8rem; color:#2c3e50; text-align:left;">🌱 <b>시작 각오:</b><br>${startReasonHtml}</div>` : '';
+                const failReasonText = data.failReason ? `<div style="margin-top:6px; font-size:0.8rem; color:#e74c3c; text-align:left;">🥀 <b>중단 사유:</b><br>${failReasonHtml}</div>` : '';
+
+                const encStartReason = encodeURIComponent(data.startReason || '');
+                const encFailReason = encodeURIComponent(data.failReason || '');
 
                 const statusBadge = data.status === 'active' 
                     ? `<span class="history-status status-active">도전 중</span>` 
                     : `<span class="history-status status-failed">종료됨</span>`;
                 
+                const reasonEditBtn = `<button class="action-btn" style="font-size:0.8rem; padding:4px 8px; background-color:#e2e8f0; color:#4a5568; border-radius:6px; font-weight:bold; margin-right: 6px;" onclick="openEditReasonModal(event, '${historyDocId}', '${encStartReason}', '${encFailReason}')">📝 사유작성</button>`;
+
                 const actionButton = data.status === 'active'
-                    ? `<button class="action-btn" style="font-size:0.8rem; padding:4px 8px; background-color:#e2e8f0; color:#4a5568; border-radius:6px; font-weight:bold;" onclick="openEditTimeModal(event, '${historyDocId}', '${data.startDate}')">⚙️ 시작시간 수정</button>`
+                    ? `<button class="action-btn" style="font-size:0.8rem; padding:4px 8px; background-color:#e2e8f0; color:#4a5568; border-radius:6px; font-weight:bold;" onclick="openEditTimeModal(event, '${historyDocId}', '${data.startDate}')">⚙️ 시간수정</button>`
                     : `<button class="action-btn" style="font-size:0.8rem; padding:4px 10px; background-color:var(--primary-color); color:white; border-radius:6px; font-weight:bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" onclick="resumeHistory(event, '${historyDocId}')">🔄 이어하기</button>`;
 
                 const itemHtml = `
@@ -1106,7 +1152,10 @@
                         
                         <div style="margin-top: 12px; padding-top: 10px; border-top: 1px dashed #cbd5e0; display: flex; justify-content: space-between; align-items: center;">
                             ${statusBadge}
-                            ${actionButton}
+                            <div>
+                                ${reasonEditBtn}
+                                ${actionButton}
+                            </div>
                         </div>
                     </div>
                 `;
@@ -1514,7 +1563,6 @@
         initSurvivalChart();
         initDistributionChart(); 
         
-        // 데이터가 확정된 후 한 번 더 카드를 재분류하여 렌더링합니다.
         renderChangeCards(currentTabName);
 
         if (timerInterval) clearInterval(timerInterval);
