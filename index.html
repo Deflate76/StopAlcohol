@@ -262,11 +262,12 @@
             <button class="craving-btn" style="margin-bottom: 12px;" onclick="openModal('cravingModal')">🔥 지금 고비가 왔어요!</button>
             <button class="craving-btn" style="background-color: var(--success-color); margin-bottom: 15px;" onclick="openModal('actionModal')">🛡️ 고비 극복 행동 개시!</button>
             
-            <div style="display: flex; gap: 6px;">
-                <button class="stat-btn" style="flex:1; padding: 10px 5px;" onclick="openStats()">📈 고비 리포트</button>
-                <button class="stat-btn" style="flex:1; padding: 10px 5px; border-color: #3498db; color: #3498db;" onclick="openStateStats()">📊 몸상태 추이</button>
-                <button class="stat-btn" style="flex:1; padding: 10px 5px; border-color: #718096; color: #718096;" onclick="openHistoryList()">📚 과거 기록</button>
-            </div>
+      <div style="display: flex; gap: 6px;">
+    <!-- 이 부분에 <span id="cravingCount">0</span> 을 추가했습니다 -->
+    <button class="stat-btn" style="flex:1; padding: 10px 5px;" onclick="openStats()">📈 고비(<span id="cravingCount">0</span>)</button>
+    <button class="stat-btn" style="flex:1; padding: 10px 5px; border-color: #3498db; color: #3498db;" onclick="openStateStats()">📊 몸상태 추이</button>
+    <button class="stat-btn" style="flex:1; padding: 10px 5px; border-color: #718096; color: #718096;" onclick="openHistoryList()">📚 과거 기록</button>
+</div>
         </div>
 
         <div class="chart-container">
