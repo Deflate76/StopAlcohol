@@ -1,6 +1,7 @@
 <!--
  * Copyright (c) 2026 Kim Jung-hoon (김정훈). All rights reserved.
  * This project and its source code are the intellectual property of the author.
+ * Unauthorized copying, distribution, or modification is strictly prohibited.
 -->
 
 <!DOCTYPE html>
@@ -125,7 +126,11 @@
         <div class="card-box" id="activeCard" style="display: none;">
             <div class="card-title"><span>⏳</span> 통제 하에 음주 중...</div>
             
-            <div class="status-display" id="elapsedTimeDisplay">음주 진행 시간: 00:00:00</div>
+            <!-- 시간 리셋 버튼을 포함한 디스플레이 영역 -->
+            <div style="display: flex; justify-content: space-between; align-items: stretch; margin-bottom: 5px; gap: 10px;">
+                <div class="status-display" id="elapsedTimeDisplay" style="flex: 1; margin: 0;">음주 진행 시간: 00:00:00</div>
+                <button class="back-btn" style="background: var(--warning-color); color: white; padding: 0 15px; font-weight: 800; border-radius: 12px; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1.2;" onclick="resetDrinkTimer()">시간<br>리셋</button>
+            </div>
             <div id="startTimeDisplay" style="font-size: 0.85rem; color: #718096; margin-bottom: 20px; font-weight: 600;">시작 시각: --:--</div>
             
             <div style="border-top: 1px dashed #e2e8f0; margin: 15px 0 20px 0;"></div>
@@ -311,7 +316,10 @@
         
         document.getElementById('userGender').value = sessionData.gender;
         document.getElementById('userWeight').value = sessionData.weight;
-        document.getElementById('userMeal').value = sessionData.mealOffsetHrs;
+        
+        // 💡 Invalid Date 방지를 위한 파싱 및 보정
+        const mealVal = parseFloat(sessionData.mealOffsetHrs || 1.0).toFixed(1);
+        document.getElementById('userMeal').value = mealVal;
 
         document.getElementById('setupCard').style.display = 'none';
         document.getElementById('historyCard').style.display = 'none';
@@ -366,6 +374,20 @@
             document.getElementById('elapsedTimeDisplay').innerText = `음주 진행 시간: ${h}:${m}:${s}`;
         }, 1000);
     }
+    
+    // 💡 신규 추가: 진행 시간 리셋 기능
+    window.resetDrinkTimer = async function() {
+        if(confirm("음주 진행 시간을 현재 시각(00:00:00)으로 리셋하시겠습니까?\n(깜빡 늦게 시작 버튼을 눌렀을 경우 사용하세요. 기존 기록된 음주들의 절대 시각은 유지되어 누적 농도 그래프는 정확하게 계산됩니다.)")) {
+            sessionStartTime = new Date();
+            
+            const startStr = sessionStartTime.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('startTimeDisplay').innerText = `시작 시각: ${startStr}`;
+            
+            renderDrinkList();
+            if(drinksList.length > 0) updateActiveChart();
+            executeSaveProcess(false, true);
+        }
+    };
 
     window.cancelDrinkingSession = async function() {
         if(confirm("기록 중인 음주 세션을 완전히 취소하시겠습니까?\n(이후 내용은 저장되지 않으며, 서버에서 현재 진행중인 세션 기록이 완전히 삭제됩니다.)")) {
@@ -458,7 +480,8 @@
             return;
         }
 
-        const mealOffsetHrs = parseFloat(document.getElementById('userMeal').value);
+        // 💡 Invalid Date 버그 방지를 위한 Fallback 추가
+        const mealOffsetHrs = parseFloat(document.getElementById('userMeal').value) || 1.0;
 
         let html = '';
         for (let i = 0; i < drinksList.length; i++) {
@@ -474,12 +497,11 @@
             const maxBacTimeStr = maxBacDate.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
 
             let timeLabel = i === 0 ? `음주 시작(${startStr}) 후 ${d.gapMinutes}분 소요` : `직전 잔(${startStr}) 이후 ${d.gapMinutes}분 소요`;
-
-            let accCMax = 0;
-            for (let j = 0; j <= i; j++) accCMax += (drinksList[j].cMaxContribution || 0);
             
-            const elapsedHrs = (eTime.getTime() - sessionStartTime.getTime()) / 3600000;
-            const currentEstBAC = Math.max(0, accCMax - (0.015 * elapsedHrs)) || 0;
+            // 💡 리스트 BAC 차트와 동기화 (단순 수식이 아닌 차트 엔진 알고리즘 재사용)
+            const subList = drinksList.slice(0, i + 1);
+            const subChartData = generateChartData(subList, sessionStartTime.getTime(), mealOffsetHrs);
+            const exactMaxBac = subChartData.maxBac || 0;
             const grams = d.alcoholGrams || 0;
 
             html += `
@@ -490,8 +512,8 @@
                     </div>
                     <div class="drink-item-time">${timeLabel} (완료: ${endStr})</div>
                     <div class="drink-item-stats">
-                        • 섭취 알코올: <b>${grams.toFixed(1)}g</b><br>
-                        • 이 잔의 누적 예상 BAC 기여: <b style="color:var(--danger-color);">${currentEstBAC.toFixed(3)}%</b><br>
+                        • 이 잔의 섭취 알코올: <b>${grams.toFixed(1)}g</b><br>
+                        • 현재까지 누적 최고 도달 예상 BAC: <b style="color:var(--danger-color);">${exactMaxBac.toFixed(3)}%</b><br>
                         • 최고농도 도달 예상 시각: <b>${maxBacTimeStr} 경</b>
                     </div>
                 </div>
@@ -502,7 +524,7 @@
 
     function updateActiveChart() {
         if(drinksList.length === 0) return;
-        const mealOffsetHrs = parseFloat(document.getElementById('userMeal').value);
+        const mealOffsetHrs = parseFloat(document.getElementById('userMeal').value) || 1.0;
         const chartData = generateChartData(drinksList, sessionStartTime.getTime(), mealOffsetHrs);
         
         const totalAlcoholGrams = drinksList.reduce((sum, d) => sum + (d.alcoholGrams || 0), 0);
@@ -535,7 +557,7 @@
         
         if(isFinal && timerInterval) clearInterval(timerInterval);
 
-        const mealOffsetHrs = parseFloat(document.getElementById('userMeal').value);
+        const mealOffsetHrs = parseFloat(document.getElementById('userMeal').value) || 1.0;
         const chartData = generateChartData(drinksList, sessionStartTime.getTime(), mealOffsetHrs);
         const totalAlcoholGrams = drinksList.reduce((sum, d) => sum + (d.alcoholGrams || 0), 0);
 
@@ -600,7 +622,8 @@
         document.getElementById('setupCard').style.display = 'none';
         document.getElementById('historyCard').style.display = 'block';
 
-        const chartData = generateChartData(sessionData.drinksList, toMs(sessionData.startTime), sessionData.mealOffsetHrs);
+        const mealOffsetHrs = parseFloat(sessionData.mealOffsetHrs) || 1.0;
+        const chartData = generateChartData(sessionData.drinksList, toMs(sessionData.startTime), mealOffsetHrs);
         const totalClearHrs = chartData.dataPoints.length * 15 / 60; 
         const statusStr = sessionData.isFinished ? "종료됨" : "진행중 (또는 중단됨)";
         const sessionDate = new Date(toMs(sessionData.startTime));
@@ -621,7 +644,8 @@
             sessionData.drinksList.forEach((d, i) => {
                 const eTime = new Date(toMs(d.endTime));
                 const endStr = eTime.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
-                const maxBacDate = new Date(eTime.getTime() + (sessionData.mealOffsetHrs * 60 * 60000));
+                
+                const maxBacDate = new Date(eTime.getTime() + (mealOffsetHrs * 60 * 60000));
                 const maxBacTimeStr = maxBacDate.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
                 
                 const grams = d.alcoholGrams || 0;
@@ -635,7 +659,7 @@
                         <div class="drink-item-time">완료 시각: ${endStr} / 시작기준 ${d.gapMinutes}분 간격</div>
                         <div class="drink-item-stats">
                             • 섭취 알코올: <b>${grams.toFixed(1)}g</b><br>
-                            • 예상 최고 BAC 기여도: <b>${contribution.toFixed(3)}%</b><br>
+                            • 이 잔 단일 예상 최고 BAC 기여도: <b>${contribution.toFixed(3)}%</b><br>
                             • 이 잔의 최고농도 도달 시각: <b>${maxBacTimeStr} 경</b>
                         </div>
                     </div>
@@ -660,17 +684,21 @@
             return { labels: ['00:00'], dataPoints: [0], maxBac: 0 };
         }
 
+        // 💡 타이머 리셋 대응 로직 보강: 첫 잔과 타이머 시간 중 더 빠른 것을 절대적인 차트 기준으로 삼음
+        let earliestDrinkMs = Math.min(...targetDrinksList.map(d => toMs(d.endTime)));
+        let actualPlotStartMs = Math.min(startMs, earliestDrinkMs);
+
         const lastDrinkFullyAbsorbedTime = toMs(targetDrinksList[targetDrinksList.length - 1].endTime) + (mealOffsetMin * 60000);
         
         for (let m = 0; m <= 24 * 60; m += 15) {
-            let currentMs = startMs + (m * 60000);
+            let currentMs = actualPlotStartMs + (m * 60000);
             let timeObj = new Date(currentMs);
             let timeLabel = timeObj.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
             
             let totalAbsorbedBAC = 0;
             targetDrinksList.forEach(d => {
                 const eMs = toMs(d.endTime);
-                const contribution = d.cMaxContribution || 0; // NaN 방지
+                const contribution = d.cMaxContribution || 0; 
 
                 if (currentMs >= eMs) {
                     let elapsedSinceDrinkMin = (currentMs - eMs) / 60000;
