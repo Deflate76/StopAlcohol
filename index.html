@@ -186,7 +186,7 @@
         .gap-days { font-weight: 800; color: #ed8936; }
         
         /* 약물 리스트 아이템 스타일 */
-        .med-list-item { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; text-align: left; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+        .med-list-item { background: #f8f9fa; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; text-align: left; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
     </style>
 </head>
 <body>
@@ -255,29 +255,22 @@
         <div id="activeMotivationalSummary" style="display: none; width: 100%; margin-bottom: 15px;"></div>
 
         <div class="craving-section">
-            <!-- 1:1 비율 몸상태 & 신체계측 버튼 -->
+            <!-- 1:1 비율 완벽한 버튼 배치 -->
             <div style="display: flex; gap: 8px; margin-bottom: 12px;">
-                <button class="craving-btn" style="background-color: var(--primary-color); flex:1; margin:0; font-size: 0.95rem; padding: 12px 5px;" onclick="openModal('stateModal')">📝 현재 몸상태</button>
-                <button class="craving-btn" style="background-color: var(--info-color); flex:1; margin:0; font-size: 0.95rem; padding: 12px 5px;" onclick="openBodyInfoModal()">⚖️ 신체계측</button>
+                <button class="craving-btn" style="background-color: var(--primary-color); flex:1; margin:0; padding:15px;" onclick="openModal('stateModal')">📝 현재 몸상태</button>
+                <button class="craving-btn" style="background-color: #16a085; flex:1; margin:0; padding:15px;" onclick="openBodyInfoModal()">⚖️ 신체계측</button>
             </div>
             
             <button class="craving-btn" style="margin-bottom: 12px;" onclick="openModal('cravingModal')">🔥 지금 고비가 왔어요!</button>
             <button class="craving-btn" style="background-color: var(--success-color); margin-bottom: 12px;" onclick="openModal('actionModal')">🛡️ 고비 극복 행동 개시!</button>
-            
-            <!-- 약물 복용 기록 버튼 -->
             <button class="craving-btn" style="background-color: #8e44ad; margin-bottom: 15px;" onclick="openMedModal()">💊 약물 복용 기록</button>
             
-            <!-- 당일 약물 복용 내역 리스트 -->
-            <div id="medListContainer" style="margin-bottom: 15px; display: none;">
-                <div style="font-size: 0.9rem; font-weight: 700; color: #4a5568; margin-bottom: 8px; text-align: left; padding-left: 5px;">💊 약물 복용 내역</div>
-                <div id="medListContent" style="display: flex; flex-direction: column; gap: 8px;"></div>
-            </div>
-            
-            <!-- 통계/기록 버튼들 -->
-            <div style="display: flex; gap: 6px;">
-                <button class="stat-btn" style="flex:1; padding: 10px 5px;" onclick="openStats()">📈 고비(<span id="cravingCount">0</span>)</button>
-                <button class="stat-btn" style="flex:1; padding: 10px 5px; border-color: #3498db; color: #3498db;" onclick="openStateStats()">📊 몸상태 추이</button>
-                <button class="stat-btn" style="flex:1; padding: 10px 5px; border-color: #718096; color: #718096;" onclick="openHistoryList()">📚 과거 기록</button>
+            <!-- 통계/기록 버튼들 (2x2 그리드 배열) -->
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
+                <button class="stat-btn" style="width:100%; padding:10px 5px;" onclick="openStats()">📈 고비(<span id="cravingCount">0</span>)</button>
+                <button class="stat-btn" style="width:100%; padding:10px 5px; border-color: #3498db; color: #3498db;" onclick="openStateStats()">📊 몸상태 추이</button>
+                <button class="stat-btn" style="width:100%; padding:10px 5px; border-color: #8e44ad; color: #8e44ad;" onclick="openMedListModal()">💊 복용 내역</button>
+                <button class="stat-btn" style="width:100%; padding:10px 5px; border-color: #718096; color: #718096;" onclick="openHistoryList()">📚 과거 기록</button>
             </div>
         </div>
 
@@ -350,7 +343,7 @@
     </div>
 </div>
 
-<!-- 약물 복용 모달 -->
+<!-- 약물 복용 기록 모달 -->
 <div id="medModal" class="modal">
     <div class="modal-content">
         <button class="close-btn-top" onclick="closeModal('medModal')">&times;</button>
@@ -367,6 +360,18 @@
         <p style="font-size:0.75rem; color:#999; margin-top:4px;">일반적으로 아캄프로세이트는 1정 333mg, 날트렉손은 1정 50mg 입니다.</p>
         
         <button class="start-btn" style="margin-top:20px; width:100%; padding: 14px; font-size: 1.1rem; background: linear-gradient(135deg, #8e44ad, #9b59b6);" onclick="submitMedication()">복용 기록 및 농도 확인</button>
+    </div>
+</div>
+
+<!-- 💊 약물 복용 내역 리스트 모달 (신규 추가) -->
+<div id="medListModal" class="modal">
+    <div class="modal-content" style="max-width: 450px;">
+        <button class="close-btn-top" onclick="closeModal('medListModal')">&times;</button>
+        <h3 style="margin-top:0; padding-right: 20px;">💊 당일 약물 복용 내역</h3>
+        <div id="medListContentModal" style="margin-top: 15px; max-height: 50vh; overflow-y: auto; padding-right: 5px;">
+            <!-- 동적 리스트가 채워지는 영역 -->
+        </div>
+        <button class="back-btn" style="width: 100%; padding: 15px; margin-top: 20px; border: 1px solid #ddd;" onclick="closeModal('medListModal')">닫기</button>
     </div>
 </div>
 
@@ -591,7 +596,7 @@
     const googleProvider = new GoogleAuthProvider();
 
     let userId = null; 
-    let userProfile = { gender: 'male', weight: 70, height: 170 }; // 신체계측 기본값
+    let userProfile = { gender: 'male', weight: 70, height: 170 };
     let currentChallengeId = null; 
     let userQuitDate = null; 
     let mainChart = null;
@@ -599,7 +604,7 @@
     let statsChart = null;
     let pastStatsChart = null;
     let stateStatsChart = null; 
-    let medChartInstance = null; // 약물 농도 차트
+    let medChartInstance = null; 
     let cravingData = [];
     let timerInterval = null;
     let currentTabName = 'physical';
@@ -627,7 +632,6 @@
             });
             
             try {
-                // 사용자 신체정보 연동
                 const userDoc = await getDoc(doc(db, "users", userId));
                 if (userDoc.exists() && userDoc.data().weight) {
                     userProfile = { ...userProfile, ...userDoc.data() };
@@ -1504,30 +1508,28 @@
     }
 
     // 신규 추가: 약물 복용 기록 리스트 렌더링
-    function renderMedList() {
+    window.openMedListModal = function() {
         const medData = cravingData.filter(d => d.type === 'medication');
-        const medContainer = document.getElementById('medListContainer');
-        const medContent = document.getElementById('medListContent');
-
+        const medContent = document.getElementById('medListContentModal');
+        
         if (medData.length === 0) {
-            medContainer.style.display = 'none';
-            return;
-        }
-
-        medContainer.style.display = 'block';
-        medContent.innerHTML = medData.slice().reverse().map(m => {
-            const timeStr = m.date.split(' ').slice(3).join(' '); // "오후 5:30" 형태로 추출
-            return `
-            <div class="med-list-item">
-                <div>
-                    <strong style="color: #8e44ad; font-size: 0.95rem;">💊 ${m.drugName}</strong>
-                    <span style="color: #4a5568; margin-left: 6px;">${m.dose}mg</span>
+            medContent.innerHTML = '<div style="text-align:center; padding:20px; color:#999; font-size:0.9rem;">아직 기록된 약물 복용 내역이 없습니다.</div>';
+        } else {
+            medContent.innerHTML = medData.slice().reverse().map(m => {
+                const timeStr = m.date.split(' ').slice(3).join(' '); // "오후 5:30" 형태로 추출
+                return `
+                <div class="med-list-item" style="margin-bottom:8px;">
+                    <div>
+                        <strong style="color: #8e44ad; font-size: 0.95rem;">💊 ${m.drugName}</strong>
+                        <span style="color: #4a5568; margin-left: 6px;">${m.dose}mg</span>
+                    </div>
+                    <div style="color: #a0aec0; font-size: 0.8rem;">${timeStr} 복용</div>
                 </div>
-                <div style="color: #a0aec0; font-size: 0.8rem;">${timeStr} 복용</div>
-            </div>
-            `;
-        }).join('');
-    }
+                `;
+            }).join('');
+        }
+        openModal('medListModal');
+    };
 
     function renderChart(canvasId, targetChart, dataArray) {
         const ctx = document.getElementById(canvasId).getContext('2d');
@@ -1858,10 +1860,7 @@
             
             closeModal('medModal');
             alert(`[${drugName} ${dose}mg] 복용 기록이 완료되었습니다.`);
-            
-            renderMedList(); // 추가된 약물을 즉시 리스트에 반영
 
-            // 그래프 표시
             openModal('medChartModal');
             setTimeout(() => {
                 plotMedicationGraph(drug, dose, userProfile.weight);
@@ -1884,7 +1883,6 @@
         initDistributionChart(); 
         
         renderChangeCards(currentTabName);
-        renderMedList(); // 시작 시 약물 리스트 표시
 
         if (timerInterval) clearInterval(timerInterval);
         timerInterval = setInterval(() => {
@@ -1957,7 +1955,10 @@
                 const filteredActs = cravingData.filter(d => d.type === 'action');
                 if (filteredActs.length > 0) {
                     const lastEntry = filteredActs[filteredActs.length - 1];
-                    if (evalPromptedFor !== lastEntry.timestamp) {
+                    // 💡 신규 로직: 이미 평가된 기록인지 확인
+                    const hasEval = cravingData.some(d => d.type === 'eval' && d.timestamp > lastEntry.timestamp);
+                    
+                    if (!hasEval && evalPromptedFor !== lastEntry.timestamp) {
                         const currentTime = new Date().getTime();
                         const diffMs = currentTime - lastEntry.timestamp;
                         
