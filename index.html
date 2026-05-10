@@ -123,7 +123,7 @@
         .close-btn-top:hover { color: var(--danger-color); }
 
         .highlight { color: var(--primary-color); font-weight: 700; }
-        textarea, select, input[type="number"] { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; margin-top: 8px; font-family: inherit; box-sizing: border-box; resize: none; font-size:1rem; }
+        textarea, select, input[type="number"], input[type="datetime-local"], input[type="text"] { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; margin-top: 8px; font-family: inherit; box-sizing: border-box; resize: none; font-size:1rem; }
 
         .dynamic-range { -webkit-appearance: none; width: 100%; height: 8px; border-radius: 4px; background: linear-gradient(to right, var(--range-color, #f39c12) 0%, var(--range-color, #f39c12) var(--range-percent, 50%), #e2e8f0 var(--range-percent, 50%), #e2e8f0 100%); outline: none; margin: 10px 0; transition: background 0.1s ease; }
         .dynamic-range::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 24px; height: 24px; border-radius: 50%; background: #fff; border: 3px solid var(--range-color, #f39c12); box-shadow: 0 2px 4px rgba(0,0,0,0.15); cursor: pointer; transition: border-color 0.1s ease; }
@@ -186,6 +186,12 @@
         .cal-day.range-acc-mid { background-color: #f0fff4; color: #276749; border-radius: 0; }
         .cal-day.range-acc-end { background-color: var(--success-color); color: white; border-radius: 0 8px 8px 0; }
         
+        /* 최장 모드 (경고색/골드) */
+        .cal-day.range-best-single { background-color: var(--warning-color); color: white; border-radius: 8px; box-shadow: 0 2px 6px rgba(243, 156, 18, 0.3); }
+        .cal-day.range-best-start { background-color: var(--warning-color); color: white; border-radius: 8px 0 0 8px; }
+        .cal-day.range-best-mid { background-color: #fdf2e9; color: #b9770e; border-radius: 0; }
+        .cal-day.range-best-end { background-color: var(--warning-color); color: white; border-radius: 0 8px 8px 0; }
+
         .cal-day.fail-mark::after { content: '❌'; position: absolute; font-size: 0.6rem; top: -4px; right: -4px; background: white; border-radius: 50%; padding: 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
         .cal-day.today-mark { border: 2px solid var(--warning-color); font-weight: 800; color: var(--text-dark); }
         
@@ -194,7 +200,8 @@
         .cal-week div:nth-child(7), .cal-day.sat { color: #3182ce; }
         /* 하이라이트 될 때는 흰색/파란색 유지 */
         .cal-day.range-curr-start.sun, .cal-day.range-curr-single.sun, .cal-day.range-curr-end.sun,
-        .cal-day.range-acc-start.sun, .cal-day.range-acc-single.sun, .cal-day.range-acc-end.sun { color: white; }
+        .cal-day.range-acc-start.sun, .cal-day.range-acc-single.sun, .cal-day.range-acc-end.sun,
+        .cal-day.range-best-start.sun, .cal-day.range-best-single.sun, .cal-day.range-best-end.sun { color: white; }
     </style>
 </head>
 <body>
@@ -502,8 +509,11 @@
 <div id="historyListModal" class="modal">
     <div class="modal-content" style="max-width: 500px;">
         <button class="close-btn-top" onclick="closeModal('historyListModal')">&times;</button>
-        <h3 style="margin-top:0; padding-right: 20px;">나의 전체 단주 기록</h3>
-        <div id="historyListContainer" style="margin-top: 20px; max-height: 60vh; overflow-y: auto;"></div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding-right: 20px;">
+            <h3 style="margin:0;">나의 전체 단주 기록</h3>
+            <button class="action-btn" style="background:var(--success-color); color:white; padding:6px 10px; border-radius:8px; font-weight:bold; font-size:0.8rem;" onclick="openCreateHistoryModal()">+ 기록 강제 생성</button>
+        </div>
+        <div id="historyListContainer" style="margin-top: 10px; max-height: 60vh; overflow-y: auto;"></div>
     </div>
 </div>
 
@@ -514,6 +524,39 @@
         <h3 style="margin-top:0; padding-right: 20px;" id="historyDetailTitle">도전 기록 상세</h3>
         <p style="font-size: 0.85rem; color: #444; line-height: 1.5;" id="historyDetailSummary"></p>
         <div style="height: 350px; margin-top: 20px;"><canvas id="pastCravingHistoryChart"></canvas></div>
+    </div>
+</div>
+
+<!-- 💡 모든 고비 기록 리스트 모달 -->
+<div id="allCravingsModal" class="modal">
+    <div class="modal-content" style="max-width: 450px;">
+        <button class="close-btn-top" onclick="closeModal('allCravingsModal')">&times;</button>
+        <h3 style="margin-top:0; padding-right: 20px;">🔥 내가 이겨냈던 전체 고비들</h3>
+        <div id="allCravingsContainer" style="margin-top: 15px; max-height: 50vh; overflow-y: auto; padding-right: 5px;"></div>
+        <button id="loadMoreCravingsBtn" class="stat-btn" style="width:100%; margin-top:10px; display:none;" onclick="loadMoreCravings()">더 보기 (10개씩)</button>
+        <button class="start-btn" style="width: 100%; padding: 15px; margin-top: 15px; background: #e2e8f0; color: #4a5568;" onclick="closeModal('allCravingsModal')">닫기</button>
+    </div>
+</div>
+
+<!-- 💡 단주 기록 강제 생성 모달 -->
+<div id="createHistoryModal" class="modal">
+    <div class="modal-content">
+        <button class="close-btn-top" onclick="closeModal('createHistoryModal')">&times;</button>
+        <h3 style="margin-top:0; padding-right: 20px;">단주 기록 직접 생성</h3>
+        
+        <label style="font-weight:700; font-size:0.9rem; margin-top:10px; display:block;">시작 일시 (필수)</label>
+        <input type="datetime-local" id="createStartDateInput" class="reason-input" style="margin-bottom: 10px; width:100%;">
+        
+        <label style="font-weight:700; font-size:0.9rem; margin-top:5px; display:block;">종료 일시 (실패 일시 - 필수)</label>
+        <input type="datetime-local" id="createEndDateInput" class="reason-input" style="margin-bottom: 10px; width:100%;">
+        
+        <label style="font-weight:700; font-size:0.9rem; margin-top:5px; display:block;">시작 각오 (선택)</label>
+        <textarea id="createStartReasonInput" rows="2" maxlength="300" placeholder="시작 각오를 입력하세요"></textarea>
+        
+        <label style="font-weight:700; font-size:0.9rem; margin-top:10px; display:block;">중단 사유 (선택)</label>
+        <textarea id="createFailReasonInput" rows="2" maxlength="300" placeholder="중단 사유를 입력하세요"></textarea>
+        
+        <button class="start-btn" style="width:100%; padding: 14px; font-size: 1.1rem; margin-top: 20px;" onclick="saveManualHistory()">기록 저장</button>
     </div>
 </div>
 
@@ -582,12 +625,17 @@
     
     let globalMaxDays = 0;
     let globalBestStartDate = null; 
+    let globalBestEndDate = null;
     let editingChallengeId = null;
     let evalPromptedFor = null;
 
     let allChallengesData = []; 
     let currentCalDate = new Date();
     let currentCalMode = 'current';
+    
+    // 💡 전체 고비 기록 변수 추가
+    let allCravingsList = [];
+    let cravingsCurrentPage = 0;
 
     window.onload = function() {
         renderChangeCards(currentTabName);
@@ -657,6 +705,7 @@
             let totalDays = 0;
             let maxDays = 0;
             let bestStartDate = null;
+            let bestEndDate = null;
             let totalCravings = 0;
             let challengeCount = 0;
             totalPastDays = 0;
@@ -669,10 +718,12 @@
                 const diffDays = Math.max(0, Math.floor((end - start) / 86400000));
                 
                 allChallengesData.push({
+                    id: docSnap.id,
                     startDate: start,
                     endDate: end,
                     status: data.status,
-                    failReason: data.failReason
+                    failReason: data.failReason,
+                    cravings: data.cravings || [] // 💡 고비 데이터 저장 추가
                 });
                 
                 totalDays += diffDays;
@@ -684,6 +735,7 @@
                 if (diffDays > maxDays) {
                     maxDays = diffDays;
                     bestStartDate = data.startDate;
+                    bestEndDate = data.endDate ? data.endDate : new Date().toISOString();
                 }
                 if (data.cravings) totalCravings += data.cravings.filter(d => !['action', 'state', 'eval', 'medication'].includes(d.type)).length;
                 challengeCount++;
@@ -691,6 +743,7 @@
 
             globalMaxDays = maxDays;
             globalBestStartDate = bestStartDate;
+            globalBestEndDate = bestEndDate;
 
             if (challengeCount > 0 && totalDays > 0) {
                 const htmlContent = `
@@ -702,15 +755,15 @@
                             지금까지 간과 뇌가 회복할 수 있도록 스스로에게 선물한 시간들은 고스란히 <b>단주 내공</b>으로 당신의 몸에 축적되어 있습니다.
                         </p>
                         <div style="display: flex; gap: 10px; text-align: center;">
-                            <div style="flex: 1; background: #fff; padding: 12px 5px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                            <div style="flex: 1; background: #fff; padding: 12px 5px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.02); cursor: pointer; transition: transform 0.2s;" onclick="openCalendarModal('accumulated')" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'">
                                 <div style="font-size: 0.75rem; color: #718096; font-weight: 700;">내 인생 누적 단주</div>
                                 <div class="dynamic-total-days" style="font-size: 1.1rem; font-weight: 800; color: var(--primary-color); margin-top: 2px;">${totalDays}일</div>
                             </div>
-                            <div style="flex: 1; background: #fff; padding: 12px 5px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                            <div style="flex: 1; background: #fff; padding: 12px 5px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.02); cursor: pointer; transition: transform 0.2s;" onclick="openCalendarModal('longest')" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'">
                                 <div style="font-size: 0.75rem; color: #718096; font-weight: 700;">최장 생존 기록</div>
                                 <div class="dynamic-max-days" style="font-size: 1.1rem; font-weight: 800; color: var(--success-color); margin-top: 2px;">${maxDays}일</div>
                             </div>
-                            <div style="flex: 1; background: #fff; padding: 12px 5px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                            <div style="flex: 1; background: #fff; padding: 12px 5px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.02); cursor: pointer; transition: transform 0.2s;" onclick="openAllCravingsModal()" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'">
                                 <div style="font-size: 0.75rem; color: #718096; font-weight: 700;">이겨냈던 고비</div>
                                 <div style="font-size: 1.1rem; font-weight: 800; color: var(--warning-color); margin-top: 2px;">${totalCravings}번</div>
                             </div>
@@ -747,6 +800,10 @@
         if (mode === 'current') {
             legendContainer.innerHTML = `
                 <div><span style="display:inline-block; width:10px; height:10px; background:var(--primary-color); border-radius:2px;"></span> 현재 기록</div>
+            `;
+        } else if (mode === 'longest') {
+            legendContainer.innerHTML = `
+                <div><span style="display:inline-block; width:10px; height:10px; background:var(--warning-color); border-radius:2px;"></span> 최장 금주 구간</div>
             `;
         } else {
             legendContainer.innerHTML = `
@@ -796,6 +853,22 @@
                     else classList.push('range-curr-mid');
                 }
             } 
+            else if (mode === 'longest') {
+                if (globalBestStartDate) {
+                    const sd = new Date(globalBestStartDate); sd.setHours(0,0,0,0);
+                    const ed = globalBestEndDate ? new Date(globalBestEndDate) : new Date(); ed.setHours(0,0,0,0);
+
+                    const isStart = iterTime === sd.getTime();
+                    const isEnd = iterTime === ed.getTime();
+
+                    if (iterTime >= sd.getTime() && iterTime <= ed.getTime()) {
+                        if (isStart && isEnd) classList.push('range-best-single');
+                        else if (isStart) classList.push('range-best-start');
+                        else if (isEnd) classList.push('range-best-end');
+                        else classList.push('range-best-mid');
+                    }
+                }
+            }
             else if (mode === 'accumulated') {
                 allChallengesData.forEach(c => {
                     const sd = new Date(c.startDate); sd.setHours(0,0,0,0);
@@ -820,6 +893,111 @@
             grid.innerHTML += `<div class="${classList.join(' ')}">${day}</div>`;
         }
     }
+    
+    // 💡 전체 고비 기록 모달 및 렌더링 로직 추가
+    window.openAllCravingsModal = function() {
+        if (!userId) return;
+        
+        allCravingsList = [];
+        allChallengesData.forEach(c => {
+            if (c.cravings && c.cravings.length > 0) {
+                const actualCravings = c.cravings.filter(d => !['action', 'state', 'eval', 'medication'].includes(d.type));
+                allCravingsList.push(...actualCravings);
+            }
+        });
+        
+        // 시간순 내림차순 정렬
+        allCravingsList.sort((a, b) => b.timestamp - a.timestamp);
+        
+        cravingsCurrentPage = 0;
+        renderCravingsList();
+        openModal('allCravingsModal');
+    };
+
+    window.renderCravingsList = function() {
+        const container = document.getElementById('allCravingsContainer');
+        if (cravingsCurrentPage === 0) container.innerHTML = '';
+
+        if (allCravingsList.length === 0) {
+            container.innerHTML = '<div style="text-align:center; padding:20px; color:#666;">기록된 고비가 없습니다.</div>';
+            document.getElementById('loadMoreCravingsBtn').style.display = 'none';
+            return;
+        }
+
+        const startIndex = cravingsCurrentPage * 10;
+        const endIndex = Math.min(startIndex + 10, allCravingsList.length);
+        const chunk = allCravingsList.slice(startIndex, endIndex);
+
+        let html = '';
+        chunk.forEach(c => {
+            html += `
+                <div style="background:#f8f9fa; border:1px solid #e2e8f0; border-radius:10px; padding:12px; margin-bottom:8px; text-align:left;">
+                    <div style="font-size:0.8rem; color:#a0aec0; margin-bottom:4px;">${c.date}</div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <strong style="color:#e74c3c;">🔥 강도: ${c.strength}/10</strong>
+                        <span style="font-size:0.85rem; color:#4a5568;">${c.reason}</span>
+                    </div>
+                </div>
+            `;
+        });
+        container.insertAdjacentHTML('beforeend', html);
+
+        if (endIndex < allCravingsList.length) {
+            document.getElementById('loadMoreCravingsBtn').style.display = 'block';
+        } else {
+            document.getElementById('loadMoreCravingsBtn').style.display = 'none';
+        }
+    };
+
+    window.loadMoreCravings = function() {
+        cravingsCurrentPage++;
+        renderCravingsList();
+    };
+    
+    // 💡 단주 기록 강제 생성 로직
+    window.openCreateHistoryModal = function() {
+        document.getElementById('createStartDateInput').value = '';
+        document.getElementById('createEndDateInput').value = '';
+        document.getElementById('createStartReasonInput').value = '';
+        document.getElementById('createFailReasonInput').value = '';
+        openModal('createHistoryModal');
+    };
+
+    window.saveManualHistory = async function() {
+        if (!userId) return;
+        const startDate = document.getElementById('createStartDateInput').value;
+        const endDate = document.getElementById('createEndDateInput').value;
+        const startReason = document.getElementById('createStartReasonInput').value.trim();
+        const failReason = document.getElementById('createFailReasonInput').value.trim();
+
+        if (!startDate) return alert("시작 일시를 입력해 주세요.");
+        if (!endDate) return alert("종료 일시를 입력해 주세요. (과거 기록 생성시 필수)");
+
+        if (new Date(startDate) > new Date(endDate)) {
+            return alert("종료 일시가 시작 일시보다 빠를 수 없습니다.");
+        }
+
+        try {
+            const newChallenge = {
+                startDate: startDate,
+                endDate: endDate,
+                status: "failed", // 강제 생성은 기본적으로 과거 종료된 기록으로 처리
+                startReason: startReason,
+                failReason: failReason,
+                cravings: [],
+                createdAt: new Date().getTime()
+            };
+
+            await addDoc(collection(db, "users", userId, "challenges"), newChallenge);
+            alert("단주 기록이 성공적으로 추가되었습니다.");
+            closeModal('createHistoryModal');
+            openHistoryList(); // 리스트 새로고침
+            loadMotivationalStats(); // 통계 새로고침
+        } catch (e) {
+            console.error(e);
+            alert("기록 추가 실패: " + e.message);
+        }
+    };
 
     window.loginWithGoogle = async function() {
         try { await signInWithPopup(auth, googleProvider); } 
