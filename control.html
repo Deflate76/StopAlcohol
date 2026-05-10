@@ -50,7 +50,7 @@
         .status-display { font-size: 1.1rem; font-weight: 800; color: var(--text-dark); background: #f0f7ff; padding: 15px; border-radius: 12px; margin-bottom: 5px; border: 1px dashed #3498db; }
         
         .chart-container { margin-top: 10px; margin-bottom: 20px; display: none; }
-        .chart-canvas-wrapper { position: relative; height: 250px; width: 100%; }
+        .chart-canvas-wrapper { position: relative; height: 280px; width: 100%; }
         
         .custom-legend { font-size: 0.75rem; color: #4a5568; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 15px; background: #f8f9fa; padding: 10px; border-radius: 8px; border: 1px solid #edf2f7;}
         .legend-item { display: flex; align-items: center; gap: 4px; }
@@ -82,6 +82,9 @@
         .modal-btn-cancel:active { background: #e2e8f0; }
         .modal-btn-apply { background: var(--primary-color); color: white; }
         .modal-btn-apply:active { filter: brightness(0.9); }
+        
+        .profile-edit-btn { border:none; background:#e2e8f0; color:#4a5568; border-radius:6px; padding:4px 10px; font-size:0.8rem; font-weight:700; cursor:pointer; transition:0.2s; }
+        .profile-edit-btn:hover { background:#cbd5e0; }
     </style>
 </head>
 <body>
@@ -94,7 +97,7 @@
 
     <h1>🍷 음주 조절 모드</h1>
     <p style="font-size: 0.9rem; color: #666; word-break: keep-all; margin-bottom: 25px;">
-        단주가 깨졌더라도, 이성의 끈을 놓지 않고 자신의 <b>알코올 섭취량을 철저히 통제</b>하는 훈련 모드입니다.
+        자신의 알코올 및 숙취 유발 물질(아세트알데하이드) 수치를 시각적으로 확인하며 <b>음주량을 철저히 통제</b>하는 훈련입니다.
     </p>
 
     <div id="loadingArea">
@@ -150,9 +153,10 @@
             
             <div style="border-top: 1px dashed #e2e8f0; margin: 15px 0 20px 0;"></div>
 
-            <!-- 신체정보 연동 표시 영역 -->
-            <div id="activeProfileDisplay" style="background:#f8f9fa; padding:10px; border-radius:10px; font-size:0.85rem; color:#4a5568; margin-bottom:15px; border:1px solid #e2e8f0; font-weight:600; text-align: left;">
-                👤 나의 신체 정보: 로딩 중...
+            <!-- 신체정보 연동 표시 및 수정 영역 -->
+            <div style="background:#f8f9fa; padding:12px; border-radius:10px; font-size:0.85rem; color:#4a5568; margin-bottom:15px; border:1px solid #e2e8f0; text-align: left; display:flex; justify-content:space-between; align-items:center;">
+                <span id="profileText" style="font-weight:600;">👤 나의 신체 정보: 로딩 중...</span>
+                <button class="profile-edit-btn" onclick="openProfileEditModal()">수정</button>
             </div>
 
             <div class="input-group">
@@ -182,12 +186,14 @@
                 </div>
                 <!-- 커스텀 범례 -->
                 <div class="custom-legend">
-                    <div class="legend-item"><div class="legend-box" style="background: rgba(46, 204, 113, 0.2);"></div><span>안전구역 (~0.05%)</span></div>
-                    <div class="legend-item"><div class="legend-box" style="background: rgba(243, 156, 18, 0.2);"></div><span>주의구역 (~0.15%)</span></div>
-                    <div class="legend-item"><div class="legend-box" style="background: rgba(231, 76, 60, 0.2);"></div><span>위험구역 (~0.30%)</span></div>
-                    <div class="legend-item"><div class="legend-box" style="background: rgba(0, 0, 0, 0.2);"></div><span>치명/사망 (0.30%~)</span></div>
-                    <div class="legend-item"><span class="legend-line" style="color: #f39c12;">---</span><span>면허정지 (0.03%)</span></div>
-                    <div class="legend-item"><span class="legend-line" style="color: #e74c3c;">---</span><span>면허취소 (0.08%)</span></div>
+                    <div class="legend-item"><div class="legend-box" style="background: rgba(46, 204, 113, 0.2);"></div><span>안전 (~0.05)</span></div>
+                    <div class="legend-item"><div class="legend-box" style="background: rgba(243, 156, 18, 0.2);"></div><span>주의 (~0.15)</span></div>
+                    <div class="legend-item"><div class="legend-box" style="background: rgba(231, 76, 60, 0.2);"></div><span>위험 (~0.30)</span></div>
+                    <div class="legend-item"><span class="legend-line" style="color: #f39c12;">---</span><span>정지(0.03)</span></div>
+                    <div class="legend-item"><span class="legend-line" style="color: #e74c3c;">---</span><span>취소(0.08)</span></div>
+                    <div class="legend-item"><span class="legend-line" style="color: #9b59b6; font-weight:400;">━━</span><span>혈중알코올(BAC)</span></div>
+                    <div class="legend-item"><span class="legend-line" style="color: #e67e22; font-weight:400;">- -</span><span>아세트알데하이드(숙취)</span></div>
+                    <div class="legend-item"><span class="legend-line" style="color: #3498db;">│</span><span>현재 시각</span></div>
                 </div>
             </div>
             
@@ -211,12 +217,13 @@
                 </div>
                 <!-- 커스텀 범례 -->
                 <div class="custom-legend">
-                    <div class="legend-item"><div class="legend-box" style="background: rgba(46, 204, 113, 0.2);"></div><span>안전구역 (~0.05%)</span></div>
-                    <div class="legend-item"><div class="legend-box" style="background: rgba(243, 156, 18, 0.2);"></div><span>주의구역 (~0.15%)</span></div>
-                    <div class="legend-item"><div class="legend-box" style="background: rgba(231, 76, 60, 0.2);"></div><span>위험구역 (~0.30%)</span></div>
-                    <div class="legend-item"><div class="legend-box" style="background: rgba(0, 0, 0, 0.2);"></div><span>치명/사망 (0.30%~)</span></div>
-                    <div class="legend-item"><span class="legend-line" style="color: #f39c12;">---</span><span>면허정지 (0.03%)</span></div>
-                    <div class="legend-item"><span class="legend-line" style="color: #e74c3c;">---</span><span>면허취소 (0.08%)</span></div>
+                    <div class="legend-item"><div class="legend-box" style="background: rgba(46, 204, 113, 0.2);"></div><span>안전 (~0.05)</span></div>
+                    <div class="legend-item"><div class="legend-box" style="background: rgba(243, 156, 18, 0.2);"></div><span>주의 (~0.15)</span></div>
+                    <div class="legend-item"><div class="legend-box" style="background: rgba(231, 76, 60, 0.2);"></div><span>위험 (~0.30)</span></div>
+                    <div class="legend-item"><span class="legend-line" style="color: #f39c12;">---</span><span>정지(0.03)</span></div>
+                    <div class="legend-item"><span class="legend-line" style="color: #e74c3c;">---</span><span>취소(0.08)</span></div>
+                    <div class="legend-item"><span class="legend-line" style="color: #9b59b6; font-weight:400;">━━</span><span>혈중알코올(BAC)</span></div>
+                    <div class="legend-item"><span class="legend-line" style="color: #e67e22; font-weight:400;">- -</span><span>아세트알데하이드(숙취)</span></div>
                 </div>
             </div>
             
@@ -246,6 +253,44 @@
         <div class="modal-actions">
             <button class="modal-btn modal-btn-cancel" onclick="closeTimeResetModal()">취소</button>
             <button class="modal-btn modal-btn-apply" onclick="applyTimeReset()">이 시각으로 설정</button>
+        </div>
+    </div>
+</div>
+
+<!-- 신체정보 수정 커스텀 모달 -->
+<div class="modal-overlay" id="profileEditModal">
+    <div class="modal-content">
+        <div class="modal-title"><span>👤</span> 신체 정보 수정</div>
+        <div class="modal-desc">
+            현재 세션에 적용될 신체 및 식사 정보를 수정합니다. (수정 시 알코올 수치가 재계산됩니다)
+        </div>
+        
+        <div style="display: flex; gap: 10px;">
+            <div class="input-group" style="flex: 1;">
+                <label>성별</label>
+                <select id="editGender">
+                    <option value="male">남성</option>
+                    <option value="female">여성</option>
+                </select>
+            </div>
+            <div class="input-group" style="flex: 1;">
+                <label>체중 (kg)</label>
+                <input type="number" id="editWeight" placeholder="예: 70">
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label>식사 상태 (안주량)</label>
+            <select id="editMeal">
+                <option value="0.5">완전 공복 (흡수 매우 빠름)</option>
+                <option value="1.0">가벼운 식사/안주 (보통)</option>
+                <option value="1.5">든든한 식사 (흡수 지연)</option>
+            </select>
+        </div>
+        
+        <div class="modal-actions">
+            <button class="modal-btn modal-btn-cancel" onclick="closeProfileEditModal()">취소</button>
+            <button class="modal-btn modal-btn-apply" onclick="applyProfileEdit()">정보 업데이트</button>
         </div>
     </div>
 </div>
@@ -416,7 +461,7 @@
         document.getElementById('userMeal').value = mealVal;
 
         const gStr = sessionData.gender === 'male' ? '남성' : '여성';
-        document.getElementById('activeProfileDisplay').innerHTML = `👤 적용된 신체 정보: <b>${gStr}, ${sessionData.weight}kg</b>`;
+        document.getElementById('profileText').innerHTML = `👤 나의 신체 정보: <b>${gStr}, ${sessionData.weight}kg</b>`;
 
         document.getElementById('setupCard').style.display = 'none';
         document.getElementById('historyCard').style.display = 'none';
@@ -446,7 +491,7 @@
         currentSessionDocId = null; 
         
         const g = document.getElementById('userGender').value === 'male' ? '남성' : '여성';
-        document.getElementById('activeProfileDisplay').innerHTML = `👤 적용된 신체 정보: <b>${g}, ${weight}kg</b>`;
+        document.getElementById('profileText').innerHTML = `👤 나의 신체 정보: <b>${g}, ${weight}kg</b>`;
 
         document.getElementById('setupCard').style.display = 'none';
         document.getElementById('historyCard').style.display = 'none';
@@ -472,12 +517,16 @@
             const m = Math.floor((diff / 60000) % 60).toString().padStart(2, '0');
             const s = Math.floor((diff / 1000) % 60).toString().padStart(2, '0');
             document.getElementById('elapsedTimeDisplay').innerText = `음주 진행 시간: ${h}:${m}:${s}`;
+            
+            // 실시간으로 차트의 현재시각 세로선만 업데이트 (렌더링 부하 고려해 잔이 있을때만 1분단위 정도 갱신이 좋으나 여기선 단순화)
+            if (activeChartInstance && drinksList.length > 0 && new Date().getSeconds() % 30 === 0) {
+                 updateActiveChart();
+            }
         }, 1000);
     }
     
-    // 모달 띄우기 함수
+    // 시각 재설정 모달 제어
     window.openTimeResetModal = function() {
-        // 모바일 및 PC 브라우저 대응을 위해 로컬 시간대를 반영한 ISO 스트링 생성
         const tzoffset = (new Date()).getTimezoneOffset() * 60000;
         const localISOTime = (new Date(Date.now() - tzoffset)).toISOString().slice(0, 16);
         
@@ -485,22 +534,18 @@
         document.getElementById('timeResetModal').style.display = 'flex';
     };
 
-    // 모달 닫기
     window.closeTimeResetModal = function() {
         document.getElementById('timeResetModal').style.display = 'none';
     };
 
-    // 설정된 시간으로 갱신 로직 (잔들의 마신 시간은 유지하되 시작 시간 변경에 따라 간격을 재계산)
     window.applyTimeReset = function() {
         const inputVal = document.getElementById('newStartTimeInput').value;
         if(!inputVal) return alert("시각을 정확히 입력해주세요.");
         
         const newStartTime = new Date(inputVal);
-        
-        // 기준 시작 시간 업데이트
         sessionStartTime = newStartTime;
         
-        // 기존 기록이 있다면 간격을 재계산 (마신 시각인 endTime은 물리적 시간이므로 불변)
+        // 기준 시각 변경에 따른 간격 재계산 (endTime은 유지)
         for (let i = 0; i < drinksList.length; i++) {
             const prevMs = i > 0 ? toMs(drinksList[i-1].endTime) : sessionStartTime.getTime();
             drinksList[i].prevTime = prevMs;
@@ -516,16 +561,51 @@
         
         closeTimeResetModal();
     };
+    
+    // 신체정보 수정 모달 제어
+    window.openProfileEditModal = function() {
+        document.getElementById('editGender').value = document.getElementById('userGender').value;
+        document.getElementById('editWeight').value = document.getElementById('userWeight').value;
+        document.getElementById('editMeal').value = document.getElementById('userMeal').value;
+        document.getElementById('profileEditModal').style.display = 'flex';
+    };
+
+    window.closeProfileEditModal = function() {
+        document.getElementById('profileEditModal').style.display = 'none';
+    };
+
+    window.applyProfileEdit = function() {
+        const nw = parseFloat(document.getElementById('editWeight').value);
+        if(!nw || nw <= 0) return alert("체중을 입력해주세요.");
+        
+        document.getElementById('userGender').value = document.getElementById('editGender').value;
+        document.getElementById('userWeight').value = nw;
+        document.getElementById('userMeal').value = document.getElementById('editMeal').value;
+        
+        const gStr = document.getElementById('editGender').value === 'male' ? '남성' : '여성';
+        document.getElementById('profileText').innerHTML = `👤 나의 신체 정보: <b>${gStr}, ${nw}kg</b>`;
+        
+        // 기여도 재계산
+        const r = document.getElementById('userGender').value === 'male' ? 0.86 : 0.64;
+        drinksList.forEach(d => {
+            const cMaxContribution = (d.alcoholGrams * 0.7) / (nw * r * 10);
+            d.cMaxContribution = cMaxContribution;
+        });
+        
+        renderDrinkList();
+        if(drinksList.length > 0) updateActiveChart();
+        executeSaveProcess(false, true);
+        
+        closeProfileEditModal();
+    };
 
     window.cancelDrinkingSession = async function() {
         if(confirm("기록 중인 음주 세션을 완전히 취소하시겠습니까?\n(서버에서 현재 진행중인 세션 기록이 완전히 삭제됩니다.)")) {
-            
             if(currentSessionDocId) {
                 try {
                     await deleteDoc(doc(db, "drinking_sessions", currentSessionDocId));
                 } catch(e) { console.error("삭제 실패", e); }
             }
-
             sessionStartTime = null;
             drinksList = [];
             currentSessionDocId = null;
@@ -603,10 +683,8 @@
         const container = document.getElementById('drinkListContainer');
         container.innerHTML = '';
 
-        // 시작 시간 (뱃지 용)
         const sTimeStr = sessionStartTime.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
         
-        // START 다이어그램 그리기
         let html = `
             <div style="display:flex; flex-direction:column; align-items:center; margin-bottom: -5px; margin-top: 5px;">
                 <div style="background: var(--text-dark); color: white; font-size: 0.9rem; font-weight: 800; padding: 8px 20px; border-radius: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 2px solid white; z-index: 3; display: flex; align-items: center; gap: 6px;">
@@ -637,7 +715,6 @@
             const exactMaxBac = subChartData.maxBac || 0;
             const grams = d.alcoholGrams || 0;
 
-            // 간격 뱃지 (선 연결 포함)
             html += getGapBadgeHTML(d.gapMinutes, i === 0);
 
             html += `
@@ -666,15 +743,23 @@
         const totalAlcoholGrams = drinksList.reduce((sum, d) => sum + (d.alcoholGrams || 0), 0);
         const totalClearHrs = chartData.dataPoints.length * 15 / 60; 
         
+        // 숙취 뱃지 생성
+        let hangoverStr = "";
+        if (chartData.maxAch < 0.015) hangoverStr = "🟢 거의 없음 (양호)";
+        else if (chartData.maxAch < 0.035) hangoverStr = "🟡 가벼운 피로 및 갈증";
+        else if (chartData.maxAch < 0.065) hangoverStr = "🟠 두통 및 속쓰림 예상";
+        else hangoverStr = "🔴 극심한 숙취 (주의)";
+
         const summaryEl = document.getElementById('activeSummary');
         summaryEl.style.display = 'block';
         summaryEl.innerHTML = `
             🍻 현재까지 누적 <b>${drinksList.length}잔</b> / 알코올 <b>${totalAlcoholGrams.toFixed(1)}g</b> 섭취<br>
             • 종합 예상 최고 농도: <b style="color:var(--danger-color);">${(chartData.maxBac || 0).toFixed(3)}%</b><br>
-            • 알코올 완전 분해 예상 소요: <b style="color:var(--info-color);">${totalClearHrs.toFixed(1)}시간</b>
+            • 알코올 완전 분해 예상 소요: <b style="color:var(--info-color);">${totalClearHrs.toFixed(1)}시간</b><br>
+            • 예상 숙취 강도: <b>${hangoverStr}</b>
         `;
         
-        drawChart(chartData, 'activeBacChart', activeChartInstance, (instance) => activeChartInstance = instance);
+        drawChart(chartData, 'activeBacChart', activeChartInstance, (instance) => activeChartInstance = instance, true);
     }
 
     window.finishDrinkingSession = async function() {
@@ -763,16 +848,23 @@
         const totalClearHrs = chartData.dataPoints.length * 15 / 60; 
         const statusStr = sessionData.isFinished ? "종료됨" : "진행중 (또는 중단됨)";
         const sessionDate = new Date(toMs(sessionData.startTime));
+        
+        let hangoverStr = "";
+        if (chartData.maxAch < 0.015) hangoverStr = "🟢 거의 없음 (양호)";
+        else if (chartData.maxAch < 0.035) hangoverStr = "🟡 가벼운 피로 및 갈증";
+        else if (chartData.maxAch < 0.065) hangoverStr = "🟠 두통 및 속쓰림 예상";
+        else hangoverStr = "🔴 극심한 숙취 (주의)";
 
         document.getElementById('historySummary').innerHTML = `
             세션 상태: <b>${statusStr}</b><br>
             세션 일시: <b>${sessionDate.toLocaleString('ko-KR')}</b><br>
             총 <b>${sessionData.drinksList ? sessionData.drinksList.length : 0}잔</b> / 알코올 <b>${(sessionData.totalAlcoholGrams || 0).toFixed(1)}g</b> 섭취<br>
             • 종합 예상 최고 농도: <b style="color:var(--danger-color);">${(chartData.maxBac || 0).toFixed(3)}%</b><br>
-            • 알코올 완전 분해 소요: 약 <b style="color:var(--info-color);">${totalClearHrs.toFixed(1)}시간</b>
+            • 알코올 완전 분해 소요: 약 <b style="color:var(--info-color);">${totalClearHrs.toFixed(1)}시간</b><br>
+            • 예상 숙취 강도: <b>${hangoverStr}</b>
         `;
 
-        drawChart(chartData, 'historyBacChart', historyChartInstance, (instance) => historyChartInstance = instance);
+        drawChart(chartData, 'historyBacChart', historyChartInstance, (instance) => historyChartInstance = instance, false);
 
         const container = document.getElementById('historyDrinkListContainer');
         const sTimeStr = sessionDate.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
@@ -826,11 +918,17 @@
     function generateChartData(targetDrinksList, startMs, mealOffsetHrs) {
         const mealOffsetMin = mealOffsetHrs * 60;
         const dataPoints = [];
+        const achDataPoints = [];
         const labels = [];
+        const timeMsList = []; // 현재 시각 매칭용 배열
         
         let maxBac = 0;
+        let maxAch = 0;
+        let prevCleared = 0;
+        let currentAch = 0;
+        
         if(!targetDrinksList || targetDrinksList.length === 0) {
-            return { labels: ['00:00'], dataPoints: [0], maxBac: 0 };
+            return { labels: ['00:00'], timeMsList: [startMs], dataPoints: [0], achDataPoints: [0], maxBac: 0, maxAch: 0 };
         }
 
         let earliestDrinkMs = Math.min(...targetDrinksList.map(d => toMs(d.endTime)));
@@ -862,35 +960,99 @@
             let bac = Math.max(0, totalAbsorbedBAC - (0.015 * elapsedHoursTotal));
             if (bac > maxBac) maxBac = bac;
             
-            labels.push(timeLabel);
-            dataPoints.push(bac.toFixed(3));
+            // 아세트알데하이드(AcH) 프록시 모델 계산 (분해된 BAC 기반 생성 및 점진적 소멸)
+            let currentlyCleared = totalAbsorbedBAC - bac; 
+            let newlyCleared = Math.max(0, currentlyCleared - prevCleared);
+            prevCleared = currentlyCleared;
             
-            if (bac === 0 && currentMs > lastDrinkFullyAbsorbedTime) {
+            currentAch += newlyCleared * 1.5; // BAC 분해량에 비례하여 1.5배 스케일로 축적
+            currentAch -= 0.0025; // 시간당 0.01 수준으로 서서히 소멸
+            if (currentAch < 0) currentAch = 0;
+            if (currentAch > maxAch) maxAch = currentAch;
+            
+            labels.push(timeLabel);
+            timeMsList.push(currentMs);
+            dataPoints.push(bac.toFixed(3));
+            achDataPoints.push(currentAch.toFixed(3));
+            
+            if (bac === 0 && currentAch === 0 && currentMs > lastDrinkFullyAbsorbedTime) {
                 break;
             }
         }
-        return { labels, dataPoints, maxBac };
+        return { labels, timeMsList, dataPoints, achDataPoints, maxBac, maxAch };
     }
 
-    function drawChart(chartData, canvasId, existingInstance, setInstanceCallback) {
+    function drawChart(chartData, canvasId, existingInstance, setInstanceCallback, isActiveSession) {
         if (existingInstance) existingInstance.destroy();
         const ctx = document.getElementById(canvasId).getContext('2d');
         
+        let annotationsConfig = {
+            boxSafe: { type: 'box', yMin: 0, yMax: 0.05, backgroundColor: 'rgba(46, 204, 113, 0.1)', borderWidth: 0, drawTime: 'beforeDraw' },
+            boxWarn: { type: 'box', yMin: 0.05, yMax: 0.15, backgroundColor: 'rgba(243, 156, 18, 0.1)', borderWidth: 0, drawTime: 'beforeDraw' },
+            boxDanger: { type: 'box', yMin: 0.15, yMax: 0.30, backgroundColor: 'rgba(231, 76, 60, 0.1)', borderWidth: 0, drawTime: 'beforeDraw' },
+            boxFatal: { type: 'box', yMin: 0.30, yMax: 1.0, backgroundColor: 'rgba(0, 0, 0, 0.1)', borderWidth: 0, drawTime: 'beforeDraw' },
+            
+            lineSuspension: {
+                type: 'line', yMin: 0.03, yMax: 0.03, borderColor: '#f39c12', borderWidth: 2, borderDash: [4, 4],
+                label: { display: true, content: '정지(0.03)', position: 'start', backgroundColor: 'rgba(243, 156, 18, 0.8)', font: { size: 9 }, yAdjust: -10 }
+            },
+            lineRevocation: {
+                type: 'line', yMin: 0.08, yMax: 0.08, borderColor: '#e74c3c', borderWidth: 2, borderDash: [4, 4],
+                label: { display: true, content: '취소(0.08)', position: 'start', backgroundColor: 'rgba(231, 76, 60, 0.8)', font: { size: 9 }, yAdjust: -10 }
+            }
+        };
+
+        // 활성 세션(진행중)일 경우, 현재 시각 세로선을 계산하여 추가
+        if (isActiveSession && chartData.timeMsList && chartData.timeMsList.length > 0) {
+            const nowMs = Date.now();
+            let closestIndex = 0;
+            let minDiff = Infinity;
+            chartData.timeMsList.forEach((ms, i) => {
+                let diff = Math.abs(nowMs - ms);
+                if (diff < minDiff) { minDiff = diff; closestIndex = i; }
+            });
+            
+            const currentLabel = chartData.labels[closestIndex];
+            
+            annotationsConfig.lineCurrentTime = {
+                type: 'line',
+                xMin: currentLabel,
+                xMax: currentLabel,
+                borderColor: '#3498db',
+                borderWidth: 2,
+                label: { display: true, content: '현재', position: 'start', backgroundColor: '#3498db', font: { size: 10 } }
+            };
+        }
+
         const newInstance = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: chartData.labels,
-                datasets: [{
-                    label: '혈중 알코올 농도 (%)',
-                    data: chartData.dataPoints,
-                    borderColor: '#9b59b6',
-                    backgroundColor: 'rgba(155, 89, 182, 0.4)',
-                    borderWidth: 3,
-                    fill: false,
-                    tension: 0.4,
-                    pointRadius: 0,
-                    zIndex: 10
-                }]
+                datasets: [
+                    {
+                        label: '혈중 알코올(BAC) %',
+                        data: chartData.dataPoints,
+                        borderColor: '#9b59b6',
+                        backgroundColor: 'rgba(155, 89, 182, 0.4)',
+                        borderWidth: 3,
+                        fill: false,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        zIndex: 10
+                    },
+                    {
+                        label: '예상 아세트알데하이드 (숙취원인)',
+                        data: chartData.achDataPoints,
+                        borderColor: '#e67e22',
+                        backgroundColor: 'transparent',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        fill: false,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        zIndex: 5
+                    }
+                ]
             },
             options: {
                 responsive: true,
@@ -899,7 +1061,7 @@
                     y: { 
                         beginAtZero: true, 
                         suggestedMax: 0.1, 
-                        title: { display: true, text: 'BAC (%)' }
+                        title: { display: true, text: '농도 (%) / Index' }
                     },
                     x: {
                         ticks: { maxTicksLimit: 6 }
@@ -908,23 +1070,7 @@
                 plugins: {
                     legend: { display: false },
                     annotation: {
-                        annotations: {
-                            // 영역별 색칠
-                            boxSafe: { type: 'box', yMin: 0, yMax: 0.05, backgroundColor: 'rgba(46, 204, 113, 0.1)', borderWidth: 0, drawTime: 'beforeDraw' },
-                            boxWarn: { type: 'box', yMin: 0.05, yMax: 0.15, backgroundColor: 'rgba(243, 156, 18, 0.1)', borderWidth: 0, drawTime: 'beforeDraw' },
-                            boxDanger: { type: 'box', yMin: 0.15, yMax: 0.30, backgroundColor: 'rgba(231, 76, 60, 0.1)', borderWidth: 0, drawTime: 'beforeDraw' },
-                            boxFatal: { type: 'box', yMin: 0.30, yMax: 1.0, backgroundColor: 'rgba(0, 0, 0, 0.1)', borderWidth: 0, drawTime: 'beforeDraw' },
-                            
-                            // 기준 실선
-                            lineSuspension: {
-                                type: 'line', yMin: 0.03, yMax: 0.03, borderColor: '#f39c12', borderWidth: 2, borderDash: [4, 4],
-                                label: { display: true, content: '면허정지 (0.03%)', position: 'start', backgroundColor: 'rgba(243, 156, 18, 0.8)', font: { size: 10 }, yAdjust: -10 }
-                            },
-                            lineRevocation: {
-                                type: 'line', yMin: 0.08, yMax: 0.08, borderColor: '#e74c3c', borderWidth: 2, borderDash: [4, 4],
-                                label: { display: true, content: '면허취소 (0.08%)', position: 'start', backgroundColor: 'rgba(231, 76, 60, 0.8)', font: { size: 10 }, yAdjust: -10 }
-                            }
-                        }
+                        annotations: annotationsConfig
                     }
                 }
             }
