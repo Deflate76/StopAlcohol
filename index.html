@@ -58,9 +58,18 @@
         .logout-btn { background: #f1f3f5; border: none; padding: 6px 12px; border-radius: 8px; font-weight: 600; cursor: pointer; color: #495057; }
 
         /* 타이머 & 차트 */
-        .timer-display { margin: 15px 0; padding: 25px 20px; background: #fff5f5; border-radius: 20px; border: 1px solid #ffe3e3; }
-        .time-unit { display: block; font-size: 3rem; font-weight: 800; color: var(--danger-color); line-height: 1.2; }
-        #subTime { font-size: 1.2rem; font-weight: 600; color: #555; margin-top: 5px; }
+        .timer-display { margin: 15px 0; padding: 20px; background: #fff5f5; border-radius: 20px; border: 1px solid #ffe3e3; display: flex; flex-direction: column; align-items: center; }
+        
+        /* 💡 달력 버튼을 위한 클릭 어포던스 디자인 */
+        .clickable-time-box { display: flex; flex-direction: column; align-items: center; padding: 10px 20px; border-radius: 16px; transition: all 0.2s ease; cursor: pointer; border: 2px solid transparent; text-decoration: none; }
+        .clickable-time-box:hover { background-color: rgba(255, 255, 255, 0.8); border-color: #ffcccc; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(231, 76, 60, 0.1); }
+        .cal-hint { font-size: 0.75rem; color: var(--danger-color); font-weight: bold; opacity: 0.8; margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
+        
+        .time-unit { font-size: 3rem; font-weight: 800; color: var(--danger-color); line-height: 1.1; margin-bottom: 5px;}
+        .sub-time-clickable { font-size: 1.1rem; color: #718096; font-weight: 700; text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 4px; transition: color 0.2s; }
+        .clickable-time-box:hover .sub-time-clickable { color: var(--danger-color); }
+        
+        #subTime { font-size: 1.2rem; font-weight: 600; color: #555; margin-top: 10px; }
         
         .sub-progress-container { width: 100%; max-width: 300px; margin: 12px auto 0; }
         .sub-progress-bg { background: #ffe3e3; height: 12px; border-radius: 6px; overflow: hidden; position: relative; margin-bottom: 6px; }
@@ -93,48 +102,16 @@
         .change-card.active .progress-fill { background: linear-gradient(90deg, #2ecc71, #27ae60); }
         .change-card.active .progress-text { color: #fff; }
 
-        /* 아코디언 공통 및 개별 스타일 */
-        details.achieved-details, details.upcoming-details {
-            background: #fff;
-            border-radius: 14px;
-            padding: 12px 15px;
-            margin-bottom: 15px;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
-            transition: all 0.3s ease;
-        }
-        details.achieved-details summary, details.upcoming-details summary {
-            font-weight: 800;
-            font-size: 0.95rem;
-            cursor: pointer;
-            list-style: none;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            outline: none;
-        }
+        details.achieved-details, details.upcoming-details { background: #fff; border-radius: 14px; padding: 12px 15px; margin-bottom: 15px; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.02); transition: all 0.3s ease; }
+        details.achieved-details summary, details.upcoming-details summary { font-weight: 800; font-size: 0.95rem; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; outline: none; }
         details.achieved-details summary { color: #718096; }
         details.upcoming-details summary { color: var(--text-dark); }
-        
         details.achieved-details summary::-webkit-details-marker, details.upcoming-details summary::-webkit-details-marker { display: none; }
-        
-        details.achieved-details summary::after, details.upcoming-details summary::after {
-            content: '▼';
-            font-size: 0.8rem;
-            color: #cbd5e0;
-            transition: transform 0.3s ease;
-        }
-        details.achieved-details[open] summary::after, details.upcoming-details[open] summary::after {
-            transform: rotate(180deg);
-        }
-        details.achieved-details[open] summary, details.upcoming-details[open] summary {
-            margin-bottom: 15px;
-            border-bottom: 1px dashed #e2e8f0;
-            padding-bottom: 10px;
-        }
+        details.achieved-details summary::after, details.upcoming-details summary::after { content: '▼'; font-size: 0.8rem; color: #cbd5e0; transition: transform 0.3s ease; }
+        details.achieved-details[open] summary::after, details.upcoming-details[open] summary::after { transform: rotate(180deg); }
+        details.achieved-details[open] summary, details.upcoming-details[open] summary { margin-bottom: 15px; border-bottom: 1px dashed #e2e8f0; padding-bottom: 10px; }
         details.achieved-details[open] summary { color: var(--success-color); }
         details.upcoming-details[open] summary { color: var(--text-dark); }
-        
         .details-content { animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -149,7 +126,6 @@
         .dynamic-range { -webkit-appearance: none; width: 100%; height: 8px; border-radius: 4px; background: linear-gradient(to right, var(--range-color, #f39c12) 0%, var(--range-color, #f39c12) var(--range-percent, 50%), #e2e8f0 var(--range-percent, 50%), #e2e8f0 100%); outline: none; margin: 10px 0; transition: background 0.1s ease; }
         .dynamic-range::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 24px; height: 24px; border-radius: 50%; background: #fff; border: 3px solid var(--range-color, #f39c12); box-shadow: 0 2px 4px rgba(0,0,0,0.15); cursor: pointer; transition: border-color 0.1s ease; }
         .dynamic-range::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: #fff; border: 3px solid var(--range-color, #f39c12); box-shadow: 0 2px 4px rgba(0,0,0,0.15); cursor: pointer; transition: border-color 0.1s ease; }
-        
         .dynamic-range[data-touched="false"] { background: #e2e8f0 !important; }
         .dynamic-range[data-touched="false"]::-webkit-slider-thumb { border-color: #cbd5e0 !important; }
         .dynamic-range[data-touched="false"]::-moz-range-thumb { border-color: #cbd5e0 !important; }
@@ -159,12 +135,10 @@
         .post-author { font-weight: 700; color: #2d3748; }
         .post-date { color: #a0aec0; font-size: 0.75rem; }
         .post-body { font-size: 0.95rem; color: #4a5568; line-height: 1.5; word-break: break-all; }
-        
         .day-badge { background: #e3f2fd; color: #1976d2; padding: 3px 6px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; margin-left: 6px; vertical-align: middle; }
         .post-actions { display: flex; gap: 12px; margin-top: 12px; font-size: 0.8rem; justify-content: flex-end; }
         .action-btn { background: none; border: none; color: #a0aec0; cursor: pointer; padding: 0; font-weight: 600; transition: color 0.2s; }
         .action-btn:hover { color: var(--primary-color); }
-        
         .comment-section { margin-top: 15px; padding-top: 12px; border-top: 1px dashed #e2e8f0; }
         .comment-item { font-size: 0.85rem; padding: 6px 0; border-bottom: 1px solid #f8f9fa; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
         .comment-item:last-child { border-bottom: none; }
@@ -185,8 +159,40 @@
         .history-gap::before { content: '⚠️'; font-size: 0.9rem; }
         .gap-days { font-weight: 800; color: #ed8936; }
         
-        /* 약물 리스트 아이템 스타일 */
         .med-list-item { background: #f8f9fa; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; text-align: left; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+        
+        /* 💡 달력 모달 전용 깔끔하고 전문적인 UI 스타일 */
+        .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 0 10px; }
+        .cal-btn { background: #f0f2f5; border: none; width: 36px; height: 36px; border-radius: 10px; font-weight: bold; font-size: 1.1rem; color: #4a5568; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
+        .cal-btn:hover { background: #e2e8f0; color: var(--primary-color); }
+        .cal-title { font-size: 1.1rem; font-weight: 800; color: var(--text-dark); }
+        .cal-week { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 0.8rem; font-weight: bold; color: #a0aec0; margin-bottom: 10px; }
+        .cal-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
+        .cal-day { padding: 10px 0; font-size: 0.9rem; font-weight: 600; color: #4a5568; border-radius: 8px; position: relative; z-index: 1; transition: background-color 0.2s; }
+        .cal-day.empty { background: transparent; }
+        
+        /* 모드별 범위 하이라이트 색상 (전문적이고 깨끗한 톤) */
+        /* 현재 모드 (파란색) */
+        .cal-day.range-curr-single { background-color: var(--primary-color); color: white; border-radius: 8px; box-shadow: 0 2px 6px rgba(52, 152, 219, 0.3); }
+        .cal-day.range-curr-start { background-color: var(--primary-color); color: white; border-radius: 8px 0 0 8px; }
+        .cal-day.range-curr-mid { background-color: #ebf8ff; color: #2b6cb0; border-radius: 0; }
+        .cal-day.range-curr-end { background-color: var(--primary-color); color: white; border-radius: 0 8px 8px 0; }
+        
+        /* 누적 모드 (초록색 + 실패시 빨간색 마크) */
+        .cal-day.range-acc-single { background-color: var(--success-color); color: white; border-radius: 8px; box-shadow: 0 2px 6px rgba(46, 204, 113, 0.3); }
+        .cal-day.range-acc-start { background-color: var(--success-color); color: white; border-radius: 8px 0 0 8px; }
+        .cal-day.range-acc-mid { background-color: #f0fff4; color: #276749; border-radius: 0; }
+        .cal-day.range-acc-end { background-color: var(--success-color); color: white; border-radius: 0 8px 8px 0; }
+        
+        .cal-day.fail-mark::after { content: '❌'; position: absolute; font-size: 0.6rem; top: -4px; right: -4px; background: white; border-radius: 50%; padding: 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .cal-day.today-mark { border: 2px solid var(--warning-color); font-weight: 800; color: var(--text-dark); }
+        
+        /* 일요일/토요일 색상 연하게 */
+        .cal-week div:nth-child(1), .cal-day.sun { color: #e53e3e; }
+        .cal-week div:nth-child(7), .cal-day.sat { color: #3182ce; }
+        /* 하이라이트 될 때는 흰색/파란색 유지 */
+        .cal-day.range-curr-start.sun, .cal-day.range-curr-single.sun, .cal-day.range-curr-end.sun,
+        .cal-day.range-acc-start.sun, .cal-day.range-acc-single.sun, .cal-day.range-acc-end.sun { color: white; }
     </style>
 </head>
 <body>
@@ -229,7 +235,11 @@
         </div>
 
         <div class="timer-display">
-            <span id="mainDays" class="time-unit">0일</span>
+            <!-- 💡 수정된 달력 클릭 UI 영역 -->
+            <div id="mainDaysContainer" style="width: 100%;">
+                <!-- JS에서 동적으로 달력 호버 UI를 생성합니다 -->
+            </div>
+            
             <div id="subTime">0시간 0분 0초</div>
             
             <div class="sub-progress-container">
@@ -255,7 +265,6 @@
         <div id="activeMotivationalSummary" style="display: none; width: 100%; margin-bottom: 15px;"></div>
 
         <div class="craving-section">
-            <!-- 1:1 비율 완벽한 버튼 배치 -->
             <div style="display: flex; gap: 8px; margin-bottom: 12px;">
                 <button class="craving-btn" style="background-color: var(--primary-color); flex:1; margin:0; padding:15px;" onclick="openModal('stateModal')">📝 현재 몸상태</button>
                 <button class="craving-btn" style="background-color: #16a085; flex:1; margin:0; padding:15px;" onclick="openBodyInfoModal()">⚖️ 신체계측</button>
@@ -265,7 +274,6 @@
             <button class="craving-btn" style="background-color: var(--success-color); margin-bottom: 12px;" onclick="openModal('actionModal')">🛡️ 고비 극복 행동 개시!</button>
             <button class="craving-btn" style="background-color: #8e44ad; margin-bottom: 15px;" onclick="openMedModal()">💊 약물 복용 기록</button>
             
-            <!-- 통계/기록 버튼들 (2x2 그리드 배열) -->
             <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
                 <button class="stat-btn" style="width:100%; padding:10px 5px;" onclick="openStats()">📈 고비(<span id="cravingCount">0</span>)</button>
                 <button class="stat-btn" style="width:100%; padding:10px 5px; border-color: #3498db; color: #3498db;" onclick="openStateStats()">📊 몸상태 추이</button>
@@ -311,7 +319,6 @@
         </div>
         
         <button class="craving-btn" style="background-color: #7f8c8d; margin-top: 30px; font-size: 0.95rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" onclick="resetDate()">🔄 금주 실패... 새로운 단주 도전 및 재설정</button>
-        
         <button class="craving-btn" style="background-color: #9b59b6; margin-top: 15px; font-size: 0.95rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" onclick="goToControlMode()">🍷 금주 실패... 음주 조절 모드로 전환</button>
     </div>
 </div>
@@ -320,25 +327,47 @@
     &copy; 2026 Alcoholaway.com All rights reserved.
 </footer>
 
+<!-- 💡 시각적 피드백 캘린더 모달 추가 -->
+<div id="calendarModal" class="modal">
+    <div class="modal-content" style="max-width: 400px; padding: 25px 20px;">
+        <button class="close-btn-top" onclick="closeModal('calendarModal')">&times;</button>
+        
+        <div class="cal-header">
+            <button class="cal-btn" onclick="changeCalMonth(-1)">&#10094;</button>
+            <div class="cal-title" id="calMonthTitle">2026년 5월</div>
+            <button class="cal-btn" onclick="changeCalMonth(1)">&#10095;</button>
+        </div>
+        
+        <div id="calLegendContainer" style="margin-bottom: 15px; font-size: 0.8rem; display: flex; gap: 10px; justify-content: center;">
+            <!-- 모드에 따라 범례 동적 변경 -->
+        </div>
+
+        <div class="cal-week">
+            <div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div>
+        </div>
+        <div class="cal-days" id="calendarDaysGrid">
+            <!-- JS 동적 생성 -->
+        </div>
+        
+        <button class="start-btn" style="width: 100%; margin-top: 20px; padding: 12px; font-size: 1rem; background: #e2e8f0; color: #4a5568;" onclick="closeModal('calendarModal')">닫기</button>
+    </div>
+</div>
+
+<!-- (기타 모달들은 동일 유지) -->
 <!-- 신체계측 모달 -->
 <div id="bodyInfoModal" class="modal">
     <div class="modal-content">
         <button class="close-btn-top" onclick="closeModal('bodyInfoModal')">&times;</button>
         <h3 style="margin-top:0; margin-bottom: 12px; padding-right: 20px;">⚖️ 신체계측 기록</h3>
         <p style="font-size:0.85rem; color:#888; margin-bottom:15px; word-break:keep-all;">입력하신 정보는 약물 대사 및 음주 조절 모드에서의 혈중 알코올 농도 계산에 활용됩니다.</p>
-        
         <label style="font-weight:700; font-size:0.9rem;">성별</label>
         <select id="bodyGender">
-            <option value="male">남성</option>
-            <option value="female">여성</option>
+            <option value="male">남성</option><option value="female">여성</option>
         </select>
-        
         <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px;">체중 (kg)</label>
         <input type="number" id="bodyWeight" placeholder="예: 70">
-        
         <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px;">신장 (cm)</label>
         <input type="number" id="bodyHeight" placeholder="예: 175">
-        
         <button class="start-btn" style="margin-top:20px; width:100%; padding: 14px; font-size: 1.1rem; background: linear-gradient(135deg, #3498db, #2980b9);" onclick="saveBodyInfo()">저장하기</button>
     </div>
 </div>
@@ -348,45 +377,37 @@
     <div class="modal-content">
         <button class="close-btn-top" onclick="closeModal('medModal')">&times;</button>
         <h3 style="margin-top:0; margin-bottom: 12px; padding-right: 20px;">💊 약물 복용 기록</h3>
-        
         <label style="font-weight:700; font-size:0.9rem;">약물 종류</label>
         <select id="medType">
             <option value="acamprosate">아캄프로세이트 (Acamprosate)</option>
             <option value="naltrexone">날트렉손 (Naltrexone)</option>
         </select>
-        
         <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px;">복용량 (mg)</label>
         <input type="number" id="medDose" placeholder="예: 333 (1정)">
         <p style="font-size:0.75rem; color:#999; margin-top:4px;">일반적으로 아캄프로세이트는 1정 333mg, 날트렉손은 1정 50mg 입니다.</p>
-        
         <button class="start-btn" style="margin-top:20px; width:100%; padding: 14px; font-size: 1.1rem; background: linear-gradient(135deg, #8e44ad, #9b59b6);" onclick="submitMedication()">복용 기록 및 농도 확인</button>
     </div>
 </div>
 
-<!-- 💊 약물 복용 내역 리스트 모달 (신규 추가) -->
 <div id="medListModal" class="modal">
     <div class="modal-content" style="max-width: 450px;">
         <button class="close-btn-top" onclick="closeModal('medListModal')">&times;</button>
         <h3 style="margin-top:0; padding-right: 20px;">💊 당일 약물 복용 내역</h3>
-        <div id="medListContentModal" style="margin-top: 15px; max-height: 50vh; overflow-y: auto; padding-right: 5px;">
-            <!-- 동적 리스트가 채워지는 영역 -->
-        </div>
-        <button class="back-btn" style="width: 100%; padding: 15px; margin-top: 20px; border: 1px solid #ddd;" onclick="closeModal('medListModal')">닫기</button>
+        <div id="medListContentModal" style="margin-top: 15px; max-height: 50vh; overflow-y: auto; padding-right: 5px;"></div>
+        <button class="start-btn" style="width: 100%; padding: 15px; margin-top: 20px; background: #e2e8f0; color: #4a5568;" onclick="closeModal('medListModal')">닫기</button>
     </div>
 </div>
 
-<!-- 약물 농도 추이 모달 -->
 <div id="medChartModal" class="modal">
     <div class="modal-content" style="max-width: 550px;">
         <button class="close-btn-top" onclick="closeModal('medChartModal')">&times;</button>
         <h3 style="margin-top:0; padding-right: 20px;">💊 혈중 약물 농도 추정치</h3>
         <p style="font-size:0.85rem; color:#666;" id="medChartDesc">복용하신 약물의 예상 체내 대사 곡선입니다.</p>
         <div style="height: 300px; margin-top: 20px;"><canvas id="medChartCanvas"></canvas></div>
-        <button class="back-btn" style="width: 100%; padding: 15px; margin-top: 20px; border: 1px solid #ddd;" onclick="closeModal('medChartModal')">닫기</button>
+        <button class="start-btn" style="width: 100%; padding: 15px; margin-top: 20px; background: #e2e8f0; color: #4a5568;" onclick="closeModal('medChartModal')">닫기</button>
     </div>
 </div>
 
-<!-- 현재 몸상태 기록 모달 -->
 <div id="stateModal" class="modal">
     <div class="modal-content">
         <button class="close-btn-top" onclick="closeModal('stateModal')">&times;</button>
@@ -395,33 +416,24 @@
             <button onclick="resetStateModal()" style="background:none; border:none; color:#718096; font-weight:bold; cursor:pointer; font-size:0.85rem; text-decoration:underline; padding:0;">초기화</button>
         </div>
         <p style="font-size:0.85rem; color:#888; margin-bottom:15px; word-break:keep-all;">기록하고 싶은 항목의 바를 움직여 활성화해 주세요.</p>
-        
         <label style="font-weight:700; font-size:0.9rem;">금단증상 정도 (<span id="withdrawalVal" style="font-weight: 800; color: #a0aec0;">-</span>/10)</label>
         <input type="range" id="withdrawalRange" min="0" max="10" value="5" class="dynamic-range" data-touched="false" oninput="markTouched(this); updateRangeStyle(this, 'withdrawalVal')">
-
         <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px;">기분 상태 (<span id="moodVal" style="font-weight: 800; color: #a0aec0;">-</span>/10)</label>
         <input type="range" id="moodRange" min="0" max="10" value="5" class="dynamic-range" data-touched="false" oninput="markTouched(this); updateRangeStyle(this, 'moodVal')">
-        
         <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px;">갈증 상태 (<span id="thirstVal" style="font-weight: 800; color: #a0aec0;">-</span>/10)</label>
         <input type="range" id="thirstRange" min="0" max="10" value="5" class="dynamic-range" data-touched="false" oninput="markTouched(this); updateRangeStyle(this, 'thirstVal')">
-
         <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px;">육체피로 정도 (<span id="fatigueVal" style="font-weight: 800; color: #a0aec0;">-</span>/10)</label>
         <input type="range" id="fatigueRange" min="0" max="10" value="5" class="dynamic-range" data-touched="false" oninput="markTouched(this); updateRangeStyle(this, 'fatigueVal')">
-
         <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px;">정신적 스트레스 정도 (<span id="stressVal" style="font-weight: 800; color: #a0aec0;">-</span>/10)</label>
         <input type="range" id="stressRange" min="0" max="10" value="5" class="dynamic-range" data-touched="false" oninput="markTouched(this); updateRangeStyle(this, 'stressVal')">
-
         <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px;">수면 상태 (<span id="sleepVal" style="font-weight: 800; color: #a0aec0;">-</span>/10)</label>
         <input type="range" id="sleepRange" min="0" max="10" value="5" class="dynamic-range" data-touched="false" oninput="markTouched(this); updateRangeStyle(this, 'sleepVal')">
-
         <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px;">배고픔 정도 (<span id="hungerVal" style="font-weight: 800; color: #a0aec0;">-</span>/10)</label>
         <input type="range" id="hungerRange" min="0" max="10" value="5" class="dynamic-range" data-touched="false" oninput="markTouched(this); updateRangeStyle(this, 'hungerVal')">
-
         <button class="start-btn" style="margin-top:20px; width:100%; padding: 14px; font-size: 1.1rem; background: linear-gradient(135deg, #3498db, #2980b9);" onclick="submitState()">현재 몸상태 기록하기</button>
     </div>
 </div>
 
-<!-- 몸상태 차트 모달 -->
 <div id="stateStatsModal" class="modal">
     <div class="modal-content" style="max-width: 550px;">
         <button class="close-btn-top" onclick="closeModal('stateStatsModal')">&times;</button>
@@ -431,64 +443,33 @@
     </div>
 </div>
 
-<!-- 고비 극복 행동 평가 모달 -->
 <div id="evalModal" class="modal">
     <div class="modal-content">
         <button class="close-btn-top" onclick="closeModal('evalModal')">&times;</button>
         <h3 style="margin-top:0; margin-bottom: 12px; padding-right: 20px;">🛡️ 극복 행동 효과 점검</h3>
         <p id="evalMessage" style="font-size: 0.85rem; color: #666; margin-bottom: 20px; line-height: 1.5;"></p>
-
         <label style="font-weight:700; font-size:0.9rem;">대책의 효과 (<span id="evalEffectVal" style="font-weight: 800;">5</span>/10) <br><span style="font-size:0.75rem; color:#999; font-weight:normal;">0: 전혀 없음 ~ 10: 매우 효과적</span></label>
         <input type="range" id="evalEffectRange" min="0" max="10" value="5" class="dynamic-range" oninput="updateRangeStyle(this, 'evalEffectVal')">
-
         <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px;">현재 갈망 강도 (<span id="evalCravingVal" style="font-weight: 800;">5</span>/10)</label>
         <input type="range" id="evalCravingRange" min="1" max="10" value="5" class="dynamic-range" oninput="updateRangeStyle(this, 'evalCravingVal')">
-
         <button class="start-btn" style="margin-top:15px; width:100%; padding: 14px; font-size: 1.1rem; background: linear-gradient(135deg, #2ecc71, #27ae60);" onclick="submitEval()">평가 결과 기록하기</button>
     </div>
 </div>
 
-<!-- 고비 극복 행동 모달 -->
 <div id="actionModal" class="modal">
     <div class="modal-content">
         <button class="close-btn-top" onclick="closeModal('actionModal')">&times;</button>
-        
         <h3 style="margin-top:0; margin-bottom: 12px; padding-right: 20px;">🛡️ 고비 극복 대책</h3>
         <p style="font-size: 0.85rem; color: #666; margin-bottom: 20px; word-break: keep-all;">지금 당장 실천할 수 있는 대책을 선택하세요. 뇌의 주의를 분산시키고 도파민 보상 회로를 리셋합니다.</p>
-        
         <div style="display: flex; flex-direction: column; gap: 10px;">
-            <button class="stat-btn" style="text-align: left; padding: 15px; border-color: #3498db; color: #2d3748; background: #f0f8ff;" onclick="submitAction('냉수 마시기', '순간적인 체온 변화와 위장 자극으로 뇌의 주의를 알코올에서 물로 전환시킵니다.')">
-                <div style="font-weight: 800; color: #3498db; margin-bottom: 4px;">💧 시원한 냉수 들이키기</div>
-                <div style="font-size: 0.75rem; font-weight: normal; color: #555;">순간적인 체온 변화와 위장 자극으로 주의 환기</div>
-            </button>
-            <button class="stat-btn" style="text-align: left; padding: 15px; border-color: #34495e; color: #2d3748; background: #f4f6f7;" onclick="submitAction('얼음+탄산/청량음료 마시기', '강한 탄산과 차가운 온도로 식도를 자극하여 뇌의 보상 기전을 일시적으로 만족시킵니다.')">
-                <div style="font-weight: 800; color: #34495e; margin-bottom: 4px;">🧊 얼음+탄산음료 등 청량음료 마시기</div>
-                <div style="font-size: 0.75rem; font-weight: normal; color: #555;">식도 자극 및 청량감으로 뇌의 보상 기전 충족</div>
-            </button>
-            <button class="stat-btn" style="text-align: left; padding: 15px; border-color: #d35400; color: #2d3748; background: #fdfae6;" onclick="submitAction('무알콜 맥주 마시기', '알코올 없이 맥주의 맛과 목넘김을 제공하여 심리적 갈망을 즉각적으로 해소합니다.')">
-                <div style="font-weight: 800; color: #d35400; margin-bottom: 4px;">🍺 무알콜 맥주 마시기</div>
-                <div style="font-size: 0.75rem; font-weight: normal; color: #555;">시각/미각적 모방으로 심리적 갈망 즉각 해소</div>
-            </button>
-            <button class="stat-btn" style="text-align: left; padding: 15px; border-color: #e67e22; color: #2d3748; background: #fff8f0;" onclick="submitAction('단당류 섭취', '알코올 갈망의 상당수는 뇌의 일시적 저혈당 상태(가짜 갈망)에서 비롯됩니다. 초콜릿이나 사탕이 효과적입니다.')">
-                <div style="font-weight: 800; color: #e67e22; margin-bottom: 4px;">🍬 단당류(초콜릿/사탕) 섭취</div>
-                <div style="font-size: 0.75rem; font-weight: normal; color: #555;">알코올 갈망을 유발하는 뇌의 '가짜 저혈당' 해소</div>
-            </button>
-            <button class="stat-btn" style="text-align: left; padding: 15px; border-color: #2ecc71; color: #2d3748; background: #f0fff4;" onclick="submitAction('심호흡 1분', '부교감 신경을 활성화하여 순간적으로 치솟는 코르티솔(스트레스 호르몬)을 억제하고 충동을 가라앉힙니다.')">
-                <div style="font-weight: 800; color: #2ecc71; margin-bottom: 4px;">🧘 1분 심호흡 및 스트레칭</div>
-                <div style="font-size: 0.75rem; font-weight: normal; color: #555;">부교감 신경 활성화로 충동 억제력 회복</div>
-            </button>
-            <button class="stat-btn" style="text-align: left; padding: 15px; border-color: #9b59b6; color: #2d3748; background: #fbf0ff;" onclick="submitAction('가벼운 산책', '신체 활동을 통해 자연스러운 엔돌핀과 도파민 분비시켜, 알코올이 주는 보상을 대체합니다.')">
-                <div style="font-weight: 800; color: #9b59b6; margin-bottom: 4px;">🏃‍♂️ 10분 가벼운 산책/운동</div>
-                <div style="font-size: 0.75rem; font-weight: normal; color: #555;">자연스러운 엔돌핀 분비로 보상 회로 대체</div>
-            </button>
-            <button class="stat-btn" style="text-align: left; padding: 15px; border-color: #e74c3c; color: #2d3748; background: #fdf0ed;" onclick="submitAction('장소/사람 회피하기', '갈망을 유발하는 강력한 환경적 트리거(술자리, 유혹하는 사람)로부터 물리적으로 벗어납니다.')">
-                <div style="font-weight: 800; color: #e74c3c; margin-bottom: 4px;">🏃 장소 및 사람 회피하기</div>
-                <div style="font-size: 0.75rem; font-weight: normal; color: #555;">환경적 트리거로부터 물리적 단절 및 도피</div>
-            </button>
-            <button class="stat-btn" style="text-align: left; padding: 15px; border-color: #7f8c8d; color: #2d3748; background: #f8f9f9;" onclick="submitAction('고비행동 현재불가', '현재 상황상 적극적 대처는 어렵지만, 고비가 왔음을 인지하고 버티는 상태를 기록합니다.')">
-                <div style="font-weight: 800; color: #7f8c8d; margin-bottom: 4px;">⏳ 고비행동 현재불가</div>
-                <div style="font-size: 0.75rem; font-weight: normal; color: #555;">적극적 개입은 어렵지만 인지하며 묵묵히 버티기</div>
-            </button>
+            <button class="stat-btn" style="text-align: left; padding: 15px; border-color: #3498db; color: #2d3748; background: #f0f8ff;" onclick="submitAction('냉수 마시기', '순간적인 체온 변화와 위장 자극으로 뇌의 주의를 알코올에서 물로 전환시킵니다.')"><div style="font-weight: 800; color: #3498db; margin-bottom: 4px;">💧 시원한 냉수 들이키기</div><div style="font-size: 0.75rem; font-weight: normal; color: #555;">순간적인 체온 변화와 위장 자극으로 주의 환기</div></button>
+            <button class="stat-btn" style="text-align: left; padding: 15px; border-color: #34495e; color: #2d3748; background: #f4f6f7;" onclick="submitAction('얼음+탄산/청량음료 마시기', '강한 탄산과 차가운 온도로 식도를 자극하여 뇌의 보상 기전을 일시적으로 만족시킵니다.')"><div style="font-weight: 800; color: #34495e; margin-bottom: 4px;">🧊 얼음+탄산음료 등 청량음료 마시기</div><div style="font-size: 0.75rem; font-weight: normal; color: #555;">식도 자극 및 청량감으로 뇌의 보상 기전 충족</div></button>
+            <button class="stat-btn" style="text-align: left; padding: 15px; border-color: #d35400; color: #2d3748; background: #fdfae6;" onclick="submitAction('무알콜 맥주 마시기', '알코올 없이 맥주의 맛과 목넘김을 제공하여 심리적 갈망을 즉각적으로 해소합니다.')"><div style="font-weight: 800; color: #d35400; margin-bottom: 4px;">🍺 무알콜 맥주 마시기</div><div style="font-size: 0.75rem; font-weight: normal; color: #555;">시각/미각적 모방으로 심리적 갈망 즉각 해소</div></button>
+            <button class="stat-btn" style="text-align: left; padding: 15px; border-color: #e67e22; color: #2d3748; background: #fff8f0;" onclick="submitAction('단당류 섭취', '알코올 갈망의 상당수는 뇌의 일시적 저혈당 상태(가짜 갈망)에서 비롯됩니다. 초콜릿이나 사탕이 효과적입니다.')"><div style="font-weight: 800; color: #e67e22; margin-bottom: 4px;">🍬 단당류(초콜릿/사탕) 섭취</div><div style="font-size: 0.75rem; font-weight: normal; color: #555;">알코올 갈망을 유발하는 뇌의 '가짜 저혈당' 해소</div></button>
+            <button class="stat-btn" style="text-align: left; padding: 15px; border-color: #2ecc71; color: #2d3748; background: #f0fff4;" onclick="submitAction('심호흡 1분', '부교감 신경을 활성화하여 순간적으로 치솟는 코르티솔(스트레스 호르몬)을 억제하고 충동을 가라앉힙니다.')"><div style="font-weight: 800; color: #2ecc71; margin-bottom: 4px;">🧘 1분 심호흡 및 스트레칭</div><div style="font-size: 0.75rem; font-weight: normal; color: #555;">부교감 신경 활성화로 충동 억제력 회복</div></button>
+            <button class="stat-btn" style="text-align: left; padding: 15px; border-color: #9b59b6; color: #2d3748; background: #fbf0ff;" onclick="submitAction('가벼운 산책', '신체 활동을 통해 자연스러운 엔돌핀과 도파민 분비시켜, 알코올이 주는 보상을 대체합니다.')"><div style="font-weight: 800; color: #9b59b6; margin-bottom: 4px;">🏃‍♂️ 10분 가벼운 산책/운동</div><div style="font-size: 0.75rem; font-weight: normal; color: #555;">자연스러운 엔돌핀 분비로 보상 회로 대체</div></button>
+            <button class="stat-btn" style="text-align: left; padding: 15px; border-color: #e74c3c; color: #2d3748; background: #fdf0ed;" onclick="submitAction('장소/사람 회피하기', '갈망을 유발하는 강력한 환경적 트리거(술자리, 유혹하는 사람)로부터 물리적으로 벗어납니다.')"><div style="font-weight: 800; color: #e74c3c; margin-bottom: 4px;">🏃 장소 및 사람 회피하기</div><div style="font-size: 0.75rem; font-weight: normal; color: #555;">환경적 트리거로부터 물리적 단절 및 도피</div></button>
+            <button class="stat-btn" style="text-align: left; padding: 15px; border-color: #7f8c8d; color: #2d3748; background: #f8f9f9;" onclick="submitAction('고비행동 현재불가', '현재 상황상 적극적 대처는 어렵지만, 고비가 왔음을 인지하고 버티는 상태를 기록합니다.')"><div style="font-weight: 800; color: #7f8c8d; margin-bottom: 4px;">⏳ 고비행동 현재불가</div><div style="font-size: 0.75rem; font-weight: normal; color: #555;">적극적 개입은 어렵지만 인지하며 묵묵히 버티기</div></button>
         </div>
     </div>
 </div>
@@ -496,23 +477,14 @@
 <div id="cravingModal" class="modal">
     <div class="modal-content">
         <button class="close-btn-top" onclick="closeModal('cravingModal')">&times;</button>
-        
         <h3 style="margin-top:0; margin-bottom: 12px; padding-right: 20px;">고비 기록하기</h3>
-        
         <label style="font-weight:700; font-size:0.9rem;">갈망 강도 (<span id="rangeVal" style="font-weight: 800;">5</span>/10)</label>
         <input type="range" id="cravingRange" min="1" max="10" value="5" class="dynamic-range" oninput="updateRangeStyle(this, 'rangeVal')">
-        
         <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:10px;">갈망의 원인</label>
         <select id="cravingReason" onchange="toggleEtc(this.value)">
-            <option value="스트레스">업무 및 일상 스트레스</option>
-            <option value="회식/모임">회식 또는 사교 모임</option>
-            <option value="우울/공허">우울하거나 외로운 기분</option>
-            <option value="습관/지루함">그냥 습관적으로(지루함)</option>
-            <option value="보상심리">고생한 나에 대한 보상</option>
-            <option value="기타">기타 (직접 입력)</option>
+            <option value="스트레스">업무 및 일상 스트레스</option><option value="회식/모임">회식 또는 사교 모임</option><option value="우울/공허">우울하거나 외로운 기분</option><option value="습관/지루함">그냥 습관적으로(지루함)</option><option value="보상심리">고생한 나에 대한 보상</option><option value="기타">기타 (직접 입력)</option>
         </select>
         <textarea id="etcReason" style="display:none;" placeholder="구체적인 사유를 적어주세요" maxlength="300"></textarea>
-
         <button class="start-btn" style="margin-top:15px; width:100%; padding: 14px; font-size: 1.1rem;" onclick="submitCraving()">이 고비 기록하고 참기</button>
     </div>
 </div>
@@ -543,7 +515,6 @@
     </div>
 </div>
 
-<!-- 시작 시간 수정 모달 -->
 <div id="editTimeModal" class="modal">
     <div class="modal-content">
         <button class="close-btn-top" onclick="closeModal('editTimeModal')">&times;</button>
@@ -554,18 +525,14 @@
     </div>
 </div>
 
-<!-- 사유 수정/추가 모달 -->
 <div id="editReasonModal" class="modal">
     <div class="modal-content">
         <button class="close-btn-top" onclick="closeModal('editReasonModal')">&times;</button>
         <h3 style="margin-top:0; padding-right: 20px;">도전 사유 기록하기</h3>
-        
         <label style="font-weight:700; font-size:0.9rem; margin-top:10px; display:block;">🌱 시작 각오 (최대 300자)</label>
         <textarea id="editStartReasonInput" rows="4" maxlength="300" placeholder="이번 도전을 시작하며 다짐했던 각오를 적어주세요."></textarea>
-        
         <label style="font-weight:700; font-size:0.9rem; margin-top:15px; display:block;">🥀 중단 사유 (최대 300자)</label>
         <textarea id="editFailReasonInput" rows="4" maxlength="300" placeholder="도전을 중단하게 된 사유를 적어주세요. (실패한 기록인 경우)"></textarea>
-        
         <button class="start-btn" style="width:100%; padding: 14px; font-size: 1.1rem; margin-top: 20px;" onclick="saveEditedReasons()">사유 저장</button>
     </div>
 </div>
@@ -615,6 +582,11 @@
     let globalBestStartDate = null; 
     let editingChallengeId = null;
     let evalPromptedFor = null;
+
+    // 💡 캘린더 기능 추가 전역 변수
+    let allChallengesData = []; // 과거 도전 기록 보관용
+    let currentCalDate = new Date();
+    let currentCalMode = 'current';
 
     window.onload = function() {
         renderChangeCards(currentTabName);
@@ -677,6 +649,7 @@
             if (snapshot.empty) {
                 document.getElementById('motivationalSummary').style.display = 'none';
                 document.getElementById('activeMotivationalSummary').style.display = 'none';
+                allChallengesData = [];
                 return;
             }
 
@@ -686,12 +659,21 @@
             let totalCravings = 0;
             let challengeCount = 0;
             totalPastDays = 0;
+            allChallengesData = []; // 💡 데이터 초기화
 
             snapshot.forEach(docSnap => {
                 const data = docSnap.data();
                 const start = new Date(data.startDate);
                 const end = data.endDate ? new Date(data.endDate) : new Date();
                 const diffDays = Math.max(0, Math.floor((end - start) / 86400000));
+                
+                // 💡 과거 모든 기록 캘린더용 저장
+                allChallengesData.push({
+                    startDate: start,
+                    endDate: end,
+                    status: data.status,
+                    failReason: data.failReason
+                });
                 
                 totalDays += diffDays;
                 
@@ -746,6 +728,104 @@
         } catch(e) { console.error(e); }
     }
 
+    /* 💡 달력 모달 로직 추가 */
+    window.openCalendarModal = function(mode) {
+        currentCalMode = mode;
+        currentCalDate = new Date(); // 현재 달로 리셋
+        renderCalendar(currentCalDate.getFullYear(), currentCalDate.getMonth(), mode);
+        openModal('calendarModal');
+    };
+
+    window.changeCalMonth = function(offset) {
+        currentCalDate.setMonth(currentCalDate.getMonth() + offset);
+        renderCalendar(currentCalDate.getFullYear(), currentCalDate.getMonth(), currentCalMode);
+    };
+
+    function renderCalendar(year, month, mode) {
+        document.getElementById('calMonthTitle').innerText = `${year}년 ${month + 1}월`;
+        
+        const legendContainer = document.getElementById('calLegendContainer');
+        if (mode === 'current') {
+            legendContainer.innerHTML = `
+                <div><span style="display:inline-block; width:10px; height:10px; background:var(--primary-color); border-radius:2px;"></span> 현재 기록</div>
+            `;
+        } else {
+            legendContainer.innerHTML = `
+                <div><span style="display:inline-block; width:10px; height:10px; background:var(--success-color); border-radius:2px;"></span> 과거 성공구간</div>
+                <div><span style="display:inline-block; width:10px; height:10px; background:white; border:1px solid #ddd; position:relative; border-radius:2px;"><span style="position:absolute; font-size:6px; top:-2px; left:-1px;">❌</span></span> 실패한 날</div>
+            `;
+        }
+
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        
+        const grid = document.getElementById('calendarDaysGrid');
+        grid.innerHTML = '';
+
+        // 첫 주 빈칸
+        for (let i = 0; i < firstDay; i++) {
+            grid.innerHTML += `<div class="cal-day empty"></div>`;
+        }
+
+        // 오늘 날짜 구하기 (시간 제거)
+        const today = new Date();
+        today.setHours(0,0,0,0);
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const iterDate = new Date(year, month, day);
+            iterDate.setHours(0,0,0,0);
+            const iterTime = iterDate.getTime();
+            const dayOfWeek = iterDate.getDay();
+            
+            let classList = ['cal-day'];
+            if (dayOfWeek === 0) classList.push('sun');
+            if (dayOfWeek === 6) classList.push('sat');
+            
+            if (iterTime === today.getTime()) {
+                classList.push('today-mark');
+            }
+
+            if (mode === 'current' && userQuitDate) {
+                const sDate = new Date(userQuitDate); sDate.setHours(0,0,0,0);
+                const eDate = new Date(); eDate.setHours(0,0,0,0);
+                
+                const isStart = iterTime === sDate.getTime();
+                const isEnd = iterTime === eDate.getTime();
+                
+                if (iterTime >= sDate.getTime() && iterTime <= eDate.getTime()) {
+                    if (isStart && isEnd) classList.push('range-curr-single');
+                    else if (isStart) classList.push('range-curr-start');
+                    else if (isEnd) classList.push('range-curr-end');
+                    else classList.push('range-curr-mid');
+                }
+            } 
+            else if (mode === 'accumulated') {
+                allChallengesData.forEach(c => {
+                    const sd = new Date(c.startDate); sd.setHours(0,0,0,0);
+                    const ed = new Date(c.endDate); ed.setHours(0,0,0,0);
+                    
+                    const isStart = iterTime === sd.getTime();
+                    const isEnd = iterTime === ed.getTime();
+                    
+                    if (iterTime >= sd.getTime() && iterTime <= ed.getTime()) {
+                        if (isStart && isEnd) classList.push('range-acc-single');
+                        else if (isStart) classList.push('range-acc-start');
+                        else if (isEnd) classList.push('range-acc-end');
+                        else classList.push('range-acc-mid');
+                    }
+                    
+                    // 실패한 날(종료일) 마킹
+                    if (c.status === 'failed' && isEnd) {
+                        classList.push('fail-mark');
+                    }
+                });
+            }
+
+            grid.innerHTML += `<div class="${classList.join(' ')}">${day}</div>`;
+        }
+    }
+
+    // (나머지 로직들은 기존과 동일하게 유지됩니다)
     window.loginWithGoogle = async function() {
         try { await signInWithPopup(auth, googleProvider); } 
         catch (error) { alert(`로그인 실패!\n에러 메시지: ${error.message}`); }
@@ -1507,7 +1587,6 @@
         }
     }
 
-    // 신규 추가: 약물 복용 기록 리스트 렌더링
     window.openMedListModal = function() {
         const medData = cravingData.filter(d => d.type === 'medication');
         const medContent = document.getElementById('medListContentModal');
@@ -1535,95 +1614,29 @@
         const ctx = document.getElementById(canvasId).getContext('2d');
         if (targetChart) targetChart.destroy();
         
-        // 약물복용 데이터도 그대로 포함하기 위해 필터를 제거합니다.
         const lastData = dataArray.slice(-20); 
         
         const customAnnotations = {};
         lastData.forEach((d, i) => {
             if (d.type === 'action') {
                 customAnnotations['action' + i] = {
-                    type: 'line',
-                    xMin: i,
-                    xMax: i,
-                    yMin: 0,
-                    yMax: 10,
-                    borderColor: '#2ecc71',
-                    borderWidth: 2,
-                    borderDash: [4, 4],
-                    label: {
-                        display: true,
-                        content: '🛡️ ' + d.actionName,
-                        position: 'center',
-                        backgroundColor: '#2ecc71',
-                        color: '#fff',
-                        font: { size: 11, weight: 'bold' },
-                        rotation: 90,
-                        padding: { top: 2, bottom: 2, left: 8, right: 8 },
-                        borderRadius: 4
-                    }
+                    type: 'line', xMin: i, xMax: i, yMin: 0, yMax: 10, borderColor: '#2ecc71', borderWidth: 2, borderDash: [4, 4],
+                    label: { display: true, content: '🛡️ ' + d.actionName, position: 'center', backgroundColor: '#2ecc71', color: '#fff', font: { size: 11, weight: 'bold' }, rotation: 90, padding: { top: 2, bottom: 2, left: 8, right: 8 }, borderRadius: 4 }
                 };
             } else if (d.type === 'state') {
                 customAnnotations['state' + i] = {
-                    type: 'line',
-                    xMin: i,
-                    xMax: i,
-                    yMin: 0,
-                    yMax: 10,
-                    borderColor: '#3498db',
-                    borderWidth: 2,
-                    borderDash: [2, 2],
-                    label: {
-                        display: true,
-                        content: '📝 상태 기록',
-                        position: 'center',
-                        backgroundColor: '#3498db',
-                        color: '#fff',
-                        font: { size: 11, weight: 'bold' },
-                        rotation: 90,
-                        padding: { top: 2, bottom: 2, left: 8, right: 8 },
-                        borderRadius: 4
-                    }
+                    type: 'line', xMin: i, xMax: i, yMin: 0, yMax: 10, borderColor: '#3498db', borderWidth: 2, borderDash: [2, 2],
+                    label: { display: true, content: '📝 상태 기록', position: 'center', backgroundColor: '#3498db', color: '#fff', font: { size: 11, weight: 'bold' }, rotation: 90, padding: { top: 2, bottom: 2, left: 8, right: 8 }, borderRadius: 4 }
                 };
             } else if (d.type === 'eval') {
                 customAnnotations['eval' + i] = {
-                    type: 'line',
-                    xMin: i,
-                    xMax: i,
-                    borderColor: '#27ae60',
-                    borderWidth: 2,
-                    borderDash: [2, 2],
-                    label: {
-                        display: true,
-                        content: '✓ 효과: ' + d.effect + '/10',
-                        position: 'start',
-                        backgroundColor: '#27ae60',
-                        font: { size: 10, weight: 'bold' },
-                        yAdjust: 35,
-                        padding: { top: 2, bottom: 2, left: 6, right: 6 },
-                        borderRadius: 4
-                    }
+                    type: 'line', xMin: i, xMax: i, borderColor: '#27ae60', borderWidth: 2, borderDash: [2, 2],
+                    label: { display: true, content: '✓ 효과: ' + d.effect + '/10', position: 'start', backgroundColor: '#27ae60', font: { size: 10, weight: 'bold' }, yAdjust: 35, padding: { top: 2, bottom: 2, left: 6, right: 6 }, borderRadius: 4 }
                 };
             } else if (d.type === 'medication') {
                 customAnnotations['med' + i] = {
-                    type: 'line',
-                    xMin: i,
-                    xMax: i,
-                    yMin: 0,
-                    yMax: 10,
-                    borderColor: '#8e44ad',
-                    borderWidth: 2,
-                    borderDash: [2, 2],
-                    label: {
-                        display: true,
-                        content: '💊 ' + d.drugName,
-                        position: 'center',
-                        backgroundColor: '#8e44ad',
-                        color: '#fff',
-                        font: { size: 10, weight: 'bold' },
-                        rotation: 90,
-                        padding: { top: 2, bottom: 2, left: 6, right: 6 },
-                        borderRadius: 4
-                    }
+                    type: 'line', xMin: i, xMax: i, yMin: 0, yMax: 10, borderColor: '#8e44ad', borderWidth: 2, borderDash: [2, 2],
+                    label: { display: true, content: '💊 ' + d.drugName, position: 'center', backgroundColor: '#8e44ad', color: '#fff', font: { size: 10, weight: 'bold' }, rotation: 90, padding: { top: 2, bottom: 2, left: 6, right: 6 }, borderRadius: 4 }
                 };
             }
         });
@@ -1634,16 +1647,8 @@
                 labels: lastData.map(d => d.date), 
                 datasets: [
                     { 
-                        type: 'line',
-                        label: '🔥 갈망 강도', 
-                        data: lastData.map(d => (d.type === 'action' || d.type === 'state' || d.type === 'medication') ? null : d.strength), 
-                        borderColor: '#e74c3c', 
-                        backgroundColor: '#e74c3c',
-                        borderWidth: 3,
-                        pointRadius: 5,
-                        tension: 0.3,
-                        spanGaps: true, 
-                        order: 0 
+                        type: 'line', label: '🔥 갈망 강도', data: lastData.map(d => (d.type === 'action' || d.type === 'state' || d.type === 'medication') ? null : d.strength), 
+                        borderColor: '#e74c3c', backgroundColor: '#e74c3c', borderWidth: 3, pointRadius: 5, tension: 0.3, spanGaps: true, order: 0 
                     },
                     { label: '육체 피로', data: lastData.map(d => (d.type === 'state' || !d.type || d.type === 'medication') && d.fatigue != null ? d.fatigue : null), backgroundColor: 'rgba(52, 152, 219, 0.5)', order: 1 },
                     { label: '정신 스트레스', data: lastData.map(d => (d.type === 'state' || !d.type || d.type === 'medication') && d.stress != null ? d.stress : null), backgroundColor: 'rgba(243, 156, 18, 0.5)', order: 1 },
@@ -1652,9 +1657,7 @@
                 ] 
             },
             options: { 
-                responsive: true, 
-                maintainAspectRatio: false, 
-                scales: { y: { beginAtZero: true, max: 10 } },
+                responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 10 } },
                 plugins: { 
                     legend: { display: true, position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } },
                     annotation: { annotations: customAnnotations }, 
@@ -1662,22 +1665,17 @@
                         callbacks: {
                             afterLabel: function(context) {
                                 const d = lastData[context.dataIndex];
-                                
-                                if (d.type === 'action') {
-                                    return `💡 행동 의의: ${d.actionDesc}`;
-                                } else if (d.type === 'state') {
+                                if (d.type === 'action') return `💡 행동 의의: ${d.actionDesc}`;
+                                else if (d.type === 'state') {
                                     let txt = [`금단: ${d.withdrawal ?? '-'}, 기분: ${d.mood ?? '-'}, 갈증: ${d.thirst ?? '-'}`];
                                     if (d.fatigue != null || d.stress != null || d.sleep != null || d.hunger != null) {
                                         txt.push(`피로: ${d.fatigue ?? '-'}, 스트레스: ${d.stress ?? '-'}, 수면: ${d.sleep ?? '-'}, 허기: ${d.hunger ?? '-'}`);
                                     }
                                     return txt;
-                                } else if (d.type === 'medication') {
-                                    return `💊 복용량: ${d.dose}mg`;
-                                } else if (d.type === 'eval') {
-                                    return `🛡️ 효과 점수: ${d.effect}/10`;
-                                } else if (context.datasetIndex === 0) {
-                                    const reason = d.reason;
-                                    if (reason) return `💡 고비 원인: ${reason}`;
+                                } else if (d.type === 'medication') return `💊 복용량: ${d.dose}mg`;
+                                else if (d.type === 'eval') return `🛡️ 효과 점수: ${d.effect}/10`;
+                                else if (context.datasetIndex === 0) {
+                                    if (d.reason) return `💡 고비 원인: ${d.reason}`;
                                 }
                                 return null;
                             }
@@ -1709,13 +1707,8 @@
                 ] 
             },
             options: { 
-                responsive: true, 
-                maintainAspectRatio: false, 
-                scales: { y: { beginAtZero: true, max: 10 } },
-                plugins: { 
-                    legend: { display: true, position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } },
-                    tooltip: { mode: 'index', intersect: false }
-                } 
+                responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 10 } },
+                plugins: { legend: { display: true, position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } }, tooltip: { mode: 'index', intersect: false } } 
             }
         });
     }
@@ -1724,25 +1717,13 @@
         if (medChartInstance) medChartInstance.destroy();
         const ctx = document.getElementById('medChartCanvas').getContext('2d');
         
-        const dataPoints = [];
-        const labels = [];
-        
-        let Ka, Ke, Vd;
-        let colorStr;
-        let drugName;
+        const dataPoints = []; const labels = [];
+        let Ka, Ke, Vd, colorStr, drugName;
         
         if (drug === 'acamprosate') {
-            Ka = 0.5;
-            Ke = 0.05; 
-            Vd = 1.0 * weight; 
-            colorStr = '#9b59b6';
-            drugName = '아캄프로세이트';
+            Ka = 0.5; Ke = 0.05; Vd = 1.0 * weight; colorStr = '#9b59b6'; drugName = '아캄프로세이트';
         } else {
-            Ka = 1.0;
-            Ke = 0.15; 
-            Vd = 13.0 * weight; 
-            colorStr = '#e74c3c';
-            drugName = '날트렉손';
+            Ka = 1.0; Ke = 0.15; Vd = 13.0 * weight; colorStr = '#e74c3c'; drugName = '날트렉손';
         }
 
         for (let t = 0; t <= 24; t += 0.5) {
@@ -1754,27 +1735,8 @@
 
         medChartInstance = new Chart(ctx, {
             type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: `${drugName} 혈중 추정 농도 (mg/L)`,
-                    data: dataPoints,
-                    borderColor: colorStr,
-                    backgroundColor: `${colorStr}33`,
-                    fill: true,
-                    tension: 0.4,
-                    pointRadius: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: { beginAtZero: true, title: { display: true, text: '농도 (mg/L)' } },
-                    x: { ticks: { maxTicksLimit: 12 }, title: { display: true, text: '복용 후 경과 시간' } }
-                },
-                plugins: { legend: { display: false } }
-            }
+            data: { labels: labels, datasets: [{ label: `${drugName} 혈중 추정 농도 (mg/L)`, data: dataPoints, borderColor: colorStr, backgroundColor: `${colorStr}33`, fill: true, tension: 0.4, pointRadius: 0 }] },
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, title: { display: true, text: '농도 (mg/L)' } }, x: { ticks: { maxTicksLimit: 12 }, title: { display: true, text: '복용 후 경과 시간' } } }, plugins: { legend: { display: false } } }
         });
     }
 
@@ -1782,17 +1744,13 @@
         const stateData = cravingData.filter(d => d.type === 'state');
         if (stateData.length === 0) return alert("현재 도전에 기록된 몸상태 데이터가 없습니다.");
         openModal('stateStatsModal');
-        setTimeout(() => {
-            stateStatsChart = renderStateChart('stateHistoryChart', stateStatsChart, stateData);
-        }, 200);
+        setTimeout(() => { stateStatsChart = renderStateChart('stateHistoryChart', stateStatsChart, stateData); }, 200);
     };
 
     window.openStats = function() {
         if (cravingData.length === 0) return alert("현재 도전에 기록된 데이터가 없습니다.");
         openModal('statsModal');
-        setTimeout(() => {
-            statsChart = renderChart('cravingHistoryChart', statsChart, cravingData);
-        }, 200);
+        setTimeout(() => { statsChart = renderChart('cravingHistoryChart', statsChart, cravingData); }, 200);
     };
 
     window.openBodyInfoModal = function() {
@@ -1807,21 +1765,14 @@
         const gender = document.getElementById('bodyGender').value;
         const weight = parseFloat(document.getElementById('bodyWeight').value);
         const height = parseFloat(document.getElementById('bodyHeight').value);
-
         if (!weight || !height) return alert("체중과 신장을 올바르게 입력해주세요.");
 
-        userProfile.gender = gender;
-        userProfile.weight = weight;
-        userProfile.height = height;
-
+        userProfile.gender = gender; userProfile.weight = weight; userProfile.height = height;
         try {
             await setDoc(doc(db, "users", userId), { gender, weight, height }, { merge: true });
             alert("신체 정보가 안전하게 저장되었습니다.\n약물 농도 및 음주 조절 BAC 계산에 활용됩니다.");
             closeModal('bodyInfoModal');
-        } catch(e) {
-            console.error(e);
-            alert("저장 실패: " + e.message);
-        }
+        } catch(e) { console.error(e); alert("저장 실패: " + e.message); }
     };
 
     window.openMedModal = function() {
@@ -1836,36 +1787,22 @@
 
     window.submitMedication = async function() {
         if (!userId || !currentChallengeId) return;
-        
         const drug = document.getElementById('medType').value;
         const dose = parseFloat(document.getElementById('medDose').value);
         const drugName = drug === 'acamprosate' ? '아캄프로세이트' : '날트렉손';
 
         if (!dose || dose <= 0) return alert("복용량을 올바르게 입력해주세요.");
 
-        const entry = {
-            type: 'medication',
-            date: new Date().toLocaleString('ko-KR', {month:'short', day:'numeric', hour:'numeric', minute:'numeric'}),
-            drug: drug,
-            drugName: drugName,
-            dose: dose,
-            timestamp: new Date().getTime()
-        };
+        const entry = { type: 'medication', date: new Date().toLocaleString('ko-KR', {month:'short', day:'numeric', hour:'numeric', minute:'numeric'}), drug: drug, drugName: drugName, dose: dose, timestamp: new Date().getTime() };
 
         try {
             const challengeRef = doc(db, "users", userId, "challenges", currentChallengeId);
             await updateDoc(challengeRef, { cravings: arrayUnion(entry) });
-            
             cravingData.push(entry);
-            
             closeModal('medModal');
             alert(`[${drugName} ${dose}mg] 복용 기록이 완료되었습니다.`);
-
             openModal('medChartModal');
-            setTimeout(() => {
-                plotMedicationGraph(drug, dose, userProfile.weight);
-            }, 200);
-
+            setTimeout(() => { plotMedicationGraph(drug, dose, userProfile.weight); }, 200);
             loadMotivationalStats();
         } catch (e) { alert("저장 실패: " + e.message); }
     };
@@ -1881,7 +1818,6 @@
 
         initSurvivalChart();
         initDistributionChart(); 
-        
         renderChangeCards(currentTabName);
 
         if (timerInterval) clearInterval(timerInterval);
@@ -1900,7 +1836,16 @@
             const totalCumul = totalPastDays + currentDays;
             let currentMax = Math.max(globalMaxDays, currentDays);
 
-            document.getElementById('mainDays').innerHTML = `${currentDays}일 <span style="font-size: 1.1rem; color: #a0aec0; font-weight: 700; margin-left: 5px;">(누적 ${totalCumul}일)</span>`;
+            // 💡 캘린더 클릭 유도 마크업 업데이트
+            document.getElementById('mainDaysContainer').innerHTML = `
+                <div class="cal-hint">👇 클릭하여 달력 보기</div>
+                <div class="clickable-time-box" onclick="openCalendarModal('current')">
+                    <div class="time-unit">${currentDays}일 <span style="font-size: 1.8rem; filter: grayscale(0.2);">📅</span></div>
+                </div>
+                <div class="clickable-time-box" onclick="openCalendarModal('accumulated')" style="margin-top: -10px; padding: 5px 15px;">
+                    <span class="sub-time-clickable">(누적 ${totalCumul}일 보기) 📅</span>
+                </div>
+            `;
             
             document.querySelectorAll('.dynamic-total-days').forEach(el => el.innerText = `${totalCumul}일`);
             document.querySelectorAll('.dynamic-max-days').forEach(el => el.innerText = `${currentMax}일`);
@@ -1923,20 +1868,15 @@
             document.getElementById('myRank').innerText = survivors.toLocaleString();
 
             const rankChangeEl = document.getElementById('rankChange');
-            if (rankUp > 0) {
-                rankChangeEl.innerHTML = `<span style="color: var(--danger-color);">▲ ${rankUp.toLocaleString()}</span>`;
-            } else {
-                rankChangeEl.innerHTML = `<span style="color: #a0aec0;">-</span>`;
-            }
+            if (rankUp > 0) rankChangeEl.innerHTML = `<span style="color: var(--danger-color);">▲ ${rankUp.toLocaleString()}</span>`;
+            else rankChangeEl.innerHTML = `<span style="color: #a0aec0;">-</span>`;
             
             if (currentMax > 0) {
                 const bestRank = Math.max(1, Math.round(1000 * Math.exp(-0.04 * currentMax)));
                 document.getElementById('myBestRank').innerText = bestRank.toLocaleString();
                 
                 let targetStartDateStr = globalBestStartDate;
-                if (currentDays >= globalMaxDays) {
-                    targetStartDateStr = startISO;
-                }
+                if (currentDays >= globalMaxDays) targetStartDateStr = startISO;
                 
                 if (targetStartDateStr) {
                     const bDate = new Date(targetStartDateStr);
@@ -1955,7 +1895,6 @@
                 const filteredActs = cravingData.filter(d => d.type === 'action');
                 if (filteredActs.length > 0) {
                     const lastEntry = filteredActs[filteredActs.length - 1];
-                    // 💡 신규 로직: 이미 평가된 기록인지 확인
                     const hasEval = cravingData.some(d => d.type === 'eval' && d.timestamp > lastEntry.timestamp);
                     
                     if (!hasEval && evalPromptedFor !== lastEntry.timestamp) {
@@ -1964,7 +1903,6 @@
                         
                         if (diffMs > 3 * 60 * 1000) {
                             evalPromptedFor = lastEntry.timestamp;
-                            
                             const actTime = new Date(lastEntry.timestamp);
                             const timeStr = actTime.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
                             const passedMins = Math.floor(diffMs / 60000);
@@ -1984,26 +1922,15 @@
         const input = document.getElementById('dateTimeInput').value;
         if (!input) return alert("일시를 선택해 주세요.");
         userQuitDate = input; 
-        
         const startReason = document.getElementById('startReasonInput').value.trim();
         
         try {
-            const newChallenge = {
-                startDate: input,
-                endDate: null,
-                status: "active",
-                cravings: [],
-                startReason: startReason,
-                createdAt: new Date().getTime()
-            };
-            
+            const newChallenge = { startDate: input, endDate: null, status: "active", cravings: [], startReason: startReason, createdAt: new Date().getTime() };
             const docRef = await addDoc(collection(db, "users", userId, "challenges"), newChallenge);
             currentChallengeId = docRef.id;
             cravingData = [];
             document.getElementById('cravingCount').innerText = 0;
-            
             document.getElementById('startReasonInput').value = ''; 
-            
             startApp(input);
             loadMotivationalStats();
         } catch (e) { alert("연동 에러: " + e.message); }
@@ -2011,141 +1938,80 @@
 
     window.submitCraving = async function() {
         if (!userId || !currentChallengeId) return;
-        
         const strength = document.getElementById('cravingRange').value;
         const reason = document.getElementById('cravingReason').value;
 
-        const entry = {
-            date: new Date().toLocaleString('ko-KR', {month:'short', day:'numeric', hour:'numeric', minute:'numeric'}),
-            strength: parseInt(strength),
-            reason: reason === '기타' ? document.getElementById('etcReason').value : reason,
-            timestamp: new Date().getTime()
-        };
+        const entry = { date: new Date().toLocaleString('ko-KR', {month:'short', day:'numeric', hour:'numeric', minute:'numeric'}), strength: parseInt(strength), reason: reason === '기타' ? document.getElementById('etcReason').value : reason, timestamp: new Date().getTime() };
 
         try {
             const challengeRef = doc(db, "users", userId, "challenges", currentChallengeId);
             await updateDoc(challengeRef, { cravings: arrayUnion(entry) });
-            
             cravingData.push(entry);
             const actualCravings = cravingData.filter(d => !['action', 'state', 'eval', 'medication'].includes(d.type)).length;
             document.getElementById('cravingCount').innerText = actualCravings;
             closeModal('cravingModal');
             alert("고비를 잘 넘기셨습니다!");
-            
             loadMotivationalStats();
         } catch (e) { alert("저장 실패: " + e.message); }
     };
 
     window.submitAction = async function(actionName, actionDesc) {
         if (!userId || !currentChallengeId) return;
-
-        const entry = {
-            type: 'action',
-            date: new Date().toLocaleString('ko-KR', {month:'short', day:'numeric', hour:'numeric', minute:'numeric'}),
-            actionName: actionName,
-            actionDesc: actionDesc,
-            timestamp: new Date().getTime()
-        };
+        const entry = { type: 'action', date: new Date().toLocaleString('ko-KR', {month:'short', day:'numeric', hour:'numeric', minute:'numeric'}), actionName: actionName, actionDesc: actionDesc, timestamp: new Date().getTime() };
 
         try {
             const challengeRef = doc(db, "users", userId, "challenges", currentChallengeId);
             await updateDoc(challengeRef, { cravings: arrayUnion(entry) });
-            
             cravingData.push(entry);
-            
             const actualCravings = cravingData.filter(d => !['action', 'state', 'eval', 'medication'].includes(d.type)).length;
             document.getElementById('cravingCount').innerText = actualCravings;
-            
             closeModal('actionModal');
             alert(`훌륭합니다! [${actionName}] 행동을 기록했습니다.\n고비를 넘기는 힘이 점점 더 강해지고 있습니다.`);
-            
             loadMotivationalStats();
         } catch (e) { alert("저장 실패: " + e.message); }
     };
 
-    window.markTouched = function(el) {
-        el.setAttribute('data-touched', 'true');
-    };
+    window.markTouched = function(el) { el.setAttribute('data-touched', 'true'); };
 
     window.submitState = async function() {
         if (!userId || !currentChallengeId) return;
-        
-        const getVal = (id) => {
-            const el = document.getElementById(id);
-            if (el && el.getAttribute('data-touched') === 'true') {
-                return parseInt(el.value);
-            }
-            return null;
-        };
+        const getVal = (id) => { const el = document.getElementById(id); if (el && el.getAttribute('data-touched') === 'true') { return parseInt(el.value); } return null; };
 
-        const withdrawal = getVal('withdrawalRange');
-        const mood = getVal('moodRange');
-        const thirst = getVal('thirstRange');
-        const fatigue = getVal('fatigueRange');
-        const stress = getVal('stressRange');
-        const sleep = getVal('sleepRange');
-        const hunger = getVal('hungerRange');
+        const withdrawal = getVal('withdrawalRange'); const mood = getVal('moodRange'); const thirst = getVal('thirstRange'); const fatigue = getVal('fatigueRange'); const stress = getVal('stressRange'); const sleep = getVal('sleepRange'); const hunger = getVal('hungerRange');
 
         if (withdrawal === null && mood === null && thirst === null && fatigue === null && stress === null && sleep === null && hunger === null) {
             return alert("기록할 몸상태의 슬라이드 바를 움직여 하나 이상 선택해 주세요.");
         }
 
-        const entry = {
-            type: 'state',
-            date: new Date().toLocaleString('ko-KR', {month:'short', day:'numeric', hour:'numeric', minute:'numeric'}),
-            timestamp: new Date().getTime()
-        };
-
-        if (withdrawal !== null) entry.withdrawal = withdrawal;
-        if (mood !== null) entry.mood = mood;
-        if (thirst !== null) entry.thirst = thirst;
-        if (fatigue !== null) entry.fatigue = fatigue;
-        if (stress !== null) entry.stress = stress;
-        if (sleep !== null) entry.sleep = sleep;
-        if (hunger !== null) entry.hunger = hunger;
+        const entry = { type: 'state', date: new Date().toLocaleString('ko-KR', {month:'short', day:'numeric', hour:'numeric', minute:'numeric'}), timestamp: new Date().getTime() };
+        if (withdrawal !== null) entry.withdrawal = withdrawal; if (mood !== null) entry.mood = mood; if (thirst !== null) entry.thirst = thirst; if (fatigue !== null) entry.fatigue = fatigue; if (stress !== null) entry.stress = stress; if (sleep !== null) entry.sleep = sleep; if (hunger !== null) entry.hunger = hunger;
 
         try {
             const challengeRef = doc(db, "users", userId, "challenges", currentChallengeId);
             await updateDoc(challengeRef, { cravings: arrayUnion(entry) });
-            
             cravingData.push(entry);
-            
             const actualCravings = cravingData.filter(d => !['action', 'state', 'eval', 'medication'].includes(d.type)).length;
             document.getElementById('cravingCount').innerText = actualCravings;
-            
             closeModal('stateModal');
             alert("선택하신 현재 몸상태가 성공적으로 기록되었습니다.");
-            
             loadMotivationalStats();
         } catch (e) { alert("저장 실패: " + e.message); }
     };
 
     window.submitEval = async function() {
         if (!userId || !currentChallengeId) return;
-        
         const effect = document.getElementById('evalEffectRange').value;
         const craving = document.getElementById('evalCravingRange').value;
-
-        const entry = {
-            type: 'eval',
-            date: new Date().toLocaleString('ko-KR', {month:'short', day:'numeric', hour:'numeric', minute:'numeric'}),
-            effect: parseInt(effect),
-            strength: parseInt(craving), 
-            timestamp: new Date().getTime()
-        };
+        const entry = { type: 'eval', date: new Date().toLocaleString('ko-KR', {month:'short', day:'numeric', hour:'numeric', minute:'numeric'}), effect: parseInt(effect), strength: parseInt(craving), timestamp: new Date().getTime() };
 
         try {
             const challengeRef = doc(db, "users", userId, "challenges", currentChallengeId);
             await updateDoc(challengeRef, { cravings: arrayUnion(entry) });
-            
             cravingData.push(entry);
-            
             const actualCravings = cravingData.filter(d => !['action', 'state', 'eval', 'medication'].includes(d.type)).length;
             document.getElementById('cravingCount').innerText = actualCravings;
-            
             closeModal('evalModal');
             alert("평가가 훌륭하게 기록되었습니다!");
-            
             loadMotivationalStats();
         } catch (e) { alert("저장 실패: " + e.message); }
     };
@@ -2153,26 +2019,14 @@
     window.resetDate = async function() {
         if (confirm("금주 실패를 기록하고, 새롭게 단주에 도전하시겠습니까?\n(과거의 도전 기록은 모두 보존됩니다.)")) {
             const failReason = prompt("다음 도전을 위해 이번 단주 중단(실패) 사유를 기록해 주세요. (선택)") || "";
-            
             try { 
                 if (userId && currentChallengeId) {
                     const challengeRef = doc(db, "users", userId, "challenges", currentChallengeId);
-                    await updateDoc(challengeRef, { 
-                        status: 'failed', 
-                        endDate: new Date().toISOString(),
-                        failReason: failReason.trim()
-                    });
+                    await updateDoc(challengeRef, { status: 'failed', endDate: new Date().toISOString(), failReason: failReason.trim() });
                 }
-                
-                localStorage.removeItem('quitDrinkingDateTime_server');
-                currentChallengeId = null;
-                cravingData = [];
-                userQuitDate = null;
-                
-                document.getElementById('setupArea').style.display = 'flex';
-                document.getElementById('displayArea').style.display = 'none';
+                localStorage.removeItem('quitDrinkingDateTime_server'); currentChallengeId = null; cravingData = []; userQuitDate = null;
+                document.getElementById('setupArea').style.display = 'flex'; document.getElementById('displayArea').style.display = 'none';
                 if (timerInterval) clearInterval(timerInterval);
-                
                 loadMotivationalStats();
             } catch (e) { alert("재설정 실패: " + e.message); }
         }
@@ -2180,68 +2034,37 @@
 
     window.updateRangeStyle = function(el, textId) {
         const val = parseInt(el.value);
-        const minStr = el.getAttribute('min');
-        const min = minStr !== null ? parseInt(minStr) : 1;
-        const maxStr = el.getAttribute('max');
-        const max = maxStr !== null ? parseInt(maxStr) : 10;
+        const minStr = el.getAttribute('min'); const min = minStr !== null ? parseInt(minStr) : 1;
+        const maxStr = el.getAttribute('max'); const max = maxStr !== null ? parseInt(maxStr) : 10;
         const percent = ((val - min) / (max - min)) * 100;
-        
         const isTouched = el.getAttribute('data-touched') === 'true';
 
         if (!isTouched && el.closest('#stateModal')) {
-            el.style.setProperty('--range-color', '#cbd5e0');
-            el.style.setProperty('--range-percent', `50%`);
-            if (textId) {
-                const textEl = document.getElementById(textId);
-                if (textEl) {
-                    textEl.innerText = '-';
-                    textEl.style.color = '#a0aec0';
-                }
-            }
+            el.style.setProperty('--range-color', '#cbd5e0'); el.style.setProperty('--range-percent', `50%`);
+            if (textId) { const textEl = document.getElementById(textId); if (textEl) { textEl.innerText = '-'; textEl.style.color = '#a0aec0'; } }
             return;
         }
 
         const hue = 120 - ((val - min) / (max - min)) * 120;
         const color = `hsl(${hue}, 85%, 45%)`; 
-        
-        el.style.setProperty('--range-color', color);
-        el.style.setProperty('--range-percent', `${percent}%`);
-        
-        if (textId) {
-            const textEl = document.getElementById(textId);
-            if (textEl) {
-                textEl.innerText = val;
-                textEl.style.color = color;
-            }
-        }
+        el.style.setProperty('--range-color', color); el.style.setProperty('--range-percent', `${percent}%`);
+        if (textId) { const textEl = document.getElementById(textId); if (textEl) { textEl.innerText = val; textEl.style.color = color; } }
     };
 
     window.resetStateModal = function() {
         const ranges = ['withdrawalRange', 'moodRange', 'thirstRange', 'fatigueRange', 'stressRange', 'sleepRange', 'hungerRange'];
         const valIds = ['withdrawalVal', 'moodVal', 'thirstVal', 'fatigueVal', 'stressVal', 'sleepVal', 'hungerVal'];
-        
         ranges.forEach((id, index) => {
             const el = document.getElementById(id);
-            if(el) {
-                el.value = 5;
-                el.setAttribute('data-touched', 'false');
-                updateRangeStyle(el, valIds[index]);
-            }
+            if(el) { el.value = 5; el.setAttribute('data-touched', 'false'); updateRangeStyle(el, valIds[index]); }
         });
     };
 
     window.openModal = (id) => {
         document.getElementById(id).style.display = 'flex';
-        if (id === 'cravingModal') {
-            updateRangeStyle(document.getElementById('cravingRange'), 'rangeVal');
-        }
-        if (id === 'stateModal') {
-            resetStateModal(); 
-        }
-        if (id === 'evalModal') {
-            updateRangeStyle(document.getElementById('evalEffectRange'), 'evalEffectVal');
-            updateRangeStyle(document.getElementById('evalCravingRange'), 'evalCravingVal');
-        }
+        if (id === 'cravingModal') { updateRangeStyle(document.getElementById('cravingRange'), 'rangeVal'); }
+        if (id === 'stateModal') { resetStateModal(); }
+        if (id === 'evalModal') { updateRangeStyle(document.getElementById('evalEffectRange'), 'evalEffectVal'); updateRangeStyle(document.getElementById('evalCravingRange'), 'evalCravingVal'); }
     };
     
     window.closeModal = (id) => document.getElementById(id).style.display = 'none';
