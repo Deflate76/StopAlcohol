@@ -26,7 +26,7 @@
         }
         
         body { font-family: 'Pretendard', -apple-system, sans-serif; text-align: center; padding: 15px; background-color: var(--bg-color); color: #333; line-height: 1.6; display: flex; flex-direction: column; min-height: 95vh; }
-        .container { flex: 1; max-width: 550px; width: 100%; margin: 0 auto; background: white; padding: 30px 20px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); box-sizing: border-box; }
+        .container { flex: 1; max-width: 550px; width: 100%; margin: 0 auto; background: white; padding: 30px 20px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); box-sizing: border-box; position: relative; }
         h1 { font-size: 1.6rem; white-space: nowrap; word-break: keep-all; margin-bottom: 25px; letter-spacing: -0.5px; color: var(--text-dark); }
         
         .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 0.9rem; color: #666; }
@@ -38,8 +38,8 @@
         
         .input-group { margin-bottom: 15px; text-align: left; }
         .input-group label { display: block; font-weight: 700; font-size: 0.9rem; color: #4a5568; margin-bottom: 6px; }
-        input[type="number"], select { width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 12px; font-size: 1rem; font-family: inherit; box-sizing: border-box; background: #fff; }
-        input[type="number"]:focus, select:focus { border-color: var(--primary-color); outline: none; }
+        input[type="number"], input[type="datetime-local"], select { width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 12px; font-size: 1rem; font-family: inherit; box-sizing: border-box; background: #fff; }
+        input:focus, select:focus { border-color: var(--primary-color); outline: none; }
         
         .action-btn { width: 100%; padding: 18px; font-size: 1.1rem; font-weight: 800; color: white; border: none; border-radius: 16px; cursor: pointer; box-shadow: 0 8px 15px rgba(0,0,0,0.1); transition: transform 0.2s; margin-top: 10px; }
         .action-btn:active { transform: scale(0.97); }
@@ -52,7 +52,6 @@
         .chart-container { margin-top: 10px; margin-bottom: 20px; display: none; }
         .chart-canvas-wrapper { position: relative; height: 250px; width: 100%; }
         
-        /* 차트 범례 스타일 */
         .custom-legend { font-size: 0.75rem; color: #4a5568; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 15px; background: #f8f9fa; padding: 10px; border-radius: 8px; border: 1px solid #edf2f7;}
         .legend-item { display: flex; align-items: center; gap: 4px; }
         .legend-box { width: 12px; height: 12px; border-radius: 3px; }
@@ -60,7 +59,6 @@
 
         #loadingArea { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 50vh; color: #718096; font-weight: bold; gap: 10px; }
 
-        /* 음주 리스트 스타일 */
         .drink-list-container { display: flex; flex-direction: column; margin-top: 15px; margin-bottom: 20px; }
         .drink-item { background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 15px; text-align: left; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.02); z-index: 2; }
         .drink-item-header { font-size: 1rem; font-weight: 800; color: var(--primary-color); margin-bottom: 4px; display:flex; justify-content:space-between; align-items:center; }
@@ -68,11 +66,22 @@
         .drink-item-stats { font-size: 0.85rem; color: #4a5568; background: #f8f9fa; padding: 10px; border-radius: 10px; line-height: 1.5; }
         .delete-drink-btn { color: var(--danger-color); font-weight: 800; font-size: 1.2rem; background: none; border: none; padding: 0; cursor: pointer; line-height: 1; }
         
-        /* 과거 세션 리스트 스타일 */
         .history-item { background: #f8f9fa; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; margin-bottom: 10px; text-align: left; cursor: pointer; transition: 0.2s; }
         .history-item:hover { background: #edf2f7; border-color: #cbd5e0; }
         .history-date { font-weight: 800; color: #2d3748; margin-bottom: 5px; font-size: 0.95rem; }
         .history-summary { font-size: 0.85rem; color: #718096; }
+
+        /* 커스텀 모달 스타일 */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 9999; padding: 20px; backdrop-filter: blur(2px); }
+        .modal-content { background: white; border-radius: 20px; padding: 25px; width: 100%; max-width: 380px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); text-align: left; }
+        .modal-title { font-size: 1.2rem; font-weight: 800; margin-bottom: 10px; color: var(--text-dark); display:flex; align-items:center; gap:8px;}
+        .modal-desc { font-size: 0.9rem; color: #666; margin-bottom: 20px; word-break: keep-all; line-height: 1.5; }
+        .modal-actions { display: flex; gap: 10px; margin-top: 25px; }
+        .modal-btn { flex: 1; padding: 14px; border-radius: 12px; font-size: 1rem; font-weight: 800; border: none; cursor: pointer; transition: 0.2s; }
+        .modal-btn-cancel { background: #edf2f7; color: #4a5568; }
+        .modal-btn-cancel:active { background: #e2e8f0; }
+        .modal-btn-apply { background: var(--primary-color); color: white; }
+        .modal-btn-apply:active { filter: brightness(0.9); }
     </style>
 </head>
 <body>
@@ -135,7 +144,7 @@
             
             <div style="display: flex; justify-content: space-between; align-items: stretch; margin-bottom: 5px; gap: 10px;">
                 <div class="status-display" id="elapsedTimeDisplay" style="flex: 1; margin: 0;">음주 진행 시간: 00:00:00</div>
-                <button class="back-btn" style="background: var(--warning-color); color: white; padding: 0 15px; font-weight: 800; border-radius: 12px; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1.2;" onclick="resetDrinkTimer()">시간<br>리셋</button>
+                <button class="back-btn" style="background: var(--warning-color); color: white; padding: 0 15px; font-weight: 800; border-radius: 12px; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1.2;" onclick="openTimeResetModal()">시간<br>설정</button>
             </div>
             <div id="startTimeDisplay" style="font-size: 0.85rem; color: #718096; margin-bottom: 20px; font-weight: 600;">시작 시각: --:--</div>
             
@@ -219,6 +228,28 @@
     </div>
 </div>
 
+<!-- 시각 재설정 커스텀 모달 -->
+<div class="modal-overlay" id="timeResetModal">
+    <div class="modal-content">
+        <div class="modal-title"><span>⏰</span> 시작 시각 재설정</div>
+        <div class="modal-desc">
+            현재 표시된 시간이 <b>지금 시각</b>입니다.<br>
+            시작 버튼을 늦게 눌렀다면, 실제 음주를 시작한 시각으로 수정해 주세요.<br>
+            <span style="color:var(--danger-color); font-size:0.8rem; margin-top:5px; display:inline-block;">* 변경 시 입력된 잔의 간격이 자동으로 재계산됩니다.</span>
+        </div>
+        
+        <div class="input-group" style="margin-bottom: 0;">
+            <label>지정할 음주 시작 시각</label>
+            <input type="datetime-local" id="newStartTimeInput">
+        </div>
+        
+        <div class="modal-actions">
+            <button class="modal-btn modal-btn-cancel" onclick="closeTimeResetModal()">취소</button>
+            <button class="modal-btn modal-btn-apply" onclick="applyTimeReset()">이 시각으로 설정</button>
+        </div>
+    </div>
+</div>
+
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
@@ -260,7 +291,7 @@
         return isNaN(parsed) ? 0 : parsed;
     }
 
-    // 음주 간격에 따른 시각적 뱃지 생성기
+    // 음주 간격에 따른 시각적 뱃지 및 연결선 생성기
     function getGapBadgeHTML(gapMinutes, isFirst) {
         let badgeColor, badgeText;
         if (gapMinutes < 15) {
@@ -281,11 +312,11 @@
 
         return `
             <div style="display:flex; flex-direction:column; align-items:center; margin: -5px 0;">
-                <div style="width:3px; height:15px; background:#e2e8f0; z-index:1;"></div>
-                <div style="background:${badgeColor}; color:white; font-size:0.75rem; padding:4px 12px; border-radius:12px; font-weight:800; box-shadow:0 2px 4px rgba(0,0,0,0.1); z-index:3;">
+                <div style="width:3px; height:20px; background:#e2e8f0; z-index:1;"></div>
+                <div style="background:${badgeColor}; color:white; font-size:0.75rem; padding:5px 12px; border-radius:12px; font-weight:800; box-shadow:0 2px 4px rgba(0,0,0,0.1); z-index:3;">
                     ${prefix} ${badgeText}
                 </div>
-                <div style="width:3px; height:15px; background:#e2e8f0; z-index:1;"></div>
+                <div style="width:3px; height:20px; background:#e2e8f0; z-index:1;"></div>
             </div>
         `;
     }
@@ -444,29 +475,46 @@
         }, 1000);
     }
     
-    window.resetDrinkTimer = async function() {
-        if(confirm("음주 진행 시간을 현재 시각(00:00:00)으로 리셋하시겠습니까?\n(기존에 기록된 음주 시각들도 리셋된 시간에 맞춰 자동으로 보정됩니다.)")) {
-            const oldStartTimeMs = sessionStartTime.getTime();
-            sessionStartTime = new Date();
-            const newStartTimeMs = sessionStartTime.getTime();
-            
-            const timeDiffMs = newStartTimeMs - oldStartTimeMs;
+    // 모달 띄우기 함수
+    window.openTimeResetModal = function() {
+        // 모바일 및 PC 브라우저 대응을 위해 로컬 시간대를 반영한 ISO 스트링 생성
+        const tzoffset = (new Date()).getTimezoneOffset() * 60000;
+        const localISOTime = (new Date(Date.now() - tzoffset)).toISOString().slice(0, 16);
+        
+        document.getElementById('newStartTimeInput').value = localISOTime;
+        document.getElementById('timeResetModal').style.display = 'flex';
+    };
 
-            drinksList = drinksList.map(drink => {
-                return {
-                    ...drink,
-                    prevTime: drink.prevTime + timeDiffMs,
-                    endTime: drink.endTime + timeDiffMs
-                };
-            });
-            
-            const startStr = sessionStartTime.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
-            document.getElementById('startTimeDisplay').innerText = `시작 시각: ${startStr}`;
-            
-            renderDrinkList();
-            if(drinksList.length > 0) updateActiveChart();
-            executeSaveProcess(false, true);
+    // 모달 닫기
+    window.closeTimeResetModal = function() {
+        document.getElementById('timeResetModal').style.display = 'none';
+    };
+
+    // 설정된 시간으로 갱신 로직 (잔들의 마신 시간은 유지하되 시작 시간 변경에 따라 간격을 재계산)
+    window.applyTimeReset = function() {
+        const inputVal = document.getElementById('newStartTimeInput').value;
+        if(!inputVal) return alert("시각을 정확히 입력해주세요.");
+        
+        const newStartTime = new Date(inputVal);
+        
+        // 기준 시작 시간 업데이트
+        sessionStartTime = newStartTime;
+        
+        // 기존 기록이 있다면 간격을 재계산 (마신 시각인 endTime은 물리적 시간이므로 불변)
+        for (let i = 0; i < drinksList.length; i++) {
+            const prevMs = i > 0 ? toMs(drinksList[i-1].endTime) : sessionStartTime.getTime();
+            drinksList[i].prevTime = prevMs;
+            drinksList[i].gapMinutes = Math.round((toMs(drinksList[i].endTime) - prevMs) / 60000);
         }
+        
+        const startStr = sessionStartTime.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+        document.getElementById('startTimeDisplay').innerText = `시작 시각: ${startStr}`;
+        
+        renderDrinkList();
+        if(drinksList.length > 0) updateActiveChart();
+        executeSaveProcess(false, true);
+        
+        closeTimeResetModal();
     };
 
     window.cancelDrinkingSession = async function() {
@@ -555,20 +603,30 @@
         const container = document.getElementById('drinkListContainer');
         container.innerHTML = '';
 
+        // 시작 시간 (뱃지 용)
+        const sTimeStr = sessionStartTime.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+        
+        // START 다이어그램 그리기
+        let html = `
+            <div style="display:flex; flex-direction:column; align-items:center; margin-bottom: -5px; margin-top: 5px;">
+                <div style="background: var(--text-dark); color: white; font-size: 0.9rem; font-weight: 800; padding: 8px 20px; border-radius: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 2px solid white; z-index: 3; display: flex; align-items: center; gap: 6px;">
+                    <span style="font-size: 1.1rem;">🏁</span> 음주 시작 (${sTimeStr})
+                </div>
+            </div>
+        `;
+
         if(drinksList.length === 0) {
-            container.innerHTML = '<div style="text-align:center; padding:15px; color:#a0aec0; font-size:0.85rem;">아직 기록된 음주 내용이 없습니다. 위 버튼을 눌러 기록을 시작하세요.</div>';
+            html += `<div style="text-align:center; padding:20px; color:#a0aec0; font-size:0.85rem; background:white; border:1px dashed #cbd5e0; border-radius:14px; margin-top:15px; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">아직 기록된 음주 내용이 없습니다.<br>위 버튼을 눌러 첫 잔을 기록하세요.</div>`;
+            container.innerHTML = html;
             return;
         }
 
         const mealOffsetHrs = parseFloat(document.getElementById('userMeal').value) || 1.0;
 
-        let html = '';
         for (let i = 0; i < drinksList.length; i++) {
             const d = drinksList[i];
             
-            const pTime = new Date(toMs(d.prevTime));
             const eTime = new Date(toMs(d.endTime));
-
             const endStr = eTime.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
             
             const maxBacDate = new Date(eTime.getTime() + (mealOffsetHrs * 60 * 60000));
@@ -579,7 +637,7 @@
             const exactMaxBac = subChartData.maxBac || 0;
             const grams = d.alcoholGrams || 0;
 
-            // 뱃지 (간격 커넥터) 생성 (첫 잔 여부 판별)
+            // 간격 뱃지 (선 연결 포함)
             html += getGapBadgeHTML(d.gapMinutes, i === 0);
 
             html += `
@@ -717,8 +775,17 @@
         drawChart(chartData, 'historyBacChart', historyChartInstance, (instance) => historyChartInstance = instance);
 
         const container = document.getElementById('historyDrinkListContainer');
-        let html = '';
-        if(sessionData.drinksList) {
+        const sTimeStr = sessionDate.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+        
+        let html = `
+            <div style="display:flex; flex-direction:column; align-items:center; margin-bottom: -5px; margin-top: 5px;">
+                <div style="background: var(--text-dark); color: white; font-size: 0.9rem; font-weight: 800; padding: 8px 20px; border-radius: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 2px solid white; z-index: 3; display: flex; align-items: center; gap: 6px;">
+                    <span style="font-size: 1.1rem;">🏁</span> 음주 시작 (${sTimeStr})
+                </div>
+            </div>
+        `;
+
+        if(sessionData.drinksList && sessionData.drinksList.length > 0) {
             sessionData.drinksList.forEach((d, i) => {
                 const eTime = new Date(toMs(d.endTime));
                 const endStr = eTime.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
@@ -745,6 +812,8 @@
                     </div>
                 `;
             });
+        } else {
+             html += `<div style="text-align:center; padding:20px; color:#a0aec0; font-size:0.85rem; background:white; border:1px dashed #cbd5e0; border-radius:14px; margin-top:15px; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">음주 기록이 없습니다.</div>`;
         }
         container.innerHTML = html;
     };
@@ -829,7 +898,7 @@
                 scales: {
                     y: { 
                         beginAtZero: true, 
-                        suggestedMax: 0.1, // 너무 수치가 낮아도 기준선이 보이도록 최소 스케일 보장
+                        suggestedMax: 0.1, 
                         title: { display: true, text: 'BAC (%)' }
                     },
                     x: {
@@ -840,13 +909,13 @@
                     legend: { display: false },
                     annotation: {
                         annotations: {
-                            // 영역별 색칠 (배경 처리되도록 drawTime 조정)
+                            // 영역별 색칠
                             boxSafe: { type: 'box', yMin: 0, yMax: 0.05, backgroundColor: 'rgba(46, 204, 113, 0.1)', borderWidth: 0, drawTime: 'beforeDraw' },
                             boxWarn: { type: 'box', yMin: 0.05, yMax: 0.15, backgroundColor: 'rgba(243, 156, 18, 0.1)', borderWidth: 0, drawTime: 'beforeDraw' },
                             boxDanger: { type: 'box', yMin: 0.15, yMax: 0.30, backgroundColor: 'rgba(231, 76, 60, 0.1)', borderWidth: 0, drawTime: 'beforeDraw' },
                             boxFatal: { type: 'box', yMin: 0.30, yMax: 1.0, backgroundColor: 'rgba(0, 0, 0, 0.1)', borderWidth: 0, drawTime: 'beforeDraw' },
                             
-                            // 기준 실선 (면허 정지 / 취소)
+                            // 기준 실선
                             lineSuspension: {
                                 type: 'line', yMin: 0.03, yMax: 0.03, borderColor: '#f39c12', borderWidth: 2, borderDash: [4, 4],
                                 label: { display: true, content: '면허정지 (0.03%)', position: 'start', backgroundColor: 'rgba(243, 156, 18, 0.8)', font: { size: 10 }, yAdjust: -10 }
