@@ -241,8 +241,8 @@
         <div class="modal-title"><span>⏰</span> 시작 시각 재설정</div>
         <div class="modal-desc">
             현재 표시된 시간이 <b>지금 시각</b>입니다.<br>
-            시작 버튼을 늦게 눌렀다면, 실제 음주를 시작한 시각으로 수정해 주세요.<br>
-            <span style="color:var(--danger-color); font-size:0.8rem; margin-top:5px; display:inline-block;">* 변경 시 입력된 잔의 간격이 자동으로 재계산됩니다.</span>
+            시작 버튼을 늦게 눌렀거나 잘못 눌렀다면, 실제 음주를 시작한 시각으로 수정해 주세요.<br>
+            <span style="color:var(--danger-color); font-size:0.8rem; margin-top:5px; display:inline-block;">* 변경 시 기록된 잔의 간격이 새로운 시작 시간에 맞춰 자동 재계산됩니다.</span>
         </div>
         
         <div class="input-group" style="margin-bottom: 0;">
@@ -262,7 +262,7 @@
     <div class="modal-content">
         <div class="modal-title"><span>👤</span> 신체 정보 수정</div>
         <div class="modal-desc">
-            현재 세션에 적용될 신체 및 식사 정보를 수정합니다. (수정 시 알코올 수치가 재계산됩니다)
+            현재 세션에 적용될 신체 및 식사 정보를 수정합니다. (수정 시 과거에 입력된 알코올 수치도 재계산됩니다)
         </div>
         
         <div style="display: flex; gap: 10px;">
@@ -518,7 +518,7 @@
             const s = Math.floor((diff / 1000) % 60).toString().padStart(2, '0');
             document.getElementById('elapsedTimeDisplay').innerText = `음주 진행 시간: ${h}:${m}:${s}`;
             
-            // 실시간으로 차트의 현재시각 세로선만 업데이트 (렌더링 부하 고려해 잔이 있을때만 1분단위 정도 갱신이 좋으나 여기선 단순화)
+            // 실시간으로 차트의 현재시각 세로선만 업데이트 (30초마다 차트 리렌더링)
             if (activeChartInstance && drinksList.length > 0 && new Date().getSeconds() % 30 === 0) {
                  updateActiveChart();
             }
@@ -679,11 +679,12 @@
         }
     };
 
-    function renderDrinkList() {
-        const container = document.getElementById('drinkListContainer');
+    function renderDrinkList(targetList = drinksList, startMs = sessionStartTime ? sessionStartTime.getTime() : 0, containerId = 'drinkListContainer') {
+        const container = document.getElementById(containerId);
         container.innerHTML = '';
 
-        const sTimeStr = sessionStartTime.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+        const sTimeObj = new Date(startMs);
+        const sTimeStr = sTimeObj.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
         
         let html = `
             <div style="display:flex; flex-direction:column; align-items:center; margin-bottom: -5px; margin-top: 5px;">
@@ -693,27 +694,35 @@
             </div>
         `;
 
-        if(drinksList.length === 0) {
+        if(targetList.length === 0) {
             html += `<div style="text-align:center; padding:20px; color:#a0aec0; font-size:0.85rem; background:white; border:1px dashed #cbd5e0; border-radius:14px; margin-top:15px; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">아직 기록된 음주 내용이 없습니다.<br>위 버튼을 눌러 첫 잔을 기록하세요.</div>`;
             container.innerHTML = html;
             return;
         }
 
-        const mealOffsetHrs = parseFloat(document.getElementById('userMeal').value) || 1.0;
-
-        for (let i = 0; i < drinksList.length; i++) {
-            const d = drinksList[i];
+        // history view일때는 setupCard에 있는 값이 아닌 sessionData 값을 써야 하므로 파라미터가 없으면 UI값 사용
+        const isHistory = (containerId === 'historyDrinkListContainer');
+        let mealOffsetHrs = parseFloat(document.getElementById('userMeal').value) || 1.0;
+        
+        for (let i = 0; i < targetList.length; i++) {
+            const d = targetList[i];
             
             const eTime = new Date(toMs(d.endTime));
             const endStr = eTime.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
             
+            // 만약 viewHistory 컨텍스트에서 호출된 경우라면 별도의 mealOffsetHrs를 받아야 하나
+            // renderDrinkList를 통합했으므로 여기서는 UI의 userMeal을 가져오도록 하고,
+            // viewHistory에서는 별도로 렌더링 로직을 분리해 두는 것이 안전합니다.
+            // (이 함수는 active session에서만 사용하도록 하겠습니다)
+            
             const maxBacDate = new Date(eTime.getTime() + (mealOffsetHrs * 60 * 60000));
             const maxBacTimeStr = maxBacDate.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
 
-            const subList = drinksList.slice(0, i + 1);
-            const subChartData = generateChartData(subList, sessionStartTime.getTime(), mealOffsetHrs);
+            const subList = targetList.slice(0, i + 1);
+            const subChartData = generateChartData(subList, startMs, mealOffsetHrs);
             const exactMaxBac = subChartData.maxBac || 0;
             const grams = d.alcoholGrams || 0;
+            const contribution = d.cMaxContribution || 0;
 
             html += getGapBadgeHTML(d.gapMinutes, i === 0);
 
@@ -725,8 +734,9 @@
                     </div>
                     <div class="drink-item-time">음주 완료 시각: ${endStr}</div>
                     <div class="drink-item-stats">
-                        • 이 잔의 섭취 알코올: <b>${grams.toFixed(1)}g</b><br>
-                        • 누적 최고 도달 예상 BAC: <b style="color:var(--danger-color);">${exactMaxBac.toFixed(3)}%</b><br>
+                        • 섭취 알코올 (해당 잔): <b>${grams.toFixed(1)}g</b><br>
+                        • 단일 잔 예상 최고 BAC 기여도: <b>${contribution.toFixed(3)}%</b><br>
+                        • <b>누적 최고 도달 예상 BAC: <span style="color:var(--danger-color);">${exactMaxBac.toFixed(3)}%</span></b><br>
                         • 최고농도 도달 예상 시각: <b>${maxBacTimeStr} 경</b>
                     </div>
                 </div>
@@ -844,10 +854,11 @@
         document.getElementById('historyCard').style.display = 'block';
 
         const mealOffsetHrs = parseFloat(sessionData.mealOffsetHrs) || 1.0;
-        const chartData = generateChartData(sessionData.drinksList, toMs(sessionData.startTime), mealOffsetHrs);
+        const startMs = toMs(sessionData.startTime);
+        const chartData = generateChartData(sessionData.drinksList, startMs, mealOffsetHrs);
         const totalClearHrs = chartData.dataPoints.length * 15 / 60; 
         const statusStr = sessionData.isFinished ? "종료됨" : "진행중 (또는 중단됨)";
-        const sessionDate = new Date(toMs(sessionData.startTime));
+        const sessionDate = new Date(startMs);
         
         let hangoverStr = "";
         if (chartData.maxAch < 0.015) hangoverStr = "🟢 거의 없음 (양호)";
@@ -885,6 +896,10 @@
                 const maxBacDate = new Date(eTime.getTime() + (mealOffsetHrs * 60 * 60000));
                 const maxBacTimeStr = maxBacDate.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
                 
+                const subList = sessionData.drinksList.slice(0, i + 1);
+                const subChartData = generateChartData(subList, startMs, mealOffsetHrs);
+                const exactMaxBac = subChartData.maxBac || 0;
+
                 const grams = d.alcoholGrams || 0;
                 const contribution = d.cMaxContribution || 0;
 
@@ -895,11 +910,12 @@
                         <div class="drink-item-header">
                             <span>${d.drinkName} - ${d.volume}ml</span>
                         </div>
-                        <div class="drink-item-time">완료 시각: ${endStr}</div>
+                        <div class="drink-item-time">음주 완료 시각: ${endStr}</div>
                         <div class="drink-item-stats">
-                            • 섭취 알코올: <b>${grams.toFixed(1)}g</b><br>
-                            • 이 잔 단일 예상 최고 BAC 기여도: <b>${contribution.toFixed(3)}%</b><br>
-                            • 이 잔의 최고농도 도달 시각: <b>${maxBacTimeStr} 경</b>
+                            • 섭취 알코올 (해당 잔): <b>${grams.toFixed(1)}g</b><br>
+                            • 단일 잔 예상 최고 BAC 기여도: <b>${contribution.toFixed(3)}%</b><br>
+                            • <b>누적 최고 도달 예상 BAC: <span style="color:var(--danger-color);">${exactMaxBac.toFixed(3)}%</span></b><br>
+                            • 최고농도 도달 예상 시각: <b>${maxBacTimeStr} 경</b>
                         </div>
                     </div>
                 `;
@@ -915,17 +931,16 @@
         document.getElementById('setupCard').style.display = 'block';
     };
 
+    // 대사 시뮬레이션 알고리즘 개선 (Iterative 방식)
     function generateChartData(targetDrinksList, startMs, mealOffsetHrs) {
         const mealOffsetMin = mealOffsetHrs * 60;
         const dataPoints = [];
         const achDataPoints = [];
         const labels = [];
-        const timeMsList = []; // 현재 시각 매칭용 배열
+        const timeMsList = []; 
         
         let maxBac = 0;
         let maxAch = 0;
-        let prevCleared = 0;
-        let currentAch = 0;
         
         if(!targetDrinksList || targetDrinksList.length === 0) {
             return { labels: ['00:00'], timeMsList: [startMs], dataPoints: [0], achDataPoints: [0], maxBac: 0, maxAch: 0 };
@@ -936,46 +951,72 @@
 
         const lastDrinkFullyAbsorbedTime = toMs(targetDrinksList[targetDrinksList.length - 1].endTime) + (mealOffsetMin * 60000);
         
-        for (let m = 0; m <= 24 * 60; m += 15) {
+        let currentBac = 0;
+        let currentAch = 0;
+        const stepMinutes = 15;
+        const stepMs = stepMinutes * 60000;
+
+        for (let m = 0; m <= 24 * 60; m += stepMinutes) {
             let currentMs = actualPlotStartMs + (m * 60000);
             let timeObj = new Date(currentMs);
             let timeLabel = timeObj.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
             
-            let totalAbsorbedBAC = 0;
+            let absorbedInStep = 0;
+            let stepStartMs = currentMs - stepMs;
+            let stepEndMs = currentMs;
+
             targetDrinksList.forEach(d => {
                 const eMs = toMs(d.endTime);
                 const contribution = d.cMaxContribution || 0; 
 
-                if (currentMs >= eMs) {
-                    let elapsedSinceDrinkMin = (currentMs - eMs) / 60000;
-                    if (mealOffsetMin <= 0 || elapsedSinceDrinkMin >= mealOffsetMin) {
-                        totalAbsorbedBAC += contribution; 
-                    } else {
-                        totalAbsorbedBAC += contribution * (elapsedSinceDrinkMin / mealOffsetMin); 
+                if (mealOffsetMin <= 0) {
+                    if (eMs > stepStartMs && eMs <= stepEndMs) {
+                        absorbedInStep += contribution;
+                    }
+                } else {
+                    const absorbStart = eMs;
+                    const absorbEnd = eMs + mealOffsetMin * 60000;
+                    const overlapStart = Math.max(stepStartMs, absorbStart);
+                    const overlapEnd = Math.min(stepEndMs, absorbEnd);
+                    
+                    if (overlapStart < overlapEnd) {
+                        const overlapMinutes = (overlapEnd - overlapStart) / 60000;
+                        absorbedInStep += contribution * (overlapMinutes / mealOffsetMin);
                     }
                 }
             });
             
-            let elapsedHoursTotal = m / 60;
-            let bac = Math.max(0, totalAbsorbedBAC - (0.015 * elapsedHoursTotal));
-            if (bac > maxBac) maxBac = bac;
+            currentBac += absorbedInStep;
             
-            // 아세트알데하이드(AcH) 프록시 모델 계산 (분해된 BAC 기반 생성 및 점진적 소멸)
-            let currentlyCleared = totalAbsorbedBAC - bac; 
-            let newlyCleared = Math.max(0, currentlyCleared - prevCleared);
-            prevCleared = currentlyCleared;
+            // 15분 단위 알코올 분해 (시간당 0.015% 소모)
+            let clearedInStep = 0.015 * (stepMinutes / 60);
+            let newlyClearedBac = 0;
             
-            currentAch += newlyCleared * 1.5; // BAC 분해량에 비례하여 1.5배 스케일로 축적
-            currentAch -= 0.0025; // 시간당 0.01 수준으로 서서히 소멸
+            if (currentBac > 0) {
+                if (currentBac > clearedInStep) {
+                    newlyClearedBac = clearedInStep;
+                    currentBac -= clearedInStep;
+                } else {
+                    newlyClearedBac = currentBac;
+                    currentBac = 0;
+                }
+            }
+            
+            // 아세트알데하이드 농도 시뮬레이션 (알코올 분해량에 비례하여 축적 후 서서히 소모)
+            currentAch += newlyClearedBac * 1.5;
+            currentAch -= 0.01 * (stepMinutes / 60); 
             if (currentAch < 0) currentAch = 0;
+            
+            if (currentBac > maxBac) maxBac = currentBac;
             if (currentAch > maxAch) maxAch = currentAch;
             
             labels.push(timeLabel);
             timeMsList.push(currentMs);
-            dataPoints.push(bac.toFixed(3));
+            dataPoints.push(currentBac.toFixed(3));
             achDataPoints.push(currentAch.toFixed(3));
             
-            if (bac === 0 && currentAch === 0 && currentMs > lastDrinkFullyAbsorbedTime) {
+            // BAC와 AcH가 모두 0으로 떨어지면 차트 종료
+            if (currentBac === 0 && currentAch === 0 && currentMs > lastDrinkFullyAbsorbedTime) {
                 break;
             }
         }
@@ -1002,7 +1043,7 @@
             }
         };
 
-        // 활성 세션(진행중)일 경우, 현재 시각 세로선을 계산하여 추가
+        // 활성 세션일 경우, 현재 시각 세로선 표시
         if (isActiveSession && chartData.timeMsList && chartData.timeMsList.length > 0) {
             const nowMs = Date.now();
             let closestIndex = 0;
@@ -1020,7 +1061,7 @@
                 xMax: currentLabel,
                 borderColor: '#3498db',
                 borderWidth: 2,
-                label: { display: true, content: '현재', position: 'start', backgroundColor: '#3498db', font: { size: 10 } }
+                label: { display: true, content: '현재시각', position: 'start', backgroundColor: '#3498db', font: { size: 10 } }
             };
         }
 
@@ -1041,7 +1082,7 @@
                         zIndex: 10
                     },
                     {
-                        label: '예상 아세트알데하이드 (숙취원인)',
+                        label: '예상 아세트알데하이드 (숙취)',
                         data: chartData.achDataPoints,
                         borderColor: '#e67e22',
                         backgroundColor: 'transparent',
@@ -1061,7 +1102,7 @@
                     y: { 
                         beginAtZero: true, 
                         suggestedMax: 0.1, 
-                        title: { display: true, text: '농도 (%) / Index' }
+                        title: { display: true, text: '농도 (%) / 가상 Index' }
                     },
                     x: {
                         ticks: { maxTicksLimit: 6 }
