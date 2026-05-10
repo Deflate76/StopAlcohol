@@ -65,8 +65,10 @@
         .clickable-time-box:hover { background-color: rgba(255, 255, 255, 0.8); border-color: #ffcccc; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(231, 76, 60, 0.1); }
         .cal-hint { font-size: 0.75rem; color: var(--danger-color); font-weight: bold; opacity: 0.8; margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
         
-        .time-unit { font-size: 3rem; font-weight: 800; color: var(--danger-color); line-height: 1.1; margin-bottom: 5px;}
+        .time-unit { font-size: 3rem; font-weight: 800; color: var(--danger-color); line-height: 1.1; margin-bottom: 5px; text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 8px; transition: color 0.2s; }
         .sub-time-clickable { font-size: 1.1rem; color: #718096; font-weight: 700; text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 4px; transition: color 0.2s; }
+        
+        .clickable-time-box:hover .time-unit { color: #c0392b; }
         .clickable-time-box:hover .sub-time-clickable { color: var(--danger-color); }
         
         #subTime { font-size: 1.2rem; font-weight: 600; color: #555; margin-top: 10px; }
@@ -235,7 +237,6 @@
         </div>
 
         <div class="timer-display">
-            <!-- 💡 수정된 달력 클릭 UI 영역 -->
             <div id="mainDaysContainer" style="width: 100%;">
                 <!-- JS에서 동적으로 달력 호버 UI를 생성합니다 -->
             </div>
@@ -327,12 +328,13 @@
     &copy; 2026 Alcoholaway.com All rights reserved.
 </footer>
 
-<!-- 💡 시각적 피드백 캘린더 모달 추가 -->
+<!-- 💡 시각적 피드백 캘린더 모달 -->
 <div id="calendarModal" class="modal">
     <div class="modal-content" style="max-width: 400px; padding: 25px 20px;">
         <button class="close-btn-top" onclick="closeModal('calendarModal')">&times;</button>
         
-        <div class="cal-header">
+        <!-- 💡 닫기 버튼(X)과 화살표 버튼(>) 겹침 방지를 위해 margin-top 25px 추가 -->
+        <div class="cal-header" style="margin-top: 25px;">
             <button class="cal-btn" onclick="changeCalMonth(-1)">&#10094;</button>
             <div class="cal-title" id="calMonthTitle">2026년 5월</div>
             <button class="cal-btn" onclick="changeCalMonth(1)">&#10095;</button>
@@ -583,8 +585,7 @@
     let editingChallengeId = null;
     let evalPromptedFor = null;
 
-    // 💡 캘린더 기능 추가 전역 변수
-    let allChallengesData = []; // 과거 도전 기록 보관용
+    let allChallengesData = []; 
     let currentCalDate = new Date();
     let currentCalMode = 'current';
 
@@ -659,7 +660,7 @@
             let totalCravings = 0;
             let challengeCount = 0;
             totalPastDays = 0;
-            allChallengesData = []; // 💡 데이터 초기화
+            allChallengesData = [];
 
             snapshot.forEach(docSnap => {
                 const data = docSnap.data();
@@ -667,7 +668,6 @@
                 const end = data.endDate ? new Date(data.endDate) : new Date();
                 const diffDays = Math.max(0, Math.floor((end - start) / 86400000));
                 
-                // 💡 과거 모든 기록 캘린더용 저장
                 allChallengesData.push({
                     startDate: start,
                     endDate: end,
@@ -728,10 +728,9 @@
         } catch(e) { console.error(e); }
     }
 
-    /* 💡 달력 모달 로직 추가 */
     window.openCalendarModal = function(mode) {
         currentCalMode = mode;
-        currentCalDate = new Date(); // 현재 달로 리셋
+        currentCalDate = new Date();
         renderCalendar(currentCalDate.getFullYear(), currentCalDate.getMonth(), mode);
         openModal('calendarModal');
     };
@@ -762,12 +761,10 @@
         const grid = document.getElementById('calendarDaysGrid');
         grid.innerHTML = '';
 
-        // 첫 주 빈칸
         for (let i = 0; i < firstDay; i++) {
             grid.innerHTML += `<div class="cal-day empty"></div>`;
         }
 
-        // 오늘 날짜 구하기 (시간 제거)
         const today = new Date();
         today.setHours(0,0,0,0);
 
@@ -814,7 +811,6 @@
                         else classList.push('range-acc-mid');
                     }
                     
-                    // 실패한 날(종료일) 마킹
                     if (c.status === 'failed' && isEnd) {
                         classList.push('fail-mark');
                     }
@@ -825,7 +821,6 @@
         }
     }
 
-    // (나머지 로직들은 기존과 동일하게 유지됩니다)
     window.loginWithGoogle = async function() {
         try { await signInWithPopup(auth, googleProvider); } 
         catch (error) { alert(`로그인 실패!\n에러 메시지: ${error.message}`); }
@@ -1836,14 +1831,14 @@
             const totalCumul = totalPastDays + currentDays;
             let currentMax = Math.max(globalMaxDays, currentDays);
 
-            // 💡 캘린더 클릭 유도 마크업 업데이트
+            // 💡 캘린더 이모지 삭제 및 점선 언더바 스타일 지정
             document.getElementById('mainDaysContainer').innerHTML = `
                 <div class="cal-hint">👇 클릭하여 달력 보기</div>
                 <div class="clickable-time-box" onclick="openCalendarModal('current')">
-                    <div class="time-unit">${currentDays}일 <span style="font-size: 1.8rem; filter: grayscale(0.2);">📅</span></div>
+                    <div class="time-unit">${currentDays}일</div>
                 </div>
                 <div class="clickable-time-box" onclick="openCalendarModal('accumulated')" style="margin-top: -10px; padding: 5px 15px;">
-                    <span class="sub-time-clickable">(누적 ${totalCumul}일 보기) 📅</span>
+                    <span class="sub-time-clickable">(누적 ${totalCumul}일 보기)</span>
                 </div>
             `;
             
