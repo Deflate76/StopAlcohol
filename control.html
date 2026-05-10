@@ -49,12 +49,20 @@
         
         .status-display { font-size: 1.1rem; font-weight: 800; color: var(--text-dark); background: #f0f7ff; padding: 15px; border-radius: 12px; margin-bottom: 5px; border: 1px dashed #3498db; }
         
-        .chart-container { position: relative; height: 250px; width: 100%; margin-top: 10px; margin-bottom: 20px; display: none; }
+        .chart-container { margin-top: 10px; margin-bottom: 20px; display: none; }
+        .chart-canvas-wrapper { position: relative; height: 250px; width: 100%; }
+        
+        /* 차트 범례 스타일 */
+        .custom-legend { font-size: 0.75rem; color: #4a5568; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 15px; background: #f8f9fa; padding: 10px; border-radius: 8px; border: 1px solid #edf2f7;}
+        .legend-item { display: flex; align-items: center; gap: 4px; }
+        .legend-box { width: 12px; height: 12px; border-radius: 3px; }
+        .legend-line { font-weight: 900; letter-spacing: -2px; }
+
         #loadingArea { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 50vh; color: #718096; font-weight: bold; gap: 10px; }
 
         /* 음주 리스트 스타일 */
-        .drink-list-container { display: flex; flex-direction: column; gap: 12px; margin-top: 15px; margin-bottom: 20px; }
-        .drink-item { background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 15px; text-align: left; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .drink-list-container { display: flex; flex-direction: column; margin-top: 15px; margin-bottom: 20px; }
+        .drink-item { background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 15px; text-align: left; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.02); z-index: 2; }
         .drink-item-header { font-size: 1rem; font-weight: 800; color: var(--primary-color); margin-bottom: 4px; display:flex; justify-content:space-between; align-items:center; }
         .drink-item-time { font-size: 0.8rem; color: #a0aec0; margin-bottom: 10px; }
         .drink-item-stats { font-size: 0.85rem; color: #4a5568; background: #f8f9fa; padding: 10px; border-radius: 10px; line-height: 1.5; }
@@ -160,7 +168,18 @@
             <p id="activeSummary" style="font-size: 0.85rem; color: #4a5568; line-height: 1.5; text-align: left; margin-bottom: 10px; display: none; padding: 10px; background: #fdfdfd; border-radius: 8px; border: 1px solid #edf2f7;"></p>
             
             <div class="chart-container" id="activeChartContainer">
-                <canvas id="activeBacChart"></canvas>
+                <div class="chart-canvas-wrapper">
+                    <canvas id="activeBacChart"></canvas>
+                </div>
+                <!-- 커스텀 범례 -->
+                <div class="custom-legend">
+                    <div class="legend-item"><div class="legend-box" style="background: rgba(46, 204, 113, 0.2);"></div><span>안전구역 (~0.05%)</span></div>
+                    <div class="legend-item"><div class="legend-box" style="background: rgba(243, 156, 18, 0.2);"></div><span>주의구역 (~0.15%)</span></div>
+                    <div class="legend-item"><div class="legend-box" style="background: rgba(231, 76, 60, 0.2);"></div><span>위험구역 (~0.30%)</span></div>
+                    <div class="legend-item"><div class="legend-box" style="background: rgba(0, 0, 0, 0.2);"></div><span>치명/사망 (0.30%~)</span></div>
+                    <div class="legend-item"><span class="legend-line" style="color: #f39c12;">---</span><span>면허정지 (0.03%)</span></div>
+                    <div class="legend-item"><span class="legend-line" style="color: #e74c3c;">---</span><span>면허취소 (0.08%)</span></div>
+                </div>
             </div>
             
             <div class="drink-list-container" id="drinkListContainer">
@@ -178,7 +197,18 @@
             <p id="historySummary" style="font-size: 0.85rem; color: #4a5568; line-height: 1.5; text-align: left; margin-bottom: 10px;"></p>
             
             <div class="chart-container" style="display: block;">
-                <canvas id="historyBacChart"></canvas>
+                <div class="chart-canvas-wrapper">
+                    <canvas id="historyBacChart"></canvas>
+                </div>
+                <!-- 커스텀 범례 -->
+                <div class="custom-legend">
+                    <div class="legend-item"><div class="legend-box" style="background: rgba(46, 204, 113, 0.2);"></div><span>안전구역 (~0.05%)</span></div>
+                    <div class="legend-item"><div class="legend-box" style="background: rgba(243, 156, 18, 0.2);"></div><span>주의구역 (~0.15%)</span></div>
+                    <div class="legend-item"><div class="legend-box" style="background: rgba(231, 76, 60, 0.2);"></div><span>위험구역 (~0.30%)</span></div>
+                    <div class="legend-item"><div class="legend-box" style="background: rgba(0, 0, 0, 0.2);"></div><span>치명/사망 (0.30%~)</span></div>
+                    <div class="legend-item"><span class="legend-line" style="color: #f39c12;">---</span><span>면허정지 (0.03%)</span></div>
+                    <div class="legend-item"><span class="legend-line" style="color: #e74c3c;">---</span><span>면허취소 (0.08%)</span></div>
+                </div>
             </div>
             
             <div class="drink-list-container" id="historyDrinkListContainer">
@@ -209,7 +239,7 @@
     const db = getFirestore(app);
 
     let userId = null;
-    let userProfile = null; // 인덱스에서 넘어온 신체정보
+    let userProfile = null; 
     let sessionStartTime = null;
     let drinksList = []; 
     let timerInterval = null;
@@ -230,6 +260,36 @@
         return isNaN(parsed) ? 0 : parsed;
     }
 
+    // 음주 간격에 따른 시각적 뱃지 생성기
+    function getGapBadgeHTML(gapMinutes, isFirst) {
+        let badgeColor, badgeText;
+        if (gapMinutes < 15) {
+            badgeColor = 'var(--danger-color)';
+            badgeText = `🚨 앗! 너무 급해요! (${gapMinutes}분 간격)`;
+        } else if (gapMinutes < 40) {
+            badgeColor = 'var(--warning-color)';
+            badgeText = `⚠️ 조금 빠릅니다 (${gapMinutes}분 간격)`;
+        } else if (gapMinutes < 60) {
+            badgeColor = 'var(--success-color)';
+            badgeText = `✅ 정상적인 속도입니다 (${gapMinutes}분 간격)`;
+        } else {
+            badgeColor = 'var(--info-color)';
+            badgeText = `🌟 훌륭합니다! 잘 조절하고 계세요 (${gapMinutes}분 간격)`;
+        }
+
+        const prefix = isFirst ? "시작 후" : "직전 잔 이후";
+
+        return `
+            <div style="display:flex; flex-direction:column; align-items:center; margin: -5px 0;">
+                <div style="width:3px; height:15px; background:#e2e8f0; z-index:1;"></div>
+                <div style="background:${badgeColor}; color:white; font-size:0.75rem; padding:4px 12px; border-radius:12px; font-weight:800; box-shadow:0 2px 4px rgba(0,0,0,0.1); z-index:3;">
+                    ${prefix} ${badgeText}
+                </div>
+                <div style="width:3px; height:15px; background:#e2e8f0; z-index:1;"></div>
+            </div>
+        `;
+    }
+
     onAuthStateChanged(auth, (user) => {
         if (user) {
             userId = user.uid;
@@ -246,7 +306,6 @@
         container.innerHTML = '<div style="font-size: 0.85rem; color: #a0aec0;">데이터를 불러오는 중...</div>';
         
         try {
-            // 사용자 신체정보 연동
             const userDoc = await getDoc(doc(db, "users", userId));
             if (userDoc.exists() && userDoc.data().weight) {
                 userProfile = userDoc.data();
@@ -386,7 +445,7 @@
     }
     
     window.resetDrinkTimer = async function() {
-        if(confirm("음주 진행 시간을 현재 시각(00:00:00)으로 리셋하시겠습니까?\n(깜빡 늦게 시작 버튼을 눌렀을 경우 사용하세요. 기존에 기록된 음주 시각들도 리셋된 시간에 맞춰 자동으로 평행 이동하여 보정됩니다.)")) {
+        if(confirm("음주 진행 시간을 현재 시각(00:00:00)으로 리셋하시겠습니까?\n(기존에 기록된 음주 시각들도 리셋된 시간에 맞춰 자동으로 보정됩니다.)")) {
             const oldStartTimeMs = sessionStartTime.getTime();
             sessionStartTime = new Date();
             const newStartTimeMs = sessionStartTime.getTime();
@@ -411,7 +470,7 @@
     };
 
     window.cancelDrinkingSession = async function() {
-        if(confirm("기록 중인 음주 세션을 완전히 취소하시겠습니까?\n(이후 내용은 저장되지 않으며, 서버에서 현재 진행중인 세션 기록이 완전히 삭제됩니다.)")) {
+        if(confirm("기록 중인 음주 세션을 완전히 취소하시겠습니까?\n(서버에서 현재 진행중인 세션 기록이 완전히 삭제됩니다.)")) {
             
             if(currentSessionDocId) {
                 try {
@@ -510,18 +569,18 @@
             const pTime = new Date(toMs(d.prevTime));
             const eTime = new Date(toMs(d.endTime));
 
-            const startStr = pTime.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
             const endStr = eTime.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
             
             const maxBacDate = new Date(eTime.getTime() + (mealOffsetHrs * 60 * 60000));
             const maxBacTimeStr = maxBacDate.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
 
-            let timeLabel = i === 0 ? `음주 시작(${startStr}) 후 ${d.gapMinutes}분 소요` : `직전 잔(${startStr}) 이후 ${d.gapMinutes}분 소요`;
-            
             const subList = drinksList.slice(0, i + 1);
             const subChartData = generateChartData(subList, sessionStartTime.getTime(), mealOffsetHrs);
             const exactMaxBac = subChartData.maxBac || 0;
             const grams = d.alcoholGrams || 0;
+
+            // 뱃지 (간격 커넥터) 생성 (첫 잔 여부 판별)
+            html += getGapBadgeHTML(d.gapMinutes, i === 0);
 
             html += `
                 <div class="drink-item">
@@ -529,10 +588,10 @@
                     <div class="drink-item-header">
                         <span>${d.drinkName} - ${d.volume}ml</span>
                     </div>
-                    <div class="drink-item-time">${timeLabel} (완료: ${endStr})</div>
+                    <div class="drink-item-time">음주 완료 시각: ${endStr}</div>
                     <div class="drink-item-stats">
                         • 이 잔의 섭취 알코올: <b>${grams.toFixed(1)}g</b><br>
-                        • 현재까지 누적 최고 도달 예상 BAC: <b style="color:var(--danger-color);">${exactMaxBac.toFixed(3)}%</b><br>
+                        • 누적 최고 도달 예상 BAC: <b style="color:var(--danger-color);">${exactMaxBac.toFixed(3)}%</b><br>
                         • 최고농도 도달 예상 시각: <b>${maxBacTimeStr} 경</b>
                     </div>
                 </div>
@@ -670,12 +729,14 @@
                 const grams = d.alcoholGrams || 0;
                 const contribution = d.cMaxContribution || 0;
 
+                html += getGapBadgeHTML(d.gapMinutes, i === 0);
+
                 html += `
                     <div class="drink-item">
                         <div class="drink-item-header">
                             <span>${d.drinkName} - ${d.volume}ml</span>
                         </div>
-                        <div class="drink-item-time">완료 시각: ${endStr} / 시작기준 ${d.gapMinutes}분 간격</div>
+                        <div class="drink-item-time">완료 시각: ${endStr}</div>
                         <div class="drink-item-stats">
                             • 섭취 알코올: <b>${grams.toFixed(1)}g</b><br>
                             • 이 잔 단일 예상 최고 BAC 기여도: <b>${contribution.toFixed(3)}%</b><br>
@@ -754,10 +815,12 @@
                     label: '혈중 알코올 농도 (%)',
                     data: chartData.dataPoints,
                     borderColor: '#9b59b6',
-                    backgroundColor: 'rgba(155, 89, 182, 0.2)',
-                    fill: true,
+                    backgroundColor: 'rgba(155, 89, 182, 0.4)',
+                    borderWidth: 3,
+                    fill: false,
                     tension: 0.4,
-                    pointRadius: 0
+                    pointRadius: 0,
+                    zIndex: 10
                 }]
             },
             options: {
@@ -766,6 +829,7 @@
                 scales: {
                     y: { 
                         beginAtZero: true, 
+                        suggestedMax: 0.1, // 너무 수치가 낮아도 기준선이 보이도록 최소 스케일 보장
                         title: { display: true, text: 'BAC (%)' }
                     },
                     x: {
@@ -776,20 +840,20 @@
                     legend: { display: false },
                     annotation: {
                         annotations: {
-                            dangerLine: {
-                                type: 'line',
-                                yMin: 0.03,
-                                yMax: 0.03,
-                                borderColor: '#e74c3c',
-                                borderWidth: 2,
-                                borderDash: [4, 4],
-                                label: {
-                                    display: true,
-                                    content: '면허정지 (0.03%)',
-                                    position: 'start',
-                                    backgroundColor: '#e74c3c',
-                                    font: { size: 10 }
-                                }
+                            // 영역별 색칠 (배경 처리되도록 drawTime 조정)
+                            boxSafe: { type: 'box', yMin: 0, yMax: 0.05, backgroundColor: 'rgba(46, 204, 113, 0.1)', borderWidth: 0, drawTime: 'beforeDraw' },
+                            boxWarn: { type: 'box', yMin: 0.05, yMax: 0.15, backgroundColor: 'rgba(243, 156, 18, 0.1)', borderWidth: 0, drawTime: 'beforeDraw' },
+                            boxDanger: { type: 'box', yMin: 0.15, yMax: 0.30, backgroundColor: 'rgba(231, 76, 60, 0.1)', borderWidth: 0, drawTime: 'beforeDraw' },
+                            boxFatal: { type: 'box', yMin: 0.30, yMax: 1.0, backgroundColor: 'rgba(0, 0, 0, 0.1)', borderWidth: 0, drawTime: 'beforeDraw' },
+                            
+                            // 기준 실선 (면허 정지 / 취소)
+                            lineSuspension: {
+                                type: 'line', yMin: 0.03, yMax: 0.03, borderColor: '#f39c12', borderWidth: 2, borderDash: [4, 4],
+                                label: { display: true, content: '면허정지 (0.03%)', position: 'start', backgroundColor: 'rgba(243, 156, 18, 0.8)', font: { size: 10 }, yAdjust: -10 }
+                            },
+                            lineRevocation: {
+                                type: 'line', yMin: 0.08, yMax: 0.08, borderColor: '#e74c3c', borderWidth: 2, borderDash: [4, 4],
+                                label: { display: true, content: '면허취소 (0.08%)', position: 'start', backgroundColor: 'rgba(231, 76, 60, 0.8)', font: { size: 10 }, yAdjust: -10 }
                             }
                         }
                     }
