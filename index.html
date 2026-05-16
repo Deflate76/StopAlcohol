@@ -171,12 +171,12 @@
         .cal-week { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 0.8rem; font-weight: bold; color: #a0aec0; margin-bottom: 10px; }
         .cal-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
         
-        /* 💡 Z-index와 구조 수정을 통한 뱃지 표시 강화 */
+        /* 뱃지가 하단에 위치할 수 있도록 여백 추가 및 position 설정 */
         .cal-day { padding: 8px 0 18px 0; font-size: 0.9rem; font-weight: 600; color: #4a5568; border-radius: 8px; position: relative; z-index: 1; transition: background-color 0.2s; }
         .cal-day.empty { background: transparent; }
         
-        /* 💡 기본 갈망 평균 점수 뱃지 스타일 (Z-index와 box-shadow 강화) */
-        .craving-avg-badge { position: absolute; bottom: -4px; left: 50%; transform: translateX(-50%); font-size: 0.6rem; font-weight: 800; color: #e74c3c; background: rgba(255,255,255,0.95); border-radius: 4px; padding: 1px 4px; line-height: 1.2; box-shadow: 0 2px 6px rgba(0,0,0,0.25); white-space: nowrap; pointer-events: none; z-index: 20; }
+        /* 💡 기본 갈망 평균 점수 뱃지 스타일 */
+        .craving-avg-badge { position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%); font-size: 0.55rem; font-weight: 800; color: #e74c3c; background: rgba(255,255,255,0.9); border-radius: 4px; padding: 1px 4px; line-height: 1.2; box-shadow: 0 1px 3px rgba(0,0,0,0.15); white-space: nowrap; pointer-events: none; }
         
         /* 모드별 범위 하이라이트 색상 (전문적이고 깨끗한 톤) */
         .cal-day.range-curr-single { background-color: var(--primary-color); color: white; border-radius: 8px; box-shadow: 0 2px 6px rgba(52, 152, 219, 0.3); }
@@ -194,8 +194,7 @@
         .cal-day.range-best-mid { background-color: #fdf2e9; color: #b9770e; border-radius: 0; }
         .cal-day.range-best-end { background-color: var(--warning-color); color: white; border-radius: 0 8px 8px 0; }
 
-        /* 💡 뱃지를 덮지 않도록 z-index 및 pointer-events 수정 */
-        .cal-day.fail-mark::after { content: '❌'; position: absolute; font-size: 0.6rem; top: -4px; right: -4px; background: white; border-radius: 50%; padding: 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); z-index: 15; pointer-events: none; }
+        .cal-day.fail-mark::after { content: '❌'; position: absolute; font-size: 0.6rem; top: -4px; right: -4px; background: white; border-radius: 50%; padding: 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
         .cal-day.today-mark { border: 2px solid var(--warning-color); font-weight: 800; color: var(--text-dark); }
         
         .cal-week div:nth-child(1), .cal-day.sun { color: #e53e3e; }
@@ -206,7 +205,7 @@
         .cal-day.range-best-start.sun, .cal-day.range-best-single.sun, .cal-day.range-best-end.sun { color: white; }
 
         .cal-day.fail-mark { cursor: pointer; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .cal-day.fail-mark:hover { transform: scale(1.15); z-index: 25; box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3); }
+        .cal-day.fail-mark:hover { transform: scale(1.15); z-index: 10; box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3); }
     </style>
 </head>
 <body>
@@ -240,7 +239,7 @@
         <button class="craving-btn" style="background-color: #9b59b6; margin-top: 15px; width: 100%; max-width: 320px; margin-left: auto; margin-right: auto; box-sizing: border-box; font-size: 0.95rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" onclick="goToControlMode()">🍷 단주 대신... 음주 조절 모드로 진입</button>
         
         <button class="stat-btn" style="margin-top:15px; border-color:var(--primary-color); color:var(--primary-color); width: 100%; max-width: 320px; margin-left: auto; margin-right: auto; box-sizing: border-box;" onclick="openHistoryList()">📚 나의 과거 기록 보기</button>
-        </div>
+    </div>
 
     <div id="displayArea" style="display: none;">
         <div class="header-bar">
@@ -603,7 +602,7 @@
         <input type="number" id="editFailAmountInput" min="1" max="10" class="reason-input" style="margin-bottom: 10px; width:100%;" placeholder="예: 5">
 
         <button class="start-btn" style="width:100%; padding: 14px; font-size: 1.1rem; margin-top: 20px;" onclick="saveEditedReasons()">정보 저장</button>
-        </div>
+    </div>
 </div>
 
 <script type="module">
@@ -887,26 +886,17 @@
         const today = new Date();
         today.setHours(0,0,0,0);
 
-        // 💡 모든 도전 기록에서 갈망(고비) 데이터를 날짜별로 집계 - 타임스탬프 누락 대비 예외처리 강화
+        // 모든 도전 기록에서 갈망(고비) 데이터를 날짜별로 집계
         const dailyCravings = {};
         allChallengesData.forEach(ch => {
             if (ch.cravings && ch.cravings.length > 0) {
                 ch.cravings.forEach(crav => {
                     if (!['action', 'state', 'eval', 'medication'].includes(crav.type)) {
-                        let cDate;
-                        if (crav.timestamp) {
-                            cDate = new Date(crav.timestamp);
-                        } else if (crav.date) {
-                            // 타임스탬프가 없는 예전 기록일 경우 임시 방편 처리 (정확하지 않을 수 있음)
-                            cDate = new Date(); 
-                        }
-                        
-                        if (cDate && !isNaN(cDate)) {
-                            const dateKey = `${cDate.getFullYear()}-${String(cDate.getMonth()+1).padStart(2,'0')}-${String(cDate.getDate()).padStart(2,'0')}`;
-                            if (!dailyCravings[dateKey]) dailyCravings[dateKey] = { sum: 0, count: 0 };
-                            dailyCravings[dateKey].sum += crav.strength;
-                            dailyCravings[dateKey].count++;
-                        }
+                        const cDate = new Date(crav.timestamp);
+                        const dateKey = `${cDate.getFullYear()}-${String(cDate.getMonth()+1).padStart(2,'0')}-${String(cDate.getDate()).padStart(2,'0')}`;
+                        if (!dailyCravings[dateKey]) dailyCravings[dateKey] = { sum: 0, count: 0 };
+                        dailyCravings[dateKey].sum += crav.strength;
+                        dailyCravings[dateKey].count++;
                     }
                 });
             }
@@ -975,7 +965,7 @@
                     }
                     
                     if (c.status === 'failed' && isEnd) {
-                        if (!classList.includes('fail-mark')) classList.push('fail-mark');
+                        classList.push('fail-mark');
                         
                         onClickEvent = `onclick="openFailAmountModal('${c.id}', ${c.failAmount || 5})"`;
                         
@@ -988,7 +978,7 @@
                 });
             }
 
-            // 💡 갈망 평균 점수 뱃지 렌더링 및 동적 스타일 할당 (!important를 사용하여 무조건 보이게 처리)
+            // 💡 갈망 평균 점수 뱃지 렌더링 및 동적 스타일 할당
             const iterDateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
             let cravingBadge = '';
             if (dailyCravings[iterDateStr]) {
@@ -997,7 +987,7 @@
                 // 실패한 날(fail-mark)이면서 음주량이 높아 붉은 계열 배경일 때를 대비한 노란색 뱃지 스타일
                 let badgeStyle = "";
                 if (classList.includes('fail-mark')) {
-                    badgeStyle = "background-color: #f1c40f !important; color: #2c3e50 !important; text-shadow: none !important; border: 1px solid #d4ac0d !important; z-index: 20 !important;";
+                    badgeStyle = "background: #f1c40f; color: #2c3e50; text-shadow: none; border: 1px solid #d4ac0d;";
                 }
                 
                 cravingBadge = `<div class="craving-avg-badge" style="${badgeStyle}">🔥${avg}</div>`;
@@ -1047,7 +1037,7 @@
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <strong style="color:#e74c3c;">🔥 강도: ${c.strength}/10</strong>
                         <span style="font-size:0.85rem; color:#4a5568;">${c.reason}</span>
-                        </div>
+                    </div>
                 </div>
             `;
         });
@@ -1428,7 +1418,7 @@
             });
             inputEl.value = '';
         } catch(e) { 
-console.error("댓글 등록 에러:", e);
+            console.error("댓글 등록 에러:", e);
             alert("댓글 등록 실패: " + e.message); 
         }
     };
@@ -2388,4 +2378,4 @@ console.error("댓글 등록 에러:", e);
 
 </script>
 </body>
-</html>
+</html>   
