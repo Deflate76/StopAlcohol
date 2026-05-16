@@ -170,23 +170,25 @@
         .cal-title { font-size: 1.1rem; font-weight: 800; color: var(--text-dark); }
         .cal-week { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 0.8rem; font-weight: bold; color: #a0aec0; margin-bottom: 10px; }
         .cal-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
-        .cal-day { padding: 10px 0; font-size: 0.9rem; font-weight: 600; color: #4a5568; border-radius: 8px; position: relative; z-index: 1; transition: background-color 0.2s; }
+        
+        /* 💡 뱃지가 하단에 위치할 수 있도록 여백 추가 및 position 설정 */
+        .cal-day { padding: 8px 0 18px 0; font-size: 0.9rem; font-weight: 600; color: #4a5568; border-radius: 8px; position: relative; z-index: 1; transition: background-color 0.2s; }
         .cal-day.empty { background: transparent; }
         
+        /* 💡 갈망 평균 점수 뱃지 스타일 */
+        .craving-avg-badge { position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%); font-size: 0.55rem; font-weight: 800; color: #e74c3c; background: rgba(255,255,255,0.85); border-radius: 4px; padding: 1px 3px; line-height: 1; box-shadow: 0 1px 2px rgba(0,0,0,0.1); white-space: nowrap; pointer-events: none; }
+        
         /* 모드별 범위 하이라이트 색상 (전문적이고 깨끗한 톤) */
-        /* 현재 모드 (파란색) */
         .cal-day.range-curr-single { background-color: var(--primary-color); color: white; border-radius: 8px; box-shadow: 0 2px 6px rgba(52, 152, 219, 0.3); }
         .cal-day.range-curr-start { background-color: var(--primary-color); color: white; border-radius: 8px 0 0 8px; }
         .cal-day.range-curr-mid { background-color: #ebf8ff; color: #2b6cb0; border-radius: 0; }
         .cal-day.range-curr-end { background-color: var(--primary-color); color: white; border-radius: 0 8px 8px 0; }
         
-        /* 누적 모드 (초록색 + 실패시 빨간색 마크) */
         .cal-day.range-acc-single { background-color: var(--success-color); color: white; border-radius: 8px; box-shadow: 0 2px 6px rgba(46, 204, 113, 0.3); }
         .cal-day.range-acc-start { background-color: var(--success-color); color: white; border-radius: 8px 0 0 8px; }
         .cal-day.range-acc-mid { background-color: #f0fff4; color: #276749; border-radius: 0; }
         .cal-day.range-acc-end { background-color: var(--success-color); color: white; border-radius: 0 8px 8px 0; }
         
-        /* 최장 모드 (경고색/골드) */
         .cal-day.range-best-single { background-color: var(--warning-color); color: white; border-radius: 8px; box-shadow: 0 2px 6px rgba(243, 156, 18, 0.3); }
         .cal-day.range-best-start { background-color: var(--warning-color); color: white; border-radius: 8px 0 0 8px; }
         .cal-day.range-best-mid { background-color: #fdf2e9; color: #b9770e; border-radius: 0; }
@@ -195,15 +197,13 @@
         .cal-day.fail-mark::after { content: '❌'; position: absolute; font-size: 0.6rem; top: -4px; right: -4px; background: white; border-radius: 50%; padding: 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
         .cal-day.today-mark { border: 2px solid var(--warning-color); font-weight: 800; color: var(--text-dark); }
         
-        /* 일요일/토요일 색상 연하게 */
         .cal-week div:nth-child(1), .cal-day.sun { color: #e53e3e; }
         .cal-week div:nth-child(7), .cal-day.sat { color: #3182ce; }
-        /* 하이라이트 될 때는 흰색/파란색 유지 */
+        
         .cal-day.range-curr-start.sun, .cal-day.range-curr-single.sun, .cal-day.range-curr-end.sun,
         .cal-day.range-acc-start.sun, .cal-day.range-acc-single.sun, .cal-day.range-acc-end.sun,
         .cal-day.range-best-start.sun, .cal-day.range-best-single.sun, .cal-day.range-best-end.sun { color: white; }
 
-        /* 💡 달력 실패 마크 호버 효과 */
         .cal-day.fail-mark { cursor: pointer; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .cal-day.fail-mark:hover { transform: scale(1.15); z-index: 10; box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3); }
     </style>
@@ -365,7 +365,7 @@
     </div>
 </div>
 
-<!-- 💡 달력에서 실패한 날짜 클릭 시 뜨는 음주량 입력 모달 -->
+<!-- 달력에서 실패한 날짜 클릭 시 뜨는 음주량 입력 모달 -->
 <div id="failAmountModal" class="modal">
     <div class="modal-content">
         <button class="close-btn-top" onclick="closeModal('failAmountModal')">&times;</button>
@@ -379,7 +379,6 @@
     </div>
 </div>
 
-<!-- (기타 모달들은 동일 유지) -->
 <!-- 신체계측 모달 -->
 <div id="bodyInfoModal" class="modal">
     <div class="modal-content">
@@ -544,7 +543,6 @@
     </div>
 </div>
 
-<!-- 💡 모든 고비 기록 리스트 모달 -->
 <div id="allCravingsModal" class="modal">
     <div class="modal-content" style="max-width: 450px;">
         <button class="close-btn-top" onclick="closeModal('allCravingsModal')">&times;</button>
@@ -555,7 +553,6 @@
     </div>
 </div>
 
-<!-- 💡 단주 기록 강제 생성 모달 (음주량 추가) -->
 <div id="createHistoryModal" class="modal">
     <div class="modal-content">
         <button class="close-btn-top" onclick="closeModal('createHistoryModal')">&times;</button>
@@ -590,7 +587,6 @@
     </div>
 </div>
 
-<!-- 사유 및 음주량 수정 모달 -->
 <div id="editReasonModal" class="modal">
     <div class="modal-content">
         <button class="close-btn-top" onclick="closeModal('editReasonModal')">&times;</button>
@@ -657,11 +653,9 @@
     let currentCalDate = new Date();
     let currentCalMode = 'current';
     
-    // 전체 고비 기록 변수 추가
     let allCravingsList = [];
     let cravingsCurrentPage = 0;
 
-    // 💡 달력에서 선택한 실패 기록 ID 저장용
     let targetFailChallengeId = null; 
 
     window.onload = function() {
@@ -809,7 +803,6 @@
         } catch(e) { console.error(e); }
     }
 
-    // 💡 달력에서 실패 마크 클릭 시 모달 열기
     window.openFailAmountModal = function(challengeId, currentAmount) {
         targetFailChallengeId = challengeId;
         const rangeInput = document.getElementById('failAmountRange');
@@ -821,7 +814,6 @@
         openModal('failAmountModal');
     };
 
-    // 💡 슬라이더 바 값 파이어베이스에 저장하고 달력 업데이트
     window.saveFailAmountFromCalendar = async function() {
         if (!userId || !targetFailChallengeId) return;
         const amt = parseInt(document.getElementById('failAmountRange').value);
@@ -891,6 +883,22 @@
         const today = new Date();
         today.setHours(0,0,0,0);
 
+        // 💡 모든 도전 기록에서 갈망(고비) 데이터를 날짜별로 집계
+        const dailyCravings = {};
+        allChallengesData.forEach(ch => {
+            if (ch.cravings && ch.cravings.length > 0) {
+                ch.cravings.forEach(crav => {
+                    if (!['action', 'state', 'eval', 'medication'].includes(crav.type)) {
+                        const cDate = new Date(crav.timestamp);
+                        const dateKey = `${cDate.getFullYear()}-${String(cDate.getMonth()+1).padStart(2,'0')}-${String(cDate.getDate()).padStart(2,'0')}`;
+                        if (!dailyCravings[dateKey]) dailyCravings[dateKey] = { sum: 0, count: 0 };
+                        dailyCravings[dateKey].sum += crav.strength;
+                        dailyCravings[dateKey].count++;
+                    }
+                });
+            }
+        });
+
         for (let day = 1; day <= daysInMonth; day++) {
             const iterDate = new Date(year, month, day);
             iterDate.setHours(0,0,0,0);
@@ -953,7 +961,6 @@
                         else classList.push('range-acc-mid');
                     }
                     
-                    // 💡 클릭 이벤트 및 동적 스타일 할당
                     if (c.status === 'failed' && isEnd) {
                         classList.push('fail-mark');
                         
@@ -961,14 +968,22 @@
                         
                         if (c.failAmount) {
                             const amt = Math.max(1, Math.min(10, c.failAmount));
-                            const hue = 120 - ((amt - 1) / 9) * 120; // 1=120(녹색), 10=0(적색)
+                            const hue = 120 - ((amt - 1) / 9) * 120; 
                             customStyle = `style="background-color: hsl(${hue}, 85%, 45%) !important; color: white !important;"`;
                         }
                     }
                 });
             }
 
-            grid.innerHTML += `<div class="${classList.join(' ')}" ${customStyle} ${onClickEvent}>${day}</div>`;
+            // 💡 갈망 평균 점수 뱃지 생성
+            const iterDateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+            let cravingBadge = '';
+            if (dailyCravings[iterDateStr]) {
+                const avg = Math.round((dailyCravings[iterDateStr].sum / dailyCravings[iterDateStr].count) * 10) / 10;
+                cravingBadge = `<div class="craving-avg-badge">🔥${avg}</div>`;
+            }
+
+            grid.innerHTML += `<div class="${classList.join(' ')}" ${customStyle} ${onClickEvent}>${day}${cravingBadge}</div>`;
         }
     }
     
