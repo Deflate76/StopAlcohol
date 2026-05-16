@@ -1106,7 +1106,7 @@
     };
 
     window.loginWithGoogle = async function() {
-        try { await signInWithPopup(auth, GoogleAuthProvider); } 
+        try { await signInWithPopup(auth, googleProvider); } 
         catch (error) { alert(`로그인 실패!\n에러 메시지: ${error.message}`); }
     };
 
