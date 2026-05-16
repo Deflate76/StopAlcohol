@@ -60,7 +60,7 @@
         /* 타이머 & 차트 */
         .timer-display { margin: 15px 0; padding: 20px; background: #fff5f5; border-radius: 20px; border: 1px solid #ffe3e3; display: flex; flex-direction: column; align-items: center; }
         
-        /* 💡 달력 버튼을 위한 클릭 어포던스 디자인 */
+        /* 달력 버튼을 위한 클릭 어포던스 디자인 */
         .clickable-time-box { display: flex; flex-direction: column; align-items: center; padding: 10px 20px; border-radius: 16px; transition: all 0.2s ease; cursor: pointer; border: 2px solid transparent; text-decoration: none; }
         .clickable-time-box:hover { background-color: rgba(255, 255, 255, 0.8); border-color: #ffcccc; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(231, 76, 60, 0.1); }
         .cal-hint { font-size: 0.75rem; color: var(--danger-color); font-weight: bold; opacity: 0.8; margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
@@ -163,7 +163,7 @@
         
         .med-list-item { background: #f8f9fa; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; text-align: left; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
         
-        /* 💡 달력 모달 전용 깔끔하고 전문적인 UI 스타일 */
+        /* 달력 모달 전용 깔끔하고 전문적인 UI 스타일 */
         .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 0 10px; }
         .cal-btn { background: #f0f2f5; border: none; width: 36px; height: 36px; border-radius: 10px; font-weight: bold; font-size: 1.1rem; color: #4a5568; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
         .cal-btn:hover { background: #e2e8f0; color: var(--primary-color); }
@@ -202,6 +202,10 @@
         .cal-day.range-curr-start.sun, .cal-day.range-curr-single.sun, .cal-day.range-curr-end.sun,
         .cal-day.range-acc-start.sun, .cal-day.range-acc-single.sun, .cal-day.range-acc-end.sun,
         .cal-day.range-best-start.sun, .cal-day.range-best-single.sun, .cal-day.range-best-end.sun { color: white; }
+
+        /* 💡 달력 실패 마크 호버 효과 */
+        .cal-day.fail-mark { cursor: pointer; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .cal-day.fail-mark:hover { transform: scale(1.15); z-index: 10; box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3); }
     </style>
 </head>
 <body>
@@ -335,7 +339,7 @@
     &copy; 2026 Alcoholaway.com All rights reserved.
 </footer>
 
-<!-- 💡 시각적 피드백 캘린더 모달 -->
+<!-- 시각적 피드백 캘린더 모달 -->
 <div id="calendarModal" class="modal">
     <div class="modal-content" style="max-width: 400px; padding: 25px 20px;">
         <button class="close-btn-top" onclick="closeModal('calendarModal')">&times;</button>
@@ -358,6 +362,20 @@
         </div>
         
         <button class="start-btn" style="width: 100%; margin-top: 20px; padding: 12px; font-size: 1rem; background: #e2e8f0; color: #4a5568;" onclick="closeModal('calendarModal')">닫기</button>
+    </div>
+</div>
+
+<!-- 💡 달력에서 실패한 날짜 클릭 시 뜨는 음주량 입력 모달 -->
+<div id="failAmountModal" class="modal">
+    <div class="modal-content">
+        <button class="close-btn-top" onclick="closeModal('failAmountModal')">&times;</button>
+        <h3 style="margin-top:0; padding-right: 20px;">🚨 실패일 음주량 기록</h3>
+        <p style="font-size:0.85rem; color:#666; margin-bottom:15px; word-break:keep-all;">이 날 얼마나 드셨는지 기록해주세요.<br>(1: 비교적 소량 ~ 10: 심각한 폭음)</p>
+        
+        <label style="font-weight:700; font-size:0.9rem;">음주량 (<span id="failAmountVal" style="font-weight: 800;">5</span>/10)</label>
+        <input type="range" id="failAmountRange" min="1" max="10" value="5" class="dynamic-range" oninput="updateRangeStyle(this, 'failAmountVal')">
+        
+        <button class="start-btn" style="margin-top:20px; width:100%; padding: 14px; font-size: 1.1rem; background: linear-gradient(135deg, #e74c3c, #c0392b);" onclick="saveFailAmountFromCalendar()">색상 적용 및 저장</button>
     </div>
 </div>
 
@@ -639,9 +657,12 @@
     let currentCalDate = new Date();
     let currentCalMode = 'current';
     
-    // 💡 전체 고비 기록 변수 추가
+    // 전체 고비 기록 변수 추가
     let allCravingsList = [];
     let cravingsCurrentPage = 0;
+
+    // 💡 달력에서 선택한 실패 기록 ID 저장용
+    let targetFailChallengeId = null; 
 
     window.onload = function() {
         renderChangeCards(currentTabName);
@@ -729,7 +750,7 @@
                     endDate: end,
                     status: data.status,
                     failReason: data.failReason,
-                    failAmount: data.failAmount || null, // 💡 실패 시 음주량 정보 로드
+                    failAmount: data.failAmount || null,
                     cravings: data.cravings || []
                 });
                 
@@ -788,6 +809,39 @@
         } catch(e) { console.error(e); }
     }
 
+    // 💡 달력에서 실패 마크 클릭 시 모달 열기
+    window.openFailAmountModal = function(challengeId, currentAmount) {
+        targetFailChallengeId = challengeId;
+        const rangeInput = document.getElementById('failAmountRange');
+        
+        rangeInput.value = currentAmount || 5; 
+        rangeInput.setAttribute('data-touched', 'true');
+        updateRangeStyle(rangeInput, 'failAmountVal');
+        
+        openModal('failAmountModal');
+    };
+
+    // 💡 슬라이더 바 값 파이어베이스에 저장하고 달력 업데이트
+    window.saveFailAmountFromCalendar = async function() {
+        if (!userId || !targetFailChallengeId) return;
+        const amt = parseInt(document.getElementById('failAmountRange').value);
+        
+        try {
+            const challengeRef = doc(db, "users", userId, "challenges", targetFailChallengeId);
+            await updateDoc(challengeRef, { failAmount: amt });
+            
+            const challenge = allChallengesData.find(c => c.id === targetFailChallengeId);
+            if (challenge) challenge.failAmount = amt;
+            
+            closeModal('failAmountModal');
+            
+            renderCalendar(currentCalDate.getFullYear(), currentCalDate.getMonth(), currentCalMode);
+            loadMotivationalStats(); 
+        } catch (error) {
+            alert("음주량 저장 실패: " + error.message);
+        }
+    };
+
     window.openCalendarModal = function(mode) {
         currentCalMode = mode;
         currentCalDate = new Date();
@@ -813,14 +867,13 @@
                 <div><span style="display:inline-block; width:10px; height:10px; background:var(--warning-color); border-radius:2px;"></span> 최장 금주 구간</div>
             `;
         } else {
-            // 💡 누적모드 범례에서 그라데이션 표시 안내 추가
             legendContainer.innerHTML = `
                 <div><span style="display:inline-block; width:10px; height:10px; background:var(--success-color); border-radius:2px;"></span> 과거 성공구간</div>
                 <div style="display:flex; align-items:center; gap:4px; margin-top: 4px;">
                     <span style="display:inline-block; width:10px; height:10px; background:hsl(120,85%,45%); border:1px solid #ddd; position:relative; border-radius:2px;"><span style="position:absolute; font-size:6px; top:-2px; left:-1px;">❌</span></span>
                     ~
                     <span style="display:inline-block; width:10px; height:10px; background:hsl(0,85%,45%); border:1px solid #ddd; position:relative; border-radius:2px;"><span style="position:absolute; font-size:6px; top:-2px; left:-1px;">❌</span></span>
-                    실패한 날 (음주량 1~10 비례)
+                    실패한 날 (클릭하여 1~10 음주량 기록)
                 </div>
             `;
         }
@@ -852,7 +905,8 @@
                 classList.push('today-mark');
             }
 
-            let customStyle = ""; // 💡 인라인 스타일 삽입용 변수 추가
+            let customStyle = ""; 
+            let onClickEvent = ""; 
 
             if (mode === 'current' && userQuitDate) {
                 const sDate = new Date(userQuitDate); sDate.setHours(0,0,0,0);
@@ -899,10 +953,12 @@
                         else classList.push('range-acc-mid');
                     }
                     
+                    // 💡 클릭 이벤트 및 동적 스타일 할당
                     if (c.status === 'failed' && isEnd) {
                         classList.push('fail-mark');
                         
-                        // 💡 음주량이 존재하면 1~10 척도를 바탕으로 그라데이션 색상(녹색~적색) 적용
+                        onClickEvent = `onclick="openFailAmountModal('${c.id}', ${c.failAmount || 5})"`;
+                        
                         if (c.failAmount) {
                             const amt = Math.max(1, Math.min(10, c.failAmount));
                             const hue = 120 - ((amt - 1) / 9) * 120; // 1=120(녹색), 10=0(적색)
@@ -912,11 +968,10 @@
                 });
             }
 
-            grid.innerHTML += `<div class="${classList.join(' ')}" ${customStyle}>${day}</div>`;
+            grid.innerHTML += `<div class="${classList.join(' ')}" ${customStyle} ${onClickEvent}>${day}</div>`;
         }
     }
     
-    // 💡 전체 고비 기록 모달 및 렌더링 로직 추가
     window.openAllCravingsModal = function() {
         if (!userId) return;
         
@@ -928,7 +983,6 @@
             }
         });
         
-        // 시간순 내림차순 정렬
         allCravingsList.sort((a, b) => b.timestamp - a.timestamp);
         
         cravingsCurrentPage = 0;
@@ -976,7 +1030,6 @@
         renderCravingsList();
     };
     
-    // 💡 단주 기록 강제 생성 로직 (음주량 추가)
     window.openCreateHistoryModal = function() {
         document.getElementById('createStartDateInput').value = '';
         document.getElementById('createEndDateInput').value = '';
@@ -1008,10 +1061,10 @@
             const newChallenge = {
                 startDate: startDate,
                 endDate: endDate,
-                status: "failed", // 강제 생성은 기본적으로 과거 종료된 기록으로 처리
+                status: "failed", 
                 startReason: startReason,
                 failReason: failReason,
-                failAmount: parsedAmount, // 💡 실패 시 음주량 함께 저장
+                failAmount: parsedAmount, 
                 cravings: [],
                 createdAt: new Date().getTime()
             };
@@ -1019,8 +1072,8 @@
             await addDoc(collection(db, "users", userId, "challenges"), newChallenge);
             alert("단주 기록이 성공적으로 추가되었습니다.");
             closeModal('createHistoryModal');
-            openHistoryList(); // 리스트 새로고침
-            loadMotivationalStats(); // 통계 새로고침
+            openHistoryList(); 
+            loadMotivationalStats(); 
         } catch (e) {
             console.error(e);
             alert("기록 추가 실패: " + e.message);
@@ -1047,7 +1100,6 @@
         if (currentChallengeId) {
             if (confirm("정말 현재 단주 도전을 종료하고 음주 조절 모드로 전환하시겠습니까?\n(현재 도전 기록은 '실패'로 저장됩니다.)")) {
                 
-                // 💡 실패 시 음주량 프롬프트 추가
                 let failAmountInput = prompt("음주 조절 모드 진입 전, 실패를 기록할 음주량 정도를 1에서 10 사이의 숫자로 입력해주세요.\n(1: 소량 ~ 10: 폭음)", "5");
                 let parsedAmount = parseInt(failAmountInput);
                 if(isNaN(parsedAmount)) parsedAmount = null;
@@ -1058,7 +1110,7 @@
                         status: 'failed', 
                         endDate: new Date().toISOString(),
                         failReason: '음주 조절 모드로 자발적 전환',
-                        failAmount: parsedAmount // 💡 음주량 저장
+                        failAmount: parsedAmount 
                     });
                     localStorage.removeItem('quitDrinkingDateTime_server');
                     window.location.href = 'control.html';
@@ -1428,7 +1480,6 @@
         }
     };
 
-    // 💡 사유 및 음주량 수정 함수 업데이트
     window.openEditReasonModal = function(event, historyDocId, startReasonEncoded, failReasonEncoded, failAmountStr) {
         event.stopPropagation();
         editingChallengeId = historyDocId;
@@ -1465,7 +1516,7 @@
             alert("정보가 성공적으로 반영되었습니다.");
             closeModal('editReasonModal');
             openHistoryList(); 
-            loadMotivationalStats(); // 색상 갱신을 위해 재로드
+            loadMotivationalStats(); 
         } catch (e) {
             console.error("수정 에러:", e);
             alert("수정 실패: " + e.message);
@@ -1512,7 +1563,6 @@
                 const startReasonHtml = data.startReason ? data.startReason.replace(/\n/g, '<br>') : '';
                 const failReasonHtml = data.failReason ? data.failReason.replace(/\n/g, '<br>') : '';
                 
-                // 💡 실패 시 음주량을 텍스트 정보에 추가
                 const failAmountHtml = data.failAmount ? `<br><b>실패 시 음주량:</b> ${data.failAmount}/10` : '';
 
                 const startReasonText = data.startReason ? `<div style="margin-top:8px; font-size:0.8rem; color:#2c3e50; text-align:left;">🌱 <b>시작 각오:</b><br>${startReasonHtml}</div>` : '';
@@ -1525,7 +1575,6 @@
                     ? `<span class="history-status status-active">도전 중</span>` 
                     : `<span class="history-status status-failed">종료됨</span>`;
                 
-                // 💡 실패 시 음주량 데이터도 수정 모달로 전달
                 const reasonEditBtn = `<button class="action-btn" style="font-size:0.8rem; padding:4px 8px; background-color:#e2e8f0; color:#4a5568; border-radius:6px; font-weight:bold; margin-right: 6px;" onclick="openEditReasonModal(event, '${historyDocId}', '${encStartReason}', '${encFailReason}', '${data.failAmount || ''}')">📝 정보수정</button>`;
 
                 const actionButton = data.status === 'active'
@@ -1612,7 +1661,7 @@
                     status: 'active',
                     endDate: null,      
                     failReason: null,
-                    failAmount: null // 💡 이어하기 시 음주량 기록 지움
+                    failAmount: null 
                 });
 
                 currentChallengeId = historyDocId;
@@ -2059,7 +2108,6 @@
             const totalCumul = totalPastDays + currentDays;
             let currentMax = Math.max(globalMaxDays, currentDays);
 
-            // 💡 캘린더 이모지 삭제 및 점선 언더바 스타일 지정
             document.getElementById('mainDaysContainer').innerHTML = `
                 <div class="cal-hint">👇 클릭하여 달력 보기</div>
                 <div class="clickable-time-box" onclick="openCalendarModal('current')">
@@ -2243,7 +2291,6 @@
         if (confirm("금주 실패를 기록하고, 새롭게 단주에 도전하시겠습니까?\n(과거의 도전 기록은 모두 보존됩니다.)")) {
             const failReason = prompt("다음 도전을 위해 이번 단주 중단(실패) 사유를 기록해 주세요. (선택)") || "";
             
-            // 💡 실패 시 음주량 프롬프트 추가
             let failAmountInput = prompt("음주량(실패 정도)을 1에서 10 사이의 숫자로 입력해주세요.\n(1: 소량 ~ 10: 폭음)", "5");
             let parsedAmount = parseInt(failAmountInput);
             if(isNaN(parsedAmount)) parsedAmount = null;
@@ -2255,7 +2302,7 @@
                         status: 'failed', 
                         endDate: new Date().toISOString(), 
                         failReason: failReason.trim(),
-                        failAmount: parsedAmount // 💡 음주량 저장
+                        failAmount: parsedAmount 
                     });
                 }
                 localStorage.removeItem('quitDrinkingDateTime_server'); currentChallengeId = null; cravingData = []; userQuitDate = null;
