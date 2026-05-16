@@ -340,14 +340,13 @@
     <div class="modal-content" style="max-width: 400px; padding: 25px 20px;">
         <button class="close-btn-top" onclick="closeModal('calendarModal')">&times;</button>
         
-        <!-- 💡 닫기 버튼(X)과 화살표 버튼(>) 겹침 방지를 위해 margin-top 25px 추가 -->
         <div class="cal-header" style="margin-top: 25px;">
             <button class="cal-btn" onclick="changeCalMonth(-1)">&#10094;</button>
             <div class="cal-title" id="calMonthTitle">2026년 5월</div>
             <button class="cal-btn" onclick="changeCalMonth(1)">&#10095;</button>
         </div>
         
-        <div id="calLegendContainer" style="margin-bottom: 15px; font-size: 0.8rem; display: flex; gap: 10px; justify-content: center;">
+        <div id="calLegendContainer" style="margin-bottom: 15px; font-size: 0.8rem; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
             <!-- 모드에 따라 범례 동적 변경 -->
         </div>
 
@@ -477,7 +476,7 @@
             <button class="stat-btn" style="text-align: left; padding: 15px; border-color: #e67e22; color: #2d3748; background: #fff8f0;" onclick="submitAction('단당류 섭취', '알코올 갈망의 상당수는 뇌의 일시적 저혈당 상태(가짜 갈망)에서 비롯됩니다. 초콜릿이나 사탕이 효과적입니다.')"><div style="font-weight: 800; color: #e67e22; margin-bottom: 4px;">🍬 단당류(초콜릿/사탕) 섭취</div><div style="font-size: 0.75rem; font-weight: normal; color: #555;">알코올 갈망을 유발하는 뇌의 '가짜 저혈당' 해소</div></button>
             <button class="stat-btn" style="text-align: left; padding: 15px; border-color: #2ecc71; color: #2d3748; background: #f0fff4;" onclick="submitAction('심호흡 1분', '부교감 신경을 활성화하여 순간적으로 치솟는 코르티솔(스트레스 호르몬)을 억제하고 충동을 가라앉힙니다.')"><div style="font-weight: 800; color: #2ecc71; margin-bottom: 4px;">🧘 1분 심호흡 및 스트레칭</div><div style="font-size: 0.75rem; font-weight: normal; color: #555;">부교감 신경 활성화로 충동 억제력 회복</div></button>
             <button class="stat-btn" style="text-align: left; padding: 15px; border-color: #9b59b6; color: #2d3748; background: #fbf0ff;" onclick="submitAction('가벼운 산책', '신체 활동을 통해 자연스러운 엔돌핀과 도파민 분비시켜, 알코올이 주는 보상을 대체합니다.')"><div style="font-weight: 800; color: #9b59b6; margin-bottom: 4px;">🏃‍♂️ 10분 가벼운 산책/운동</div><div style="font-size: 0.75rem; font-weight: normal; color: #555;">자연스러운 엔돌핀 분비로 보상 회로 대체</div></button>
-            <button class="stat-btn" style="text-align: left; padding: 15px; border-color: #e74c3c; color: #2d3748; background: #fdf0ed;" onclick="submitAction('장소/사람 회피하기', '갈망을 유발하는 강력한 환경적 트리거(술자리, 유혹하는 사람)로부터 물리적으로 벗어납니다.')"><div style="font-weight: 800; color: #e74c3c; margin-bottom: 4px;">🏃 장소 및 사람 회피하기</div><div style="font-size: 0.75rem; font-weight: normal; color: #555;">환경적 트리거로부터 물리적 단절 및 도피</div></button>
+            <button class="stat-btn" style="text-align: left; padding: 15px; border-color: #e74c3c; color: #2d3748; background: #fdf0ed;" onclick="submitAction('장소/사람 회피하기', '갈망을 유발하는 강력한 환경적 트리거(술자리, 유혹하는 파트너)로부터 물리적으로 벗어납니다.')"><div style="font-weight: 800; color: #e74c3c; margin-bottom: 4px;">🏃 장소 및 사람 회피하기</div><div style="font-size: 0.75rem; font-weight: normal; color: #555;">환경적 트리거로부터 물리적 단절 및 도피</div></button>
             <button class="stat-btn" style="text-align: left; padding: 15px; border-color: #7f8c8d; color: #2d3748; background: #f8f9f9;" onclick="submitAction('고비행동 현재불가', '현재 상황상 적극적 대처는 어렵지만, 고비가 왔음을 인지하고 버티는 상태를 기록합니다.')"><div style="font-weight: 800; color: #7f8c8d; margin-bottom: 4px;">⏳ 고비행동 현재불가</div><div style="font-size: 0.75rem; font-weight: normal; color: #555;">적극적 개입은 어렵지만 인지하며 묵묵히 버티기</div></button>
         </div>
     </div>
@@ -538,7 +537,7 @@
     </div>
 </div>
 
-<!-- 💡 단주 기록 강제 생성 모달 -->
+<!-- 💡 단주 기록 강제 생성 모달 (음주량 추가) -->
 <div id="createHistoryModal" class="modal">
     <div class="modal-content">
         <button class="close-btn-top" onclick="closeModal('createHistoryModal')">&times;</button>
@@ -556,6 +555,9 @@
         <label style="font-weight:700; font-size:0.9rem; margin-top:10px; display:block;">중단 사유 (선택)</label>
         <textarea id="createFailReasonInput" rows="2" maxlength="300" placeholder="중단 사유를 입력하세요"></textarea>
         
+        <label style="font-weight:700; font-size:0.9rem; margin-top:10px; display:block;">실패 시 음주량 (1~10, 선택)</label>
+        <input type="number" id="createFailAmountInput" min="1" max="10" class="reason-input" style="margin-bottom: 10px; width:100%;" placeholder="예: 5">
+
         <button class="start-btn" style="width:100%; padding: 14px; font-size: 1.1rem; margin-top: 20px;" onclick="saveManualHistory()">기록 저장</button>
     </div>
 </div>
@@ -570,6 +572,7 @@
     </div>
 </div>
 
+<!-- 사유 및 음주량 수정 모달 -->
 <div id="editReasonModal" class="modal">
     <div class="modal-content">
         <button class="close-btn-top" onclick="closeModal('editReasonModal')">&times;</button>
@@ -578,7 +581,10 @@
         <textarea id="editStartReasonInput" rows="4" maxlength="300" placeholder="이번 도전을 시작하며 다짐했던 각오를 적어주세요."></textarea>
         <label style="font-weight:700; font-size:0.9rem; margin-top:15px; display:block;">🥀 중단 사유 (최대 300자)</label>
         <textarea id="editFailReasonInput" rows="4" maxlength="300" placeholder="도전을 중단하게 된 사유를 적어주세요. (실패한 기록인 경우)"></textarea>
-        <button class="start-btn" style="width:100%; padding: 14px; font-size: 1.1rem; margin-top: 20px;" onclick="saveEditedReasons()">사유 저장</button>
+        <label style="font-weight:700; font-size:0.9rem; margin-top:15px; display:block;">🚨 실패 시 음주량 (1~10)</label>
+        <input type="number" id="editFailAmountInput" min="1" max="10" class="reason-input" style="margin-bottom: 10px; width:100%;" placeholder="예: 5">
+
+        <button class="start-btn" style="width:100%; padding: 14px; font-size: 1.1rem; margin-top: 20px;" onclick="saveEditedReasons()">정보 저장</button>
     </div>
 </div>
 
@@ -723,7 +729,8 @@
                     endDate: end,
                     status: data.status,
                     failReason: data.failReason,
-                    cravings: data.cravings || [] // 💡 고비 데이터 저장 추가
+                    failAmount: data.failAmount || null, // 💡 실패 시 음주량 정보 로드
+                    cravings: data.cravings || []
                 });
                 
                 totalDays += diffDays;
@@ -806,9 +813,15 @@
                 <div><span style="display:inline-block; width:10px; height:10px; background:var(--warning-color); border-radius:2px;"></span> 최장 금주 구간</div>
             `;
         } else {
+            // 💡 누적모드 범례에서 그라데이션 표시 안내 추가
             legendContainer.innerHTML = `
                 <div><span style="display:inline-block; width:10px; height:10px; background:var(--success-color); border-radius:2px;"></span> 과거 성공구간</div>
-                <div><span style="display:inline-block; width:10px; height:10px; background:white; border:1px solid #ddd; position:relative; border-radius:2px;"><span style="position:absolute; font-size:6px; top:-2px; left:-1px;">❌</span></span> 실패한 날</div>
+                <div style="display:flex; align-items:center; gap:4px; margin-top: 4px;">
+                    <span style="display:inline-block; width:10px; height:10px; background:hsl(120,85%,45%); border:1px solid #ddd; position:relative; border-radius:2px;"><span style="position:absolute; font-size:6px; top:-2px; left:-1px;">❌</span></span>
+                    ~
+                    <span style="display:inline-block; width:10px; height:10px; background:hsl(0,85%,45%); border:1px solid #ddd; position:relative; border-radius:2px;"><span style="position:absolute; font-size:6px; top:-2px; left:-1px;">❌</span></span>
+                    실패한 날 (음주량 1~10 비례)
+                </div>
             `;
         }
 
@@ -838,6 +851,8 @@
             if (iterTime === today.getTime()) {
                 classList.push('today-mark');
             }
+
+            let customStyle = ""; // 💡 인라인 스타일 삽입용 변수 추가
 
             if (mode === 'current' && userQuitDate) {
                 const sDate = new Date(userQuitDate); sDate.setHours(0,0,0,0);
@@ -886,11 +901,18 @@
                     
                     if (c.status === 'failed' && isEnd) {
                         classList.push('fail-mark');
+                        
+                        // 💡 음주량이 존재하면 1~10 척도를 바탕으로 그라데이션 색상(녹색~적색) 적용
+                        if (c.failAmount) {
+                            const amt = Math.max(1, Math.min(10, c.failAmount));
+                            const hue = 120 - ((amt - 1) / 9) * 120; // 1=120(녹색), 10=0(적색)
+                            customStyle = `style="background-color: hsl(${hue}, 85%, 45%) !important; color: white !important;"`;
+                        }
                     }
                 });
             }
 
-            grid.innerHTML += `<div class="${classList.join(' ')}">${day}</div>`;
+            grid.innerHTML += `<div class="${classList.join(' ')}" ${customStyle}>${day}</div>`;
         }
     }
     
@@ -954,12 +976,13 @@
         renderCravingsList();
     };
     
-    // 💡 단주 기록 강제 생성 로직
+    // 💡 단주 기록 강제 생성 로직 (음주량 추가)
     window.openCreateHistoryModal = function() {
         document.getElementById('createStartDateInput').value = '';
         document.getElementById('createEndDateInput').value = '';
         document.getElementById('createStartReasonInput').value = '';
         document.getElementById('createFailReasonInput').value = '';
+        document.getElementById('createFailAmountInput').value = '';
         openModal('createHistoryModal');
     };
 
@@ -969,6 +992,7 @@
         const endDate = document.getElementById('createEndDateInput').value;
         const startReason = document.getElementById('createStartReasonInput').value.trim();
         const failReason = document.getElementById('createFailReasonInput').value.trim();
+        const failAmountVal = document.getElementById('createFailAmountInput').value;
 
         if (!startDate) return alert("시작 일시를 입력해 주세요.");
         if (!endDate) return alert("종료 일시를 입력해 주세요. (과거 기록 생성시 필수)");
@@ -977,6 +1001,9 @@
             return alert("종료 일시가 시작 일시보다 빠를 수 없습니다.");
         }
 
+        let parsedAmount = parseInt(failAmountVal);
+        if (isNaN(parsedAmount)) parsedAmount = null;
+
         try {
             const newChallenge = {
                 startDate: startDate,
@@ -984,6 +1011,7 @@
                 status: "failed", // 강제 생성은 기본적으로 과거 종료된 기록으로 처리
                 startReason: startReason,
                 failReason: failReason,
+                failAmount: parsedAmount, // 💡 실패 시 음주량 함께 저장
                 cravings: [],
                 createdAt: new Date().getTime()
             };
@@ -1018,12 +1046,19 @@
         }
         if (currentChallengeId) {
             if (confirm("정말 현재 단주 도전을 종료하고 음주 조절 모드로 전환하시겠습니까?\n(현재 도전 기록은 '실패'로 저장됩니다.)")) {
+                
+                // 💡 실패 시 음주량 프롬프트 추가
+                let failAmountInput = prompt("음주 조절 모드 진입 전, 실패를 기록할 음주량 정도를 1에서 10 사이의 숫자로 입력해주세요.\n(1: 소량 ~ 10: 폭음)", "5");
+                let parsedAmount = parseInt(failAmountInput);
+                if(isNaN(parsedAmount)) parsedAmount = null;
+
                 try {
                     const challengeRef = doc(db, "users", userId, "challenges", currentChallengeId);
                     await updateDoc(challengeRef, { 
                         status: 'failed', 
                         endDate: new Date().toISOString(),
-                        failReason: '음주 조절 모드로 자발적 전환'
+                        failReason: '음주 조절 모드로 자발적 전환',
+                        failAmount: parsedAmount // 💡 음주량 저장
                     });
                     localStorage.removeItem('quitDrinkingDateTime_server');
                     window.location.href = 'control.html';
@@ -1393,7 +1428,8 @@
         }
     };
 
-    window.openEditReasonModal = function(event, historyDocId, startReasonEncoded, failReasonEncoded) {
+    // 💡 사유 및 음주량 수정 함수 업데이트
+    window.openEditReasonModal = function(event, historyDocId, startReasonEncoded, failReasonEncoded, failAmountStr) {
         event.stopPropagation();
         editingChallengeId = historyDocId;
         
@@ -1403,6 +1439,8 @@
         document.getElementById('editStartReasonInput').value = (startReason && startReason !== 'undefined') ? startReason : '';
         document.getElementById('editFailReasonInput').value = (failReason && failReason !== 'undefined') ? failReason : '';
         
+        document.getElementById('editFailAmountInput').value = (failAmountStr && failAmountStr !== 'undefined' && failAmountStr !== 'null') ? failAmountStr : '';
+        
         openModal('editReasonModal');
     };
 
@@ -1411,19 +1449,25 @@
         
         const newStartReason = document.getElementById('editStartReasonInput').value.trim();
         const newFailReason = document.getElementById('editFailReasonInput').value.trim();
+        const newFailAmountVal = document.getElementById('editFailAmountInput').value;
+
+        let parsedAmount = parseInt(newFailAmountVal);
+        if (isNaN(parsedAmount)) parsedAmount = null;
 
         try {
             const challengeRef = doc(db, "users", userId, "challenges", editingChallengeId);
             await updateDoc(challengeRef, {
                 startReason: newStartReason,
-                failReason: newFailReason
+                failReason: newFailReason,
+                failAmount: parsedAmount
             });
 
-            alert("사유가 성공적으로 반영되었습니다.");
+            alert("정보가 성공적으로 반영되었습니다.");
             closeModal('editReasonModal');
             openHistoryList(); 
+            loadMotivationalStats(); // 색상 갱신을 위해 재로드
         } catch (e) {
-            console.error("사유 수정 에러:", e);
+            console.error("수정 에러:", e);
             alert("수정 실패: " + e.message);
         }
     };
@@ -1467,9 +1511,12 @@
 
                 const startReasonHtml = data.startReason ? data.startReason.replace(/\n/g, '<br>') : '';
                 const failReasonHtml = data.failReason ? data.failReason.replace(/\n/g, '<br>') : '';
+                
+                // 💡 실패 시 음주량을 텍스트 정보에 추가
+                const failAmountHtml = data.failAmount ? `<br><b>실패 시 음주량:</b> ${data.failAmount}/10` : '';
 
                 const startReasonText = data.startReason ? `<div style="margin-top:8px; font-size:0.8rem; color:#2c3e50; text-align:left;">🌱 <b>시작 각오:</b><br>${startReasonHtml}</div>` : '';
-                const failReasonText = data.failReason ? `<div style="margin-top:6px; font-size:0.8rem; color:#e74c3c; text-align:left;">🥀 <b>중단 사유:</b><br>${failReasonHtml}</div>` : '';
+                const failReasonText = (data.failReason || data.failAmount) ? `<div style="margin-top:6px; font-size:0.8rem; color:#e74c3c; text-align:left;">🥀 <b>중단 사유:</b><br>${failReasonHtml}${failAmountHtml}</div>` : '';
 
                 const encStartReason = encodeURIComponent(data.startReason || '');
                 const encFailReason = encodeURIComponent(data.failReason || '');
@@ -1478,7 +1525,8 @@
                     ? `<span class="history-status status-active">도전 중</span>` 
                     : `<span class="history-status status-failed">종료됨</span>`;
                 
-                const reasonEditBtn = `<button class="action-btn" style="font-size:0.8rem; padding:4px 8px; background-color:#e2e8f0; color:#4a5568; border-radius:6px; font-weight:bold; margin-right: 6px;" onclick="openEditReasonModal(event, '${historyDocId}', '${encStartReason}', '${encFailReason}')">📝 사유수정</button>`;
+                // 💡 실패 시 음주량 데이터도 수정 모달로 전달
+                const reasonEditBtn = `<button class="action-btn" style="font-size:0.8rem; padding:4px 8px; background-color:#e2e8f0; color:#4a5568; border-radius:6px; font-weight:bold; margin-right: 6px;" onclick="openEditReasonModal(event, '${historyDocId}', '${encStartReason}', '${encFailReason}', '${data.failAmount || ''}')">📝 정보수정</button>`;
 
                 const actionButton = data.status === 'active'
                     ? `<button class="action-btn" style="font-size:0.8rem; padding:4px 8px; background-color:#e2e8f0; color:#4a5568; border-radius:6px; font-weight:bold;" onclick="openEditTimeModal(event, '${historyDocId}', '${data.startDate}')">⚙️ 시간수정</button>`
@@ -1563,7 +1611,8 @@
                 await updateDoc(targetRef, {
                     status: 'active',
                     endDate: null,      
-                    failReason: null    
+                    failReason: null,
+                    failAmount: null // 💡 이어하기 시 음주량 기록 지움
                 });
 
                 currentChallengeId = historyDocId;
@@ -1604,10 +1653,11 @@
         
         const startReasonHtml = data.startReason ? data.startReason.replace(/\n/g, '<br>') : '';
         const failReasonHtml = data.failReason ? data.failReason.replace(/\n/g, '<br>') : '';
+        const failAmountHtml = data.failAmount ? `<br><b>실패 시 음주량:</b> ${data.failAmount}/10` : '';
 
         let summaryHtml = `총 <b>${cravCount}번</b>의 고비가 있었습니다.`;
         if (data.startReason) summaryHtml += `<br><div style="color:#2c3e50; font-size:0.8rem; margin-top:6px;">🌱 시작 각오:<br>${startReasonHtml}</div>`;
-        if (data.failReason) summaryHtml += `<br><div style="color:#e74c3c; font-size:0.8rem; margin-top:6px;">🥀 중단 사유:<br>${failReasonHtml}</div>`;
+        if (data.failReason || data.failAmount) summaryHtml += `<br><div style="color:#e74c3c; font-size:0.8rem; margin-top:6px;">🥀 중단 사유:<br>${failReasonHtml}${failAmountHtml}</div>`;
         document.getElementById('historyDetailSummary').innerHTML = summaryHtml;
 
         setTimeout(() => {
@@ -2192,10 +2242,21 @@
     window.resetDate = async function() {
         if (confirm("금주 실패를 기록하고, 새롭게 단주에 도전하시겠습니까?\n(과거의 도전 기록은 모두 보존됩니다.)")) {
             const failReason = prompt("다음 도전을 위해 이번 단주 중단(실패) 사유를 기록해 주세요. (선택)") || "";
+            
+            // 💡 실패 시 음주량 프롬프트 추가
+            let failAmountInput = prompt("음주량(실패 정도)을 1에서 10 사이의 숫자로 입력해주세요.\n(1: 소량 ~ 10: 폭음)", "5");
+            let parsedAmount = parseInt(failAmountInput);
+            if(isNaN(parsedAmount)) parsedAmount = null;
+
             try { 
                 if (userId && currentChallengeId) {
                     const challengeRef = doc(db, "users", userId, "challenges", currentChallengeId);
-                    await updateDoc(challengeRef, { status: 'failed', endDate: new Date().toISOString(), failReason: failReason.trim() });
+                    await updateDoc(challengeRef, { 
+                        status: 'failed', 
+                        endDate: new Date().toISOString(), 
+                        failReason: failReason.trim(),
+                        failAmount: parsedAmount // 💡 음주량 저장
+                    });
                 }
                 localStorage.removeItem('quitDrinkingDateTime_server'); currentChallengeId = null; cravingData = []; userQuitDate = null;
                 document.getElementById('setupArea').style.display = 'flex'; document.getElementById('displayArea').style.display = 'none';
