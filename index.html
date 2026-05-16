@@ -171,12 +171,12 @@
         .cal-week { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 0.8rem; font-weight: bold; color: #a0aec0; margin-bottom: 10px; }
         .cal-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
         
-        /* 뱃지가 하단에 위치할 수 있도록 여백 추가 및 position 설정 */
+        /* 💡 Z-index와 구조 수정을 통한 뱃지 표시 강화 */
         .cal-day { padding: 8px 0 18px 0; font-size: 0.9rem; font-weight: 600; color: #4a5568; border-radius: 8px; position: relative; z-index: 1; transition: background-color 0.2s; }
         .cal-day.empty { background: transparent; }
         
-        /* 💡 기본 갈망 평균 점수 뱃지 스타일 */
-        .craving-avg-badge { position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%); font-size: 0.55rem; font-weight: 800; color: #e74c3c; background: rgba(255,255,255,0.9); border-radius: 4px; padding: 1px 4px; line-height: 1.2; box-shadow: 0 1px 3px rgba(0,0,0,0.15); white-space: nowrap; pointer-events: none; }
+        /* 💡 기본 갈망 평균 점수 뱃지 스타일 (Z-index와 box-shadow 강화) */
+        .craving-avg-badge { position: absolute; bottom: -4px; left: 50%; transform: translateX(-50%); font-size: 0.6rem; font-weight: 800; color: #e74c3c; background: rgba(255,255,255,0.95); border-radius: 4px; padding: 1px 4px; line-height: 1.2; box-shadow: 0 2px 6px rgba(0,0,0,0.25); white-space: nowrap; pointer-events: none; z-index: 20; }
         
         /* 모드별 범위 하이라이트 색상 (전문적이고 깨끗한 톤) */
         .cal-day.range-curr-single { background-color: var(--primary-color); color: white; border-radius: 8px; box-shadow: 0 2px 6px rgba(52, 152, 219, 0.3); }
@@ -194,7 +194,8 @@
         .cal-day.range-best-mid { background-color: #fdf2e9; color: #b9770e; border-radius: 0; }
         .cal-day.range-best-end { background-color: var(--warning-color); color: white; border-radius: 0 8px 8px 0; }
 
-        .cal-day.fail-mark::after { content: '❌'; position: absolute; font-size: 0.6rem; top: -4px; right: -4px; background: white; border-radius: 50%; padding: 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        /* 💡 뱃지를 덮지 않도록 z-index 및 pointer-events 수정 */
+        .cal-day.fail-mark::after { content: '❌'; position: absolute; font-size: 0.6rem; top: -4px; right: -4px; background: white; border-radius: 50%; padding: 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); z-index: 15; pointer-events: none; }
         .cal-day.today-mark { border: 2px solid var(--warning-color); font-weight: 800; color: var(--text-dark); }
         
         .cal-week div:nth-child(1), .cal-day.sun { color: #e53e3e; }
@@ -205,7 +206,7 @@
         .cal-day.range-best-start.sun, .cal-day.range-best-single.sun, .cal-day.range-best-end.sun { color: white; }
 
         .cal-day.fail-mark { cursor: pointer; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .cal-day.fail-mark:hover { transform: scale(1.15); z-index: 10; box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3); }
+        .cal-day.fail-mark:hover { transform: scale(1.15); z-index: 25; box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3); }
     </style>
 </head>
 <body>
@@ -238,7 +239,9 @@
         
         <button class="craving-btn" style="background-color: #9b59b6; margin-top: 15px; width: 100%; max-width: 320px; margin-left: auto; margin-right: auto; box-sizing: border-box; font-size: 0.95rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" onclick="goToControlMode()">🍷 단주 대신... 음주 조절 모드로 진입</button>
         
-        <button class="stat-btn" style="margin-top:15px; border-color:var(--primary-color); color:var(--primary-color); width: 100%; max-width: 320px; margin-left: auto; margin-right: auto; box-sizing: border-box;" onclick="openHistoryList()">📚 나의 과거 기록 보기</button>
+        <button class="stat-btn" style="margin-top:15px; border-color:var(--primary-color); color:var(--primary-color); width: 100%; max-width: 320px; margin-left: auto; margin-right: auto; box-sizing: border-box;" onclick="openHistoryList()">📚 나의 과거 단주 기록 보기</button>
+        
+        <button class="stat-btn" style="margin-top:10px; border-color:#9b59b6; color:#9b59b6; width: 100%; max-width: 320px; margin-left: auto; margin-right: auto; box-sizing: border-box;" onclick="openControlHistoryList()">🍷 나의 음주 조절 기록 보기</button>
     </div>
 
     <div id="displayArea" style="display: none;">
@@ -290,8 +293,10 @@
                 <button class="stat-btn" style="width:100%; padding:10px 5px;" onclick="openStats()">📈 고비(<span id="cravingCount">0</span>)</button>
                 <button class="stat-btn" style="width:100%; padding:10px 5px; border-color: #3498db; color: #3498db;" onclick="openStateStats()">📊 몸상태 추이</button>
                 <button class="stat-btn" style="width:100%; padding:10px 5px; border-color: #8e44ad; color: #8e44ad;" onclick="openMedListModal()">💊 복용 내역</button>
-                <button class="stat-btn" style="width:100%; padding:10px 5px; border-color: #718096; color: #718096;" onclick="openHistoryList()">📚 과거 기록</button>
+                <button class="stat-btn" style="width:100%; padding:10px 5px; border-color: #718096; color: #718096;" onclick="openHistoryList()">📚 단주 기록</button>
             </div>
+            
+            <button class="stat-btn" style="width:100%; margin-top:8px; padding:10px 5px; border-color: #9b59b6; color: #9b59b6;" onclick="openControlHistoryList()">🍷 나의 음주 조절 기록 보기</button>
         </div>
 
         <div class="chart-container">
@@ -522,6 +527,7 @@
     </div>
 </div>
 
+<!-- 단주 기록 리스트 모달 -->
 <div id="historyListModal" class="modal">
     <div class="modal-content" style="max-width: 500px;">
         <button class="close-btn-top" onclick="closeModal('historyListModal')">&times;</button>
@@ -530,6 +536,17 @@
             <button class="action-btn" style="background:var(--success-color); color:white; padding:6px 10px; border-radius:8px; font-weight:bold; font-size:0.8rem;" onclick="openCreateHistoryModal()">+ 기록 강제 생성</button>
         </div>
         <div id="historyListContainer" style="margin-top: 10px; max-height: 60vh; overflow-y: auto;"></div>
+    </div>
+</div>
+
+<!-- 음주 조절 기록 리스트 모달 (새로 추가됨) -->
+<div id="controlHistoryListModal" class="modal">
+    <div class="modal-content" style="max-width: 500px;">
+        <button class="close-btn-top" onclick="closeModal('controlHistoryListModal')">&times;</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding-right: 20px;">
+            <h3 style="margin:0;">🍷 나의 음주 조절 기록</h3>
+        </div>
+        <div id="controlHistoryListContainer" style="margin-top: 10px; max-height: 60vh; overflow-y: auto;"></div>
     </div>
 </div>
 
@@ -886,17 +903,26 @@
         const today = new Date();
         today.setHours(0,0,0,0);
 
-        // 모든 도전 기록에서 갈망(고비) 데이터를 날짜별로 집계
+        // 💡 모든 도전 기록에서 갈망(고비) 데이터를 날짜별로 집계 - 타임스탬프 누락 대비 예외처리 강화
         const dailyCravings = {};
         allChallengesData.forEach(ch => {
             if (ch.cravings && ch.cravings.length > 0) {
                 ch.cravings.forEach(crav => {
                     if (!['action', 'state', 'eval', 'medication'].includes(crav.type)) {
-                        const cDate = new Date(crav.timestamp);
-                        const dateKey = `${cDate.getFullYear()}-${String(cDate.getMonth()+1).padStart(2,'0')}-${String(cDate.getDate()).padStart(2,'0')}`;
-                        if (!dailyCravings[dateKey]) dailyCravings[dateKey] = { sum: 0, count: 0 };
-                        dailyCravings[dateKey].sum += crav.strength;
-                        dailyCravings[dateKey].count++;
+                        let cDate;
+                        if (crav.timestamp) {
+                            cDate = new Date(crav.timestamp);
+                        } else if (crav.date) {
+                            // 과거 데이터 호환용
+                            cDate = new Date(); 
+                        }
+                        
+                        if (cDate && !isNaN(cDate)) {
+                            const dateKey = `${cDate.getFullYear()}-${String(cDate.getMonth()+1).padStart(2,'0')}-${String(cDate.getDate()).padStart(2,'0')}`;
+                            if (!dailyCravings[dateKey]) dailyCravings[dateKey] = { sum: 0, count: 0 };
+                            dailyCravings[dateKey].sum += crav.strength;
+                            dailyCravings[dateKey].count++;
+                        }
                     }
                 });
             }
@@ -965,7 +991,7 @@
                     }
                     
                     if (c.status === 'failed' && isEnd) {
-                        classList.push('fail-mark');
+                        if (!classList.includes('fail-mark')) classList.push('fail-mark');
                         
                         onClickEvent = `onclick="openFailAmountModal('${c.id}', ${c.failAmount || 5})"`;
                         
@@ -978,7 +1004,7 @@
                 });
             }
 
-            // 💡 갈망 평균 점수 뱃지 렌더링 및 동적 스타일 할당
+            // 💡 갈망 평균 점수 뱃지 렌더링 및 동적 스타일 할당 (!important를 사용하여 무조건 보이게 처리)
             const iterDateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
             let cravingBadge = '';
             if (dailyCravings[iterDateStr]) {
@@ -987,7 +1013,7 @@
                 // 실패한 날(fail-mark)이면서 음주량이 높아 붉은 계열 배경일 때를 대비한 노란색 뱃지 스타일
                 let badgeStyle = "";
                 if (classList.includes('fail-mark')) {
-                    badgeStyle = "background: #f1c40f; color: #2c3e50; text-shadow: none; border: 1px solid #d4ac0d;";
+                    badgeStyle = "background-color: #f1c40f !important; color: #2c3e50 !important; text-shadow: none !important; border: 1px solid #d4ac0d !important; z-index: 20 !important;";
                 }
                 
                 cravingBadge = `<div class="craving-avg-badge" style="${badgeStyle}">🔥${avg}</div>`;
@@ -1117,6 +1143,7 @@
         } catch (error) { alert("로그아웃 실패"); }
     };
 
+    // 💡 음주량 입력 프롬프트 제거 반영
     window.goToControlMode = async function() {
         if (!userId) {
             alert("음주 조절 모드를 사용하려면 로그인이 필요합니다.");
@@ -1124,18 +1151,12 @@
         }
         if (currentChallengeId) {
             if (confirm("정말 현재 단주 도전을 종료하고 음주 조절 모드로 전환하시겠습니까?\n(현재 도전 기록은 '실패'로 저장됩니다.)")) {
-                
-                let failAmountInput = prompt("음주 조절 모드 진입 전, 실패를 기록할 음주량 정도를 1에서 10 사이의 숫자로 입력해주세요.\n(1: 소량 ~ 10: 폭음)", "5");
-                let parsedAmount = parseInt(failAmountInput);
-                if(isNaN(parsedAmount)) parsedAmount = null;
-
                 try {
                     const challengeRef = doc(db, "users", userId, "challenges", currentChallengeId);
                     await updateDoc(challengeRef, { 
                         status: 'failed', 
                         endDate: new Date().toISOString(),
-                        failReason: '음주 조절 모드로 자발적 전환',
-                        failAmount: parsedAmount 
+                        failReason: '음주 조절 모드로 자발적 전환'
                     });
                     localStorage.removeItem('quitDrinkingDateTime_server');
                     window.location.href = 'control.html';
@@ -1548,10 +1569,74 @@
         }
     };
 
+    // 💡 추가된 음주 조절 기록 리스트 모달 오픈 함수
+    window.openControlHistoryList = async function() {
+        if (!userId) return alert("로그인이 필요합니다.");
+        
+        closeModal('historyListModal'); // 단주 기록 모달이 열려있다면 닫기
+        openModal('controlHistoryListModal');
+        
+        const container = document.getElementById('controlHistoryListContainer');
+        container.innerHTML = '<div style="text-align:center; padding:20px;">기록을 불러오는 중입니다...</div>';
+
+        try {
+            // control.html에서는 'drinking_sessions' 콜렉션을 사용
+            const q = query(collection(db, "drinking_sessions"), where("userId", "==", userId), orderBy("startTime", "desc"));
+            const snapshot = await getDocs(q);
+            
+            if (snapshot.empty) {
+                container.innerHTML = '<div style="text-align:center; padding:20px; color:#666;">아직 생성된 음주 조절 기록이 없습니다.</div>';
+                return;
+            }
+
+            container.innerHTML = '';
+            const docs = snapshot.docs;
+
+            for (let i = 0; i < docs.length; i++) {
+                const data = docs[i].data();
+                
+                const startStr = data.startTime ? new Date(data.startTime).toLocaleDateString('ko-KR', {
+                    year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
+                }) : '시작일 미상';
+                
+                const statusBadge = data.isFinished 
+                    ? `<span class="history-status status-failed" style="background:#f0f2f5; color:#718096;">종료됨</span>`
+                    : `<span class="history-status status-active">진행 중(중단됨)</span>`;
+                
+                const currentDrinks = data.drinksList ? data.drinksList.length : 0;
+                const maxBac = data.maxBac || 0;
+                const totalGrams = data.totalAlcoholGrams || 0;
+
+                const drinkInfo = `
+                    <div style="font-size:0.85rem; color:#4a5568; margin-top:6px; line-height: 1.5;">
+                        • 총 음주량: <b>${currentDrinks}</b>잔<br>
+                        • 섭취 알코올: <b>${totalGrams.toFixed(1)}</b>g<br>
+                        • 최고 도달 농도(BAC): <b style="color:var(--danger-color);">${maxBac.toFixed(3)}%</b>
+                    </div>
+                `;
+
+                const itemHtml = `
+                    <div class="history-item">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <strong style="color:var(--text-dark); font-size:0.9rem;">${startStr}</strong>
+                            ${statusBadge}
+                        </div>
+                        ${drinkInfo}
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', itemHtml);
+            }
+        } catch (e) {
+            container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--danger-color);">기록을 불러오는데 실패했습니다.</div>';
+            console.error(e);
+        }
+    };
+
     window.openHistoryList = async function() {
         if (!userId) return alert("로그인이 필요합니다.");
         
         closeModal('historyDetailModal');
+        closeModal('controlHistoryListModal'); // 음주 조절 기록 모달이 열려있다면 닫기
         openModal('historyListModal');
         
         const container = document.getElementById('historyListContainer');
