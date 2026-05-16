@@ -171,12 +171,12 @@
         .cal-week { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 0.8rem; font-weight: bold; color: #a0aec0; margin-bottom: 10px; }
         .cal-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
         
-        /* 💡 뱃지가 하단에 위치할 수 있도록 여백 추가 및 position 설정 */
+        /* 뱃지가 하단에 위치할 수 있도록 여백 추가 및 position 설정 */
         .cal-day { padding: 8px 0 18px 0; font-size: 0.9rem; font-weight: 600; color: #4a5568; border-radius: 8px; position: relative; z-index: 1; transition: background-color 0.2s; }
         .cal-day.empty { background: transparent; }
         
-        /* 💡 갈망 평균 점수 뱃지 스타일 */
-        .craving-avg-badge { position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%); font-size: 0.55rem; font-weight: 800; color: #e74c3c; background: rgba(255,255,255,0.85); border-radius: 4px; padding: 1px 3px; line-height: 1; box-shadow: 0 1px 2px rgba(0,0,0,0.1); white-space: nowrap; pointer-events: none; }
+        /* 💡 기본 갈망 평균 점수 뱃지 스타일 */
+        .craving-avg-badge { position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%); font-size: 0.55rem; font-weight: 800; color: #e74c3c; background: rgba(255,255,255,0.9); border-radius: 4px; padding: 1px 4px; line-height: 1.2; box-shadow: 0 1px 3px rgba(0,0,0,0.15); white-space: nowrap; pointer-events: none; }
         
         /* 모드별 범위 하이라이트 색상 (전문적이고 깨끗한 톤) */
         .cal-day.range-curr-single { background-color: var(--primary-color); color: white; border-radius: 8px; box-shadow: 0 2px 6px rgba(52, 152, 219, 0.3); }
@@ -543,6 +543,7 @@
     </div>
 </div>
 
+<!-- 모든 고비 기록 리스트 모달 -->
 <div id="allCravingsModal" class="modal">
     <div class="modal-content" style="max-width: 450px;">
         <button class="close-btn-top" onclick="closeModal('allCravingsModal')">&times;</button>
@@ -553,6 +554,7 @@
     </div>
 </div>
 
+<!-- 단주 기록 강제 생성 모달 -->
 <div id="createHistoryModal" class="modal">
     <div class="modal-content">
         <button class="close-btn-top" onclick="closeModal('createHistoryModal')">&times;</button>
@@ -587,6 +589,7 @@
     </div>
 </div>
 
+<!-- 사유 및 음주량 수정 모달 -->
 <div id="editReasonModal" class="modal">
     <div class="modal-content">
         <button class="close-btn-top" onclick="closeModal('editReasonModal')">&times;</button>
@@ -883,7 +886,7 @@
         const today = new Date();
         today.setHours(0,0,0,0);
 
-        // 💡 모든 도전 기록에서 갈망(고비) 데이터를 날짜별로 집계
+        // 모든 도전 기록에서 갈망(고비) 데이터를 날짜별로 집계
         const dailyCravings = {};
         allChallengesData.forEach(ch => {
             if (ch.cravings && ch.cravings.length > 0) {
@@ -975,12 +978,19 @@
                 });
             }
 
-            // 💡 갈망 평균 점수 뱃지 생성
+            // 💡 갈망 평균 점수 뱃지 렌더링 및 동적 스타일 할당
             const iterDateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
             let cravingBadge = '';
             if (dailyCravings[iterDateStr]) {
                 const avg = Math.round((dailyCravings[iterDateStr].sum / dailyCravings[iterDateStr].count) * 10) / 10;
-                cravingBadge = `<div class="craving-avg-badge">🔥${avg}</div>`;
+                
+                // 실패한 날(fail-mark)이면서 음주량이 높아 붉은 계열 배경일 때를 대비한 노란색 뱃지 스타일
+                let badgeStyle = "";
+                if (classList.includes('fail-mark')) {
+                    badgeStyle = "background: #f1c40f; color: #2c3e50; text-shadow: none; border: 1px solid #d4ac0d;";
+                }
+                
+                cravingBadge = `<div class="craving-avg-badge" style="${badgeStyle}">🔥${avg}</div>`;
             }
 
             grid.innerHTML += `<div class="${classList.join(' ')}" ${customStyle} ${onClickEvent}>${day}${cravingBadge}</div>`;
@@ -1096,7 +1106,7 @@
     };
 
     window.loginWithGoogle = async function() {
-        try { await signInWithPopup(auth, googleProvider); } 
+        try { await signInWithPopup(auth, GoogleAuthProvider); } 
         catch (error) { alert(`로그인 실패!\n에러 메시지: ${error.message}`); }
     };
 
