@@ -285,7 +285,10 @@
     
     <div id="setupArea">
         <div class="header-bar" style="width: 100%;">
-            <span class="user-display-name"></span>
+            <div style="display: flex; flex-direction: column; align-items: flex-start; text-align: left;">
+                <span class="user-display-name" style="font-weight: 800; color: var(--primary-color); cursor: pointer; text-decoration: underline; text-underline-offset: 3px;" onclick="openNicknameModal()" title="별명 수정하기"></span>
+                <span class="visit-stats" style="font-size: 0.75rem; color: #718096; margin-top: 2px;"></span>
+            </div>
             <button class="logout-btn" onclick="logout()">로그아웃</button>
         </div>
 
@@ -307,7 +310,10 @@
 
     <div id="displayArea" style="display: none;">
         <div class="header-bar">
-            <span class="user-display-name" style="font-weight: 700; color: var(--primary-color);"></span>
+            <div style="display: flex; flex-direction: column; align-items: flex-start; text-align: left;">
+                <span class="user-display-name" style="font-weight: 800; color: var(--primary-color); cursor: pointer; text-decoration: underline; text-underline-offset: 3px;" onclick="openNicknameModal()" title="별명 수정하기"></span>
+                <span class="visit-stats" style="font-size: 0.75rem; color: #718096; margin-top: 2px;"></span>
+            </div>
             <button class="logout-btn" onclick="logout()">로그아웃</button>
         </div>
 
@@ -394,8 +400,8 @@
                 <div class="rank-info">
                     <div class="rank-item">현재 1,000명 중 <span class="rank-number" id="survivors">1,000</span>명 생존</div>
                     <div class="rank-item">나의 현재 순위 : <span class="rank-number" id="myRank">1</span>위 <span id="rankChange" style="font-size: 0.95rem; font-weight: 800; margin-left: 8px;"></span></div>
-                    <!-- 모바일에서 두 줄로 떨어지게 수정된 최고 순위 표시 영역 -->
-                    <div class="rank-item" style="font-size: 0.85rem; color: #666; margin-top: 4px; flex-direction: column; gap: 2px;">
+                    <!-- 모바일 최적화: 두 줄 가운데 정렬 -->
+                    <div class="rank-item" style="font-size: 0.85rem; color: #666; margin-top: 4px; flex-direction: column; gap: 2px; align-items: center; text-align: center;">
                         <div>(나의 최고 순위: <span id="myBestRank">-</span>위)</div>
                         <div id="myBestRankDate"></div>
                     </div>
@@ -444,6 +450,19 @@
     &copy; 2026 Alcoholaway.com All rights reserved.
 </footer>
 
+<!-- 닉네임 설정 모달 -->
+<div id="nicknameModal" class="modal" style="z-index: 3000;">
+    <div class="modal-content">
+        <button id="nicknameCloseBtn" class="close-btn-top" onclick="closeModal('nicknameModal')">&times;</button>
+        <h3 style="margin-top:0; margin-bottom: 12px; padding-right: 20px;">👤 별명 설정</h3>
+        <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px; word-break: keep-all;">커뮤니티와 리포트에서 사용할 나만의 멋진 별명을 입력해주세요.</p>
+        <label style="font-weight:700; font-size:0.9rem;">별명</label>
+        <input type="text" id="nicknameInput" placeholder="예: 불굴의 생존자" maxlength="15">
+        <button class="start-btn" style="width:100%; padding: 14px; font-size: 1.1rem; margin-top: 20px;" onclick="saveNickname()">저장하고 시작하기</button>
+    </div>
+</div>
+
+<!-- (기존 모달 유지) -->
 <!-- 🚨 요주의 날 기록 모달 -->
 <div id="cautionDayModal" class="modal">
     <div class="modal-content">
@@ -792,7 +811,7 @@
     const googleProvider = new GoogleAuthProvider();
 
     let userId = null; 
-    let userProfile = { gender: 'male', weight: 70, height: 170 };
+    let userProfile = { gender: 'male', weight: 70, height: 170, nickname: '', totalVisits: 0, todayVisits: 0 };
     let cautionDays = []; 
     let isCautionAlertOpen = false;
 
@@ -832,20 +851,90 @@
         document.getElementById('dateTimeInput').value = now.toISOString().slice(0, 16);
     };
 
+    window.updateGreetingUI = function() {
+        const greetingTexts = document.querySelectorAll('.user-display-name');
+        const visitStats = document.querySelectorAll('.visit-stats');
+
+        const nameStr = userProfile.nickname || "도전자";
+        greetingTexts.forEach(el => el.innerText = `${nameStr}님 환영합니다! ✏️`);
+
+        if (userProfile.totalVisits > 0) {
+            visitStats.forEach(el => {
+                el.innerText = `(오늘 ${userProfile.todayVisits}번째, 전체 ${userProfile.totalVisits}번째 방문)`;
+            });
+        }
+    };
+
+    window.openNicknameModal = function(forced = false) {
+        document.getElementById('nicknameInput').value = userProfile.nickname || '';
+        document.getElementById('nicknameCloseBtn').style.display = forced ? 'none' : 'block';
+        openModal('nicknameModal');
+    };
+
+    window.saveNickname = async function() {
+        const val = document.getElementById('nicknameInput').value.trim();
+        if (!val) return alert("별명을 입력해 주세요.");
+        if (!userId) return;
+
+        try {
+            await setDoc(doc(db, "users", userId), { nickname: val }, { merge: true });
+            userProfile.nickname = val;
+            updateGreetingUI();
+            closeModal('nicknameModal');
+        } catch (e) {
+            alert("별명 저장 실패: " + e.message);
+        }
+    };
+
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             userId = user.uid;
             document.getElementById('loginArea').style.display = 'none';
-            document.querySelectorAll('.user-display-name').forEach(el => {
-                el.innerText = `${user.displayName || '도전자'}님 환영합니다!`;
-            });
             
             try {
                 const userDoc = await getDoc(doc(db, "users", userId));
-                if (userDoc.exists()) {
-                    if (userDoc.data().weight) userProfile = { ...userProfile, ...userDoc.data() };
-                    if (userDoc.data().cautionDays) cautionDays = userDoc.data().cautionDays;
+                let userData = userDoc.exists() ? userDoc.data() : {};
+
+                if (userData.weight) userProfile = { ...userProfile, ...userData };
+                if (userData.cautionDays) cautionDays = userData.cautionDays;
+
+                // 방문 횟수 로직
+                let totalVisits = userData.totalVisits || 0;
+                let todayVisits = userData.todayVisits || 0;
+                let lastVisitDate = userData.lastVisitDate || "";
+
+                const isNewSession = !sessionStorage.getItem('session_visited');
+                const now = new Date();
+                const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+
+                if (isNewSession) {
+                    totalVisits++;
+                    if (lastVisitDate === todayStr) {
+                        todayVisits++;
+                    } else {
+                        todayVisits = 1;
+                        lastVisitDate = todayStr;
+                    }
+                    sessionStorage.setItem('session_visited', 'true');
+                    
+                    await setDoc(doc(db, "users", userId), {
+                        totalVisits, todayVisits, lastVisitDate
+                    }, { merge: true });
                 }
+
+                userProfile.totalVisits = totalVisits;
+                userProfile.todayVisits = todayVisits;
+
+                // 닉네임 로직
+                let nickname = userData.nickname || "";
+                if (!nickname) {
+                    userProfile.nickname = user.displayName || ""; 
+                    openNicknameModal(true);
+                } else {
+                    userProfile.nickname = nickname;
+                }
+
+                updateGreetingUI();
 
                 const q = query(collection(db, "users", userId, "challenges"), where("status", "==", "active"));
                 const snapshot = await getDocs(q);
@@ -873,6 +962,7 @@
             userQuitDate = null;
             currentChallengeId = null;
             cautionDays = [];
+            userProfile.nickname = '';
             if (timerInterval) clearInterval(timerInterval);
             document.getElementById('loginArea').style.display = 'flex';
             document.getElementById('setupArea').style.display = 'none';
@@ -1587,7 +1677,7 @@
         try {
             await addDoc(collection(db, "posts"), {
                 uid: userId,
-                author: auth.currentUser.displayName || "익명의 생존자",
+                author: userProfile.nickname || auth.currentUser.displayName || "익명의 생존자",
                 authorQuitDate: userQuitDate || null,
                 content: content,
                 createdAt: new Date().getTime(),
@@ -1707,7 +1797,7 @@
 
         const newComment = {
             uid: userId,
-            author: auth.currentUser.displayName || "익명의 생존자",
+            author: userProfile.nickname || auth.currentUser.displayName || "익명의 생존자",
             authorQuitDate: userQuitDate || null,
             text: text,
             createdAt: new Date().getTime()
@@ -2176,7 +2266,7 @@
                     y: { 
                         display: true, 
                         beginAtZero: true,
-                        title: { display:true, text:'상대 밀도', font:{size:10} },
+                        title: { display:true, text:'생존자 분포 밀도', font:{size:10} },
                         ticks: { display: false },
                         border: { display: true },
                         afterFit: function(scale) { scale.width = 55; }
