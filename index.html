@@ -501,6 +501,7 @@
     </div>
 </div>
 
+<!-- 몸상태 기록 모달 (브레인포그 포함, 마진 최적화) -->
 <div id="stateModal" class="modal">
     <div class="modal-content">
         <button class="close-btn-top" onclick="closeModal('stateModal')">&times;</button>
@@ -508,21 +509,32 @@
             <h3 style="margin:0;">📝 현재 몸상태 기록</h3>
             <button onclick="resetStateModal()" style="background:none; border:none; color:#718096; font-weight:bold; cursor:pointer; font-size:0.85rem; text-decoration:underline; padding:0;">초기화</button>
         </div>
-        <p style="font-size:0.85rem; color:#888; margin-bottom:15px; word-break:keep-all;">기록하고 싶은 항목의 바를 움직여 활성화해 주세요.</p>
+        <p style="font-size:0.85rem; color:#888; margin-bottom:10px; word-break:keep-all;">기록하고 싶은 항목의 바를 움직여 활성화해 주세요.</p>
+        
         <label style="font-weight:700; font-size:0.9rem;">금단증상 정도 (<span id="withdrawalVal" style="font-weight: 800; color: #a0aec0;">-</span>/10)</label>
         <input type="range" id="withdrawalRange" min="0" max="10" value="5" class="dynamic-range" data-touched="false" oninput="markTouched(this); updateRangeStyle(this, 'withdrawalVal')">
-        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px;">기분 상태 (<span id="moodVal" style="font-weight: 800; color: #a0aec0;">-</span>/10)</label>
+        
+        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:10px;">기분 상태 (<span id="moodVal" style="font-weight: 800; color: #a0aec0;">-</span>/10)</label>
         <input type="range" id="moodRange" min="0" max="10" value="5" class="dynamic-range" data-touched="false" oninput="markTouched(this); updateRangeStyle(this, 'moodVal')">
-        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px;">갈증 상태 (<span id="thirstVal" style="font-weight: 800; color: #a0aec0;">-</span>/10)</label>
+        
+        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:10px;">갈증 상태 (<span id="thirstVal" style="font-weight: 800; color: #a0aec0;">-</span>/10)</label>
         <input type="range" id="thirstRange" min="0" max="10" value="5" class="dynamic-range" data-touched="false" oninput="markTouched(this); updateRangeStyle(this, 'thirstVal')">
-        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px;">육체피로 정도 (<span id="fatigueVal" style="font-weight: 800; color: #a0aec0;">-</span>/10)</label>
+        
+        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:10px;">육체피로 정도 (<span id="fatigueVal" style="font-weight: 800; color: #a0aec0;">-</span>/10)</label>
         <input type="range" id="fatigueRange" min="0" max="10" value="5" class="dynamic-range" data-touched="false" oninput="markTouched(this); updateRangeStyle(this, 'fatigueVal')">
-        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px;">정신적 스트레스 정도 (<span id="stressVal" style="font-weight: 800; color: #a0aec0;">-</span>/10)</label>
+        
+        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:10px;">정신적 스트레스 (<span id="stressVal" style="font-weight: 800; color: #a0aec0;">-</span>/10)</label>
         <input type="range" id="stressRange" min="0" max="10" value="5" class="dynamic-range" data-touched="false" oninput="markTouched(this); updateRangeStyle(this, 'stressVal')">
-        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px;">수면 상태 (<span id="sleepVal" style="font-weight: 800; color: #a0aec0;">-</span>/10)</label>
+        
+        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:10px;">수면 부족 (<span id="sleepVal" style="font-weight: 800; color: #a0aec0;">-</span>/10)</label>
         <input type="range" id="sleepRange" min="0" max="10" value="5" class="dynamic-range" data-touched="false" oninput="markTouched(this); updateRangeStyle(this, 'sleepVal')">
-        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px;">배고픔 정도 (<span id="hungerVal" style="font-weight: 800; color: #a0aec0;">-</span>/10)</label>
+        
+        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:10px;">배고픔 정도 (<span id="hungerVal" style="font-weight: 800; color: #a0aec0;">-</span>/10)</label>
         <input type="range" id="hungerRange" min="0" max="10" value="5" class="dynamic-range" data-touched="false" oninput="markTouched(this); updateRangeStyle(this, 'hungerVal')">
+        
+        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:10px;">브레인포그(멍함) (<span id="brainFogVal" style="font-weight: 800; color: #a0aec0;">-</span>/10)</label>
+        <input type="range" id="brainFogRange" min="0" max="10" value="5" class="dynamic-range" data-touched="false" oninput="markTouched(this); updateRangeStyle(this, 'brainFogVal')">
+        
         <button class="start-btn" style="margin-top:20px; width:100%; padding: 14px; font-size: 1.1rem; background: linear-gradient(135deg, #3498db, #2980b9);" onclick="submitState()">현재 몸상태 기록하기</button>
     </div>
 </div>
@@ -2237,7 +2249,8 @@
                     { label: '육체 피로', data: lastData.map(d => (d.type === 'state' || !d.type || d.type === 'medication') && d.fatigue != null ? d.fatigue : null), backgroundColor: 'rgba(52, 152, 219, 0.5)', order: 1 },
                     { label: '정신 스트레스', data: lastData.map(d => (d.type === 'state' || !d.type || d.type === 'medication') && d.stress != null ? d.stress : null), backgroundColor: 'rgba(243, 156, 18, 0.5)', order: 1 },
                     { label: '수면 부족', data: lastData.map(d => (d.type === 'state' || !d.type || d.type === 'medication') && d.sleep != null ? d.sleep : null), backgroundColor: 'rgba(155, 89, 182, 0.5)', order: 1 },
-                    { label: '배고픔', data: lastData.map(d => (d.type === 'state' || !d.type || d.type === 'medication') && d.hunger != null ? d.hunger : null), backgroundColor: 'rgba(46, 204, 113, 0.5)', order: 1 }
+                    { label: '배고픔', data: lastData.map(d => (d.type === 'state' || !d.type || d.type === 'medication') && d.hunger != null ? d.hunger : null), backgroundColor: 'rgba(46, 204, 113, 0.5)', order: 1 },
+                    { label: '브레인포그', data: lastData.map(d => (d.type === 'state' || !d.type || d.type === 'medication') && d.brainFog != null ? d.brainFog : null), backgroundColor: 'rgba(127, 140, 141, 0.5)', order: 1 }
                 ] 
             },
             options: { 
@@ -2252,8 +2265,8 @@
                                 if (d.type === 'action') return `💡 행동 의의: ${d.actionDesc}`;
                                 else if (d.type === 'state') {
                                     let txt = [`금단: ${d.withdrawal ?? '-'}, 기분: ${d.mood ?? '-'}, 갈증: ${d.thirst ?? '-'}`];
-                                    if (d.fatigue != null || d.stress != null || d.sleep != null || d.hunger != null) {
-                                        txt.push(`피로: ${d.fatigue ?? '-'}, 스트레스: ${d.stress ?? '-'}, 수면: ${d.sleep ?? '-'}, 허기: ${d.hunger ?? '-'}`);
+                                    if (d.fatigue != null || d.stress != null || d.sleep != null || d.hunger != null || d.brainFog != null) {
+                                        txt.push(`피로: ${d.fatigue ?? '-'}, 스트레스: ${d.stress ?? '-'}, 수면: ${d.sleep ?? '-'}, 허기: ${d.hunger ?? '-'}, 멍함: ${d.brainFog ?? '-'}`);
                                     }
                                     return txt;
                                 } else if (d.type === 'medication') return `💊 복용량: ${d.dose}mg`;
@@ -2287,7 +2300,8 @@
                     { label: '피로', data: lastData.map(d => d.fatigue !== undefined ? d.fatigue : null), borderColor: '#f39c12', backgroundColor: '#f39c12', tension: 0.3, spanGaps: true },
                     { label: '스트레스', data: lastData.map(d => d.stress !== undefined ? d.stress : null), borderColor: '#e67e22', backgroundColor: '#e67e22', tension: 0.3, spanGaps: true },
                     { label: '수면(부족)', data: lastData.map(d => d.sleep !== undefined ? d.sleep : null), borderColor: '#34495e', backgroundColor: '#34495e', tension: 0.3, spanGaps: true },
-                    { label: '배고픔', data: lastData.map(d => d.hunger !== undefined ? d.hunger : null), borderColor: '#2ecc71', backgroundColor: '#2ecc71', tension: 0.3, spanGaps: true }
+                    { label: '배고픔', data: lastData.map(d => d.hunger !== undefined ? d.hunger : null), borderColor: '#2ecc71', backgroundColor: '#2ecc71', tension: 0.3, spanGaps: true },
+                    { label: '브레인포그', data: lastData.map(d => d.brainFog !== undefined ? d.brainFog : null), borderColor: '#7f8c8d', backgroundColor: '#7f8c8d', tension: 0.3, spanGaps: true }
                 ] 
             },
             options: { 
@@ -2582,14 +2596,28 @@
         if (!userId || !currentChallengeId) return;
         const getVal = (id) => { const el = document.getElementById(id); if (el && el.getAttribute('data-touched') === 'true') { return parseInt(el.value); } return null; };
 
-        const withdrawal = getVal('withdrawalRange'); const mood = getVal('moodRange'); const thirst = getVal('thirstRange'); const fatigue = getVal('fatigueRange'); const stress = getVal('stressRange'); const sleep = getVal('sleepRange'); const hunger = getVal('hungerRange');
+        const withdrawal = getVal('withdrawalRange'); 
+        const mood = getVal('moodRange'); 
+        const thirst = getVal('thirstRange'); 
+        const fatigue = getVal('fatigueRange'); 
+        const stress = getVal('stressRange'); 
+        const sleep = getVal('sleepRange'); 
+        const hunger = getVal('hungerRange');
+        const brainFog = getVal('brainFogRange');
 
-        if (withdrawal === null && mood === null && thirst === null && fatigue === null && stress === null && sleep === null && hunger === null) {
+        if (withdrawal === null && mood === null && thirst === null && fatigue === null && stress === null && sleep === null && hunger === null && brainFog === null) {
             return alert("기록할 몸상태의 슬라이드 바를 움직여 하나 이상 선택해 주세요.");
         }
 
         const entry = { type: 'state', date: new Date().toLocaleString('ko-KR', {month:'short', day:'numeric', hour:'numeric', minute:'numeric'}), timestamp: new Date().getTime() };
-        if (withdrawal !== null) entry.withdrawal = withdrawal; if (mood !== null) entry.mood = mood; if (thirst !== null) entry.thirst = thirst; if (fatigue !== null) entry.fatigue = fatigue; if (stress !== null) entry.stress = stress; if (sleep !== null) entry.sleep = sleep; if (hunger !== null) entry.hunger = hunger;
+        if (withdrawal !== null) entry.withdrawal = withdrawal; 
+        if (mood !== null) entry.mood = mood; 
+        if (thirst !== null) entry.thirst = thirst; 
+        if (fatigue !== null) entry.fatigue = fatigue; 
+        if (stress !== null) entry.stress = stress; 
+        if (sleep !== null) entry.sleep = sleep; 
+        if (hunger !== null) entry.hunger = hunger;
+        if (brainFog !== null) entry.brainFog = brainFog;
 
         try {
             const challengeRef = doc(db, "users", userId, "challenges", currentChallengeId);
@@ -2667,8 +2695,8 @@
     };
 
     window.resetStateModal = function() {
-        const ranges = ['withdrawalRange', 'moodRange', 'thirstRange', 'fatigueRange', 'stressRange', 'sleepRange', 'hungerRange'];
-        const valIds = ['withdrawalVal', 'moodVal', 'thirstVal', 'fatigueVal', 'stressVal', 'sleepVal', 'hungerVal'];
+        const ranges = ['withdrawalRange', 'moodRange', 'thirstRange', 'fatigueRange', 'stressRange', 'sleepRange', 'hungerRange', 'brainFogRange'];
+        const valIds = ['withdrawalVal', 'moodVal', 'thirstVal', 'fatigueVal', 'stressVal', 'sleepVal', 'hungerVal', 'brainFogVal'];
         ranges.forEach((id, index) => {
             const el = document.getElementById(id);
             if(el) { el.value = 5; el.setAttribute('data-touched', 'false'); updateRangeStyle(el, valIds[index]); }
