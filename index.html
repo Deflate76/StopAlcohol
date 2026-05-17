@@ -394,7 +394,11 @@
                 <div class="rank-info">
                     <div class="rank-item">현재 1,000명 중 <span class="rank-number" id="survivors">1,000</span>명 생존</div>
                     <div class="rank-item">나의 현재 순위 : <span class="rank-number" id="myRank">1</span>위 <span id="rankChange" style="font-size: 0.95rem; font-weight: 800; margin-left: 8px;"></span></div>
-                    <div class="rank-item" style="font-size: 0.85rem; color: #666; margin-top: 2px;">(나의 최고 순위: <span id="myBestRank">-</span>위 <span id="myBestRankDate"></span>)</div>
+                    <!-- 모바일에서 두 줄로 떨어지게 수정된 최고 순위 표시 영역 -->
+                    <div class="rank-item" style="font-size: 0.85rem; color: #666; margin-top: 4px; flex-direction: column; gap: 2px;">
+                        <div>(나의 최고 순위: <span id="myBestRank">-</span>위)</div>
+                        <div id="myBestRankDate"></div>
+                    </div>
                 </div>
 
                 <div class="chart-divider"></div>
@@ -440,7 +444,6 @@
     &copy; 2026 Alcoholaway.com All rights reserved.
 </footer>
 
-<!-- (모달 영역들은 기존과 동일하게 유지됩니다) -->
 <!-- 🚨 요주의 날 기록 모달 -->
 <div id="cautionDayModal" class="modal">
     <div class="modal-content">
@@ -2116,7 +2119,12 @@
                 responsive: true, maintainAspectRatio: false, 
                 scales: { 
                     x: { type: 'linear', min: 0, max: 100, title: { display:true, text:'경과 일수', font:{size:10} } }, 
-                    y: { beginAtZero: true, max: 1000, title: { display:true, text:'도전자 수', font:{size:10} } } 
+                    y: { 
+                        beginAtZero: true, 
+                        max: 1000, 
+                        title: { display:true, text:'도전자 수', font:{size:10} },
+                        afterFit: function(scale) { scale.width = 55; }
+                    } 
                 }, 
                 plugins: { 
                     legend: { display: true, position: 'top', labels: { boxWidth: 12, font: { size: 11, weight: 'bold' }, padding: 15 } }, 
@@ -2165,7 +2173,14 @@
                 maintainAspectRatio: false, 
                 scales: { 
                     x: { type: 'linear', min: 0, max: 100, title: { display:true, text:'경과 일수', font:{size:10} } }, 
-                    y: { display: false } 
+                    y: { 
+                        display: true, 
+                        beginAtZero: true,
+                        title: { display:true, text:'상대 밀도', font:{size:10} },
+                        ticks: { display: false },
+                        border: { display: true },
+                        afterFit: function(scale) { scale.width = 55; }
+                    } 
                 }, 
                 plugins: { 
                     legend: { display: false }, 
