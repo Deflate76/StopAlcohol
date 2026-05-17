@@ -97,13 +97,62 @@
         .rank-item { display: flex; justify-content: center; align-items: baseline; gap: 6px; }
         .rank-number { font-size: 1.5rem; font-weight: 800; color: #1976d2; }
         
-        .craving-section { margin-top: 25px; padding: 20px; background: #fff9f0; border-radius: 20px; border: 1px dashed var(--warning-color); display: flex; flex-direction: column; }
+        /* 🔥 통합된 접기/펴기 섹션 스타일 */
+        details.main-section {
+            margin-top: 20px;
+            background: #fff;
+            border-radius: 20px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            padding: 0 20px 20px 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        details.main-section.highlight {
+            background: #fff9f0;
+            border: 1px dashed var(--warning-color);
+        }
+        details.main-section summary {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            cursor: pointer;
+            list-style: none;
+            padding: 20px 0 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            outline: none;
+            user-select: none;
+        }
+        details.main-section[open] summary {
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+            border-bottom: 1px dashed #cbd5e0;
+        }
+        details.main-section summary::-webkit-details-marker { display: none; }
+        details.main-section summary::after {
+            content: '＋';
+            font-size: 1.3rem;
+            color: #a0aec0;
+            font-weight: 800;
+            transition: transform 0.3s ease;
+        }
+        details.main-section.highlight summary::after {
+            color: var(--warning-color);
+        }
+        details.main-section[open] summary::after {
+            content: '－';
+            color: var(--danger-color);
+        }
+        
         .craving-btn { background-color: var(--warning-color); color: white; border: none; padding: 15px; border-radius: 14px; font-weight: bold; cursor: pointer; width: 100%; font-size: 1rem; transition: 0.2s; box-sizing: border-box; }
         .craving-btn:active { transform: scale(0.98); }
         .stat-btn { background-color: #fff; color: var(--warning-color); border: 2px solid var(--warning-color); padding: 10px; border-radius: 12px; font-size: 0.85rem; cursor: pointer; width: 100%; font-weight: bold; box-sizing: border-box; }
+        
         .chart-container { position: relative; height: 250px; width: 100%; margin: 10px 0; }
         
-        .tab-container { display: flex; justify-content: space-around; margin-top: 30px; border-bottom: 2px solid #e2e8f0; margin-bottom: 20px; }
+        .tab-container { display: flex; justify-content: space-around; margin-top: 5px; border-bottom: 2px solid #e2e8f0; margin-bottom: 20px; }
         .tab-btn { padding: 8px 5px; border: none; background: none; font-size: 0.95rem; font-weight: 700; color: #718096; cursor: pointer; transition: all 0.3s; border-bottom: 3px solid transparent; margin-bottom: -2px; line-height: 1.3; }
         .tab-btn.active { color: var(--primary-color); border-bottom-color: var(--primary-color); }
 
@@ -182,21 +231,16 @@
         .cal-week { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 0.8rem; font-weight: bold; color: #a0aec0; margin-bottom: 10px; }
         .cal-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
         
-        /* 💡 Z-index와 구조 수정을 통한 뱃지 표시 강화 */
         .cal-day { padding: 8px 0 18px 0; font-size: 0.9rem; font-weight: 600; color: #4a5568; border-radius: 8px; position: relative; z-index: 1; transition: background-color 0.2s; }
         .cal-day.empty { background: transparent; }
         
-        /* 💡 기본 갈망 평균 점수 뱃지 스타일 */
         .craving-avg-badge { position: absolute; bottom: -4px; left: 50%; transform: translateX(-50%); font-size: 0.6rem; font-weight: 800; color: #e74c3c; background: rgba(255,255,255,0.95); border-radius: 4px; padding: 1px 4px; line-height: 1.2; box-shadow: 0 2px 6px rgba(0,0,0,0.25); white-space: nowrap; pointer-events: none; z-index: 20; }
         
-        /* 🚨 요주의 날 뱃지 스타일 */
         .caution-badge { position: absolute; top: -6px; right: -6px; font-size: 0.8rem; z-index: 20; cursor: pointer; background: #fff; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); padding: 1px; transition: transform 0.2s; }
         .caution-badge:hover { transform: scale(1.2); }
 
-        /* 행동 통계 뱃지 */
         .action-stat { font-size: 0.75rem; color: #c0392b; font-weight: 800; background: #fadbd8; padding: 4px 8px; border-radius: 6px; margin-top: 6px; display: inline-block; border: 1px solid #f5b7b1; }
 
-        /* 모드별 범위 하이라이트 색상 (전문적이고 깨끗한 톤) */
         .cal-day.range-curr-single { background-color: var(--primary-color); color: white; border-radius: 8px; box-shadow: 0 2px 6px rgba(52, 152, 219, 0.3); }
         .cal-day.range-curr-start { background-color: var(--primary-color); color: white; border-radius: 8px 0 0 8px; }
         .cal-day.range-curr-mid { background-color: #ebf8ff; color: #2b6cb0; border-radius: 0; }
@@ -212,7 +256,6 @@
         .cal-day.range-best-mid { background-color: #fdf2e9; color: #b9770e; border-radius: 0; }
         .cal-day.range-best-end { background-color: var(--warning-color); color: white; border-radius: 0 8px 8px 0; }
 
-        /* 💡 뱃지를 덮지 않도록 z-index 및 pointer-events 수정 */
         .cal-day.fail-mark::after { content: '❌'; position: absolute; font-size: 0.6rem; top: -4px; right: -4px; background: white; border-radius: 50%; padding: 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); z-index: 15; pointer-events: none; }
         .cal-day.today-mark { border: 2px solid var(--warning-color); font-weight: 800; color: var(--text-dark); }
         
@@ -314,63 +357,79 @@
 
         <div id="activeMotivationalSummary" style="display: none; width: 100%; margin-bottom: 15px;"></div>
 
-        <div class="craving-section">
-            <div style="display: flex; gap: 8px; margin-bottom: 12px;">
-                <button class="craving-btn" style="background-color: var(--primary-color); flex:1; margin:0; padding:15px;" onclick="openModal('stateModal')">📝 현재 몸상태</button>
-                <button class="craving-btn" style="background-color: #16a085; flex:1; margin:0; padding:15px;" onclick="openBodyInfoModal()">⚖️ 신체계측</button>
+        <!-- Section 1: 고비 관리 -->
+        <details class="main-section highlight" open>
+            <summary>🔥 고비 관리 및 기록</summary>
+            <div class="section-content">
+                <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                    <button class="craving-btn" style="background-color: var(--primary-color); flex:1; margin:0; padding:15px;" onclick="openModal('stateModal')">📝 현재 몸상태</button>
+                    <button class="craving-btn" style="background-color: #16a085; flex:1; margin:0; padding:15px;" onclick="openBodyInfoModal()">⚖️ 신체계측</button>
+                </div>
+                
+                <button class="craving-btn" style="margin-bottom: 12px;" onclick="openModal('cravingModal')">🔥 갈망 기록하기</button>
+                <button class="craving-btn" style="background-color: var(--success-color); margin-bottom: 12px;" onclick="openActionModal()">🛡️ 고비 극복 행동 개시!</button>
+                <button class="craving-btn" style="background-color: #8e44ad; margin-bottom: 15px;" onclick="openMedModal()">💊 약물 복용 기록</button>
+                
+                <button class="craving-btn" style="background-color: #d35400; margin-bottom: 15px; font-size: 0.95rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" onclick="openCautionModal()">🚨 요주의 날 기록</button>
+                
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
+                    <button class="stat-btn" style="width:100%; padding:10px 5px;" onclick="openStats()">📈 고비(<span id="cravingCount">0</span>)</button>
+                    <button class="stat-btn" style="width:100%; padding:10px 5px; border-color: #3498db; color: #3498db;" onclick="openStateStats()">📊 몸상태 추이</button>
+                    <button class="stat-btn" style="width:100%; padding:10px 5px; border-color: #8e44ad; color: #8e44ad;" onclick="openMedListModal()">💊 복용 내역</button>
+                    <button class="stat-btn" style="width:100%; padding:10px 5px; border-color: #718096; color: #718096;" onclick="openHistoryList()">📚 단주 기록</button>
+                </div>
+                
+                <button class="stat-btn" style="width:100%; margin-top:8px; padding:10px 5px; border-color: #9b59b6; color: #9b59b6;" onclick="openControlHistoryList()">🍷 나의 음주 조절 기록 보기</button>
             </div>
-            
-            <button class="craving-btn" style="margin-bottom: 12px;" onclick="openModal('cravingModal')">🔥 갈망 기록하기</button>
-            <button class="craving-btn" style="background-color: var(--success-color); margin-bottom: 12px;" onclick="openActionModal()">🛡️ 고비 극복 행동 개시!</button>
-            <button class="craving-btn" style="background-color: #8e44ad; margin-bottom: 15px;" onclick="openMedModal()">💊 약물 복용 기록</button>
-            
-            <button class="craving-btn" style="background-color: #d35400; margin-bottom: 15px; font-size: 0.95rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" onclick="openCautionModal()">🚨 요주의 날 기록</button>
-            
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
-                <button class="stat-btn" style="width:100%; padding:10px 5px;" onclick="openStats()">📈 고비(<span id="cravingCount">0</span>)</button>
-                <button class="stat-btn" style="width:100%; padding:10px 5px; border-color: #3498db; color: #3498db;" onclick="openStateStats()">📊 몸상태 추이</button>
-                <button class="stat-btn" style="width:100%; padding:10px 5px; border-color: #8e44ad; color: #8e44ad;" onclick="openMedListModal()">💊 복용 내역</button>
-                <button class="stat-btn" style="width:100%; padding:10px 5px; border-color: #718096; color: #718096;" onclick="openHistoryList()">📚 단주 기록</button>
+        </details>
+
+        <!-- Section 2: 통계 (차트) -->
+        <details class="main-section" open>
+            <summary>📈 생존 현황 및 통계</summary>
+            <div class="section-content">
+                <div class="chart-container">
+                    <canvas id="survivalChart"></canvas>
+                </div>
+                
+                <div class="rank-info">
+                    <div class="rank-item">현재 1,000명 중 <span class="rank-number" id="survivors">1,000</span>명 생존</div>
+                    <div class="rank-item">나의 현재 순위 : <span class="rank-number" id="myRank">1</span>위 <span id="rankChange" style="font-size: 0.95rem; font-weight: 800; margin-left: 8px;"></span></div>
+                    <div class="rank-item" style="font-size: 0.85rem; color: #666; margin-top: 2px;">(나의 최고 순위: <span id="myBestRank">-</span>위 <span id="myBestRankDate"></span>)</div>
+                </div>
+
+                <div class="chart-divider"></div>
+
+                <div style="font-size: 0.9rem; font-weight: 700; color: #4a5568; margin-bottom: 5px; text-align: left; padding-left: 10px;">📊 전체 도전자 중 나의 위치 (상대 분포)</div>
+                <div class="chart-container" style="height: 180px;">
+                    <canvas id="distributionChart"></canvas>
+                </div>
             </div>
-            
-            <button class="stat-btn" style="width:100%; margin-top:8px; padding:10px 5px; border-color: #9b59b6; color: #9b59b6;" onclick="openControlHistoryList()">🍷 나의 음주 조절 기록 보기</button>
-        </div>
+        </details>
 
-        <div class="chart-container">
-            <canvas id="survivalChart"></canvas>
-        </div>
-        
-        <div class="rank-info">
-            <div class="rank-item">현재 1,000명 중 <span class="rank-number" id="survivors">1,000</span>명 생존</div>
-            <div class="rank-item">나의 현재 순위 : <span class="rank-number" id="myRank">1</span>위 <span id="rankChange" style="font-size: 0.95rem; font-weight: 800; margin-left: 8px;"></span></div>
-            <div class="rank-item" style="font-size: 0.85rem; color: #666; margin-top: 2px;">(나의 최고 순위: <span id="myBestRank">-</span>위 <span id="myBestRankDate"></span>)</div>
-        </div>
+        <!-- Section 3: 신체 회복 및 커뮤니티 -->
+        <details class="main-section" open>
+            <summary>🌱 신체 회복 및 생존자 통신</summary>
+            <div class="section-content">
+                <div class="tab-container">
+                    <button class="tab-btn active" onclick="switchTab(this, 'physical')">신체<br>회복</button>
+                    <button class="tab-btn" onclick="switchTab(this, 'liver')">간<br>기능</button>
+                    <button class="tab-btn" onclick="switchTab(this, 'brain')">뇌<br>기능</button>
+                    <button class="tab-btn" style="color: var(--warning-color);" onclick="switchTab(this, 'community')">생존자<br>통신</button>
+                </div>
 
-        <div class="chart-divider"></div>
-
-        <div style="font-size: 0.9rem; font-weight: 700; color: #4a5568; margin-bottom: 5px; text-align: left; padding-left: 10px;">📊 전체 도전자 중 나의 위치 (상대 분포)</div>
-        <div class="chart-container" style="height: 180px;">
-            <canvas id="distributionChart"></canvas>
-        </div>
-
-        <div class="tab-container">
-            <button class="tab-btn active" onclick="switchTab(this, 'physical')">신체<br>회복</button>
-            <button class="tab-btn" onclick="switchTab(this, 'liver')">간<br>기능</button>
-            <button class="tab-btn" onclick="switchTab(this, 'brain')">뇌<br>기능</button>
-            <button class="tab-btn" style="color: var(--warning-color);" onclick="switchTab(this, 'community')">생존자<br>통신</button>
-        </div>
-
-        <div class="change-section" id="changeSection">
-            <div id="changeList"></div>
-        </div>
-        
-        <div class="community-section" id="communitySection" style="display: none; text-align: left;">
-            <div style="background: #fff; padding: 15px; border-radius: 14px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
-                <textarea id="postContent" placeholder="오늘 하루, 어떤 고비가 있었나요? 생존자들과 나누어 보세요." rows="3" style="width: 100%; border: 1px solid #ddd; border-radius: 10px; padding: 12px; resize: none; margin-bottom: 10px; box-sizing: border-box; font-family: inherit;"></textarea>
-                <button onclick="submitPost()" style="width: 100%; background: var(--warning-color); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">통신 발송</button>
+                <div class="change-section" id="changeSection">
+                    <div id="changeList"></div>
+                </div>
+                
+                <div class="community-section" id="communitySection" style="display: none; text-align: left;">
+                    <div style="background: #fff; padding: 15px; border-radius: 14px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                        <textarea id="postContent" placeholder="오늘 하루, 어떤 고비가 있었나요? 생존자들과 나누어 보세요." rows="3" style="width: 100%; border: 1px solid #ddd; border-radius: 10px; padding: 12px; resize: none; margin-bottom: 10px; box-sizing: border-box; font-family: inherit;"></textarea>
+                        <button onclick="submitPost()" style="width: 100%; background: var(--warning-color); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">통신 발송</button>
+                    </div>
+                    <div id="postList" style="display: flex; flex-direction: column; gap: 0px;"></div>
+                </div>
             </div>
-            <div id="postList" style="display: flex; flex-direction: column; gap: 0px;"></div>
-        </div>
+        </details>
         
         <button class="craving-btn" style="background-color: #7f8c8d; margin-top: 30px; font-size: 0.95rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" onclick="resetDate()">🔄 금주 실패... 새로운 단주 도전 및 재설정</button>
         <button class="craving-btn" style="background-color: #9b59b6; margin-top: 15px; font-size: 0.95rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" onclick="goToControlMode()">🍷 금주 실패... 음주 조절 모드로 전환</button>
@@ -381,6 +440,7 @@
     &copy; 2026 Alcoholaway.com All rights reserved.
 </footer>
 
+<!-- (모달 영역들은 기존과 동일하게 유지됩니다) -->
 <!-- 🚨 요주의 날 기록 모달 -->
 <div id="cautionDayModal" class="modal">
     <div class="modal-content">
@@ -503,7 +563,7 @@
     </div>
 </div>
 
-<!-- 몸상태 기록 모달 (브레인포그 포함, 마진 최적화) -->
+<!-- 몸상태 기록 모달 -->
 <div id="stateModal" class="modal">
     <div class="modal-content">
         <button class="close-btn-top" onclick="closeModal('stateModal')">&times;</button>
@@ -563,7 +623,6 @@
     </div>
 </div>
 
-<!-- 동적 렌더링으로 변경된 고비 극복 대책 모달 -->
 <div id="actionModal" class="modal">
     <div class="modal-content">
         <button class="close-btn-top" onclick="closeModal('actionModal')">&times;</button>
@@ -703,7 +762,6 @@
     const brainStages = [ { d: 1, t: "1일: 신경 과민기", desc: "알코올의 억제 효과가 사라지며 뇌가 과하게 흥분하지만, 독성 배출을 시작합니다." }, { d: 3, t: "3일: 금단 불안 정점", desc: "가장 힘든 고비입니다. 뇌가 술 없이 신호를 보내는 법을 다시 배우기 시작합니다." }, { d: 7, t: "1주: 수면 사이클 복구", desc: "알코올 없이 렘(REM) 수면에 진입하여 뇌의 노폐물(글림파틱 시스템)이 청소됩니다." }, { d: 14, t: "2주: 감정 조절 시작", desc: "충동을 조절하는 전두엽 기능이 살아나며 이유 없는 짜증과 감정 기복이 줄어듭니다." }, { d: 30, t: "1개월: 인지 능력 반등", desc: "기억력, 작업 속도, 의사결정 능력이 눈에 띄게 개선되며 업무 효율이 올라갑니다." }, { d: 90, t: "3개월: 도파민 수용체 재생", desc: "술이 주는 강한 자극 없이도 일상의 소소한 즐거움에서 행복감을 느끼기 시작합니다." }, { d: 180, t: "6개월: 신경 가소성 강화", desc: "알코올 갈망을 담당하는 뇌 회로가 약화되고, 새로운 건강한 습관이 뇌에 각인됩니다." }, { d: 365, t: "1년: 회백질 용적 증가", desc: "알코올로 수축되었던 뇌 부피가 물리적으로 회복되며 지능적 유연성을 되찾습니다." }, { d: 730, t: "2년: 신경계 완전 정상화", desc: "뇌의 화학적 균형이 비음주자와 거의 동일한 상태로 완벽하게 리셋됩니다." } ];
     const physicalStages = typeof stages !== 'undefined' ? stages : [];
 
-    // 동적 고비 극복 대책 배열
     const actionTypes = [
         { id: '냉수 마시기', title: '💧 시원한 냉수 들이키기', desc: '순간적인 체온 변화와 위장 자극으로 뇌의 주의를 알코올에서 물로 전환시킵니다.', color: '#3498db', bg: '#f0f8ff' },
         { id: '얼음+탄산/청량음료 마시기', title: '🧊 얼음+탄산음료 등 청량음료 마시기', desc: '강한 탄산과 차가운 온도로 식도를 자극하여 뇌의 보상 기전을 일시적으로 만족시킵니다.', color: '#34495e', bg: '#f4f6f7' },
@@ -732,7 +790,7 @@
 
     let userId = null; 
     let userProfile = { gender: 'male', weight: 70, height: 170 };
-    let cautionDays = []; // 요주의 날 데이터
+    let cautionDays = []; 
     let isCautionAlertOpen = false;
 
     let currentChallengeId = null; 
@@ -1005,7 +1063,7 @@
                     closeModal('cautionAlertModal');
                 };
                 openModal('cautionAlertModal');
-                break; // 한 번에 하나씩만 처리
+                break;
             }
         }
     }
@@ -2056,7 +2114,10 @@
             ]},
             options: { 
                 responsive: true, maintainAspectRatio: false, 
-                scales: { x: { type: 'linear', min: 0, max: 100, title: { display:true, text:'경과일수', font:{size:10} } }, y: { beginAtZero: true, max: 1000, title: { display:true, text:'생존자수', font:{size:10} } } }, 
+                scales: { 
+                    x: { type: 'linear', min: 0, max: 100, title: { display:true, text:'경과 일수', font:{size:10} } }, 
+                    y: { beginAtZero: true, max: 1000, title: { display:true, text:'도전자 수', font:{size:10} } } 
+                }, 
                 plugins: { 
                     legend: { display: true, position: 'top', labels: { boxWidth: 12, font: { size: 11, weight: 'bold' }, padding: 15 } }, 
                     annotation: { 
@@ -2103,7 +2164,7 @@
                 responsive: true, 
                 maintainAspectRatio: false, 
                 scales: { 
-                    x: { type: 'linear', min: 0, max: 100, title: { display:true, text:'금주 일수', font:{size:10} } }, 
+                    x: { type: 'linear', min: 0, max: 100, title: { display:true, text:'경과 일수', font:{size:10} } }, 
                     y: { display: false } 
                 }, 
                 plugins: { 
@@ -2129,8 +2190,10 @@
         mainChart.data.datasets[0].data = past;
         mainChart.data.datasets[1].data = future;
 
-        mainChart.options.plugins.annotation.annotations.line1.xMin = days;
-        mainChart.options.plugins.annotation.annotations.line1.xMax = days;
+        const chartDays = Math.min(days, 100);
+
+        mainChart.options.plugins.annotation.annotations.line1.xMin = chartDays;
+        mainChart.options.plugins.annotation.annotations.line1.xMax = chartDays;
         mainChart.options.plugins.annotation.annotations.line2.yMin = survivors;
         mainChart.options.plugins.annotation.annotations.line2.yMax = survivors;
         mainChart.options.plugins.annotation.annotations.line2.label.content = survivors.toLocaleString() + '명';
@@ -2138,8 +2201,9 @@
         let isOverlapping = (Math.floor(days) >= globalMaxDays);
 
         if (globalMaxDays > 0 && !isOverlapping) {
-            mainChart.options.plugins.annotation.annotations.line3.xMin = globalMaxDays;
-            mainChart.options.plugins.annotation.annotations.line3.xMax = globalMaxDays;
+            const chartMaxDays = Math.min(globalMaxDays, 100);
+            mainChart.options.plugins.annotation.annotations.line3.xMin = chartMaxDays;
+            mainChart.options.plugins.annotation.annotations.line3.xMax = chartMaxDays;
             mainChart.options.plugins.annotation.annotations.line3.label.content = `최장 ${globalMaxDays}일`;
             mainChart.options.plugins.annotation.annotations.line3.display = true;
         } else if (mainChart.options.plugins.annotation.annotations.line3) {
@@ -2149,19 +2213,17 @@
         mainChart.update('none');
 
         if (distChart) {
-            const displayDays = Math.min(days, 100); 
-            
             const distPast = []; 
             const distFuture = [];
             for(let i = 0; i <= 100; i+=2) {
                 const y = (1 / (i + 5)) * Math.exp(-Math.pow(Math.log((i+1)/15), 2) / (2 * Math.pow(0.8, 2))) * 1000;
-                if (i <= displayDays) distPast.push({x: i, y: y});
+                if (i <= chartDays) distPast.push({x: i, y: y});
                 else distFuture.push({x: i, y: y});
             }
-            const currentY = (1 / (displayDays + 5)) * Math.exp(-Math.pow(Math.log((displayDays+1)/15), 2) / (2 * Math.pow(0.8, 2))) * 1000;
+            const currentY = (1 / (chartDays + 5)) * Math.exp(-Math.pow(Math.log((chartDays+1)/15), 2) / (2 * Math.pow(0.8, 2))) * 1000;
             
-            distPast.push({x: displayDays, y: currentY});
-            distFuture.unshift({x: displayDays, y: currentY});
+            distPast.push({x: chartDays, y: currentY});
+            distFuture.unshift({x: chartDays, y: currentY});
 
             distPast.sort((a,b)=>a.x - b.x);
             distFuture.sort((a,b)=>a.x - b.x);
@@ -2169,8 +2231,8 @@
             distChart.data.datasets[0].data = distPast; 
             distChart.data.datasets[1].data = distFuture; 
 
-            distChart.options.plugins.annotation.annotations.myPosition.xMin = displayDays;
-            distChart.options.plugins.annotation.annotations.myPosition.xMax = displayDays;
+            distChart.options.plugins.annotation.annotations.myPosition.xMin = chartDays;
+            distChart.options.plugins.annotation.annotations.myPosition.xMax = chartDays;
             
             if (globalMaxDays > 0 && !isOverlapping) {
                 const displayMax = Math.min(globalMaxDays, 100);
@@ -2433,7 +2495,6 @@
             const minutesPassed = Math.floor((diff/60000)%60);
             const secondsPassed = Math.floor((diff/1000)%60);
 
-            // 시간/분/초 부드러운 업데이트 (1초 단위 갱신, CSS transition으로 부드럽게)
             const hourPerc = (hoursPassed / 24) * 100;
             const minPerc = (minutesPassed / 60) * 100;
             const secPerc = (secondsPassed / 60) * 100;
