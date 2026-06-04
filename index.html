@@ -1,11 +1,7 @@
 <!--
-
  * Copyright (c) 2026 Kim Jung-hoon (김정훈). All rights reserved.
-
  * This project and its source code are the intellectual property of the author.
-
  * Unauthorized copying, distribution, or modification is strictly prohibited.
-
 -->
 
 <!DOCTYPE html>
@@ -285,7 +281,8 @@
 
         <div class="timer-display">
             <div id="mainDaysContainer" style="width: 100%;">
-                </div>
+                <!-- JS에서 동적으로 달력 호버 UI를 생성합니다 -->
+            </div>
             
             <div id="subTime">0시간 0분 0초</div>
             
@@ -327,6 +324,7 @@
 
         <div id="activeMotivationalSummary" style="display: none; width: 100%; margin-bottom: 15px;"></div>
 
+        <!-- Section 1: 고비 관리 -->
         <details class="main-section highlight" open>
             <summary>🔥 고비 관리 및 기록</summary>
             <div class="section-content">
@@ -355,6 +353,7 @@
             </div>
         </details>
 
+        <!-- Section 2: 통계 (차트) -->
         <details class="main-section" open>
             <summary>📈 생존 현황 및 통계</summary>
             <div class="section-content">
@@ -380,6 +379,7 @@
             </div>
         </details>
 
+        <!-- Section 3: 신체 회복 및 커뮤니티 -->
         <details class="main-section" open>
             <summary>🌱 신체 회복 및 생존자 통신</summary>
             <div class="section-content">
@@ -413,6 +413,7 @@
     &copy; 2026 Alcoholaway.com All rights reserved.
 </footer>
 
+<!-- 닉네임 설정 모달 -->
 <div id="nicknameModal" class="modal" style="z-index: 3000;">
     <div class="modal-content">
         <button id="nicknameCloseBtn" class="close-btn-top" onclick="closeModal('nicknameModal')">&times;</button>
@@ -424,6 +425,7 @@
     </div>
 </div>
 
+<!-- 🚨 요주의 날 기록 모달 -->
 <div id="cautionDayModal" class="modal">
     <div class="modal-content">
         <button class="close-btn-top" onclick="closeModal('cautionDayModal')">&times;</button>
@@ -437,6 +439,7 @@
     </div>
 </div>
 
+<!-- 🚨 요주의 날 알림 팝업 모달 -->
 <div id="cautionAlertModal" class="modal">
     <div class="modal-content" style="border: 3px solid #e74c3c; background: #fff5f5;">
         <h2 style="margin-top:0; color: #e74c3c; text-align: center;">🚨 요주의 날 경고</h2>
@@ -450,6 +453,7 @@
     </div>
 </div>
 
+<!-- 시각적 피드백 캘린더 모달 -->
 <div id="calendarModal" class="modal">
     <div class="modal-content" style="max-width: 400px; padding: 25px 20px;">
         <button class="close-btn-top" onclick="closeModal('calendarModal')">&times;</button>
@@ -461,19 +465,22 @@
         </div>
         
         <div id="calLegendContainer" style="margin-bottom: 15px; font-size: 0.8rem; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-            </div>
+            <!-- 모드에 따라 범례 동적 변경 -->
+        </div>
         <p style="text-align: center; font-size: 0.75rem; color: #9b59b6; margin-top: -5px; margin-bottom: 15px;">💡 날짜를 <strong>길게 누르면(Long-click)</strong> 식사량과 음주량을 기록할 수 있습니다.</p>
 
         <div class="cal-week">
             <div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div>
         </div>
         <div class="cal-days" id="calendarDaysGrid">
-            </div>
+            <!-- JS 동적 생성 -->
+        </div>
         
         <button class="start-btn" style="width: 100%; margin-top: 20px; padding: 12px; font-size: 1rem; background: #e2e8f0; color: #4a5568;" onclick="closeModal('calendarModal')">닫기</button>
     </div>
 </div>
 
+<!-- 식사량/음주량 입력 모달 (Long-click) -->
 <div id="dailyLogModal" class="modal">
     <div class="modal-content">
         <button class="close-btn-top" onclick="closeModal('dailyLogModal')">&times;</button>
@@ -482,6 +489,7 @@
         
         <input type="hidden" id="dailyLogDateHidden">
 
+        <!-- 식사량 -->
         <label style="font-weight:700; font-size:0.9rem;">아침 식사량 (<span id="logBreakfastVal" style="font-weight: 800; color: #a0aec0;">0</span>/10)</label>
         <input type="range" id="logBreakfastRange" min="0" max="10" value="0" class="dynamic-range" oninput="markTouched(this); updateRangeStyle(this, 'logBreakfastVal')">
         
@@ -494,10 +502,12 @@
         <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:10px;">간식량 (<span id="logSnackVal" style="font-weight: 800; color: #a0aec0;">0</span>/10)</label>
         <input type="range" id="logSnackRange" min="0" max="10" value="0" class="dynamic-range" oninput="markTouched(this); updateRangeStyle(this, 'logSnackVal')">
 
+        <!-- 음주량 -->
         <div style="border-top: 1px dashed #cbd5e0; margin: 20px 0;"></div>
         <label style="font-weight:700; font-size:0.9rem; display:block; color:var(--danger-color);">🍷 음주량 (<span id="logAlcoholVal" style="font-weight: 800; color: #a0aec0;">0</span>/10)</label>
         <input type="range" id="logAlcoholRange" min="0" max="10" value="0" class="dynamic-range" oninput="markTouched(this); updateRangeStyle(this, 'logAlcoholVal')">
         
+        <!-- 체중 -->
         <div style="border-top: 1px dashed #cbd5e0; margin: 20px 0;"></div>
         <label style="font-weight:700; font-size:0.9rem; display:block;">당일 체중 (kg)</label>
         <input type="number" id="logWeightInput" placeholder="예: 70.5" style="margin-top: 5px;">
@@ -506,16 +516,21 @@
     </div>
 </div>
 
+<!-- 식사량/체중 리스트 조회 모달 (그래프 팝업 적용) -->
 <div id="mealWeightLogListModal" class="modal">
-    <div class="modal-content" style="max-width: 500px;">
+    <div class="modal-content" style="max-width: 550px;">
         <button class="close-btn-top" onclick="closeModal('mealWeightLogListModal')">&times;</button>
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding-right: 20px;">
-            <h3 style="margin:0;">🥗 식사량 및 체중 기록</h3>
+            <h3 style="margin:0;">🥗 식사/체중/음주 추이</h3>
         </div>
-        <div id="mealWeightLogListContainer" style="margin-top: 10px; max-height: 60vh; overflow-y: auto;"></div>
+        <div style="height: 250px; position: relative; margin-top: 15px;">
+            <canvas id="mealWeightChartCanvas"></canvas>
+        </div>
+        <div id="mealWeightLogListContainer" style="margin-top: 15px; max-height: 30vh; overflow-y: auto;"></div>
     </div>
 </div>
 
+<!-- 달력에서 실패한 날짜 클릭 시 뜨는 음주량 입력 모달 (유지) -->
 <div id="failAmountModal" class="modal">
     <div class="modal-content">
         <button class="close-btn-top" onclick="closeModal('failAmountModal')">&times;</button>
@@ -529,6 +544,7 @@
     </div>
 </div>
 
+<!-- 신체계측 모달 -->
 <div id="bodyInfoModal" class="modal">
     <div class="modal-content">
         <button class="close-btn-top" onclick="closeModal('bodyInfoModal')">&times;</button>
@@ -546,6 +562,7 @@
     </div>
 </div>
 
+<!-- 약물 복용 기록 모달 -->
 <div id="medModal" class="modal">
     <div class="modal-content">
         <button class="close-btn-top" onclick="closeModal('medModal')">&times;</button>
@@ -581,6 +598,7 @@
     </div>
 </div>
 
+<!-- 몸상태 기록 모달 -->
 <div id="stateModal" class="modal">
     <div class="modal-content">
         <button class="close-btn-top" onclick="closeModal('stateModal')">&times;</button>
@@ -646,7 +664,8 @@
         <h3 style="margin-top:0; margin-bottom: 12px; padding-right: 20px;">🛡️ 고비 극복 대책</h3>
         <p style="font-size: 0.85rem; color: #666; margin-bottom: 20px; word-break: keep-all;">지금 당장 실천할 수 있는 대책을 선택하세요. 뇌의 주의를 분산시키고 도파민 보상 회로를 리셋합니다.</p>
         <div id="actionListContainer" style="display: flex; flex-direction: column; gap: 10px;">
-            </div>
+            <!-- JS 동적 생성 -->
+        </div>
     </div>
 </div>
 
@@ -673,6 +692,7 @@
     </div>
 </div>
 
+<!-- 단주 기록 리스트 모달 -->
 <div id="historyListModal" class="modal">
     <div class="modal-content" style="max-width: 500px;">
         <button class="close-btn-top" onclick="closeModal('historyListModal')">&times;</button>
@@ -684,6 +704,7 @@
     </div>
 </div>
 
+<!-- 음주 조절 기록 리스트 모달 -->
 <div id="controlHistoryListModal" class="modal">
     <div class="modal-content" style="max-width: 500px;">
         <button class="close-btn-top" onclick="closeModal('controlHistoryListModal')">&times;</button>
@@ -704,6 +725,7 @@
     </div>
 </div>
 
+<!-- 모든 고비 기록 리스트 모달 -->
 <div id="allCravingsModal" class="modal">
     <div class="modal-content" style="max-width: 450px;">
         <button class="close-btn-top" onclick="closeModal('allCravingsModal')">&times;</button>
@@ -714,6 +736,7 @@
     </div>
 </div>
 
+<!-- 단주 기록 강제 생성 모달 -->
 <div id="createHistoryModal" class="modal">
     <div class="modal-content">
         <button class="close-btn-top" onclick="closeModal('createHistoryModal')">&times;</button>
@@ -748,6 +771,7 @@
     </div>
 </div>
 
+<!-- 사유 및 음주량 수정 모달 -->
 <div id="editReasonModal" class="modal">
     <div class="modal-content">
         <button class="close-btn-top" onclick="closeModal('editReasonModal')">&times;</button>
@@ -812,7 +836,9 @@
     let pastStatsChart = null;
     let stateStatsChart = null; 
     let medChartInstance = null; 
+    let mealWeightChartInstance = null; // 식사량 체중 차트 인스턴스
     let cravingData = [];
+    let dailyLogsData = {}; // 달력 배지 표시를 위한 전역 데이터
     let timerInterval = null;
     let currentTabName = 'physical';
     let unsubscribePosts = null; 
@@ -884,6 +910,14 @@
             document.getElementById('loginArea').style.display = 'none';
             
             try {
+                // 식사량/체중 기록 글로벌 로드
+                const logsQ = query(collection(db, "users", userId, "daily_logs"));
+                const logsSnap = await getDocs(logsQ);
+                dailyLogsData = {};
+                logsSnap.forEach(doc => {
+                    dailyLogsData[doc.id] = doc.data();
+                });
+
                 const userDoc = await getDoc(doc(db, "users", userId));
                 let userData = userDoc.exists() ? userDoc.data() : {};
 
@@ -954,6 +988,7 @@
             userQuitDate = null;
             currentChallengeId = null;
             cautionDays = [];
+            dailyLogsData = {};
             userProfile.nickname = '';
             if (timerInterval) clearInterval(timerInterval);
             document.getElementById('loginArea').style.display = 'flex';
@@ -1142,6 +1177,9 @@
         try {
             await setDoc(doc(db, "users", userId, "daily_logs", dateStr), logData, { merge: true });
             
+            // 로컬 전역변수 업데이트 (달력 아이콘 갱신용)
+            dailyLogsData[dateStr] = logData;
+
             // 최신 체중 갱신
             if (logData.weight) {
                 userProfile.weight = logData.weight;
@@ -1150,6 +1188,11 @@
 
             alert("식사량 및 음주량이 성공적으로 기록되었습니다.");
             closeModal('dailyLogModal');
+
+            // 캘린더가 열려있으면 즉시 리렌더링
+            if (document.getElementById('calendarModal').style.display === 'flex') {
+                renderCalendar(currentCalDate.getFullYear(), currentCalDate.getMonth(), currentCalMode);
+            }
         } catch(e) {
             console.error("저장 실패:", e);
             alert("기록 저장에 실패했습니다.");
@@ -1166,36 +1209,44 @@
         container.innerHTML = '<div style="text-align:center; padding:20px;">기록을 불러오는 중입니다...</div>';
 
         try {
-            // Document ID(날짜 문자열 YYYY-MM-DD)를 내림차순(최신순)으로 정렬하여 조회
-            // Firebase Firestore 제한상 문서ID만으로 자동 정렬이 안될수도 있으므로 클라이언트 정렬 적용
             const q = query(collection(db, "users", userId, "daily_logs"));
             const snapshot = await getDocs(q);
             
-            if (snapshot.empty) {
-                container.innerHTML = '<div style="text-align:center; padding:20px; color:#666;">아직 기록된 식사량/체중 데이터가 없습니다.<br>달력에서 날짜를 길게 눌러(Long-click) 기록해보세요.</div>';
-                return;
-            }
-
             let logs = [];
             snapshot.forEach(doc => {
                 logs.push({ date: doc.id, ...doc.data() });
+                dailyLogsData[doc.id] = doc.data(); // 글로벌 객체 갱신
             });
-            
-            // 날짜 내림차순 정렬
-            logs.sort((a, b) => b.date.localeCompare(a.date));
 
-            container.innerHTML = '';
+            if (logs.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding:20px; color:#666;">아직 기록된 식사량/체중 데이터가 없습니다.<br>달력에서 날짜를 길게 눌러(Long-click) 기록해보세요.</div>';
+                if (mealWeightChartInstance) mealWeightChartInstance.destroy();
+                return;
+            }
             
-            logs.forEach(data => {
+            // 차트를 위해 날짜 오름차순 정렬
+            logs.sort((a, b) => a.date.localeCompare(b.date));
+
+            const labels = [];
+            const weightData = [];
+            const mealSumData = [];
+            const alcoholData = [];
+
+            // 리스트는 최신순으로 표시하기 위해 배열 뒤집기
+            let listHtml = '';
+            const reversedLogs = [...logs].reverse();
+            
+            reversedLogs.forEach(data => {
                 const dateStr = data.date;
-                const bf = data.breakfast ?? '-';
-                const lc = data.lunch ?? '-';
-                const dn = data.dinner ?? '-';
-                const sn = data.snack ?? '-';
-                const alc = data.alcohol ?? '-';
+                const bf = data.breakfast || 0;
+                const lc = data.lunch || 0;
+                const dn = data.dinner || 0;
+                const sn = data.snack || 0;
+                const alc = data.alcohol || 0;
+                const sum = bf + lc + dn + sn;
                 const wt = data.weight ? `${data.weight}kg` : '미입력';
 
-                const itemHtml = `
+                listHtml += `
                     <div class="history-item" onclick="openDailyLogModal('${dateStr}')" style="text-align:left;">
                         <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px dashed #e2e8f0; padding-bottom:8px; margin-bottom:8px;">
                             <strong style="color:var(--text-dark); font-size:1rem;">📅 ${dateStr}</strong>
@@ -1208,12 +1259,87 @@
                             <div>🍪 간식: <b>${sn}</b></div>
                         </div>
                         <div style="margin-top:8px; font-size:0.85rem; color:var(--danger-color); font-weight:bold;">
-                            🍷 음주량: ${alc}
+                            🍷 음주량: ${alc} | 🥗 식사총합: ${sum}
                         </div>
                     </div>
                 `;
-                container.insertAdjacentHTML('beforeend', itemHtml);
             });
+            container.innerHTML = listHtml;
+
+            // 차트 데이터 구성
+            logs.forEach(data => {
+                labels.push(data.date.slice(5)); // MM-DD
+                const bf = data.breakfast || 0;
+                const lc = data.lunch || 0;
+                const dn = data.dinner || 0;
+                const sn = data.snack || 0;
+                
+                mealSumData.push(bf + lc + dn + sn);
+                alcoholData.push(data.alcohol || 0);
+                weightData.push(data.weight || null);
+            });
+
+            if (mealWeightChartInstance) mealWeightChartInstance.destroy();
+            const ctx = document.getElementById('mealWeightChartCanvas').getContext('2d');
+            mealWeightChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            type: 'line',
+                            label: '체중 (kg)',
+                            data: weightData,
+                            borderColor: '#3498db',
+                            backgroundColor: '#3498db',
+                            yAxisID: 'yWeight',
+                            spanGaps: true,
+                            tension: 0.3,
+                            pointRadius: 4
+                        },
+                        {
+                            type: 'bar',
+                            label: '식사량 합계',
+                            data: mealSumData,
+                            backgroundColor: 'rgba(46, 204, 113, 0.6)',
+                            yAxisID: 'yAmount'
+                        },
+                        {
+                            type: 'bar',
+                            label: '음주량',
+                            data: alcoholData,
+                            backgroundColor: 'rgba(231, 76, 60, 0.7)',
+                            yAxisID: 'yAmount'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        yAmount: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: { display: true, text: '식사/음주량 (0~40)', font: { size: 10 } },
+                            beginAtZero: true,
+                            suggestedMax: 40
+                        },
+                        yWeight: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: { display: true, text: '체중 (kg)', font: { size: 10 } },
+                            grid: { drawOnChartArea: false }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: true, position: 'top', labels: { font: { size: 11 } } },
+                        tooltip: { mode: 'index', intersect: false }
+                    }
+                }
+            });
+
         } catch (e) {
             container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--danger-color);">기록을 불러오는데 실패했습니다.</div>';
             console.error(e);
@@ -1487,7 +1613,13 @@
                 cBadge = `<div class="caution-badge" onclick="showCautionReason(event, '${cautionForDay.reason}')">🚨</div>`;
             }
 
-            grid.innerHTML += `<div class="${classList.join(' ')}" ${customStyle} ${onClickEvent} data-date="${iterDateStrCal}" onmousedown="startPress(event, this)" onmouseup="cancelPress()" onmouseleave="cancelPress()" ontouchstart="startPress(event, this)" ontouchend="cancelPress()">${day}${cravingBadge}${cBadge}</div>`;
+            // 🥗 식사/음주 기록 배지 추가 (global dailyLogsData 확인)
+            let logBadge = '';
+            if (dailyLogsData[iterDateStrCal]) {
+                logBadge = `<div style="position: absolute; top: 2px; left: 4px; font-size: 0.65rem; z-index: 20;">🥗</div>`;
+            }
+
+            grid.innerHTML += `<div class="${classList.join(' ')}" ${customStyle} ${onClickEvent} data-date="${iterDateStrCal}" onmousedown="startPress(event, this)" onmouseup="cancelPress()" onmouseleave="cancelPress()" ontouchstart="startPress(event, this)" ontouchend="cancelPress()">${day}${cravingBadge}${cBadge}${logBadge}</div>`;
         }
     }
 
