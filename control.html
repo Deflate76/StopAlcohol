@@ -132,7 +132,25 @@
                 </select>
             </div>
 
-            <button class="action-btn btn-start" onclick="startDrinkingSession()">⏱️ 음주 시작 (타이머 구동)</button>
+            <div style="border-top: 1px dashed #e2e8f0; margin: 20px 0;"></div>
+            <div class="card-title" style="font-size: 1rem; margin-bottom: 15px;"><span>🍺</span> 처음 시작할 술</div>
+
+            <div class="input-group">
+                <label>드시는 술 종류</label>
+                <select id="startDrinkType">
+                    <option value="4.5">맥주 (4.5%)</option>
+                    <option value="16.5">소주 (16.5%)</option>
+                    <option value="13.0">와인 (13%)</option>
+                    <option value="40.0">위스키 (40%)</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label>용량 (ml)</label>
+                <input type="number" id="startDrinkVolume" placeholder="예: 500" value="500">
+            </div>
+
+            <button class="action-btn btn-start" onclick="startDrinkSession()">⏱️ 이 술로 음주 시작(타이머 구동)</button>
 
             <div style="border-top: 1px solid #e2e8f0; margin: 25px 0 15px 0;"></div>
             <div class="card-title" style="font-size: 1rem; color: #4a5568;"><span>📚</span> 과거 음주 조절 기록</div>
@@ -174,7 +192,9 @@
                 <input type="number" id="drinkVolume" placeholder="예: 500" value="500">
             </div>
 
-            <button class="action-btn btn-add" onclick="addDrinkItem()">🍺 해당 용량 음주완료 기록</button>
+            <button class="action-btn btn-add" onclick="addDrinkItem()">🍺 해당 용량 음주 시작</button>
+
+            <div id="preDrinkBacResult" style="display:none; margin-top:15px; padding:14px; border-radius:12px; background:#fff8e1; border:1px solid #f6c453; color:#5d4037; text-align:left; font-size:0.88rem; line-height:1.55;"></div>
             
             <div style="margin-top: 20px;"></div>
             
@@ -377,6 +397,205 @@
         return isNaN(parsed) ? 0 : parsed;
     }
 
+    // 신규 데이터는 drinkStartedAt을 사용하고, 기존 데이터의 endTime도 계속 지원합니다.
+    function getDrinkTimeMs(drink) {
+        if (!drink) return 0;
+        return toMs(drink.drinkStartedAt ?? drink.endTime ?? drink.startTime);
+    }
+
+    function getDrinkInput(typeSelectId, volumeInputId) {
+        const typeSelect = document.getElementById(typeSelectId);
+        const volumeInput = document.getElementById(volumeInputId);
+        const abv = parseFloat(typeSelect.value);
+        const volume = parseFloat(volumeInput.value);
+
+        if (!Number.isFinite(abv) || abv <= 0) {
+            throw new Error('술 종류를 올바르게 선택해주세요.');
+        }
+        if (!Number.isFinite(volume) || volume <= 0) {
+            throw new Error('용량을 올바르게 입력해주세요.');
+        }
+
+        return {
+            abv,
+            volume,
+            drinkName: typeSelect.options[typeSelect.selectedIndex].text
+        };
+    }
+
+    function calculateDrinkMetrics(gender, weight, abv, volume) {
+        const r = gender === 'male' ? 0.86 : 0.64;
+        const alcoholGrams = volume * (abv / 100) * 0.7894;
+        const cMaxContribution = (alcoholGrams * 0.7) / (weight * r * 10);
+        return { alcoholGrams, cMaxContribution };
+    }
+
+    /**
+     * 특정 시각 직전의 BAC를 앞서 기록된 술만 사용해 역산합니다.
+     * 기존 차트와 동일하게 식사 상태에 따른 선형 흡수와 시간당 0.015% 분해를 적용하되,
+     * 입력 시각을 더 정확히 반영하기 위해 최대 1분 단위로 적분합니다.
+     */
+    function calculateBacAtTime(priorDrinks, targetMs, mealOffsetHrs, sessionStartMs = null) {
+        if (!priorDrinks || priorDrinks.length === 0) return 0;
+
+        const validDrinks = priorDrinks
+            .filter(d => getDrinkTimeMs(d) > 0 && getDrinkTimeMs(d) <= targetMs)
+            .sort((a, b) => getDrinkTimeMs(a) - getDrinkTimeMs(b));
+        if (validDrinks.length === 0) return 0;
+
+        const firstDrinkMs = getDrinkTimeMs(validDrinks[0]);
+        const simulationStartMs = Math.min(sessionStartMs || firstDrinkMs, firstDrinkMs);
+        const mealOffsetMin = Math.max(0, Number(mealOffsetHrs) || 0);
+        const maxStepMs = 60 * 1000;
+        let currentBac = 0;
+        let cursorMs = simulationStartMs;
+
+        while (cursorMs < targetMs) {
+            const stepEndMs = Math.min(cursorMs + maxStepMs, targetMs);
+            const stepMinutes = (stepEndMs - cursorMs) / 60000;
+            let absorbedInStep = 0;
+
+            validDrinks.forEach(d => {
+                const drinkMs = getDrinkTimeMs(d);
+                const contribution = Number(d.cMaxContribution) || 0;
+
+                if (mealOffsetMin <= 0) {
+                    if (drinkMs >= cursorMs && drinkMs < stepEndMs) {
+                        absorbedInStep += contribution;
+                    }
+                    return;
+                }
+
+                const absorbStartMs = drinkMs;
+                const absorbEndMs = drinkMs + (mealOffsetMin * 60000);
+                const overlapStartMs = Math.max(cursorMs, absorbStartMs);
+                const overlapEndMs = Math.min(stepEndMs, absorbEndMs);
+                if (overlapStartMs < overlapEndMs) {
+                    const overlapMinutes = (overlapEndMs - overlapStartMs) / 60000;
+                    absorbedInStep += contribution * (overlapMinutes / mealOffsetMin);
+                }
+            });
+
+            currentBac += absorbedInStep;
+            currentBac = Math.max(0, currentBac - (0.015 * (stepMinutes / 60)));
+            cursorMs = stepEndMs;
+        }
+
+        return currentBac;
+    }
+
+    function createDrinkRecord({ typeSelectId, volumeInputId, startedAtMs, isInitialDrink = false }) {
+        const gender = document.getElementById('userGender').value;
+        const weight = parseFloat(document.getElementById('userWeight').value);
+        const mealOffsetHrs = parseFloat(document.getElementById('userMeal').value) || 1.0;
+        const input = getDrinkInput(typeSelectId, volumeInputId);
+        const metrics = calculateDrinkMetrics(gender, weight, input.abv, input.volume);
+        const priorDrinks = [...drinksList];
+        const prevTimeMs = priorDrinks.length > 0
+            ? getDrinkTimeMs(priorDrinks[priorDrinks.length - 1])
+            : sessionStartTime.getTime();
+        const priorAlcoholGrams = priorDrinks.reduce((sum, d) => sum + (Number(d.alcoholGrams) || 0), 0);
+        const bacBeforeDrink = calculateBacAtTime(
+            priorDrinks,
+            startedAtMs,
+            mealOffsetHrs,
+            sessionStartTime.getTime()
+        );
+
+        return {
+            id: Date.now() + drinksList.length,
+            sequence: drinksList.length + 1,
+            additionalSequence: isInitialDrink ? 0 : priorDrinks.filter(d => !d.isInitialDrink).length + 1,
+            entrySource: isInitialDrink ? 'session_start' : 'manual_add',
+            isInitialDrink,
+            drinkName: input.drinkName,
+            abv: input.abv,
+            volume: input.volume,
+            prevTime: prevTimeMs,
+            drinkStartedAt: startedAtMs,
+            endTime: startedAtMs, // 기존 저장 데이터 및 코드와의 하위 호환용
+            gapMinutes: isInitialDrink ? 0 : Math.max(0, Math.round((startedAtMs - prevTimeMs) / 60000)),
+            alcoholGrams: metrics.alcoholGrams,
+            cMaxContribution: metrics.cMaxContribution,
+            bacBeforeDrink,
+            priorDrinkCount: priorDrinks.length,
+            priorAlcoholGrams
+        };
+    }
+
+    function recalculateDrinkDerivedFields() {
+        if (!sessionStartTime || !drinksList) return;
+
+        const gender = document.getElementById('userGender').value;
+        const weight = parseFloat(document.getElementById('userWeight').value);
+        const mealOffsetHrs = parseFloat(document.getElementById('userMeal').value) || 1.0;
+        const rebuilt = [];
+
+        drinksList
+            .sort((a, b) => getDrinkTimeMs(a) - getDrinkTimeMs(b))
+            .forEach((drink, index) => {
+                const startedAtMs = getDrinkTimeMs(drink);
+                const metrics = calculateDrinkMetrics(
+                    gender,
+                    weight,
+                    Number(drink.abv) || 0,
+                    Number(drink.volume) || 0
+                );
+                const prevTimeMs = rebuilt.length > 0
+                    ? getDrinkTimeMs(rebuilt[rebuilt.length - 1])
+                    : sessionStartTime.getTime();
+                const priorAlcoholGrams = rebuilt.reduce((sum, d) => sum + (Number(d.alcoholGrams) || 0), 0);
+                const isInitialDrink = drink.isInitialDrink === true || drink.entrySource === 'session_start';
+
+                drink.sequence = index + 1;
+                drink.additionalSequence = isInitialDrink ? 0 : rebuilt.filter(d => !d.isInitialDrink).length + 1;
+                drink.isInitialDrink = isInitialDrink;
+                drink.entrySource = isInitialDrink ? 'session_start' : (drink.entrySource || 'manual_add');
+                drink.drinkStartedAt = startedAtMs;
+                drink.endTime = startedAtMs;
+                drink.prevTime = prevTimeMs;
+                drink.gapMinutes = isInitialDrink && index === 0
+                    ? 0
+                    : Math.max(0, Math.round((startedAtMs - prevTimeMs) / 60000));
+                drink.alcoholGrams = metrics.alcoholGrams;
+                drink.cMaxContribution = metrics.cMaxContribution;
+                drink.bacBeforeDrink = calculateBacAtTime(
+                    rebuilt,
+                    startedAtMs,
+                    mealOffsetHrs,
+                    sessionStartTime.getTime()
+                );
+                drink.priorDrinkCount = rebuilt.length;
+                drink.priorAlcoholGrams = priorAlcoholGrams;
+                rebuilt.push(drink);
+            });
+
+        drinksList = rebuilt;
+    }
+
+    function showLatestPreDrinkBacResult() {
+        const panel = document.getElementById('preDrinkBacResult');
+        if (!panel) return;
+        const latest = [...drinksList].reverse().find(d => !d.isInitialDrink);
+        if (!latest) {
+            panel.style.display = 'none';
+            panel.innerHTML = '';
+            return;
+        }
+
+        const startedAt = new Date(getDrinkTimeMs(latest));
+        const timeText = startedAt.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        panel.style.display = 'block';
+        const additionalSequence = Number(latest.additionalSequence) || drinksList.filter(d => !d.isInitialDrink).indexOf(latest) + 1;
+        panel.innerHTML = `
+            <b>🧮 추가 ${additionalSequence}번째 잔 시작 직전 역산 결과</b><br>
+            ${timeText} 기준, 앞선 <b>${latest.priorDrinkCount}회</b>의 음주와 누적 알코올
+            <b>${(Number(latest.priorAlcoholGrams) || 0).toFixed(1)}g</b>만 반영한 예상 BAC는
+            <b style="color:var(--danger-color); font-size:1rem;">${(Number(latest.bacBeforeDrink) || 0).toFixed(3)}%</b>입니다.<br>
+            <span style="font-size:0.76rem; color:#8d6e63;">※ 현재 새로 선택한 술의 알코올량은 이 직전 농도 계산에 포함하지 않았습니다.</span>
+        `;
+    }
+
     // 음주 간격에 따른 시각적 뱃지 및 연결선 생성기
     function getGapBadgeHTML(gapMinutes, isFirst) {
         let badgeColor, badgeText;
@@ -493,7 +712,7 @@
                 <div class="history-item" onclick="viewHistory('${data.id}')">
                     <div class="history-date">${dateStr} 세션 <span style="font-size:0.75rem; color:#a0aec0; font-weight:normal;">(${statusStr})</span></div>
                     <div class="history-summary">
-                        총 ${totalDrinks}잔 / 섭취 알코올 ${(data.totalAlcoholGrams || 0).toFixed(1)}g<br>
+                        총 ${totalDrinks}회 / 섭취 알코올 ${(data.totalAlcoholGrams || 0).toFixed(1)}g<br>
                         최고 도달 농도: <b>${(data.maxBac || 0).toFixed(3)}%</b>
                     </div>
                 </div>
@@ -512,6 +731,7 @@
         
         const mealVal = parseFloat(sessionData.mealOffsetHrs || 1.0).toFixed(1);
         document.getElementById('userMeal').value = mealVal;
+        recalculateDrinkDerivedFields();
 
         const gStr = sessionData.gender === 'male' ? '남성' : '여성';
         document.getElementById('profileText').innerHTML = `👤 나의 신체 정보: <b>${gStr}, ${sessionData.weight}kg</b>`;
@@ -524,6 +744,7 @@
         document.getElementById('startTimeDisplay').innerText = `시작 시각: ${startStr}`;
 
         renderDrinkList();
+        showLatestPreDrinkBacResult();
         if (drinksList.length > 0) {
             document.getElementById('activeChartContainer').style.display = 'block'; 
             updateActiveChart();
@@ -535,32 +756,56 @@
         startTimer();
     }
 
-    window.startDrinkingSession = async function() {
-        const weight = document.getElementById('userWeight').value;
-        if(!weight || weight <= 0) return alert("체중을 올바르게 입력해주세요.");
+    window.startDrinkSession = async function() {
+        const weight = parseFloat(document.getElementById('userWeight').value);
+        if (!Number.isFinite(weight) || weight <= 0) {
+            return alert("체중을 올바르게 입력해주세요.");
+        }
+
+        try {
+            // 시작 화면에서 선택한 술을 세션의 첫 번째 음주 기록으로 즉시 등록합니다.
+            getDrinkInput('startDrinkType', 'startDrinkVolume');
+        } catch (error) {
+            return alert(error.message);
+        }
 
         sessionStartTime = new Date();
         drinksList = [];
-        currentSessionDocId = null; 
-        
+        currentSessionDocId = null;
+
+        const initialDrink = createDrinkRecord({
+            typeSelectId: 'startDrinkType',
+            volumeInputId: 'startDrinkVolume',
+            startedAtMs: sessionStartTime.getTime(),
+            isInitialDrink: true
+        });
+        drinksList.push(initialDrink);
+
+        // 진행 화면의 다음 술 입력값도 시작 시 선택한 값으로 맞춰줍니다.
+        document.getElementById('drinkType').value = document.getElementById('startDrinkType').value;
+        document.getElementById('drinkVolume').value = document.getElementById('startDrinkVolume').value;
+
         const g = document.getElementById('userGender').value === 'male' ? '남성' : '여성';
         document.getElementById('profileText').innerHTML = `👤 나의 신체 정보: <b>${g}, ${weight}kg</b>`;
 
         document.getElementById('setupCard').style.display = 'none';
         document.getElementById('historyCard').style.display = 'none';
         document.getElementById('activeCard').style.display = 'block';
-        
+
         const startStr = sessionStartTime.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
         document.getElementById('startTimeDisplay').innerText = `시작 시각: ${startStr}`;
 
-        document.getElementById('activeChartContainer').style.display = 'none'; 
-        document.getElementById('activeSummary').style.display = 'none';
-        
+        document.getElementById('preDrinkBacResult').style.display = 'none';
         renderDrinkList();
+        document.getElementById('activeChartContainer').style.display = 'block';
+        updateActiveChart();
         startTimer();
 
-        executeSaveProcess(false, true); 
+        await executeSaveProcess(false, true);
     };
+
+    // 기존 호출명도 계속 동작하도록 별칭을 유지합니다.
+    window.startDrinkingSession = window.startDrinkSession;
 
     function startTimer() {
         if(timerInterval) clearInterval(timerInterval);
@@ -596,19 +841,23 @@
         if(!inputVal) return alert("시각을 정확히 입력해주세요.");
         
         const newStartTime = new Date(inputVal);
+        const oldStartMs = sessionStartTime.getTime();
+        const deltaMs = newStartTime.getTime() - oldStartMs;
         sessionStartTime = newStartTime;
-        
-        // 기준 시각 변경에 따른 간격 재계산 (endTime은 유지)
-        for (let i = 0; i < drinksList.length; i++) {
-            const prevMs = i > 0 ? toMs(drinksList[i-1].endTime) : sessionStartTime.getTime();
-            drinksList[i].prevTime = prevMs;
-            drinksList[i].gapMinutes = Math.round((toMs(drinksList[i].endTime) - prevMs) / 60000);
-        }
+
+        // 시작 시각을 옮기면 모든 음주 시작 시각도 기존 간격을 유지한 채 함께 이동합니다.
+        drinksList.forEach(drink => {
+            const shiftedMs = getDrinkTimeMs(drink) + deltaMs;
+            drink.drinkStartedAt = shiftedMs;
+            drink.endTime = shiftedMs;
+        });
+        recalculateDrinkDerivedFields();
         
         const startStr = sessionStartTime.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
         document.getElementById('startTimeDisplay').innerText = `시작 시각: ${startStr}`;
         
         renderDrinkList();
+        showLatestPreDrinkBacResult();
         if(drinksList.length > 0) updateActiveChart();
         executeSaveProcess(false, true);
         
@@ -638,14 +887,10 @@
         const gStr = document.getElementById('editGender').value === 'male' ? '남성' : '여성';
         document.getElementById('profileText').innerHTML = `👤 나의 신체 정보: <b>${gStr}, ${nw}kg</b>`;
         
-        // 기여도 재계산
-        const r = document.getElementById('userGender').value === 'male' ? 0.86 : 0.64;
-        drinksList.forEach(d => {
-            const cMaxContribution = (d.alcoholGrams * 0.7) / (nw * r * 10);
-            d.cMaxContribution = cMaxContribution;
-        });
-        
+        // 체중/성별 변경 후 각 잔의 기여도와 잔 시작 직전 BAC를 모두 다시 계산합니다.
+        recalculateDrinkDerivedFields();
         renderDrinkList();
+        showLatestPreDrinkBacResult();
         if(drinksList.length > 0) updateActiveChart();
         executeSaveProcess(false, true);
         
@@ -667,6 +912,8 @@
             document.getElementById('setupCard').style.display = 'block';
             document.getElementById('activeCard').style.display = 'none';
             document.getElementById('drinkVolume').value = '500';
+            document.getElementById('startDrinkVolume').value = '500';
+            document.getElementById('preDrinkBacResult').style.display = 'none';
             
             document.getElementById('mainControlArea').style.display = 'none';
             document.getElementById('loadingArea').style.display = 'flex';
@@ -675,40 +922,27 @@
     };
 
     window.addDrinkItem = function() {
-        const gender = document.getElementById('userGender').value;
-        const weight = parseFloat(document.getElementById('userWeight').value);
-        const drinkTypeSelect = document.getElementById('drinkType');
-        const abv = parseFloat(drinkTypeSelect.value);
-        const drinkName = drinkTypeSelect.options[drinkTypeSelect.selectedIndex].text;
-        const volume = parseFloat(document.getElementById('drinkVolume').value);
+        if (!sessionStartTime) return alert('먼저 음주 세션을 시작해주세요.');
 
-        if(!volume || volume <= 0) return alert("용량을 올바르게 입력해주세요.");
+        let newDrink;
+        try {
+            const nowMs = Date.now();
+            // 새 술을 drinksList에 넣기 전에 기존 기록만으로 현재 시각 직전 BAC를 역산합니다.
+            newDrink = createDrinkRecord({
+                typeSelectId: 'drinkType',
+                volumeInputId: 'drinkVolume',
+                startedAtMs: nowMs,
+                isInitialDrink: false
+            });
+        } catch (error) {
+            return alert(error.message);
+        }
 
-        const now = new Date();
-        const prevTimeMs = drinksList.length > 0 ? toMs(drinksList[drinksList.length - 1].endTime) : sessionStartTime.getTime();
-        const gapMs = now.getTime() - prevTimeMs;
-        const gapMinutes = Math.round(gapMs / 60000);
-
-        const r = gender === 'male' ? 0.86 : 0.64;
-        const alcoholGrams = volume * (abv / 100) * 0.7894;
-        const cMaxContribution = (alcoholGrams * 0.7) / (weight * r * 10);
-
-        drinksList.push({
-            id: Date.now(),
-            drinkName: drinkName,
-            abv: abv,
-            volume: volume,
-            prevTime: prevTimeMs, 
-            endTime: now.getTime(),
-            gapMinutes: gapMinutes,
-            alcoholGrams: alcoholGrams,
-            cMaxContribution: cMaxContribution
-        });
-
+        drinksList.push(newDrink);
         renderDrinkList();
+        showLatestPreDrinkBacResult();
         document.getElementById('activeChartContainer').style.display = 'block';
-        
-        updateActiveChart(); 
+        updateActiveChart();
         executeSaveProcess(false, true);
     };
 
@@ -719,15 +953,13 @@
             if(drinksList.length === 0) {
                 document.getElementById('activeChartContainer').style.display = 'none';
                 document.getElementById('activeSummary').style.display = 'none';
+                document.getElementById('preDrinkBacResult').style.display = 'none';
             } else {
-                for(let i = 0; i < drinksList.length; i++) {
-                    const prevMs = i > 0 ? toMs(drinksList[i-1].endTime) : sessionStartTime.getTime();
-                    drinksList[i].prevTime = prevMs;
-                    drinksList[i].gapMinutes = Math.round((toMs(drinksList[i].endTime) - prevMs) / 60000);
-                }
+                recalculateDrinkDerivedFields();
                 updateActiveChart();
             }
             renderDrinkList();
+            showLatestPreDrinkBacResult();
             executeSaveProcess(false, true);
         }
     };
@@ -748,7 +980,7 @@
         `;
 
         if(targetList.length === 0) {
-            html += `<div style="text-align:center; padding:20px; color:#a0aec0; font-size:0.85rem; background:white; border:1px dashed #cbd5e0; border-radius:14px; margin-top:15px; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">아직 기록된 음주 내용이 없습니다.<br>위 버튼을 눌러 첫 잔을 기록하세요.</div>`;
+            html += `<div style="text-align:center; padding:20px; color:#a0aec0; font-size:0.85rem; background:white; border:1px dashed #cbd5e0; border-radius:14px; margin-top:15px; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">아직 기록된 음주 내용이 없습니다.<br>음주 세션을 다시 시작해주세요.</div>`;
             container.innerHTML = html;
             return;
         }
@@ -760,8 +992,8 @@
         for (let i = 0; i < targetList.length; i++) {
             const d = targetList[i];
             
-            const eTime = new Date(toMs(d.endTime));
-            const endStr = eTime.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+            const eTime = new Date(getDrinkTimeMs(d));
+            const startDrinkStr = eTime.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
             
             // 만약 viewHistory 컨텍스트에서 호출된 경우라면 별도의 mealOffsetHrs를 받아야 하나
             // renderDrinkList를 통합했으므로 여기서는 UI의 userMeal을 가져오도록 하고,
@@ -777,18 +1009,29 @@
             const grams = d.alcoholGrams || 0;
             const contribution = d.cMaxContribution || 0;
 
-            html += getGapBadgeHTML(d.gapMinutes, i === 0);
+            if (i > 0) html += getGapBadgeHTML(d.gapMinutes, i === 1);
+
+            const bacBeforeDrink = Number.isFinite(Number(d.bacBeforeDrink))
+                ? Number(d.bacBeforeDrink)
+                : calculateBacAtTime(targetList.slice(0, i), getDrinkTimeMs(d), mealOffsetHrs, startMs);
+            const priorAlcoholGrams = Number.isFinite(Number(d.priorAlcoholGrams))
+                ? Number(d.priorAlcoholGrams)
+                : targetList.slice(0, i).reduce((sum, item) => sum + (Number(item.alcoholGrams) || 0), 0);
+            const additionalSequence = Number(d.additionalSequence) || targetList.slice(0, i + 1).filter(item => !item.isInitialDrink).length;
+            const entryLabel = d.isInitialDrink ? '세션 시작 술' : `추가 ${additionalSequence}번째 잔`;
 
             html += `
                 <div class="drink-item">
                     <button class="delete-drink-btn" onclick="deleteDrink(${i})" title="삭제">&times;</button>
                     <div class="drink-item-header">
-                        <span>${d.drinkName} - ${d.volume}ml</span>
+                        <span>${entryLabel} · ${d.drinkName} - ${d.volume}ml</span>
                     </div>
-                    <div class="drink-item-time">음주 완료 시각: ${endStr}</div>
+                    <div class="drink-item-time">음주 시작 시각: ${startDrinkStr}</div>
                     <div class="drink-item-stats">
-                        • 섭취 알코올 (해당 잔): <b>${grams.toFixed(1)}g</b><br>
-                        • 단일 잔 예상 최고 BAC 기여도: <b>${contribution.toFixed(3)}%</b><br>
+                        • 이 술 시작 직전 예상 BAC: <b style="color:var(--danger-color);">${bacBeforeDrink.toFixed(3)}%</b><br>
+                        • 직전 계산에 반영된 누적 알코올: <b>${priorAlcoholGrams.toFixed(1)}g</b><br>
+                        • 섭취 알코올 (해당 술): <b>${grams.toFixed(1)}g</b><br>
+                        • 단일 술 예상 최고 BAC 기여도: <b>${contribution.toFixed(3)}%</b><br>
                         • <b>누적 최고 도달 예상 BAC: <span style="color:var(--danger-color);">${exactMaxBac.toFixed(3)}%</span></b><br>
                         • 최고농도 도달 예상 시각: <b>${maxBacTimeStr} 경</b>
                     </div>
@@ -815,8 +1058,21 @@
 
         const summaryEl = document.getElementById('activeSummary');
         summaryEl.style.display = 'block';
+        const currentEstimatedBac = calculateBacAtTime(
+            drinksList,
+            Date.now(),
+            mealOffsetHrs,
+            sessionStartTime.getTime()
+        );
+        const latestDrink = drinksList[drinksList.length - 1];
+        const latestPreBacLine = latestDrink && !latestDrink.isInitialDrink
+            ? `• 최근 술 시작 직전 역산 BAC: <b style="color:var(--warning-color);">${(Number(latestDrink.bacBeforeDrink) || 0).toFixed(3)}%</b><br>`
+            : '';
+
         summaryEl.innerHTML = `
-            🍻 현재까지 누적 <b>${drinksList.length}잔</b> / 알코올 <b>${totalAlcoholGrams.toFixed(1)}g</b> 섭취<br>
+            🍻 현재까지 누적 <b>${drinksList.length}회</b> / 알코올 <b>${totalAlcoholGrams.toFixed(1)}g</b> 섭취<br>
+            ${latestPreBacLine}
+            • 현재 시각 예상 BAC: <b style="color:var(--primary-color);">${currentEstimatedBac.toFixed(3)}%</b><br>
             • 종합 예상 최고 농도: <b style="color:var(--danger-color);">${(chartData.maxBac || 0).toFixed(3)}%</b><br>
             • 알코올 완전 분해 예상 소요: <b style="color:var(--info-color);">${totalClearHrs.toFixed(1)}시간</b><br>
             • 예상 숙취 강도: <b>${hangoverStr}</b>
@@ -883,6 +1139,8 @@
                 drinksList = [];
                 currentSessionDocId = null;
                 document.getElementById('drinkVolume').value = '500';
+                document.getElementById('startDrinkVolume').value = '500';
+                document.getElementById('preDrinkBacResult').style.display = 'none';
                 
                 document.getElementById('loadingText').innerText = "데이터 갱신 중...";
                 loadSessionsAndCheckActive();
@@ -922,7 +1180,7 @@
         document.getElementById('historySummary').innerHTML = `
             세션 상태: <b>${statusStr}</b><br>
             세션 일시: <b>${sessionDate.toLocaleString('ko-KR')}</b><br>
-            총 <b>${sessionData.drinksList ? sessionData.drinksList.length : 0}잔</b> / 알코올 <b>${(sessionData.totalAlcoholGrams || 0).toFixed(1)}g</b> 섭취<br>
+            총 <b>${sessionData.drinksList ? sessionData.drinksList.length : 0}회</b> / 알코올 <b>${(sessionData.totalAlcoholGrams || 0).toFixed(1)}g</b> 섭취<br>
             • 종합 예상 최고 농도: <b style="color:var(--danger-color);">${(chartData.maxBac || 0).toFixed(3)}%</b><br>
             • 알코올 완전 분해 소요: 약 <b style="color:var(--info-color);">${totalClearHrs.toFixed(1)}시간</b><br>
             • 예상 숙취 강도: <b>${hangoverStr}</b>
@@ -943,8 +1201,8 @@
 
         if(sessionData.drinksList && sessionData.drinksList.length > 0) {
             sessionData.drinksList.forEach((d, i) => {
-                const eTime = new Date(toMs(d.endTime));
-                const endStr = eTime.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+                const eTime = new Date(getDrinkTimeMs(d));
+                const startDrinkStr = eTime.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
                 
                 const maxBacDate = new Date(eTime.getTime() + (mealOffsetHrs * 60 * 60000));
                 const maxBacTimeStr = maxBacDate.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
@@ -956,17 +1214,28 @@
                 const grams = d.alcoholGrams || 0;
                 const contribution = d.cMaxContribution || 0;
 
-                html += getGapBadgeHTML(d.gapMinutes, i === 0);
+                if (i > 0) html += getGapBadgeHTML(d.gapMinutes, i === 1);
+
+                const bacBeforeDrink = Number.isFinite(Number(d.bacBeforeDrink))
+                    ? Number(d.bacBeforeDrink)
+                    : calculateBacAtTime(sessionData.drinksList.slice(0, i), getDrinkTimeMs(d), mealOffsetHrs, startMs);
+                const priorAlcoholGrams = Number.isFinite(Number(d.priorAlcoholGrams))
+                    ? Number(d.priorAlcoholGrams)
+                    : sessionData.drinksList.slice(0, i).reduce((sum, item) => sum + (Number(item.alcoholGrams) || 0), 0);
+                const additionalSequence = Number(d.additionalSequence) || sessionData.drinksList.slice(0, i + 1).filter(item => !item.isInitialDrink).length;
+                const entryLabel = d.isInitialDrink ? '세션 시작 술' : `추가 ${additionalSequence}번째 잔`;
 
                 html += `
                     <div class="drink-item">
                         <div class="drink-item-header">
-                            <span>${d.drinkName} - ${d.volume}ml</span>
+                            <span>${entryLabel} · ${d.drinkName} - ${d.volume}ml</span>
                         </div>
-                        <div class="drink-item-time">음주 완료 시각: ${endStr}</div>
+                        <div class="drink-item-time">음주 시작 시각: ${startDrinkStr}</div>
                         <div class="drink-item-stats">
-                            • 섭취 알코올 (해당 잔): <b>${grams.toFixed(1)}g</b><br>
-                            • 단일 잔 예상 최고 BAC 기여도: <b>${contribution.toFixed(3)}%</b><br>
+                            • 이 술 시작 직전 예상 BAC: <b style="color:var(--danger-color);">${bacBeforeDrink.toFixed(3)}%</b><br>
+                            • 직전 계산에 반영된 누적 알코올: <b>${priorAlcoholGrams.toFixed(1)}g</b><br>
+                            • 섭취 알코올 (해당 술): <b>${grams.toFixed(1)}g</b><br>
+                            • 단일 술 예상 최고 BAC 기여도: <b>${contribution.toFixed(3)}%</b><br>
                             • <b>누적 최고 도달 예상 BAC: <span style="color:var(--danger-color);">${exactMaxBac.toFixed(3)}%</span></b><br>
                             • 최고농도 도달 예상 시각: <b>${maxBacTimeStr} 경</b>
                         </div>
@@ -999,10 +1268,10 @@
             return { labels: ['00:00'], timeMsList: [startMs], dataPoints: [0], achDataPoints: [0], maxBac: 0, maxAch: 0 };
         }
 
-        let earliestDrinkMs = Math.min(...targetDrinksList.map(d => toMs(d.endTime)));
+        let earliestDrinkMs = Math.min(...targetDrinksList.map(d => getDrinkTimeMs(d)));
         let actualPlotStartMs = Math.min(startMs, earliestDrinkMs);
 
-        const lastDrinkFullyAbsorbedTime = toMs(targetDrinksList[targetDrinksList.length - 1].endTime) + (mealOffsetMin * 60000);
+        const lastDrinkFullyAbsorbedTime = getDrinkTimeMs(targetDrinksList[targetDrinksList.length - 1]) + (mealOffsetMin * 60000);
         
         let currentBac = 0;
         let currentAch = 0;
@@ -1019,7 +1288,7 @@
             let stepEndMs = currentMs;
 
             targetDrinksList.forEach(d => {
-                const eMs = toMs(d.endTime);
+                const eMs = getDrinkTimeMs(d);
                 const contribution = d.cMaxContribution || 0; 
 
                 if (mealOffsetMin <= 0) {
