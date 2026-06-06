@@ -228,7 +228,7 @@
                     <div class="legend-item"><span class="legend-line" style="color: #e74c3c; font-weight:800;">━━</span><span>현재 마신 술 기준 BAC</span></div>
                     <div class="legend-item"><span class="legend-line" style="color: #e67e22; font-weight:600;">━━</span><span>이전 잔별 BAC 추이</span></div>
                     <div class="legend-item"><span class="legend-line" style="color: #f1c40f; font-weight:800;">━━</span><span>아세트알데하이드(숙취)</span></div>
-                    <div class="legend-item"><span class="legend-line" style="color: #3498db;">│</span><span>현재 시각</span></div>
+                    <div class="legend-item"><span class="legend-line" style="color: #3498db; font-weight:500;">- - -</span><span>현재 시각</span></div>
                 </div>
             </div>
             
@@ -359,9 +359,9 @@
     });
 
     const APP_VERSION = Object.freeze({
-        version: 'v2026.06.06-09',
+        version: 'v2026.06.06-10',
         updatedAt: '2026-06-06 KST',
-        note: '현재 추가잔 포함 BAC 점선화, 현재 마신 술 기준 BAC 분리, 시작잔 누적 알코올 표시 제외'
+        note: '현재시각/정지/취소 기준선 후면 배치, 현재시각 레이블 위치 조정'
     });
 
     const versionEl = document.getElementById('appVersionText');
@@ -1801,6 +1801,8 @@
         if (existingInstance) existingInstance.destroy();
         const ctx = document.getElementById(canvasId).getContext('2d');
         
+        const guidelineDrawTime = isActiveSession ? 'beforeDatasetsDraw' : 'afterDatasetsDraw';
+
         let annotationsConfig = {
             boxSafe: { type: 'box', yMin: 0, yMax: 0.05, backgroundColor: 'rgba(46, 204, 113, 0.1)', borderWidth: 0, drawTime: 'beforeDraw' },
             boxWarn: { type: 'box', yMin: 0.05, yMax: 0.15, backgroundColor: 'rgba(243, 156, 18, 0.1)', borderWidth: 0, drawTime: 'beforeDraw' },
@@ -1809,10 +1811,12 @@
             
             lineSuspension: {
                 type: 'line', yMin: 0.03, yMax: 0.03, borderColor: '#f39c12', borderWidth: 2, borderDash: [4, 4],
+                drawTime: guidelineDrawTime, z: -10,
                 label: { display: true, content: '정지(0.03)', position: 'start', backgroundColor: 'rgba(243, 156, 18, 0.8)', font: { size: 9 }, yAdjust: -10 }
             },
             lineRevocation: {
                 type: 'line', yMin: 0.08, yMax: 0.08, borderColor: '#e74c3c', borderWidth: 2, borderDash: [4, 4],
+                drawTime: guidelineDrawTime, z: -10,
                 label: { display: true, content: '취소(0.08)', position: 'start', backgroundColor: 'rgba(231, 76, 60, 0.8)', font: { size: 9 }, yAdjust: -10 }
             }
         };
@@ -1833,9 +1837,27 @@
                 type: 'line',
                 xMin: currentLabel,
                 xMax: currentLabel,
-                borderColor: '#3498db',
-                borderWidth: 2,
-                label: { display: true, content: '현재시각', position: 'start', backgroundColor: '#3498db', font: { size: 10 } }
+                borderColor: 'rgba(52, 152, 219, 0.85)',
+                borderWidth: 1,
+                borderDash: [3, 3],
+                drawTime: 'beforeDatasetsDraw',
+                z: -20,
+                label: { display: false }
+            };
+
+            annotationsConfig.labelCurrentTime = {
+                type: 'label',
+                xValue: currentLabel,
+                yValue: 0.07,
+                adjustScaleRange: false,
+                content: ['현재시각'],
+                backgroundColor: 'rgba(52, 152, 219, 0.9)',
+                color: '#ffffff',
+                font: { size: 10, weight: '700' },
+                padding: { top: 3, bottom: 3, left: 6, right: 6 },
+                borderRadius: 6,
+                drawTime: 'afterDatasetsDraw',
+                z: 20
             };
         }
 
