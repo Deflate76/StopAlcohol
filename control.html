@@ -358,9 +358,9 @@
     });
 
     const APP_VERSION = Object.freeze({
-        version: 'v2026.06.06-07',
+        version: 'v2026.06.06-08',
         updatedAt: '2026-06-06 KST',
-        note: '현재 추정 BAC 실시간 갱신, 잔별 직전 BAC 표시 제거, 아세트알데하이드 그래프 굵기 강화'
+        note: '추가잔 제외 기준 현재 추정 BAC, activeSummary 이전잔 누적 기준, 초단위 실시간 갱신'
     });
 
     const versionEl = document.getElementById('appVersionText');
@@ -664,6 +664,39 @@
         );
     }
 
+    function getLatestAdditionalDrinkIndex(targetList = drinksList) {
+        if (!Array.isArray(targetList) || targetList.length === 0) return -1;
+        for (let i = targetList.length - 1; i >= 0; i--) {
+            if (!isInitialDrinkRecord(targetList[i], i)) return i;
+        }
+        return -1;
+    }
+
+    // preDrinkBacResult와 activeSummary는 최신 추가잔을 제외하고,
+    // 세션 시작잔 + 최신 추가잔 이전의 잔까지만 기준으로 계산합니다.
+    function getDrinksBeforeLatestAdditionalDrink(targetList = drinksList) {
+        const latestAdditionalIndex = getLatestAdditionalDrinkIndex(targetList);
+        if (latestAdditionalIndex <= 0) return [];
+        return targetList.slice(0, latestAdditionalIndex);
+    }
+
+    function calculateAbsorbedAlcoholGramsAtTime(targetDrinks, targetMs = Date.now()) {
+        if (!Array.isArray(targetDrinks) || targetDrinks.length === 0) return 0;
+        const mealOffsetHrs = parseFloat(document.getElementById('userMeal').value) || 1.0;
+        const absorbMinutes = Math.max(0, mealOffsetHrs * 60);
+
+        return targetDrinks.reduce((sum, d) => {
+            const drinkMs = getDrinkTimeMs(d);
+            const grams = Number(d.alcoholGrams) || 0;
+            if (!drinkMs || drinkMs > targetMs) return sum;
+            if (absorbMinutes <= 0) return sum + grams;
+
+            const elapsedMinutes = Math.max(0, (targetMs - drinkMs) / 60000);
+            const absorbedRatio = Math.min(1, elapsedMinutes / absorbMinutes);
+            return sum + (grams * absorbedRatio);
+        }, 0);
+    }
+
 
     function hideActiveAnalysis() {
         const chartContainer = document.getElementById('activeChartContainer');
@@ -788,8 +821,16 @@
         const panel = document.getElementById('preDrinkBacResult');
         if (!panel) return;
 
-        const latest = [...drinksList].reverse().find((d) => !isInitialDrinkRecord(d, drinksList.indexOf(d)));
-        if (!latest) {
+        const latestAdditionalIndex = getLatestAdditionalDrinkIndex(drinksList);
+        if (latestAdditionalIndex < 0) {
+            panel.style.display = 'none';
+            panel.innerHTML = '';
+            return;
+        }
+
+        const latest = drinksList[latestAdditionalIndex];
+        const referenceDrinks = getDrinksBeforeLatestAdditionalDrink(drinksList);
+        if (referenceDrinks.length === 0) {
             panel.style.display = 'none';
             panel.innerHTML = '';
             return;
@@ -798,30 +839,22 @@
         const nowMs = Date.now();
         const elapsedText = formatElapsedFromStart(nowMs);
         const nowText = new Date(nowMs).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        const currentEstimatedBac = getRealtimeEstimatedBac(nowMs, drinksList);
-        const totalAlcoholGrams = drinksList.reduce((sum, d) => sum + (Number(d.alcoholGrams) || 0), 0);
-        const absorbedAlcoholGrams = drinksList.reduce((sum, d) => {
-            const drinkMs = getDrinkTimeMs(d);
-            const grams = Number(d.alcoholGrams) || 0;
-            if (!drinkMs || drinkMs > nowMs) return sum;
-
-            const mealOffsetHrs = parseFloat(document.getElementById('userMeal').value) || 1.0;
-            const absorbMinutes = Math.max(0, mealOffsetHrs * 60);
-            if (absorbMinutes <= 0) return sum + grams;
-
-            const elapsedMinutes = Math.max(0, (nowMs - drinkMs) / 60000);
-            const absorbedRatio = Math.min(1, elapsedMinutes / absorbMinutes);
-            return sum + (grams * absorbedRatio);
-        }, 0);
+        const currentEstimatedBac = getRealtimeEstimatedBac(nowMs, referenceDrinks);
+        const referenceTotalAlcoholGrams = referenceDrinks.reduce((sum, d) => sum + (Number(d.alcoholGrams) || 0), 0);
+        const absorbedAlcoholGrams = calculateAbsorbedAlcoholGramsAtTime(referenceDrinks, nowMs);
+        const excludedAlcoholGrams = Number(latest.alcoholGrams) || 0;
+        const additionalSequence = Number(latest.additionalSequence)
+            || drinksList.slice(0, latestAdditionalIndex + 1).filter((d, index) => !isInitialDrinkRecord(d, index)).length;
 
         panel.style.display = 'block';
         panel.innerHTML = `
             <b>🧮 현재 추정 BAC</b><br>
             음주 진행 시간 <b>${elapsedText}</b> / 현재 시각 <b>${nowText}</b> 기준,<br>
-            기록된 술 <b>${drinksList.length}회</b> 중 현재까지 흡수된 알코올 약
-            <b>${absorbedAlcoholGrams.toFixed(1)}g</b>을 반영한 예상 BAC는
+            <b>추가 ${additionalSequence}번째 잔은 제외</b>하고 이전 술 기록 <b>${referenceDrinks.length}회</b>,
+            누적 알코올 <b>${referenceTotalAlcoholGrams.toFixed(1)}g</b> 중 현재까지 흡수된 약
+            <b>${absorbedAlcoholGrams.toFixed(1)}g</b>만 반영한 예상 BAC는
             <b style="color:var(--danger-color); font-size:1rem;">${currentEstimatedBac.toFixed(3)}%</b>입니다.<br>
-            <span style="font-size:0.76rem; color:#8d6e63;">※ 총 기록 알코올 ${totalAlcoholGrams.toFixed(1)}g 중 아직 흡수 중인 양은 현재 시각 BAC에 전부 반영하지 않습니다.</span>
+            <span style="font-size:0.76rem; color:#8d6e63;">※ 방금 입력한 추가잔 알코올 ${excludedAlcoholGrams.toFixed(1)}g은 이 현재 추정 BAC 계산에 포함하지 않았습니다.</span>
         `;
     }
 
@@ -1084,14 +1117,19 @@
     function startTimer() {
         if(timerInterval) clearInterval(timerInterval);
         timerInterval = setInterval(() => {
-            const diff = new Date() - sessionStartTime;
+            const now = new Date();
+            const diff = now - sessionStartTime;
             const h = Math.floor(diff / 3600000).toString().padStart(2, '0');
             const m = Math.floor((diff / 60000) % 60).toString().padStart(2, '0');
             const s = Math.floor((diff / 1000) % 60).toString().padStart(2, '0');
             document.getElementById('elapsedTimeDisplay').innerText = `음주 진행 시간: ${h}:${m}:${s}`;
+
+            // 현재 추정 BAC 패널은 최신 추가잔을 제외한 이전 잔 기준으로 초단위 갱신합니다.
+            showLatestPreDrinkBacResult();
+            updateActiveSummaryOnly();
             
-            // 실시간으로 차트의 현재시각 세로선만 업데이트 (30초마다 차트 리렌더링)
-            if (activeChartInstance && activeAnalysisUnlocked && hasAdditionalDrinks() && new Date().getSeconds() % 30 === 0) {
+            // 차트의 현재시각 세로선은 렌더링 부담을 줄이기 위해 30초마다 리렌더링합니다.
+            if (activeChartInstance && activeAnalysisUnlocked && hasAdditionalDrinks() && now.getSeconds() % 30 === 0) {
                  updateActiveChart();
             }
         }, 1000);
@@ -1323,6 +1361,66 @@
         container.innerHTML = html;
     }
 
+    function renderActiveSummary(summaryDrinks = null, summaryChartData = null) {
+        const summaryEl = document.getElementById('activeSummary');
+        if (!summaryEl) return;
+
+        if(!activeAnalysisUnlocked || !hasAdditionalDrinks()) {
+            summaryEl.style.display = 'none';
+            summaryEl.innerHTML = '';
+            summaryEl.setAttribute('data-visible', 'false');
+            return;
+        }
+
+        const latestAdditionalIndex = getLatestAdditionalDrinkIndex(drinksList);
+        if (latestAdditionalIndex < 0) {
+            summaryEl.style.display = 'none';
+            summaryEl.innerHTML = '';
+            summaryEl.setAttribute('data-visible', 'false');
+            return;
+        }
+
+        const latestDrink = drinksList[latestAdditionalIndex];
+        const referenceDrinks = Array.isArray(summaryDrinks) ? summaryDrinks : getDrinksBeforeLatestAdditionalDrink(drinksList);
+        if (referenceDrinks.length === 0) {
+            summaryEl.style.display = 'none';
+            summaryEl.innerHTML = '';
+            summaryEl.setAttribute('data-visible', 'false');
+            return;
+        }
+
+        const mealOffsetHrs = parseFloat(document.getElementById('userMeal').value) || 1.0;
+        const chartForSummary = summaryChartData || generateChartData(referenceDrinks, sessionStartTime.getTime(), mealOffsetHrs);
+        const sessionPeakBac = Number(chartForSummary.maxBac) || 0;
+        const currentEstimatedBac = getRealtimeEstimatedBac(Date.now(), referenceDrinks);
+        const totalAlcoholGrams = referenceDrinks.reduce((sum, d) => sum + (Number(d.alcoholGrams) || 0), 0);
+        const totalClearHrs = ((chartForSummary.dataPoints.length - 1) * (chartForSummary.stepMinutes || 5)) / 60;
+        const additionalSequence = Number(latestDrink.additionalSequence)
+            || drinksList.slice(0, latestAdditionalIndex + 1).filter((d, index) => !isInitialDrinkRecord(d, index)).length;
+        const excludedAlcoholGrams = Number(latestDrink.alcoholGrams) || 0;
+        
+        let hangoverStr = "";
+        if (chartForSummary.maxAch < 0.015) hangoverStr = "🟢 거의 없음 (양호)";
+        else if (chartForSummary.maxAch < 0.035) hangoverStr = "🟡 가벼운 피로 및 갈증";
+        else if (chartForSummary.maxAch < 0.065) hangoverStr = "🟠 두통 및 속쓰림 예상";
+        else hangoverStr = "🔴 극심한 숙취 (주의)";
+
+        summaryEl.style.display = 'block';
+        summaryEl.setAttribute('data-visible', 'true');
+        summaryEl.innerHTML = `
+            🍻 추가 ${additionalSequence}번째 잔 <b>이전 기준</b>: 누적 <b>${referenceDrinks.length}회</b> / 알코올 <b>${totalAlcoholGrams.toFixed(1)}g</b> 반영<br>
+            <span style="font-size:0.78rem; color:#8d6e63;">※ 방금 입력한 추가잔 알코올 ${excludedAlcoholGrams.toFixed(1)}g은 아래 요약 계산에서 제외했습니다.</span><br>
+            • 종합 예상 최고 농도: <b style="color:var(--danger-color);">${sessionPeakBac.toFixed(3)}%</b><br>
+            • 현재 시각 추정 BAC: <b style="color:var(--primary-color);">${currentEstimatedBac.toFixed(3)}%</b><br>
+            • 알코올 완전 분해 예상 소요: <b style="color:var(--info-color);">${totalClearHrs.toFixed(1)}시간</b><br>
+            • 예상 숙취 강도: <b>${hangoverStr}</b>
+        `;
+    }
+
+    function updateActiveSummaryOnly() {
+        renderActiveSummary();
+    }
+
     function updateActiveChart() {
         if(!activeAnalysisUnlocked || !hasAdditionalDrinks()) {
             hideActiveAnalysis();
@@ -1330,36 +1428,14 @@
         }
         document.getElementById('activeChartContainer').style.display = 'block';
         const mealOffsetHrs = parseFloat(document.getElementById('userMeal').value) || 1.0;
+
+        // 차트는 전체 세션 흐름을 보여주되, 상단 요약(activeSummary)은 최신 추가잔 제외 기준으로 계산합니다.
         const chartData = generateChartData(drinksList, sessionStartTime.getTime(), mealOffsetHrs);
-        const sessionPeakBac = Number(chartData.maxBac) || 0;
-        const currentEstimatedBac = getChartBacAtTime(chartData, Date.now());
-        
-        const totalAlcoholGrams = drinksList.reduce((sum, d) => sum + (d.alcoholGrams || 0), 0);
-        const totalClearHrs = ((chartData.dataPoints.length - 1) * (chartData.stepMinutes || 5)) / 60; 
-        
-        // 숙취 뱃지 생성
-        let hangoverStr = "";
-        if (chartData.maxAch < 0.015) hangoverStr = "🟢 거의 없음 (양호)";
-        else if (chartData.maxAch < 0.035) hangoverStr = "🟡 가벼운 피로 및 갈증";
-        else if (chartData.maxAch < 0.065) hangoverStr = "🟠 두통 및 속쓰림 예상";
-        else hangoverStr = "🔴 극심한 숙취 (주의)";
-
-        const summaryEl = document.getElementById('activeSummary');
-        summaryEl.style.display = 'block';
-        summaryEl.setAttribute('data-visible', 'true');
-        const latestDrink = drinksList[drinksList.length - 1];
-        const latestPreBacLine = latestDrink && !isInitialDrinkRecord(latestDrink, drinksList.length - 1)
-            ? `• 최근 술 시작 전 추정 BAC: <b style="color:var(--warning-color);">${(Number(latestDrink.bacBeforeDrink) || 0).toFixed(3)}%</b><br>`
-            : '';
-
-        summaryEl.innerHTML = `
-            🍻 현재까지 누적 <b>${drinksList.length}회</b> / 알코올 <b>${totalAlcoholGrams.toFixed(1)}g</b> 섭취<br>
-            ${latestPreBacLine}
-            • 종합 예상 최고 농도: <b style="color:var(--danger-color);">${sessionPeakBac.toFixed(3)}%</b><br>
-            • 현재 시각 추정 BAC: <b style="color:var(--primary-color);">${currentEstimatedBac.toFixed(3)}%</b><br>
-            • 알코올 완전 분해 예상 소요: <b style="color:var(--info-color);">${totalClearHrs.toFixed(1)}시간</b><br>
-            • 예상 숙취 강도: <b>${hangoverStr}</b>
-        `;
+        const summaryDrinks = getDrinksBeforeLatestAdditionalDrink(drinksList);
+        const summaryChartData = summaryDrinks.length > 0
+            ? generateChartData(summaryDrinks, sessionStartTime.getTime(), mealOffsetHrs)
+            : null;
+        renderActiveSummary(summaryDrinks, summaryChartData);
         
         drawChart(chartData, 'activeBacChart', activeChartInstance, (instance) => activeChartInstance = instance, true);
     }
