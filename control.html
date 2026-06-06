@@ -92,7 +92,7 @@
 <div class="container">
     <div class="header-bar">
         <span id="userNameDisplay" style="font-weight: 700; color: var(--primary-color);">로딩 중...</span>
-        <button class="back-btn" onclick="location.href='index.html'">리포트로 복귀</button>
+        <button class="back-btn" onclick="logoutFromControl()">로그아웃</button>
     </div>
 
     <h1>🍷 음주 조절 모드</h1>
@@ -297,8 +297,8 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
-    import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, getDocs, query, where, orderBy, serverTimestamp, getDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, doc, setDoc, updateDoc, deleteDoc, getDocs, query, where, orderBy, serverTimestamp, getDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBWDwueP3a0atxCqFIgqd96sgXc0EqYbEY",
@@ -314,7 +314,14 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    // index.html과 동일한 사용자 문서 필드로 현재 모드를 공유합니다.
+    const APP_MODE = Object.freeze({
+        ABSTINENCE: 'abstinence',
+        CONTROL: 'control'
+    });
+
     let userId = null;
+    let explicitLogoutInProgress = false;
     let userProfile = null; 
     let sessionStartTime = null;
     let drinksList = []; 
@@ -324,6 +331,40 @@
     let pastSessionsData = [];
     
     let currentSessionDocId = null; 
+
+    async function saveActiveMode(mode) {
+        const uid = auth.currentUser?.uid || userId;
+        if (!uid) throw new Error('로그인된 사용자가 없습니다.');
+        if (!Object.values(APP_MODE).includes(mode)) {
+            throw new Error(`지원하지 않는 모드입니다: ${mode}`);
+        }
+
+        await setDoc(doc(db, 'users', uid), {
+            activeMode: mode,
+            activeModeUpdatedAt: new Date().getTime()
+        }, { merge: true });
+    }
+
+    window.logoutFromControl = async function() {
+        if (!auth.currentUser) {
+            window.location.replace('index.html');
+            return;
+        }
+
+        explicitLogoutInProgress = true;
+        try {
+            // 로그아웃하는 순간 DB 모드를 금주 모드로 되돌립니다.
+            await saveActiveMode(APP_MODE.ABSTINENCE);
+            sessionStorage.removeItem('session_visited');
+            localStorage.removeItem('quitDrinkingDateTime_server');
+            await signOut(auth);
+            window.location.replace('index.html');
+        } catch (error) {
+            explicitLogoutInProgress = false;
+            console.error('로그아웃 실패:', error);
+            alert('로그아웃 실패: ' + error.message);
+        }
+    };
 
     function toMs(t) {
         if (!t) return 0;
@@ -366,14 +407,26 @@
         `;
     }
 
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
         if (user) {
             userId = user.uid;
             document.getElementById('userNameDisplay').innerText = (user.displayName || '도전자') + '님의 조절 모드';
-            loadSessionsAndCheckActive();
+
+            try {
+                // control.html에 들어온 순간 현재 활성 모드를 DB에 확정합니다.
+                await saveActiveMode(APP_MODE.CONTROL);
+                await loadSessionsAndCheckActive();
+            } catch (error) {
+                console.error('음주 조절 모드 초기화 실패:', error);
+                document.getElementById('loadingText').innerText = '모드 저장 또는 데이터 로드에 실패했습니다.';
+                alert('음주 조절 모드 초기화 중 오류가 발생했습니다: ' + error.message);
+            }
         } else {
-            alert("로그인이 필요합니다. 메인 리포트 화면으로 이동합니다.");
-            window.location.href = 'index.html';
+            userId = null;
+            if (!explicitLogoutInProgress) {
+                alert("로그인이 필요합니다. 메인 리포트 화면으로 이동합니다.");
+            }
+            window.location.replace('index.html');
         }
     });
 
