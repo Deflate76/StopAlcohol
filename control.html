@@ -211,7 +211,7 @@
                     <div class="legend-item"><div class="legend-box" style="background: rgba(231, 76, 60, 0.2);"></div><span>위험 (~0.30)</span></div>
                     <div class="legend-item"><span class="legend-line" style="color: #f39c12;">---</span><span>정지(0.03)</span></div>
                     <div class="legend-item"><span class="legend-line" style="color: #e74c3c;">---</span><span>취소(0.08)</span></div>
-                    <div class="legend-item"><span class="legend-line" style="color: #9b59b6; font-weight:400;">━━</span><span>혈중알코올(BAC)</span></div>
+                    <div class="legend-item"><span class="legend-line" style="color: #9b59b6; font-weight:400;">━━</span><span>잔별 BAC 추이</span></div>
                     <div class="legend-item"><span class="legend-line" style="color: #e67e22; font-weight:400;">- -</span><span>아세트알데하이드(숙취)</span></div>
                     <div class="legend-item"><span class="legend-line" style="color: #3498db;">│</span><span>현재 시각</span></div>
                 </div>
@@ -242,7 +242,7 @@
                     <div class="legend-item"><div class="legend-box" style="background: rgba(231, 76, 60, 0.2);"></div><span>위험 (~0.30)</span></div>
                     <div class="legend-item"><span class="legend-line" style="color: #f39c12;">---</span><span>정지(0.03)</span></div>
                     <div class="legend-item"><span class="legend-line" style="color: #e74c3c;">---</span><span>취소(0.08)</span></div>
-                    <div class="legend-item"><span class="legend-line" style="color: #9b59b6; font-weight:400;">━━</span><span>혈중알코올(BAC)</span></div>
+                    <div class="legend-item"><span class="legend-line" style="color: #9b59b6; font-weight:400;">━━</span><span>잔별 BAC 추이</span></div>
                     <div class="legend-item"><span class="legend-line" style="color: #e67e22; font-weight:400;">- -</span><span>아세트알데하이드(숙취)</span></div>
                 </div>
             </div>
@@ -531,6 +531,36 @@
         return maxExpectedPeak;
     }
 
+
+    function hasAdditionalDrinks(targetList = drinksList) {
+        return Array.isArray(targetList) && targetList.some(d => !d.isInitialDrink);
+    }
+
+    function hideActiveAnalysis() {
+        const chartContainer = document.getElementById('activeChartContainer');
+        const summaryEl = document.getElementById('activeSummary');
+
+        if (chartContainer) chartContainer.style.display = 'none';
+        if (summaryEl) {
+            summaryEl.style.display = 'none';
+            summaryEl.innerHTML = '';
+        }
+
+        if (activeChartInstance) {
+            activeChartInstance.destroy();
+            activeChartInstance = null;
+        }
+    }
+
+    function refreshActiveAnalysisIfReady() {
+        if (hasAdditionalDrinks()) {
+            document.getElementById('activeChartContainer').style.display = 'block';
+            updateActiveChart();
+        } else {
+            hideActiveAnalysis();
+        }
+    }
+
     function createDrinkRecord({ typeSelectId, volumeInputId, startedAtMs, isInitialDrink = false }) {
         const gender = document.getElementById('userGender').value;
         const weight = parseFloat(document.getElementById('userWeight').value);
@@ -792,13 +822,7 @@
 
         renderDrinkList();
         showLatestPreDrinkBacResult();
-        if (drinksList.length > 0) {
-            document.getElementById('activeChartContainer').style.display = 'block'; 
-            updateActiveChart();
-        } else {
-            document.getElementById('activeChartContainer').style.display = 'none'; 
-            document.getElementById('activeSummary').style.display = 'none';
-        }
+        refreshActiveAnalysisIfReady();
 
         startTimer();
     }
@@ -844,8 +868,7 @@
 
         document.getElementById('preDrinkBacResult').style.display = 'none';
         renderDrinkList();
-        document.getElementById('activeChartContainer').style.display = 'block';
-        updateActiveChart();
+        hideActiveAnalysis();
         startTimer();
 
         await executeSaveProcess(false, true);
@@ -864,7 +887,7 @@
             document.getElementById('elapsedTimeDisplay').innerText = `음주 진행 시간: ${h}:${m}:${s}`;
             
             // 실시간으로 차트의 현재시각 세로선만 업데이트 (30초마다 차트 리렌더링)
-            if (activeChartInstance && drinksList.length > 0 && new Date().getSeconds() % 30 === 0) {
+            if (activeChartInstance && hasAdditionalDrinks() && new Date().getSeconds() % 30 === 0) {
                  updateActiveChart();
             }
         }, 1000);
@@ -905,7 +928,7 @@
         
         renderDrinkList();
         showLatestPreDrinkBacResult();
-        if(drinksList.length > 0) updateActiveChart();
+        refreshActiveAnalysisIfReady();
         executeSaveProcess(false, true);
         
         closeTimeResetModal();
@@ -938,7 +961,7 @@
         recalculateDrinkDerivedFields();
         renderDrinkList();
         showLatestPreDrinkBacResult();
-        if(drinksList.length > 0) updateActiveChart();
+        refreshActiveAnalysisIfReady();
         executeSaveProcess(false, true);
         
         closeProfileEditModal();
@@ -988,8 +1011,7 @@
         drinksList.push(newDrink);
         renderDrinkList();
         showLatestPreDrinkBacResult();
-        document.getElementById('activeChartContainer').style.display = 'block';
-        updateActiveChart();
+        refreshActiveAnalysisIfReady();
         executeSaveProcess(false, true);
     };
 
@@ -998,15 +1020,14 @@
             drinksList.splice(index, 1);
             
             if(drinksList.length === 0) {
-                document.getElementById('activeChartContainer').style.display = 'none';
-                document.getElementById('activeSummary').style.display = 'none';
                 document.getElementById('preDrinkBacResult').style.display = 'none';
+                hideActiveAnalysis();
             } else {
                 recalculateDrinkDerivedFields();
-                updateActiveChart();
             }
             renderDrinkList();
             showLatestPreDrinkBacResult();
+            refreshActiveAnalysisIfReady();
             executeSaveProcess(false, true);
         }
     };
@@ -1094,7 +1115,11 @@
     }
 
     function updateActiveChart() {
-        if(drinksList.length === 0) return;
+        if(!hasAdditionalDrinks()) {
+            hideActiveAnalysis();
+            return;
+        }
+        document.getElementById('activeChartContainer').style.display = 'block';
         const mealOffsetHrs = parseFloat(document.getElementById('userMeal').value) || 1.0;
         const chartData = generateChartData(drinksList, sessionStartTime.getTime(), mealOffsetHrs);
         const sessionExpectedPeak = calculateSessionExpectedPeak(
@@ -1322,26 +1347,44 @@
     };
 
     // 대사 시뮬레이션 알고리즘 개선 (Iterative 방식)
+    // 각 잔의 BAC 기여도를 따로 추적하여 차트에는 잔 개수만큼 보라색 BAC 라인을 표시합니다.
+    // 분해량은 전체 BAC에서 차감하되, 현재 남아있는 각 잔의 BAC 비율에 따라 나누어 빼므로
+    // 잔별 라인을 모두 더하면 기존의 누적 BAC 추이와 거의 같은 흐름이 됩니다.
     function generateChartData(targetDrinksList, startMs, mealOffsetHrs) {
         const mealOffsetMin = mealOffsetHrs * 60;
         const dataPoints = [];
+        const individualBacDataPoints = [];
         const achDataPoints = [];
         const labels = [];
-        const timeMsList = []; 
+        const timeMsList = [];
         
         let maxBac = 0;
         let maxAch = 0;
         
         if(!targetDrinksList || targetDrinksList.length === 0) {
-            return { labels: ['00:00'], timeMsList: [startMs], dataPoints: [0], achDataPoints: [0], maxBac: 0, maxAch: 0 };
+            return {
+                labels: ['00:00'],
+                timeMsList: [startMs],
+                dataPoints: [0],
+                individualBacDataPoints: [],
+                achDataPoints: [0],
+                maxBac: 0,
+                maxAch: 0
+            };
         }
 
-        let earliestDrinkMs = Math.min(...targetDrinksList.map(d => getDrinkTimeMs(d)));
+        const sortedDrinks = [...targetDrinksList]
+            .filter(d => getDrinkTimeMs(d) > 0)
+            .sort((a, b) => getDrinkTimeMs(a) - getDrinkTimeMs(b));
+
+        sortedDrinks.forEach(() => individualBacDataPoints.push([]));
+
+        let earliestDrinkMs = Math.min(...sortedDrinks.map(d => getDrinkTimeMs(d)));
         let actualPlotStartMs = Math.min(startMs, earliestDrinkMs);
 
-        const lastDrinkFullyAbsorbedTime = getDrinkTimeMs(targetDrinksList[targetDrinksList.length - 1]) + (mealOffsetMin * 60000);
+        const lastDrinkFullyAbsorbedTime = getDrinkTimeMs(sortedDrinks[sortedDrinks.length - 1]) + (mealOffsetMin * 60000);
         
-        let currentBac = 0;
+        const currentDrinkBacs = sortedDrinks.map(() => 0);
         let currentAch = 0;
         const stepMinutes = 15;
         const stepMs = stepMinutes * 60000;
@@ -1351,17 +1394,17 @@
             let timeObj = new Date(currentMs);
             let timeLabel = timeObj.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
             
-            let absorbedInStep = 0;
             let stepStartMs = currentMs - stepMs;
             let stepEndMs = currentMs;
 
-            targetDrinksList.forEach(d => {
+            sortedDrinks.forEach((d, index) => {
                 const eMs = getDrinkTimeMs(d);
-                const contribution = d.cMaxContribution || 0; 
+                const contribution = Number(d.cMaxContribution) || 0;
+                let absorbedForThisDrink = 0;
 
                 if (mealOffsetMin <= 0) {
                     if (eMs > stepStartMs && eMs <= stepEndMs) {
-                        absorbedInStep += contribution;
+                        absorbedForThisDrink = contribution;
                     }
                 } else {
                     const absorbStart = eMs;
@@ -1371,26 +1414,27 @@
                     
                     if (overlapStart < overlapEnd) {
                         const overlapMinutes = (overlapEnd - overlapStart) / 60000;
-                        absorbedInStep += contribution * (overlapMinutes / mealOffsetMin);
+                        absorbedForThisDrink = contribution * (overlapMinutes / mealOffsetMin);
                     }
                 }
+
+                currentDrinkBacs[index] += absorbedForThisDrink;
             });
             
-            currentBac += absorbedInStep;
-            
             // 15분 단위 알코올 분해 (시간당 0.015% 소모)
-            let clearedInStep = 0.015 * (stepMinutes / 60);
-            let newlyClearedBac = 0;
-            
-            if (currentBac > 0) {
-                if (currentBac > clearedInStep) {
-                    newlyClearedBac = clearedInStep;
-                    currentBac -= clearedInStep;
-                } else {
-                    newlyClearedBac = currentBac;
-                    currentBac = 0;
-                }
+            let currentBacBeforeClear = currentDrinkBacs.reduce((sum, v) => sum + v, 0);
+            let clearedInStep = Math.min(currentBacBeforeClear, 0.015 * (stepMinutes / 60));
+            let newlyClearedBac = clearedInStep;
+
+            if (currentBacBeforeClear > 0 && clearedInStep > 0) {
+                currentDrinkBacs.forEach((v, index) => {
+                    const share = v / currentBacBeforeClear;
+                    currentDrinkBacs[index] = Math.max(0, v - (clearedInStep * share));
+                });
             }
+
+            let currentBac = currentDrinkBacs.reduce((sum, v) => sum + v, 0);
+            if (currentBac < 0.000001) currentBac = 0;
             
             // 아세트알데하이드 농도 시뮬레이션 (알코올 분해량에 비례하여 축적 후 서서히 소모)
             currentAch += newlyClearedBac * 1.5;
@@ -1403,6 +1447,9 @@
             labels.push(timeLabel);
             timeMsList.push(currentMs);
             dataPoints.push(currentBac.toFixed(3));
+            currentDrinkBacs.forEach((v, index) => {
+                individualBacDataPoints[index].push(v.toFixed(3));
+            });
             achDataPoints.push(currentAch.toFixed(3));
             
             // BAC와 AcH가 모두 0으로 떨어지면 차트 종료
@@ -1410,7 +1457,16 @@
                 break;
             }
         }
-        return { labels, timeMsList, dataPoints, achDataPoints, maxBac, maxAch };
+        return {
+            labels,
+            timeMsList,
+            dataPoints,
+            individualBacDataPoints,
+            drinksForChart: sortedDrinks,
+            achDataPoints,
+            maxBac,
+            maxAch
+        };
     }
 
     function drawChart(chartData, canvasId, existingInstance, setInstanceCallback, isActiveSession) {
@@ -1455,22 +1511,45 @@
             };
         }
 
+        const individualBacDatasets = (chartData.individualBacDataPoints || []).map((points, index) => {
+            const drink = chartData.drinksForChart && chartData.drinksForChart[index] ? chartData.drinksForChart[index] : null;
+            const labelPrefix = drink && drink.isInitialDrink ? '시작 술' : `${index + 1}번째 잔`;
+            const opacity = Math.max(0.35, 0.95 - (index * 0.08));
+
+            return {
+                label: `${labelPrefix} BAC %`,
+                data: points,
+                borderColor: `rgba(155, 89, 182, ${opacity})`,
+                backgroundColor: 'transparent',
+                borderWidth: index === 0 ? 3 : 2,
+                fill: false,
+                tension: 0.4,
+                pointRadius: 0,
+                zIndex: 10 + index
+            };
+        });
+
+        // 구형 데이터 또는 예외 상황 대비: 잔별 데이터가 없으면 기존 누적 BAC 한 줄을 사용합니다.
+        const bacDatasets = individualBacDatasets.length > 0
+            ? individualBacDatasets
+            : [{
+                label: '혈중 알코올(BAC) %',
+                data: chartData.dataPoints,
+                borderColor: '#9b59b6',
+                backgroundColor: 'rgba(155, 89, 182, 0.4)',
+                borderWidth: 3,
+                fill: false,
+                tension: 0.4,
+                pointRadius: 0,
+                zIndex: 10
+            }];
+
         const newInstance = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: chartData.labels,
                 datasets: [
-                    {
-                        label: '혈중 알코올(BAC) %',
-                        data: chartData.dataPoints,
-                        borderColor: '#9b59b6',
-                        backgroundColor: 'rgba(155, 89, 182, 0.4)',
-                        borderWidth: 3,
-                        fill: false,
-                        tension: 0.4,
-                        pointRadius: 0,
-                        zIndex: 10
-                    },
+                    ...bacDatasets,
                     {
                         label: '예상 아세트알데하이드 (숙취)',
                         data: chartData.achDataPoints,
@@ -1508,6 +1587,7 @@
         });
         setInstanceCallback(newInstance);
     }
+
 </script>
 </body>
 </html>
