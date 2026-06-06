@@ -484,6 +484,53 @@
         return currentBac;
     }
 
+    /**
+     * 표시용 예상 최고 BAC입니다.
+     * - 첫 잔: 0 + 해당 술 기여도 = 단일 술 예상 최고 BAC
+     * - 추가 잔: 해당 잔 시작 직전 BAC + 해당 술 기여도
+     *
+     * 차트용 대사 시뮬레이션(generateChartData)은 흡수 중 분해를 계속 반영하지만,
+     * 사용자에게 보여주는 '이 술 반영 후 예상 최고 BAC'는 직전 BAC에 새 술의
+     * 순수 기여도를 더한 값으로 계산해 첫 잔이 0.003%처럼 과소 표시되지 않게 합니다.
+     */
+    function calculateExpectedPeakAfterDrink(priorDrinks, currentDrink, drinkStartMs, mealOffsetHrs, sessionStartMs) {
+        const bacBeforeDrink = calculateBacAtTime(
+            priorDrinks,
+            drinkStartMs,
+            mealOffsetHrs,
+            sessionStartMs
+        );
+
+        const currentContribution = Number(currentDrink?.cMaxContribution) || 0;
+        return Math.max(0, bacBeforeDrink + currentContribution);
+    }
+
+    function calculateSessionExpectedPeak(targetDrinksList, startMs, mealOffsetHrs) {
+        if (!targetDrinksList || targetDrinksList.length === 0) return 0;
+
+        const sortedDrinks = [...targetDrinksList]
+            .filter(d => getDrinkTimeMs(d) > 0)
+            .sort((a, b) => getDrinkTimeMs(a) - getDrinkTimeMs(b));
+
+        let maxExpectedPeak = 0;
+        const priorDrinks = [];
+
+        sortedDrinks.forEach(drink => {
+            const drinkStartMs = getDrinkTimeMs(drink);
+            const expectedPeak = calculateExpectedPeakAfterDrink(
+                priorDrinks,
+                drink,
+                drinkStartMs,
+                mealOffsetHrs,
+                startMs
+            );
+            if (expectedPeak > maxExpectedPeak) maxExpectedPeak = expectedPeak;
+            priorDrinks.push(drink);
+        });
+
+        return maxExpectedPeak;
+    }
+
     function createDrinkRecord({ typeSelectId, volumeInputId, startedAtMs, isInitialDrink = false }) {
         const gender = document.getElementById('userGender').value;
         const weight = parseFloat(document.getElementById('userWeight').value);
@@ -1003,20 +1050,25 @@
             const maxBacDate = new Date(eTime.getTime() + (mealOffsetHrs * 60 * 60000));
             const maxBacTimeStr = maxBacDate.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
 
-            const subList = targetList.slice(0, i + 1);
-            const subChartData = generateChartData(subList, startMs, mealOffsetHrs);
-            const exactMaxBac = subChartData.maxBac || 0;
+            const priorList = targetList.slice(0, i);
+            const bacBeforeDrink = Number.isFinite(Number(d.bacBeforeDrink))
+                ? Number(d.bacBeforeDrink)
+                : calculateBacAtTime(priorList, getDrinkTimeMs(d), mealOffsetHrs, startMs);
+            const exactMaxBac = calculateExpectedPeakAfterDrink(
+                priorList,
+                d,
+                getDrinkTimeMs(d),
+                mealOffsetHrs,
+                startMs
+            );
             const grams = d.alcoholGrams || 0;
             const contribution = d.cMaxContribution || 0;
 
             if (i > 0) html += getGapBadgeHTML(d.gapMinutes, i === 1);
 
-            const bacBeforeDrink = Number.isFinite(Number(d.bacBeforeDrink))
-                ? Number(d.bacBeforeDrink)
-                : calculateBacAtTime(targetList.slice(0, i), getDrinkTimeMs(d), mealOffsetHrs, startMs);
             const priorAlcoholGrams = Number.isFinite(Number(d.priorAlcoholGrams))
                 ? Number(d.priorAlcoholGrams)
-                : targetList.slice(0, i).reduce((sum, item) => sum + (Number(item.alcoholGrams) || 0), 0);
+                : priorList.reduce((sum, item) => sum + (Number(item.alcoholGrams) || 0), 0);
             const additionalSequence = Number(d.additionalSequence) || targetList.slice(0, i + 1).filter(item => !item.isInitialDrink).length;
             const entryLabel = d.isInitialDrink ? '세션 시작 술' : `추가 ${additionalSequence}번째 잔`;
 
@@ -1031,8 +1083,8 @@
                         • 이 술 시작 직전 예상 BAC: <b style="color:var(--danger-color);">${bacBeforeDrink.toFixed(3)}%</b><br>
                         • 직전 계산에 반영된 누적 알코올: <b>${priorAlcoholGrams.toFixed(1)}g</b><br>
                         • 섭취 알코올 (해당 술): <b>${grams.toFixed(1)}g</b><br>
-                        • 단일 술 예상 최고 BAC 기여도: <b>${contribution.toFixed(3)}%</b><br>
-                        • <b>누적 최고 도달 예상 BAC: <span style="color:var(--danger-color);">${exactMaxBac.toFixed(3)}%</span></b><br>
+                        • 이 술의 BAC 증가 예상치: <b>${contribution.toFixed(3)}%</b><br>
+                        • <b>이 술 반영 후 예상 최고 BAC: <span style="color:var(--danger-color);">${exactMaxBac.toFixed(3)}%</span></b><br>
                         • 최고농도 도달 예상 시각: <b>${maxBacTimeStr} 경</b>
                     </div>
                 </div>
@@ -1045,6 +1097,11 @@
         if(drinksList.length === 0) return;
         const mealOffsetHrs = parseFloat(document.getElementById('userMeal').value) || 1.0;
         const chartData = generateChartData(drinksList, sessionStartTime.getTime(), mealOffsetHrs);
+        const sessionExpectedPeak = calculateSessionExpectedPeak(
+            drinksList,
+            sessionStartTime.getTime(),
+            mealOffsetHrs
+        );
         
         const totalAlcoholGrams = drinksList.reduce((sum, d) => sum + (d.alcoholGrams || 0), 0);
         const totalClearHrs = chartData.dataPoints.length * 15 / 60; 
@@ -1073,7 +1130,7 @@
             🍻 현재까지 누적 <b>${drinksList.length}회</b> / 알코올 <b>${totalAlcoholGrams.toFixed(1)}g</b> 섭취<br>
             ${latestPreBacLine}
             • 현재 시각 예상 BAC: <b style="color:var(--primary-color);">${currentEstimatedBac.toFixed(3)}%</b><br>
-            • 종합 예상 최고 농도: <b style="color:var(--danger-color);">${(chartData.maxBac || 0).toFixed(3)}%</b><br>
+            • 종합 예상 최고 농도: <b style="color:var(--danger-color);">${sessionExpectedPeak.toFixed(3)}%</b><br>
             • 알코올 완전 분해 예상 소요: <b style="color:var(--info-color);">${totalClearHrs.toFixed(1)}시간</b><br>
             • 예상 숙취 강도: <b>${hangoverStr}</b>
         `;
@@ -1099,6 +1156,11 @@
 
         const mealOffsetHrs = parseFloat(document.getElementById('userMeal').value) || 1.0;
         const chartData = generateChartData(drinksList, sessionStartTime.getTime(), mealOffsetHrs);
+        const sessionExpectedPeak = calculateSessionExpectedPeak(
+            drinksList,
+            sessionStartTime.getTime(),
+            mealOffsetHrs
+        );
         const totalAlcoholGrams = drinksList.reduce((sum, d) => sum + (d.alcoholGrams || 0), 0);
 
         const sessionData = {
@@ -1109,7 +1171,7 @@
             gender: document.getElementById('userGender').value,
             weight: parseFloat(document.getElementById('userWeight').value),
             drinksList: drinksList,
-            maxBac: chartData.maxBac || 0,
+            maxBac: sessionExpectedPeak,
             totalAlcoholGrams: totalAlcoholGrams,
             isFinished: isFinal, 
             updatedAt: serverTimestamp()
@@ -1167,6 +1229,7 @@
         const mealOffsetHrs = parseFloat(sessionData.mealOffsetHrs) || 1.0;
         const startMs = toMs(sessionData.startTime);
         const chartData = generateChartData(sessionData.drinksList, startMs, mealOffsetHrs);
+        const sessionExpectedPeak = calculateSessionExpectedPeak(sessionData.drinksList, startMs, mealOffsetHrs);
         const totalClearHrs = chartData.dataPoints.length * 15 / 60; 
         const statusStr = sessionData.isFinished ? "종료됨" : "진행중 (또는 중단됨)";
         const sessionDate = new Date(startMs);
@@ -1181,7 +1244,7 @@
             세션 상태: <b>${statusStr}</b><br>
             세션 일시: <b>${sessionDate.toLocaleString('ko-KR')}</b><br>
             총 <b>${sessionData.drinksList ? sessionData.drinksList.length : 0}회</b> / 알코올 <b>${(sessionData.totalAlcoholGrams || 0).toFixed(1)}g</b> 섭취<br>
-            • 종합 예상 최고 농도: <b style="color:var(--danger-color);">${(chartData.maxBac || 0).toFixed(3)}%</b><br>
+            • 종합 예상 최고 농도: <b style="color:var(--danger-color);">${sessionExpectedPeak.toFixed(3)}%</b><br>
             • 알코올 완전 분해 소요: 약 <b style="color:var(--info-color);">${totalClearHrs.toFixed(1)}시간</b><br>
             • 예상 숙취 강도: <b>${hangoverStr}</b>
         `;
@@ -1207,21 +1270,26 @@
                 const maxBacDate = new Date(eTime.getTime() + (mealOffsetHrs * 60 * 60000));
                 const maxBacTimeStr = maxBacDate.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
                 
-                const subList = sessionData.drinksList.slice(0, i + 1);
-                const subChartData = generateChartData(subList, startMs, mealOffsetHrs);
-                const exactMaxBac = subChartData.maxBac || 0;
+                const priorList = sessionData.drinksList.slice(0, i);
+                const bacBeforeDrink = Number.isFinite(Number(d.bacBeforeDrink))
+                    ? Number(d.bacBeforeDrink)
+                    : calculateBacAtTime(priorList, getDrinkTimeMs(d), mealOffsetHrs, startMs);
+                const exactMaxBac = calculateExpectedPeakAfterDrink(
+                    priorList,
+                    d,
+                    getDrinkTimeMs(d),
+                    mealOffsetHrs,
+                    startMs
+                );
 
                 const grams = d.alcoholGrams || 0;
                 const contribution = d.cMaxContribution || 0;
 
                 if (i > 0) html += getGapBadgeHTML(d.gapMinutes, i === 1);
 
-                const bacBeforeDrink = Number.isFinite(Number(d.bacBeforeDrink))
-                    ? Number(d.bacBeforeDrink)
-                    : calculateBacAtTime(sessionData.drinksList.slice(0, i), getDrinkTimeMs(d), mealOffsetHrs, startMs);
                 const priorAlcoholGrams = Number.isFinite(Number(d.priorAlcoholGrams))
                     ? Number(d.priorAlcoholGrams)
-                    : sessionData.drinksList.slice(0, i).reduce((sum, item) => sum + (Number(item.alcoholGrams) || 0), 0);
+                    : priorList.reduce((sum, item) => sum + (Number(item.alcoholGrams) || 0), 0);
                 const additionalSequence = Number(d.additionalSequence) || sessionData.drinksList.slice(0, i + 1).filter(item => !item.isInitialDrink).length;
                 const entryLabel = d.isInitialDrink ? '세션 시작 술' : `추가 ${additionalSequence}번째 잔`;
 
@@ -1235,8 +1303,8 @@
                             • 이 술 시작 직전 예상 BAC: <b style="color:var(--danger-color);">${bacBeforeDrink.toFixed(3)}%</b><br>
                             • 직전 계산에 반영된 누적 알코올: <b>${priorAlcoholGrams.toFixed(1)}g</b><br>
                             • 섭취 알코올 (해당 술): <b>${grams.toFixed(1)}g</b><br>
-                            • 단일 술 예상 최고 BAC 기여도: <b>${contribution.toFixed(3)}%</b><br>
-                            • <b>누적 최고 도달 예상 BAC: <span style="color:var(--danger-color);">${exactMaxBac.toFixed(3)}%</span></b><br>
+                            • 이 술의 BAC 증가 예상치: <b>${contribution.toFixed(3)}%</b><br>
+                            • <b>이 술 반영 후 예상 최고 BAC: <span style="color:var(--danger-color);">${exactMaxBac.toFixed(3)}%</span></b><br>
                             • 최고농도 도달 예상 시각: <b>${maxBacTimeStr} 경</b>
                         </div>
                     </div>
