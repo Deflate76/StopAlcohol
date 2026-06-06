@@ -48,6 +48,38 @@
         .btn-end { background: linear-gradient(135deg, #e74c3c, #c0392b); }
         
         .status-display { font-size: 1.1rem; font-weight: 800; color: var(--text-dark); background: #f0f7ff; padding: 15px; border-radius: 12px; margin-bottom: 5px; border: 1px dashed #3498db; }
+        .live-value { display: inline-block; padding: 1px 5px; border-radius: 7px; font-weight: 900; transition: background-color 0.2s ease; }
+        .live-value.flash-pulse { animation: liveValuePulse 0.72s ease-out; }
+        .live-value.bac-value { color: var(--danger-color); font-size: 1rem; }
+        @keyframes liveValuePulse {
+            0% { background: rgba(255, 236, 153, 0.98); box-shadow: 0 0 0 0 rgba(246, 196, 83, 0.45); }
+            45% { background: rgba(255, 236, 153, 0.78); box-shadow: 0 0 0 6px rgba(246, 196, 83, 0.12); }
+            100% { background: transparent; box-shadow: 0 0 0 10px rgba(246, 196, 83, 0); }
+        }
+
+        .pace-panel { margin: 8px 0 10px 0; padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; text-align: left; }
+        .pace-panel-top { display:flex; justify-content:space-between; align-items:center; gap:10px; font-size:0.82rem; color:#4a5568; font-weight:800; margin-bottom:9px; }
+        .pace-panel-value { color: var(--text-dark); font-variant-numeric: tabular-nums; }
+        .pace-panel-chip { flex:0 0 auto; background:#edf2f7; color:#4a5568; border-radius:999px; padding:3px 9px; font-size:0.72rem; font-weight:900; }
+        .pace-bar-track { position:relative; height: 14px; border-radius: 999px; background: #edf2f7; overflow: visible; border:1px solid #e2e8f0; }
+        .pace-bar-fill { height:100%; width:0%; border-radius:999px; background: linear-gradient(90deg, #e74c3c, #f39c12); transition: width 0.45s ease, background 0.45s ease; }
+        .pace-bar-fill.is-good { background: linear-gradient(90deg, #2ecc71, #27ae60); }
+        .pace-bar-fill.is-neutral { background: linear-gradient(90deg, #cbd5e0, #94a3b8); }
+        .pace-bar-marker { position:absolute; left:50%; top:-4px; bottom:-4px; width:2px; background:rgba(45, 55, 72, 0.45); transform:translateX(-1px); }
+        .pace-bar-marker-label { position:absolute; left:50%; top:18px; transform:translateX(-50%); font-size:0.68rem; color:#718096; font-weight:900; white-space:nowrap; }
+        .pace-bar-scale { display:flex; justify-content:space-between; margin-top:16px; font-size:0.68rem; color:#94a3b8; font-weight:800; }
+        .next-recommended-time { margin-top:8px; padding:9px 10px; background:#ffffff; border:1px dashed #cbd5e0; border-radius:10px; font-size:0.78rem; color:#4a5568; line-height:1.4; word-break:keep-all; }
+
+        .collapsible-section { margin-top: 16px; border: 1px solid #e2e8f0; border-radius: 16px; background: #ffffff; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.025); }
+        .collapsible-header { width:100%; border:none; background:#f8fafc; padding: 12px 14px; display:flex; align-items:center; justify-content:space-between; gap:10px; cursor:pointer; font-family:inherit; color:var(--text-dark); }
+        .collapsible-title { display:flex; align-items:center; gap:7px; font-size:0.92rem; font-weight:900; text-align:left; }
+        .collapsible-meta { display:block; margin-top:1px; font-size:0.7rem; color:#718096; font-weight:800; }
+        .collapsible-right { display:flex; align-items:center; gap:6px; color:#718096; font-size:0.76rem; font-weight:900; white-space:nowrap; }
+        .collapsible-chevron { font-size:1rem; color:#4a5568; line-height:1; }
+        .collapsible-body { padding: 14px; border-top: 1px solid #edf2f7; }
+        .collapsible-section.is-collapsed .collapsible-body { display:none; }
+        .collapsible-section.is-collapsed .collapsible-header { border-bottom:none; }
+        .collapsible-section .chart-container { margin-bottom: 0; }
         
         .chart-container { margin-top: 10px; margin-bottom: 20px; display: none; }
         .chart-canvas-wrapper { position: relative; height: 280px; width: 100%; }
@@ -189,8 +221,21 @@
             <div class="card-title"><span>⏳</span> 통제 하에 음주 중...</div>
             
             <div style="display: flex; justify-content: space-between; align-items: stretch; margin-bottom: 5px; gap: 10px;">
-                <div class="status-display" id="elapsedTimeDisplay" style="flex: 1; margin: 0;">음주 진행 시간: 00:00:00</div>
+                <div class="status-display" id="elapsedTimeDisplay" style="flex: 1; margin: 0;">음주 진행 시간: <span id="elapsedTimeLiveValue" class="live-value">00:00:00</span></div>
                 <button class="back-btn" style="background: var(--warning-color); color: white; padding: 0 15px; font-weight: 800; border-radius: 12px; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1.2;" onclick="openTimeResetModal()">시간<br>설정</button>
+            </div>
+            <div id="drinkPacePanel" class="pace-panel" style="display:none;" aria-live="polite">
+                <div class="pace-panel-top">
+                    <div>평균 음주 간격: <span id="averageDrinkIntervalValue" class="pace-panel-value">--분</span></div>
+                    <div id="recommendedIntervalChip" class="pace-panel-chip">권장 40분</div>
+                </div>
+                <div class="pace-bar-track" aria-label="평균 음주 간격 진행률">
+                    <div id="drinkIntervalProgressFill" class="pace-bar-fill is-neutral"></div>
+                    <div class="pace-bar-marker"></div>
+                    <div class="pace-bar-marker-label">권장</div>
+                </div>
+                <div class="pace-bar-scale"><span>빠름</span><span>권장 간격</span><span>여유</span></div>
+                <div id="nextRecommendedDrinkTime" class="next-recommended-time">다음 권장 음주 주문 시각: --:--</div>
             </div>
             <div id="startTimeDisplay" style="font-size: 0.85rem; color: #718096; margin-bottom: 20px; font-weight: 600;">시작 시각: --:--</div>
             
@@ -219,29 +264,50 @@
 
             <button class="action-btn btn-add" onclick="addDrinkItem()">🍺 해당 용량 음주 시작</button>
 
-            <div id="preDrinkBacResult" style="display:none; margin-top:15px; padding:14px; border-radius:12px; background:#fff8e1; border:1px solid #f6c453; color:#5d4037; text-align:left; font-size:0.88rem; line-height:1.55;"></div>
-            
-            <div style="margin-top: 20px;"></div>
-            
-            <p id="activeSummary" style="font-size: 0.85rem; color: #4a5568; line-height: 1.5; text-align: left; margin-bottom: 10px; display: none; padding: 10px; background: #fdfdfd; border-radius: 8px; border: 1px solid #edf2f7;"></p>
-            
-            <div class="chart-container" id="activeChartContainer">
-                <div class="chart-canvas-wrapper">
-                    <canvas id="activeBacChart"></canvas>
-                </div>
-                <div id="activeBacChartValuePanel" class="chart-value-panel" aria-live="polite">
-                    <div class="chart-value-panel-hint">그래프를 탭하면 해당 시각의 값을 아래에 표시합니다.</div>
-                </div>
-                <!-- 커스텀 범례 -->
-                <div class="custom-legend">
-                    <div class="legend-item"><span class="legend-line" style="color: #e74c3c; font-weight:800;">━━</span><span>현재 마신 술 기준 BAC</span></div>
-                    <div class="legend-item"><span class="legend-line" style="color: #e67e22; font-weight:600;">━━</span><span>이전 잔별 BAC 추이</span></div>
-                    <div class="legend-item"><span class="legend-line" style="color: #f1c40f; font-weight:800;">━━</span><span>아세트알데하이드(숙취)</span></div>
-                    <div class="legend-item"><span class="legend-line" style="color: #3498db; font-weight:500;">- - -</span><span>현재 시각</span></div>
+            <div class="collapsible-section" id="activeAnalysisSection" style="display:none;">
+                <button class="collapsible-header" type="button" onclick="toggleCollapsibleSection('activeAnalysisSection')" aria-expanded="true" aria-controls="activeAnalysisSectionBody">
+                    <span>
+                        <span class="collapsible-title"><span>📊</span><span>BAC 분석 · 그래프 · 범례</span></span>
+                        <span class="collapsible-meta">현재 추정 BAC, 요약, activeBacChart, custom-legend</span>
+                    </span>
+                    <span class="collapsible-right"><span id="activeAnalysisSectionAction">접기</span><span id="activeAnalysisSectionChevron" class="collapsible-chevron">⌃</span></span>
+                </button>
+                <div class="collapsible-body" id="activeAnalysisSectionBody">
+                    <div id="preDrinkBacResult" style="display:none; padding:14px; border-radius:12px; background:#fff8e1; border:1px solid #f6c453; color:#5d4037; text-align:left; font-size:0.88rem; line-height:1.55;"></div>
+                    
+                    <div style="margin-top: 14px;"></div>
+                    
+                    <p id="activeSummary" style="font-size: 0.85rem; color: #4a5568; line-height: 1.5; text-align: left; margin-bottom: 10px; display: none; padding: 10px; background: #fdfdfd; border-radius: 8px; border: 1px solid #edf2f7;"></p>
+                    
+                    <div class="chart-container" id="activeChartContainer">
+                        <div class="chart-canvas-wrapper">
+                            <canvas id="activeBacChart"></canvas>
+                        </div>
+                        <div id="activeBacChartValuePanel" class="chart-value-panel" aria-live="polite">
+                            <div class="chart-value-panel-hint">그래프를 탭하면 해당 시각의 값을 아래에 표시합니다.</div>
+                        </div>
+                        <!-- 커스텀 범례 -->
+                        <div class="custom-legend">
+                            <div class="legend-item"><span class="legend-line" style="color: #e74c3c; font-weight:800;">━━</span><span>현재 마신 술 기준 BAC</span></div>
+                            <div class="legend-item"><span class="legend-line" style="color: #e67e22; font-weight:600;">━━</span><span>이전 잔별 BAC 추이</span></div>
+                            <div class="legend-item"><span class="legend-line" style="color: #f1c40f; font-weight:800;">━━</span><span>아세트알데하이드(숙취)</span></div>
+                            <div class="legend-item"><span class="legend-line" style="color: #3498db; font-weight:500;">- - -</span><span>현재 시각</span></div>
+                        </div>
+                    </div>
                 </div>
             </div>
             
-            <div class="drink-list-container" id="drinkListContainer">
+            <div class="collapsible-section" id="drinkItemsSection">
+                <button class="collapsible-header" type="button" onclick="toggleCollapsibleSection('drinkItemsSection')" aria-expanded="true" aria-controls="drinkItemsSectionBody">
+                    <span>
+                        <span class="collapsible-title"><span>🍻</span><span>음주 기록 목록</span></span>
+                        <span class="collapsible-meta" id="drinkListCountText">기록 없음</span>
+                    </span>
+                    <span class="collapsible-right"><span id="drinkItemsSectionAction">접기</span><span id="drinkItemsSectionChevron" class="collapsible-chevron">⌃</span></span>
+                </button>
+                <div class="collapsible-body" id="drinkItemsSectionBody">
+                    <div class="drink-list-container" id="drinkListContainer"></div>
+                </div>
             </div>
 
             <div style="border-top: 1px solid #e2e8f0; margin: 25px 0 15px 0;"></div>
@@ -371,9 +437,9 @@
     });
 
     const APP_VERSION = Object.freeze({
-        version: 'v2026.06.06-14',
+        version: 'v2026.06.06-15',
         updatedAt: '2026-06-06 KST',
-        note: '그래프 기본 툴팁 제거 및 선택값 하단 패널 표시'
+        note: '실시간 값 강조, 분석/목록 접기, 평균 음주 간격 안내 추가'
     });
 
     const versionEl = document.getElementById('appVersionText');
@@ -394,6 +460,11 @@
     let activeAnalysisUnlocked = false;
     let historyCurrentPage = 0;
     const HISTORY_PAGE_SIZE = 10;
+    const RECOMMENDED_DRINK_INTERVAL_MINUTES = 40;
+    const collapsibleSectionState = {
+        activeAnalysisSection: true,
+        drinkItemsSection: true
+    };
     
     let currentSessionDocId = null; 
 
@@ -409,6 +480,72 @@
         return Array.isArray(targetList) && targetList.some((d, index) => !isInitialDrinkRecord(d, index));
     }
 
+    function setCollapsibleSectionVisible(sectionId, isVisible) {
+        const section = document.getElementById(sectionId);
+        if (!section) return;
+        section.style.display = isVisible ? 'block' : 'none';
+        if (isVisible) syncCollapsibleSection(sectionId);
+    }
+
+    function syncCollapsibleSection(sectionId) {
+        const section = document.getElementById(sectionId);
+        if (!section) return;
+        const isExpanded = collapsibleSectionState[sectionId] !== false;
+        section.classList.toggle('is-collapsed', !isExpanded);
+        const header = section.querySelector('.collapsible-header');
+        if (header) header.setAttribute('aria-expanded', String(isExpanded));
+        const action = document.getElementById(`${sectionId}Action`);
+        if (action) action.innerText = isExpanded ? '접기' : '펼치기';
+        const chevron = document.getElementById(`${sectionId}Chevron`);
+        if (chevron) chevron.innerText = isExpanded ? '⌃' : '⌄';
+    }
+
+    window.toggleCollapsibleSection = function(sectionId) {
+        collapsibleSectionState[sectionId] = collapsibleSectionState[sectionId] === false;
+        syncCollapsibleSection(sectionId);
+    };
+
+    function refreshActiveAnalysisSectionVisibility() {
+        setCollapsibleSectionVisible('activeAnalysisSection', hasAdditionalDrinks());
+    }
+
+    function updateDrinkItemsSectionMeta(targetList = drinksList) {
+        const meta = document.getElementById('drinkListCountText');
+        if (!meta) return;
+        const count = Array.isArray(targetList) ? targetList.length : 0;
+        if (count === 0) {
+            meta.innerText = '기록 없음';
+            return;
+        }
+        const currentCount = 1;
+        const absorbedCount = Math.max(0, count - currentCount);
+        meta.innerText = `총 ${count}개 · 반영 ${absorbedCount}개 · 현재 ${currentCount}개`;
+        setCollapsibleSectionVisible('drinkItemsSection', true);
+    }
+
+    function triggerValueFlash(target) {
+        const el = typeof target === 'string' ? document.getElementById(target) : target;
+        if (!el) return;
+        el.classList.remove('flash-pulse');
+        // reflow로 같은 값이 반복 갱신되어도 매초 애니메이션이 다시 시작되게 합니다.
+        void el.offsetWidth;
+        el.classList.add('flash-pulse');
+    }
+
+    function triggerValueFlashes(ids) {
+        ids.forEach(id => triggerValueFlash(id));
+    }
+
+    function resetLiveStatusPanels() {
+        const elapsedEl = document.getElementById('elapsedTimeDisplay');
+        if (elapsedEl) elapsedEl.innerHTML = '음주 진행 시간: <span id="elapsedTimeLiveValue" class="live-value">00:00:00</span>';
+        const pacePanel = document.getElementById('drinkPacePanel');
+        if (pacePanel) pacePanel.style.display = 'none';
+        setCollapsibleSectionVisible('activeAnalysisSection', false);
+        setCollapsibleSectionVisible('drinkItemsSection', false);
+        updateDrinkItemsSectionMeta([]);
+    }
+
     function resetLocalSessionState() {
         sessionStartTime = null;
         drinksList = [];
@@ -419,6 +556,7 @@
             timerInterval = null;
         }
         hideActiveAnalysis();
+        resetLiveStatusPanels();
     }
 
     async function getOpenSessionDocs() {
@@ -751,6 +889,85 @@
         return `${h}:${m}:${s}`;
     }
 
+    function updateElapsedTimeDisplay(targetMs = Date.now()) {
+        const elapsedEl = document.getElementById('elapsedTimeDisplay');
+        if (!elapsedEl) return;
+        const elapsedText = formatElapsedFromStart(targetMs);
+        elapsedEl.innerHTML = `음주 진행 시간: <span id="elapsedTimeLiveValue" class="live-value">${elapsedText}</span>`;
+        triggerValueFlash('elapsedTimeLiveValue');
+    }
+
+    function getDrinkIntervalStats(targetList = drinksList) {
+        const sorted = [...(targetList || [])]
+            .filter(d => getDrinkTimeMs(d) > 0)
+            .sort((a, b) => getDrinkTimeMs(a) - getDrinkTimeMs(b));
+        if (sorted.length === 0) {
+            return { averageGapMinutes: null, latestDrinkMs: null, gapCount: 0 };
+        }
+
+        const gaps = [];
+        for (let i = 1; i < sorted.length; i++) {
+            const gapMinutes = (getDrinkTimeMs(sorted[i]) - getDrinkTimeMs(sorted[i - 1])) / 60000;
+            if (Number.isFinite(gapMinutes) && gapMinutes >= 0) gaps.push(gapMinutes);
+        }
+
+        const averageGapMinutes = gaps.length > 0
+            ? gaps.reduce((sum, value) => sum + value, 0) / gaps.length
+            : null;
+
+        return {
+            averageGapMinutes,
+            latestDrinkMs: getDrinkTimeMs(sorted[sorted.length - 1]),
+            gapCount: gaps.length
+        };
+    }
+
+    function refreshDrinkPacePanel(nowMs = Date.now()) {
+        const panel = document.getElementById('drinkPacePanel');
+        if (!panel) return;
+
+        if (!sessionStartTime || !Array.isArray(drinksList) || drinksList.length === 0) {
+            panel.style.display = 'none';
+            return;
+        }
+
+        panel.style.display = 'block';
+        const stats = getDrinkIntervalStats(drinksList);
+        const avgEl = document.getElementById('averageDrinkIntervalValue');
+        const chipEl = document.getElementById('recommendedIntervalChip');
+        const fillEl = document.getElementById('drinkIntervalProgressFill');
+        const nextEl = document.getElementById('nextRecommendedDrinkTime');
+        const recommended = RECOMMENDED_DRINK_INTERVAL_MINUTES;
+
+        if (chipEl) chipEl.innerText = `권장 ${recommended}분`;
+
+        let progressPercent = 0;
+        let isNeutral = false;
+        if (stats.averageGapMinutes === null) {
+            isNeutral = true;
+            if (avgEl) avgEl.innerText = '추가잔 기록 후 계산';
+        } else {
+            progressPercent = Math.min(100, Math.max(0, (stats.averageGapMinutes / recommended) * 50));
+            if (avgEl) avgEl.innerText = `${stats.averageGapMinutes.toFixed(1)}분`;
+        }
+
+        if (fillEl) {
+            fillEl.style.width = `${progressPercent}%`;
+            fillEl.classList.toggle('is-neutral', isNeutral);
+            fillEl.classList.toggle('is-good', !isNeutral && progressPercent >= 50);
+        }
+
+        if (nextEl && stats.latestDrinkMs) {
+            const nextRecommendedMs = stats.latestDrinkMs + (recommended * 60000);
+            const nextTimeText = new Date(nextRecommendedMs).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+            const remainingMs = nextRecommendedMs - nowMs;
+            const remainingText = remainingMs > 0
+                ? `약 ${Math.ceil(remainingMs / 60000)}분 후`
+                : '권장 간격 충족됨';
+            nextEl.innerHTML = `다음 권장 음주 주문 시각: <b>${nextTimeText} 경</b> <span style="color:#718096;">(${remainingText})</span><br><span style="font-size:0.72rem; color:#94a3b8;">※ 최신 drink-item-current 시작 시각 + 권장 ${recommended}분 기준입니다.</span>`;
+        }
+    }
+
     function getRealtimeEstimatedBac(targetMs = Date.now(), targetDrinks = drinksList) {
         if (!sessionStartTime || !Array.isArray(targetDrinks) || targetDrinks.length === 0) return 0;
         const mealOffsetHrs = parseFloat(document.getElementById('userMeal').value) || 1.0;
@@ -815,10 +1032,12 @@
             activeChartInstance = null;
         }
         clearChartValuePanel('activeBacChart', true);
+        setCollapsibleSectionVisible('activeAnalysisSection', false);
     }
 
     function refreshActiveAnalysisIfReady() {
         if (activeAnalysisUnlocked && hasAdditionalDrinks()) {
+            setCollapsibleSectionVisible('activeAnalysisSection', true);
             document.getElementById('activeChartContainer').style.display = 'block';
             document.getElementById('activeChartContainer').setAttribute('data-visible', 'true');
             updateActiveChart();
@@ -924,6 +1143,7 @@
         if (latestAdditionalIndex < 0) {
             panel.style.display = 'none';
             panel.innerHTML = '';
+            refreshActiveAnalysisSectionVisibility();
             return;
         }
 
@@ -932,6 +1152,7 @@
         if (referenceDrinks.length === 0) {
             panel.style.display = 'none';
             panel.innerHTML = '';
+            refreshActiveAnalysisSectionVisibility();
             return;
         }
 
@@ -945,16 +1166,18 @@
         const additionalSequence = Number(latest.additionalSequence)
             || drinksList.slice(0, latestAdditionalIndex + 1).filter((d, index) => !isInitialDrinkRecord(d, index)).length;
 
+        setCollapsibleSectionVisible('activeAnalysisSection', true);
         panel.style.display = 'block';
         panel.innerHTML = `
             <b>🧮 현재 추정 BAC</b><br>
-            음주 진행 시간 <b>${elapsedText}</b> / 현재 시각 <b>${nowText}</b> 기준,<br>
+            음주 진행 시간 <b><span id="preDrinkElapsedValue" class="live-value">${elapsedText}</span></b> / 현재 시각 <b><span id="preDrinkNowValue" class="live-value">${nowText}</span></b> 기준,<br>
             <b>추가 ${additionalSequence}번째 잔은 제외</b>하고 이전 술 기록 <b>${referenceDrinks.length}회</b>,
             누적 알코올 <b>${referenceTotalAlcoholGrams.toFixed(1)}g</b> 중 현재까지 흡수된 약
-            <b>${absorbedAlcoholGrams.toFixed(1)}g</b>만 반영한 예상 BAC는
-            <b style="color:var(--danger-color); font-size:1rem;">${currentEstimatedBac.toFixed(3)}%</b>입니다.<br>
+            <b>${absorbedAlcoholGrams.toFixed(1)}g</b>만 반영한 현재 시각 추정 BAC는
+            <b><span id="preDrinkBacValue" class="live-value bac-value">${currentEstimatedBac.toFixed(3)}%</span></b>입니다.<br>
             <span style="font-size:0.76rem; color:#8d6e63;">※ 방금 입력한 추가잔 알코올 ${excludedAlcoholGrams.toFixed(1)}g은 이 현재 추정 BAC 계산에 포함하지 않았습니다.</span>
         `;
+        triggerValueFlashes(['preDrinkElapsedValue', 'preDrinkNowValue', 'preDrinkBacValue']);
     }
 
     // 음주 간격에 따른 시각적 뱃지 및 연결선 생성기
@@ -1153,6 +1376,7 @@
         document.getElementById('startTimeDisplay').innerText = `시작 시각: ${startStr}`;
 
         renderDrinkList();
+        refreshDrinkPacePanel();
         showLatestPreDrinkBacResult();
         activeAnalysisUnlocked = hasAdditionalDrinks();
         refreshActiveAnalysisIfReady();
@@ -1204,6 +1428,7 @@
 
         document.getElementById('preDrinkBacResult').style.display = 'none';
         renderDrinkList();
+        refreshDrinkPacePanel();
         hideActiveAnalysis();
         startTimer();
 
@@ -1215,13 +1440,12 @@
 
     function startTimer() {
         if(timerInterval) clearInterval(timerInterval);
+        updateElapsedTimeDisplay(Date.now());
+        refreshDrinkPacePanel(Date.now());
         timerInterval = setInterval(() => {
             const now = new Date();
-            const diff = now - sessionStartTime;
-            const h = Math.floor(diff / 3600000).toString().padStart(2, '0');
-            const m = Math.floor((diff / 60000) % 60).toString().padStart(2, '0');
-            const s = Math.floor((diff / 1000) % 60).toString().padStart(2, '0');
-            document.getElementById('elapsedTimeDisplay').innerText = `음주 진행 시간: ${h}:${m}:${s}`;
+            updateElapsedTimeDisplay(now.getTime());
+            refreshDrinkPacePanel(now.getTime());
 
             // 현재 추정 BAC 패널은 최신 추가잔을 제외한 이전 잔 기준으로 초단위 갱신합니다.
             showLatestPreDrinkBacResult();
@@ -1268,6 +1492,7 @@
         document.getElementById('startTimeDisplay').innerText = `시작 시각: ${startStr}`;
         
         renderDrinkList();
+        refreshDrinkPacePanel();
         showLatestPreDrinkBacResult();
         refreshActiveAnalysisIfReady();
         executeSaveProcess(false, true);
@@ -1301,6 +1526,7 @@
         // 체중/성별 변경 후 각 잔의 기여도와 잔 시작 직전 BAC를 모두 다시 계산합니다.
         recalculateDrinkDerivedFields();
         renderDrinkList();
+        refreshDrinkPacePanel();
         showLatestPreDrinkBacResult();
         refreshActiveAnalysisIfReady();
         executeSaveProcess(false, true);
@@ -1351,6 +1577,7 @@
         drinksList.push(newDrink);
         activeAnalysisUnlocked = true;
         renderDrinkList();
+        refreshDrinkPacePanel();
         showLatestPreDrinkBacResult();
         refreshActiveAnalysisIfReady();
         executeSaveProcess(false, true);
@@ -1393,6 +1620,7 @@
         if(targetList.length === 0) {
             html += `<div style="text-align:center; padding:20px; color:#a0aec0; font-size:0.85rem; background:white; border:1px dashed #cbd5e0; border-radius:14px; margin-top:15px; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">아직 기록된 음주 내용이 없습니다.<br>음주 세션을 다시 시작해주세요.</div>`;
             container.innerHTML = html;
+            if (containerId === 'drinkListContainer') updateDrinkItemsSectionMeta(targetList);
             return;
         }
 
@@ -1462,6 +1690,7 @@
             `;
         }
         container.innerHTML = html;
+        if (containerId === 'drinkListContainer') updateDrinkItemsSectionMeta(targetList);
     }
 
     function renderActiveSummary(summaryDrinks = null, summaryChartData = null) {
@@ -1514,10 +1743,11 @@
             🍻 추가 ${additionalSequence}번째 잔 <b>이전 기준</b>: 누적 <b>${referenceDrinks.length}회</b> / 알코올 <b>${totalAlcoholGrams.toFixed(1)}g</b> 반영<br>
             <span style="font-size:0.78rem; color:#8d6e63;">※ 방금 입력한 추가잔 알코올 ${excludedAlcoholGrams.toFixed(1)}g은 아래 요약 계산에서 제외했습니다.</span><br>
             • 종합 예상 최고 농도: <b style="color:var(--danger-color);">${sessionPeakBac.toFixed(3)}%</b><br>
-            • 현재 시각 추정 BAC: <b style="color:var(--primary-color);">${currentEstimatedBac.toFixed(3)}%</b><br>
+            • 현재 시각 추정 BAC: <b style="color:var(--primary-color);"><span id="activeSummaryCurrentBacValue" class="live-value">${currentEstimatedBac.toFixed(3)}%</span></b><br>
             • 알코올 완전 분해 예상 소요: <b style="color:var(--info-color);">${totalClearHrs.toFixed(1)}시간</b><br>
             • 예상 숙취 강도: <b>${hangoverStr}</b>
         `;
+        triggerValueFlash('activeSummaryCurrentBacValue');
     }
 
     function updateActiveSummaryOnly() {
@@ -1529,6 +1759,7 @@
             hideActiveAnalysis();
             return;
         }
+        setCollapsibleSectionVisible('activeAnalysisSection', true);
         document.getElementById('activeChartContainer').style.display = 'block';
         const mealOffsetHrs = parseFloat(document.getElementById('userMeal').value) || 1.0;
 
