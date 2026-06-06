@@ -224,9 +224,9 @@
                     <div class="legend-item"><div class="legend-box" style="background: rgba(231, 76, 60, 0.2);"></div><span>위험 (~0.30)</span></div>
                     <div class="legend-item"><span class="legend-line" style="color: #f39c12;">---</span><span>정지(0.03)</span></div>
                     <div class="legend-item"><span class="legend-line" style="color: #e74c3c;">---</span><span>취소(0.08)</span></div>
-                    <div class="legend-item"><span class="legend-line" style="color: #6c3483; font-weight:800;">━━</span><span>전체 합산 BAC</span></div>
-                    <div class="legend-item"><span class="legend-line" style="color: #9b59b6; font-weight:400;">━━</span><span>잔별 BAC 추이</span></div>
-                    <div class="legend-item"><span class="legend-line" style="color: #e67e22; font-weight:400;">- -</span><span>아세트알데하이드(숙취)</span></div>
+                    <div class="legend-item"><span class="legend-line" style="color: #e74c3c; font-weight:800;">━━</span><span>전체 합산 BAC</span></div>
+                    <div class="legend-item"><span class="legend-line" style="color: #e67e22; font-weight:600;">━━</span><span>잔별 BAC 추이</span></div>
+                    <div class="legend-item"><span class="legend-line" style="color: #f1c40f; font-weight:800;">━━</span><span>아세트알데하이드(숙취)</span></div>
                     <div class="legend-item"><span class="legend-line" style="color: #3498db;">│</span><span>현재 시각</span></div>
                 </div>
             </div>
@@ -256,9 +256,9 @@
                     <div class="legend-item"><div class="legend-box" style="background: rgba(231, 76, 60, 0.2);"></div><span>위험 (~0.30)</span></div>
                     <div class="legend-item"><span class="legend-line" style="color: #f39c12;">---</span><span>정지(0.03)</span></div>
                     <div class="legend-item"><span class="legend-line" style="color: #e74c3c;">---</span><span>취소(0.08)</span></div>
-                    <div class="legend-item"><span class="legend-line" style="color: #6c3483; font-weight:800;">━━</span><span>전체 합산 BAC</span></div>
-                    <div class="legend-item"><span class="legend-line" style="color: #9b59b6; font-weight:400;">━━</span><span>잔별 BAC 추이</span></div>
-                    <div class="legend-item"><span class="legend-line" style="color: #e67e22; font-weight:400;">- -</span><span>아세트알데하이드(숙취)</span></div>
+                    <div class="legend-item"><span class="legend-line" style="color: #e74c3c; font-weight:800;">━━</span><span>전체 합산 BAC</span></div>
+                    <div class="legend-item"><span class="legend-line" style="color: #e67e22; font-weight:600;">━━</span><span>잔별 BAC 추이</span></div>
+                    <div class="legend-item"><span class="legend-line" style="color: #f1c40f; font-weight:800;">━━</span><span>아세트알데하이드(숙취)</span></div>
                 </div>
             </div>
             
@@ -358,9 +358,9 @@
     });
 
     const APP_VERSION = Object.freeze({
-        version: 'v2026.06.06-05',
+        version: 'v2026.06.06-06',
         updatedAt: '2026-06-06 KST',
-        note: '차트·요약 BAC 기준 통일, 전체 합산 BAC 라인 추가, 현재/최고 BAC 표시명 정리'
+        note: '차트 색상 체계 정리, 아세트알데하이드 실선 표시, 최근 술 시작 전 추정 BAC 문구 개선'
     });
 
     const versionEl = document.getElementById('appVersionText');
@@ -1312,7 +1312,7 @@
         summaryEl.setAttribute('data-visible', 'true');
         const latestDrink = drinksList[drinksList.length - 1];
         const latestPreBacLine = latestDrink && !isInitialDrinkRecord(latestDrink, drinksList.length - 1)
-            ? `• 최근 술 시작 직전 역산 BAC: <b style="color:var(--warning-color);">${(Number(latestDrink.bacBeforeDrink) || 0).toFixed(3)}%</b><br>`
+            ? `• 최근 술 시작 전 추정 BAC: <b style="color:var(--warning-color);">${(Number(latestDrink.bacBeforeDrink) || 0).toFixed(3)}%</b><br>`
             : '';
 
         summaryEl.innerHTML = `
@@ -1683,8 +1683,8 @@
         const totalBacDataset = {
             label: '전체 합산 BAC %',
             data: chartData.dataPoints,
-            borderColor: '#6c3483',
-            backgroundColor: 'rgba(108, 52, 131, 0.08)',
+            borderColor: '#e74c3c',
+            backgroundColor: 'rgba(231, 76, 60, 0.08)',
             borderWidth: 4,
             fill: false,
             tension: 0.35,
@@ -1700,7 +1700,7 @@
             return {
                 label: `${labelPrefix} BAC %`,
                 data: points,
-                borderColor: `rgba(155, 89, 182, ${opacity})`,
+                borderColor: `rgba(230, 126, 34, ${opacity})`,
                 backgroundColor: 'transparent',
                 borderWidth: 2,
                 borderDash: index === (chartData.individualBacDataPoints.length - 1) ? [] : [3, 3],
@@ -1717,10 +1717,10 @@
             {
                 label: '예상 아세트알데하이드 (숙취)',
                 data: chartData.achDataPoints,
-                borderColor: '#e67e22',
+                borderColor: '#f1c40f',
                 backgroundColor: 'transparent',
                 borderWidth: 2,
-                borderDash: [5, 5],
+                borderDash: [],
                 fill: false,
                 tension: 0.35,
                 pointRadius: 0,
