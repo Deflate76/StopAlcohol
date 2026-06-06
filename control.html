@@ -224,6 +224,7 @@
                     <div class="legend-item"><div class="legend-box" style="background: rgba(231, 76, 60, 0.2);"></div><span>위험 (~0.30)</span></div>
                     <div class="legend-item"><span class="legend-line" style="color: #f39c12;">---</span><span>정지(0.03)</span></div>
                     <div class="legend-item"><span class="legend-line" style="color: #e74c3c;">---</span><span>취소(0.08)</span></div>
+                    <div class="legend-item"><span class="legend-line" style="color: #6c3483; font-weight:800;">━━</span><span>전체 합산 BAC</span></div>
                     <div class="legend-item"><span class="legend-line" style="color: #9b59b6; font-weight:400;">━━</span><span>잔별 BAC 추이</span></div>
                     <div class="legend-item"><span class="legend-line" style="color: #e67e22; font-weight:400;">- -</span><span>아세트알데하이드(숙취)</span></div>
                     <div class="legend-item"><span class="legend-line" style="color: #3498db;">│</span><span>현재 시각</span></div>
@@ -255,6 +256,7 @@
                     <div class="legend-item"><div class="legend-box" style="background: rgba(231, 76, 60, 0.2);"></div><span>위험 (~0.30)</span></div>
                     <div class="legend-item"><span class="legend-line" style="color: #f39c12;">---</span><span>정지(0.03)</span></div>
                     <div class="legend-item"><span class="legend-line" style="color: #e74c3c;">---</span><span>취소(0.08)</span></div>
+                    <div class="legend-item"><span class="legend-line" style="color: #6c3483; font-weight:800;">━━</span><span>전체 합산 BAC</span></div>
                     <div class="legend-item"><span class="legend-line" style="color: #9b59b6; font-weight:400;">━━</span><span>잔별 BAC 추이</span></div>
                     <div class="legend-item"><span class="legend-line" style="color: #e67e22; font-weight:400;">- -</span><span>아세트알데하이드(숙취)</span></div>
                 </div>
@@ -356,9 +358,9 @@
     });
 
     const APP_VERSION = Object.freeze({
-        version: 'v2026.06.06-04',
+        version: 'v2026.06.06-05',
         updatedAt: '2026-06-06 KST',
-        note: '기록 접기/펼치기, 페이지네이션, 잔 상태 색상, BAC 최고점 계산 개선'
+        note: '차트·요약 BAC 기준 통일, 전체 합산 BAC 라인 추가, 현재/최고 BAC 표시명 정리'
     });
 
     const versionEl = document.getElementById('appVersionText');
@@ -605,30 +607,11 @@
         }
 
         const chartData = generateChartData(sortedDrinks, startMs, mealOffsetHrs);
-        let peakBac = 0;
-        let peakIndex = 0;
-
-        (chartData.dataPoints || []).forEach((value, index) => {
-            const numericValue = Number(value) || 0;
-            if (numericValue > peakBac) {
-                peakBac = numericValue;
-                peakIndex = index;
-            }
-        });
-
-        // 첫 잔만 있을 때는 사용자가 직관적으로 보는 '해당 술의 순수 BAC 증가 예상치'도 보존합니다.
-        // 추가 잔부터는 전체 패턴 시뮬레이션 최고점이 우선입니다.
-        if (sortedDrinks.length === 1) {
-            const singleContribution = Number(sortedDrinks[0].cMaxContribution) || 0;
-            if (singleContribution > peakBac) {
-                peakBac = singleContribution;
-                peakIndex = -1;
-            }
-        }
-
+        const peakBac = Number(chartData.maxBac) || 0;
+        const peakIndex = Number.isFinite(Number(chartData.maxBacIndex)) ? Number(chartData.maxBacIndex) : 0;
         const fallbackDrink = sortedDrinks[sortedDrinks.length - 1];
         const fallbackPeakTimeMs = getDrinkTimeMs(fallbackDrink) + ((Number(mealOffsetHrs) || 0) * 60 * 60000);
-        const peakTimeMs = peakIndex >= 0 && chartData.timeMsList && chartData.timeMsList[peakIndex]
+        const peakTimeMs = chartData.timeMsList && chartData.timeMsList[peakIndex]
             ? chartData.timeMsList[peakIndex]
             : fallbackPeakTimeMs;
 
@@ -641,6 +624,24 @@
 
     function calculateSessionExpectedPeak(targetDrinksList, startMs, mealOffsetHrs) {
         return calculatePatternPeakThroughDrinks(targetDrinksList, startMs, mealOffsetHrs).peakBac;
+    }
+
+
+    function getChartBacAtTime(chartData, targetMs) {
+        if (!chartData || !chartData.timeMsList || !chartData.dataPoints || chartData.timeMsList.length === 0) return 0;
+        if (!targetMs) targetMs = Date.now();
+
+        let closestIndex = 0;
+        let minDiff = Infinity;
+        chartData.timeMsList.forEach((ms, index) => {
+            const diff = Math.abs(ms - targetMs);
+            if (diff < minDiff) {
+                minDiff = diff;
+                closestIndex = index;
+            }
+        });
+
+        return Number(chartData.dataPoints[closestIndex]) || 0;
     }
 
 
@@ -1293,14 +1294,11 @@
         document.getElementById('activeChartContainer').style.display = 'block';
         const mealOffsetHrs = parseFloat(document.getElementById('userMeal').value) || 1.0;
         const chartData = generateChartData(drinksList, sessionStartTime.getTime(), mealOffsetHrs);
-        const sessionExpectedPeak = calculateSessionExpectedPeak(
-            drinksList,
-            sessionStartTime.getTime(),
-            mealOffsetHrs
-        );
+        const sessionPeakBac = Number(chartData.maxBac) || 0;
+        const currentEstimatedBac = getChartBacAtTime(chartData, Date.now());
         
         const totalAlcoholGrams = drinksList.reduce((sum, d) => sum + (d.alcoholGrams || 0), 0);
-        const totalClearHrs = chartData.dataPoints.length * 15 / 60; 
+        const totalClearHrs = ((chartData.dataPoints.length - 1) * (chartData.stepMinutes || 5)) / 60; 
         
         // 숙취 뱃지 생성
         let hangoverStr = "";
@@ -1311,22 +1309,17 @@
 
         const summaryEl = document.getElementById('activeSummary');
         summaryEl.style.display = 'block';
-        const currentEstimatedBac = calculateBacAtTime(
-            drinksList,
-            Date.now(),
-            mealOffsetHrs,
-            sessionStartTime.getTime()
-        );
+        summaryEl.setAttribute('data-visible', 'true');
         const latestDrink = drinksList[drinksList.length - 1];
-        const latestPreBacLine = latestDrink && !latestDrink.isInitialDrink
+        const latestPreBacLine = latestDrink && !isInitialDrinkRecord(latestDrink, drinksList.length - 1)
             ? `• 최근 술 시작 직전 역산 BAC: <b style="color:var(--warning-color);">${(Number(latestDrink.bacBeforeDrink) || 0).toFixed(3)}%</b><br>`
             : '';
 
         summaryEl.innerHTML = `
             🍻 현재까지 누적 <b>${drinksList.length}회</b> / 알코올 <b>${totalAlcoholGrams.toFixed(1)}g</b> 섭취<br>
             ${latestPreBacLine}
-            • 현재 시각 예상 BAC: <b style="color:var(--primary-color);">${currentEstimatedBac.toFixed(3)}%</b><br>
-            • 종합 예상 최고 농도: <b style="color:var(--danger-color);">${sessionExpectedPeak.toFixed(3)}%</b><br>
+            • 종합 예상 최고 농도: <b style="color:var(--danger-color);">${sessionPeakBac.toFixed(3)}%</b><br>
+            • 현재 시각 추정 BAC: <b style="color:var(--primary-color);">${currentEstimatedBac.toFixed(3)}%</b><br>
             • 알코올 완전 분해 예상 소요: <b style="color:var(--info-color);">${totalClearHrs.toFixed(1)}시간</b><br>
             • 예상 숙취 강도: <b>${hangoverStr}</b>
         `;
@@ -1352,11 +1345,7 @@
 
         const mealOffsetHrs = parseFloat(document.getElementById('userMeal').value) || 1.0;
         const chartData = generateChartData(drinksList, sessionStartTime.getTime(), mealOffsetHrs);
-        const sessionExpectedPeak = calculateSessionExpectedPeak(
-            drinksList,
-            sessionStartTime.getTime(),
-            mealOffsetHrs
-        );
+        const sessionExpectedPeak = Number(chartData.maxBac) || 0;
         const totalAlcoholGrams = drinksList.reduce((sum, d) => sum + (d.alcoholGrams || 0), 0);
 
         const sessionData = {
@@ -1429,8 +1418,8 @@
         const mealOffsetHrs = parseFloat(sessionData.mealOffsetHrs) || 1.0;
         const startMs = toMs(sessionData.startTime);
         const chartData = generateChartData(sessionData.drinksList, startMs, mealOffsetHrs);
-        const sessionExpectedPeak = calculateSessionExpectedPeak(sessionData.drinksList, startMs, mealOffsetHrs);
-        const totalClearHrs = chartData.dataPoints.length * 15 / 60; 
+        const sessionExpectedPeak = Number(chartData.maxBac) || 0;
+        const totalClearHrs = ((chartData.dataPoints.length - 1) * (chartData.stepMinutes || 5)) / 60; 
         const statusStr = sessionData.isFinished ? "종료됨" : "진행중 (또는 중단됨)";
         const sessionDate = new Date(startMs);
         
@@ -1520,25 +1509,31 @@
     // 분해량은 전체 BAC에서 차감하되, 현재 남아있는 각 잔의 BAC 비율에 따라 나누어 빼므로
     // 잔별 라인을 모두 더하면 기존의 누적 BAC 추이와 거의 같은 흐름이 됩니다.
     function generateChartData(targetDrinksList, startMs, mealOffsetHrs) {
-        const mealOffsetMin = mealOffsetHrs * 60;
+        const mealOffsetMin = Math.max(0, (Number(mealOffsetHrs) || 0) * 60);
+        const stepMinutes = 5;
+        const stepMs = stepMinutes * 60000;
         const dataPoints = [];
         const individualBacDataPoints = [];
         const achDataPoints = [];
         const labels = [];
         const timeMsList = [];
-        
+
         let maxBac = 0;
         let maxAch = 0;
-        
-        if(!targetDrinksList || targetDrinksList.length === 0) {
+        let maxBacIndex = 0;
+
+        if (!targetDrinksList || targetDrinksList.length === 0) {
             return {
                 labels: ['00:00'],
-                timeMsList: [startMs],
+                timeMsList: [startMs || Date.now()],
                 dataPoints: [0],
                 individualBacDataPoints: [],
+                drinksForChart: [],
                 achDataPoints: [0],
                 maxBac: 0,
-                maxAch: 0
+                maxAch: 0,
+                maxBacIndex: 0,
+                stepMinutes
             };
         }
 
@@ -1546,86 +1541,89 @@
             .filter(d => getDrinkTimeMs(d) > 0)
             .sort((a, b) => getDrinkTimeMs(a) - getDrinkTimeMs(b));
 
+        if (sortedDrinks.length === 0) {
+            return {
+                labels: ['00:00'],
+                timeMsList: [startMs || Date.now()],
+                dataPoints: [0],
+                individualBacDataPoints: [],
+                drinksForChart: [],
+                achDataPoints: [0],
+                maxBac: 0,
+                maxAch: 0,
+                maxBacIndex: 0,
+                stepMinutes
+            };
+        }
+
         sortedDrinks.forEach(() => individualBacDataPoints.push([]));
 
-        let earliestDrinkMs = Math.min(...sortedDrinks.map(d => getDrinkTimeMs(d)));
-        let actualPlotStartMs = Math.min(startMs, earliestDrinkMs);
+        const earliestDrinkMs = Math.min(...sortedDrinks.map(d => getDrinkTimeMs(d)));
+        const actualPlotStartMs = Math.min(startMs || earliestDrinkMs, earliestDrinkMs);
+        const totalContribution = sortedDrinks.reduce((sum, d) => sum + (Number(d.cMaxContribution) || 0), 0);
+        const lastDrinkMs = getDrinkTimeMs(sortedDrinks[sortedDrinks.length - 1]);
+        const lastAbsorbEndMs = lastDrinkMs + (mealOffsetMin * 60000);
 
-        const lastDrinkFullyAbsorbedTime = getDrinkTimeMs(sortedDrinks[sortedDrinks.length - 1]) + (mealOffsetMin * 60000);
-        
-        const currentDrinkBacs = sortedDrinks.map(() => 0);
-        let currentAch = 0;
-        const stepMinutes = 15;
-        const stepMs = stepMinutes * 60000;
+        // 각 잔의 그래프는 사용자가 이해하기 쉽게 '흡수 완료 시점 = 해당 잔의 BAC 증가 예상치'에 도달하도록 표시합니다.
+        // 이후 분해 구간에서는 전체 분해율 0.015%/h를 각 잔의 기여도 비율대로 나누어 감소시킵니다.
+        function getDisplayedDrinkBacAt(drink, currentMs) {
+            const drinkMs = getDrinkTimeMs(drink);
+            const contribution = Number(drink.cMaxContribution) || 0;
+            if (contribution <= 0 || currentMs <= drinkMs) return 0;
 
-        for (let m = 0; m <= 24 * 60; m += stepMinutes) {
-            let currentMs = actualPlotStartMs + (m * 60000);
-            let timeObj = new Date(currentMs);
-            let timeLabel = timeObj.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
-            
-            let stepStartMs = currentMs - stepMs;
-            let stepEndMs = currentMs;
-
-            sortedDrinks.forEach((d, index) => {
-                const eMs = getDrinkTimeMs(d);
-                const contribution = Number(d.cMaxContribution) || 0;
-                let absorbedForThisDrink = 0;
-
-                if (mealOffsetMin <= 0) {
-                    if (eMs > stepStartMs && eMs <= stepEndMs) {
-                        absorbedForThisDrink = contribution;
-                    }
-                } else {
-                    const absorbStart = eMs;
-                    const absorbEnd = eMs + mealOffsetMin * 60000;
-                    const overlapStart = Math.max(stepStartMs, absorbStart);
-                    const overlapEnd = Math.min(stepEndMs, absorbEnd);
-                    
-                    if (overlapStart < overlapEnd) {
-                        const overlapMinutes = (overlapEnd - overlapStart) / 60000;
-                        absorbedForThisDrink = contribution * (overlapMinutes / mealOffsetMin);
-                    }
-                }
-
-                currentDrinkBacs[index] += absorbedForThisDrink;
-            });
-            
-            // 15분 단위 알코올 분해 (시간당 0.015% 소모)
-            let currentBacBeforeClear = currentDrinkBacs.reduce((sum, v) => sum + v, 0);
-            let clearedInStep = Math.min(currentBacBeforeClear, 0.015 * (stepMinutes / 60));
-            let newlyClearedBac = clearedInStep;
-
-            if (currentBacBeforeClear > 0 && clearedInStep > 0) {
-                currentDrinkBacs.forEach((v, index) => {
-                    const share = v / currentBacBeforeClear;
-                    currentDrinkBacs[index] = Math.max(0, v - (clearedInStep * share));
-                });
+            const absorbEndMs = drinkMs + (mealOffsetMin * 60000);
+            if (mealOffsetMin <= 0) {
+                if (currentMs < drinkMs) return 0;
+            } else if (currentMs < absorbEndMs) {
+                return contribution * ((currentMs - drinkMs) / (mealOffsetMin * 60000));
             }
 
+            const decayStartMs = mealOffsetMin <= 0 ? drinkMs : absorbEndMs;
+            const elapsedAfterPeakHours = Math.max(0, (currentMs - decayStartMs) / 3600000);
+            const contributionShare = totalContribution > 0 ? contribution / totalContribution : 1 / sortedDrinks.length;
+            const individualClearRate = 0.015 * contributionShare;
+            return Math.max(0, contribution - (individualClearRate * elapsedAfterPeakHours));
+        }
+
+        let previousTotalBac = 0;
+        let currentAch = 0;
+        const maxPlotMinutes = 24 * 60;
+
+        for (let m = 0; m <= maxPlotMinutes; m += stepMinutes) {
+            const currentMs = actualPlotStartMs + (m * 60000);
+            const timeObj = new Date(currentMs);
+            const timeLabel = timeObj.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+
+            const currentDrinkBacs = sortedDrinks.map(d => getDisplayedDrinkBacAt(d, currentMs));
             let currentBac = currentDrinkBacs.reduce((sum, v) => sum + v, 0);
             if (currentBac < 0.000001) currentBac = 0;
-            
-            // 아세트알데하이드 농도 시뮬레이션 (알코올 분해량에 비례하여 축적 후 서서히 소모)
-            currentAch += newlyClearedBac * 1.5;
-            currentAch -= 0.01 * (stepMinutes / 60); 
+
+            const clearedThisStep = Math.max(0, previousTotalBac - currentBac);
+            currentAch += clearedThisStep * 1.5;
+            currentAch -= 0.01 * (stepMinutes / 60);
             if (currentAch < 0) currentAch = 0;
-            
-            if (currentBac > maxBac) maxBac = currentBac;
+
+            if (currentBac > maxBac) {
+                maxBac = currentBac;
+                maxBacIndex = dataPoints.length;
+            }
             if (currentAch > maxAch) maxAch = currentAch;
-            
+
             labels.push(timeLabel);
             timeMsList.push(currentMs);
-            dataPoints.push(currentBac.toFixed(3));
+            dataPoints.push(Number(currentBac.toFixed(4)));
             currentDrinkBacs.forEach((v, index) => {
-                individualBacDataPoints[index].push(v.toFixed(3));
+                individualBacDataPoints[index].push(Number(v.toFixed(4)));
             });
-            achDataPoints.push(currentAch.toFixed(3));
-            
-            // BAC와 AcH가 모두 0으로 떨어지면 차트 종료
-            if (currentBac === 0 && currentAch === 0 && currentMs > lastDrinkFullyAbsorbedTime) {
+            achDataPoints.push(Number(currentAch.toFixed(4)));
+
+            previousTotalBac = currentBac;
+
+            if (currentBac === 0 && currentAch === 0 && currentMs > lastAbsorbEndMs) {
                 break;
             }
         }
+
         return {
             labels,
             timeMsList,
@@ -1634,7 +1632,9 @@
             drinksForChart: sortedDrinks,
             achDataPoints,
             maxBac,
-            maxAch
+            maxAch,
+            maxBacIndex,
+            stepMinutes
         };
     }
 
@@ -1680,66 +1680,70 @@
             };
         }
 
+        const totalBacDataset = {
+            label: '전체 합산 BAC %',
+            data: chartData.dataPoints,
+            borderColor: '#6c3483',
+            backgroundColor: 'rgba(108, 52, 131, 0.08)',
+            borderWidth: 4,
+            fill: false,
+            tension: 0.35,
+            pointRadius: 0,
+            order: 1
+        };
+
         const individualBacDatasets = (chartData.individualBacDataPoints || []).map((points, index) => {
             const drink = chartData.drinksForChart && chartData.drinksForChart[index] ? chartData.drinksForChart[index] : null;
             const labelPrefix = drink && isInitialDrinkRecord(drink, index) ? '시작 술' : `${index + 1}번째 잔`;
-            const opacity = Math.max(0.35, 0.95 - (index * 0.08));
+            const opacity = Math.max(0.28, 0.82 - (index * 0.06));
 
             return {
                 label: `${labelPrefix} BAC %`,
                 data: points,
                 borderColor: `rgba(155, 89, 182, ${opacity})`,
                 backgroundColor: 'transparent',
-                borderWidth: index === 0 ? 3 : 2,
+                borderWidth: 2,
+                borderDash: index === (chartData.individualBacDataPoints.length - 1) ? [] : [3, 3],
                 fill: false,
-                tension: 0.4,
+                tension: 0.35,
                 pointRadius: 0,
-                zIndex: 10 + index
+                order: 2 + index
             };
         });
 
-        // 구형 데이터 또는 예외 상황 대비: 잔별 데이터가 없으면 기존 누적 BAC 한 줄을 사용합니다.
-        const bacDatasets = individualBacDatasets.length > 0
-            ? individualBacDatasets
-            : [{
-                label: '혈중 알코올(BAC) %',
-                data: chartData.dataPoints,
-                borderColor: '#9b59b6',
-                backgroundColor: 'rgba(155, 89, 182, 0.4)',
-                borderWidth: 3,
+        const datasets = [
+            totalBacDataset,
+            ...individualBacDatasets,
+            {
+                label: '예상 아세트알데하이드 (숙취)',
+                data: chartData.achDataPoints,
+                borderColor: '#e67e22',
+                backgroundColor: 'transparent',
+                borderWidth: 2,
+                borderDash: [5, 5],
                 fill: false,
-                tension: 0.4,
+                tension: 0.35,
                 pointRadius: 0,
-                zIndex: 10
-            }];
+                order: 100
+            }
+        ];
+
+        const suggestedMax = Math.max(0.1, (Number(chartData.maxBac) || 0) * 1.25, (Number(chartData.maxAch) || 0) * 1.25);
 
         const newInstance = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: chartData.labels,
-                datasets: [
-                    ...bacDatasets,
-                    {
-                        label: '예상 아세트알데하이드 (숙취)',
-                        data: chartData.achDataPoints,
-                        borderColor: '#e67e22',
-                        backgroundColor: 'transparent',
-                        borderWidth: 2,
-                        borderDash: [5, 5],
-                        fill: false,
-                        tension: 0.4,
-                        pointRadius: 0,
-                        zIndex: 5
-                    }
-                ]
+                datasets
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
                 scales: {
                     y: { 
                         beginAtZero: true, 
-                        suggestedMax: 0.1, 
+                        suggestedMax, 
                         title: { display: true, text: '농도 (%) / 가상 Index' }
                     },
                     x: {
