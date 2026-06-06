@@ -224,8 +224,9 @@
                     <div class="legend-item"><div class="legend-box" style="background: rgba(231, 76, 60, 0.2);"></div><span>위험 (~0.30)</span></div>
                     <div class="legend-item"><span class="legend-line" style="color: #f39c12;">---</span><span>정지(0.03)</span></div>
                     <div class="legend-item"><span class="legend-line" style="color: #e74c3c;">---</span><span>취소(0.08)</span></div>
-                    <div class="legend-item"><span class="legend-line" style="color: #e74c3c; font-weight:800;">━━</span><span>전체 합산 BAC</span></div>
-                    <div class="legend-item"><span class="legend-line" style="color: #e67e22; font-weight:600;">━━</span><span>잔별 BAC 추이</span></div>
+                    <div class="legend-item"><span class="legend-line" style="color: #e74c3c; font-weight:800;">- - -</span><span>현재 추가잔 포함 BAC</span></div>
+                    <div class="legend-item"><span class="legend-line" style="color: #e74c3c; font-weight:800;">━━</span><span>현재 마신 술 기준 BAC</span></div>
+                    <div class="legend-item"><span class="legend-line" style="color: #e67e22; font-weight:600;">━━</span><span>이전 잔별 BAC 추이</span></div>
                     <div class="legend-item"><span class="legend-line" style="color: #f1c40f; font-weight:800;">━━</span><span>아세트알데하이드(숙취)</span></div>
                     <div class="legend-item"><span class="legend-line" style="color: #3498db;">│</span><span>현재 시각</span></div>
                 </div>
@@ -358,9 +359,9 @@
     });
 
     const APP_VERSION = Object.freeze({
-        version: 'v2026.06.06-08',
+        version: 'v2026.06.06-09',
         updatedAt: '2026-06-06 KST',
-        note: '추가잔 제외 기준 현재 추정 BAC, activeSummary 이전잔 누적 기준, 초단위 실시간 갱신'
+        note: '현재 추가잔 포함 BAC 점선화, 현재 마신 술 기준 BAC 분리, 시작잔 누적 알코올 표시 제외'
     });
 
     const versionEl = document.getElementById('appVersionText');
@@ -642,6 +643,40 @@
         });
 
         return Number(chartData.dataPoints[closestIndex]) || 0;
+    }
+
+    function getChartSeriesValueAtTime(chartData, targetMs, seriesKey = 'dataPoints') {
+        if (!chartData || !chartData.timeMsList || !chartData[seriesKey] || chartData.timeMsList.length === 0) return 0;
+        if (targetMs < chartData.timeMsList[0]) return 0;
+        if (targetMs > chartData.timeMsList[chartData.timeMsList.length - 1]) return 0;
+
+        let closestIndex = 0;
+        let minDiff = Infinity;
+        chartData.timeMsList.forEach((ms, index) => {
+            const diff = Math.abs(ms - targetMs);
+            if (diff < minDiff) {
+                minDiff = diff;
+                closestIndex = index;
+            }
+        });
+
+        return Number(chartData[seriesKey][closestIndex]) || 0;
+    }
+
+    function attachCurrentDrinkBasisData(fullChartData, previousOnlyChartData) {
+        if (!fullChartData || !Array.isArray(fullChartData.dataPoints) || !Array.isArray(fullChartData.timeMsList)) return fullChartData;
+
+        const previousDataPoints = fullChartData.timeMsList.map(ms =>
+            previousOnlyChartData ? getChartSeriesValueAtTime(previousOnlyChartData, ms, 'dataPoints') : 0
+        );
+
+        fullChartData.previousOnlyDataPoints = previousDataPoints;
+        fullChartData.currentDrinkBasisDataPoints = fullChartData.dataPoints.map((value, index) => {
+            const diff = (Number(value) || 0) - (Number(previousDataPoints[index]) || 0);
+            return Number(Math.max(0, diff).toFixed(4));
+        });
+
+        return fullChartData;
     }
 
     function formatElapsedFromStart(targetMs = Date.now()) {
@@ -1329,7 +1364,11 @@
                 ? Number(d.priorAlcoholGrams)
                 : priorList.reduce((sum, item) => sum + (Number(item.alcoholGrams) || 0), 0);
             const additionalSequence = Number(d.additionalSequence) || targetList.slice(0, i + 1).filter((item, itemIndex) => !isInitialDrinkRecord(item, itemIndex)).length;
-            const entryLabel = isInitialDrinkRecord(d, i) ? '세션 시작 술' : `추가 ${additionalSequence}번째 잔`;
+            const isInitialEntry = isInitialDrinkRecord(d, i);
+            const entryLabel = isInitialEntry ? '세션 시작 술' : `추가 ${additionalSequence}번째 잔`;
+            const priorAlcoholLine = isInitialEntry
+                ? ''
+                : `• 직전 계산에 반영된 누적 알코올: <b>${priorAlcoholGrams.toFixed(1)}g</b><br>`;
 
             const isLatestActiveDrink = !isHistory && i === targetList.length - 1;
             const drinkItemClass = !isHistory
@@ -1349,7 +1388,7 @@
                     </div>
                     <div class="drink-item-time">음주 시작 시각: ${startDrinkStr}</div>
                     <div class="drink-item-stats">
-                        • 직전 계산에 반영된 누적 알코올: <b>${priorAlcoholGrams.toFixed(1)}g</b><br>
+                        ${priorAlcoholLine}
                         • 섭취 알코올 (해당 술): <b>${grams.toFixed(1)}g</b><br>
                         • 이 술의 BAC 증가 예상치: <b>${contribution.toFixed(3)}%</b><br>
                         • <b>이 술 반영 후 예상 최고 BAC: <span style="color:var(--danger-color);">${exactMaxBac.toFixed(3)}%</span></b><br>
@@ -1429,12 +1468,16 @@
         document.getElementById('activeChartContainer').style.display = 'block';
         const mealOffsetHrs = parseFloat(document.getElementById('userMeal').value) || 1.0;
 
-        // 차트는 전체 세션 흐름을 보여주되, 상단 요약(activeSummary)은 최신 추가잔 제외 기준으로 계산합니다.
+        // 활성 차트는 최신 추가잔까지 포함한 BAC와, 최신 추가잔만의 기여 패턴을 분리해서 보여줍니다.
         const chartData = generateChartData(drinksList, sessionStartTime.getTime(), mealOffsetHrs);
+        const latestAdditionalIndex = getLatestAdditionalDrinkIndex(drinksList);
+        const latestAdditionalDrink = latestAdditionalIndex >= 0 ? drinksList[latestAdditionalIndex] : null;
         const summaryDrinks = getDrinksBeforeLatestAdditionalDrink(drinksList);
         const summaryChartData = summaryDrinks.length > 0
             ? generateChartData(summaryDrinks, sessionStartTime.getTime(), mealOffsetHrs)
             : null;
+        attachCurrentDrinkBasisData(chartData, summaryChartData);
+        chartData.latestAdditionalDrinkStartedAt = latestAdditionalDrink ? getDrinkTimeMs(latestAdditionalDrink) : null;
         renderActiveSummary(summaryDrinks, summaryChartData);
         
         drawChart(chartData, 'activeBacChart', activeChartInstance, (instance) => activeChartInstance = instance, true);
@@ -1587,7 +1630,11 @@
                     ? Number(d.priorAlcoholGrams)
                     : priorList.reduce((sum, item) => sum + (Number(item.alcoholGrams) || 0), 0);
                 const additionalSequence = Number(d.additionalSequence) || sessionData.drinksList.slice(0, i + 1).filter((item, itemIndex) => !isInitialDrinkRecord(item, itemIndex)).length;
-                const entryLabel = isInitialDrinkRecord(d, i) ? '세션 시작 술' : `추가 ${additionalSequence}번째 잔`;
+                const isInitialEntry = isInitialDrinkRecord(d, i);
+                const entryLabel = isInitialEntry ? '세션 시작 술' : `추가 ${additionalSequence}번째 잔`;
+                const priorAlcoholLine = isInitialEntry
+                    ? ''
+                    : `• 직전 계산에 반영된 누적 알코올: <b>${priorAlcoholGrams.toFixed(1)}g</b><br>`;
 
                 html += `
                     <div class="drink-item">
@@ -1596,7 +1643,7 @@
                         </div>
                         <div class="drink-item-time">음주 시작 시각: ${startDrinkStr}</div>
                         <div class="drink-item-stats">
-                                • 직전 계산에 반영된 누적 알코올: <b>${priorAlcoholGrams.toFixed(1)}g</b><br>
+                            ${priorAlcoholLine}
                             • 섭취 알코올 (해당 술): <b>${grams.toFixed(1)}g</b><br>
                             • 이 술의 BAC 증가 예상치: <b>${contribution.toFixed(3)}%</b><br>
                             • <b>이 술 반영 후 예상 최고 BAC: <span style="color:var(--danger-color);">${exactMaxBac.toFixed(3)}%</span></b><br>
@@ -1793,19 +1840,41 @@
         }
 
         const totalBacDataset = {
-            label: '전체 합산 BAC %',
+            label: isActiveSession ? '현재 추가잔 포함 BAC %' : '전체 합산 BAC %',
             data: chartData.dataPoints,
             borderColor: '#e74c3c',
             backgroundColor: 'rgba(231, 76, 60, 0.08)',
             borderWidth: 4,
+            borderDash: isActiveSession ? [8, 5] : [],
             fill: false,
             tension: 0.35,
             pointRadius: 0,
             order: 1
         };
 
+        const currentDrinkBasisDataset = (isActiveSession && Array.isArray(chartData.currentDrinkBasisDataPoints))
+            ? {
+                label: '현재 마신 술 기준 BAC %',
+                data: chartData.currentDrinkBasisDataPoints,
+                borderColor: '#e74c3c',
+                backgroundColor: 'transparent',
+                borderWidth: 4,
+                borderDash: [],
+                fill: false,
+                tension: 0.35,
+                pointRadius: 0,
+                order: 0
+            }
+            : null;
+
+        const latestAdditionalDrinkStartedAt = isActiveSession ? Number(chartData.latestAdditionalDrinkStartedAt) : null;
         const individualBacDatasets = (chartData.individualBacDataPoints || []).map((points, index) => {
             const drink = chartData.drinksForChart && chartData.drinksForChart[index] ? chartData.drinksForChart[index] : null;
+            const drinkStartedAt = drink ? getDrinkTimeMs(drink) : null;
+            if (isActiveSession && latestAdditionalDrinkStartedAt && drinkStartedAt === latestAdditionalDrinkStartedAt) {
+                return null;
+            }
+
             const labelPrefix = drink && isInitialDrinkRecord(drink, index) ? '시작 술' : `${index + 1}번째 잔`;
             const opacity = Math.max(0.28, 0.82 - (index * 0.06));
 
@@ -1815,16 +1884,17 @@
                 borderColor: `rgba(230, 126, 34, ${opacity})`,
                 backgroundColor: 'transparent',
                 borderWidth: 2,
-                borderDash: index === (chartData.individualBacDataPoints.length - 1) ? [] : [3, 3],
+                borderDash: [3, 3],
                 fill: false,
                 tension: 0.35,
                 pointRadius: 0,
                 order: 2 + index
             };
-        });
+        }).filter(Boolean);
 
         const datasets = [
             totalBacDataset,
+            ...(currentDrinkBasisDataset ? [currentDrinkBasisDataset] : []),
             ...individualBacDatasets,
             {
                 label: '예상 아세트알데하이드 (숙취)',
