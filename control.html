@@ -60,16 +60,28 @@
         #loadingArea { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 50vh; color: #718096; font-weight: bold; gap: 10px; }
 
         .drink-list-container { display: flex; flex-direction: column; margin-top: 15px; margin-bottom: 20px; }
-        .drink-item { background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 15px; text-align: left; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.02); z-index: 2; }
+        .drink-item { background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 15px; text-align: left; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.02); z-index: 2; transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s; }
+        .drink-item-current { background: #f0fff4; border-color: #9ae6b4; box-shadow: 0 4px 12px rgba(46, 204, 113, 0.12); }
+        .drink-item-absorbed { background: #fff7ed; border-color: #fdba74; box-shadow: 0 4px 12px rgba(249, 115, 22, 0.10); }
+        .drink-state-badge { display:inline-block; margin-left:6px; padding:2px 7px; border-radius:999px; font-size:0.68rem; font-weight:800; vertical-align:middle; }
+        .drink-state-current { background:#dcfce7; color:#166534; }
+        .drink-state-absorbed { background:#ffedd5; color:#9a3412; }
         .drink-item-header { font-size: 1rem; font-weight: 800; color: var(--primary-color); margin-bottom: 4px; display:flex; justify-content:space-between; align-items:center; }
         .drink-item-time { font-size: 0.8rem; color: #a0aec0; margin-bottom: 10px; }
-        .drink-item-stats { font-size: 0.85rem; color: #4a5568; background: #f8f9fa; padding: 10px; border-radius: 10px; line-height: 1.5; }
+        .drink-item-stats { font-size: 0.85rem; color: #4a5568; background: rgba(255,255,255,0.72); padding: 10px; border-radius: 10px; line-height: 1.5; }
         .delete-drink-btn { color: var(--danger-color); font-weight: 800; font-size: 1.2rem; background: none; border: none; padding: 0; cursor: pointer; line-height: 1; }
         
-        .history-item { background: #f8f9fa; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; margin-bottom: 10px; text-align: left; cursor: pointer; transition: 0.2s; }
+        .history-item { background: #f8f9fa; border: 1px solid #e2e8f0; border-radius: 12px; padding: 0; margin-bottom: 10px; text-align: left; cursor: pointer; transition: 0.2s; overflow:hidden; }
         .history-item:hover { background: #edf2f7; border-color: #cbd5e0; }
-        .history-date { font-weight: 800; color: #2d3748; margin-bottom: 5px; font-size: 0.95rem; }
-        .history-summary { font-size: 0.85rem; color: #718096; }
+        .history-date { font-weight: 800; color: #2d3748; font-size: 0.95rem; }
+        .history-toggle-row { display:flex; justify-content:space-between; align-items:center; gap:10px; padding:15px; }
+        .history-chevron { font-size:1rem; color:#718096; font-weight:900; min-width:22px; text-align:center; }
+        .history-summary { font-size: 0.85rem; color: #718096; display:none; padding:0 15px 15px 15px; border-top:1px dashed #e2e8f0; background:rgba(255,255,255,0.55); }
+        .history-summary.expanded { display:block; }
+        .history-detail-btn { margin-top:10px; border:none; border-radius:10px; padding:8px 12px; background:var(--primary-color); color:white; font-weight:800; cursor:pointer; }
+        .history-pagination { display:flex; justify-content:center; align-items:center; gap:12px; margin-top:12px; font-size:0.85rem; color:#718096; }
+        .history-page-btn { border:1px solid #e2e8f0; background:#fff; color:#4a5568; border-radius:10px; padding:8px 12px; font-size:1rem; font-weight:900; cursor:pointer; min-width:42px; }
+        .history-page-btn:disabled { opacity:0.35; cursor:not-allowed; }
 
         /* 커스텀 모달 스타일 */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 9999; padding: 20px; backdrop-filter: blur(2px); }
@@ -344,9 +356,9 @@
     });
 
     const APP_VERSION = Object.freeze({
-        version: 'v2026.06.06-03',
-        updatedAt: '2026-06-06 15:30 KST',
-        note: '요약/차트 표시 조건과 열린 세션 정리 로직 개선'
+        version: 'v2026.06.06-04',
+        updatedAt: '2026-06-06 KST',
+        note: '기록 접기/펼치기, 페이지네이션, 잔 상태 색상, BAC 최고점 계산 개선'
     });
 
     const versionEl = document.getElementById('appVersionText');
@@ -364,6 +376,8 @@
     let historyChartInstance = null;
     let pastSessionsData = [];
     let activeAnalysisUnlocked = false;
+    let historyCurrentPage = 0;
+    const HISTORY_PAGE_SIZE = 10;
     
     let currentSessionDocId = null; 
 
@@ -576,50 +590,57 @@
     }
 
     /**
-     * 표시용 예상 최고 BAC입니다.
-     * - 첫 잔: 0 + 해당 술 기여도 = 단일 술 예상 최고 BAC
-     * - 추가 잔: 해당 잔 시작 직전 BAC + 해당 술 기여도
-     *
-     * 차트용 대사 시뮬레이션(generateChartData)은 흡수 중 분해를 계속 반영하지만,
-     * 사용자에게 보여주는 '이 술 반영 후 예상 최고 BAC'는 직전 BAC에 새 술의
-     * 순수 기여도를 더한 값으로 계산해 첫 잔이 0.003%처럼 과소 표시되지 않게 합니다.
+     * 해당 잔까지 포함한 시간별 BAC 패턴 전체에서 최고점을 찾습니다.
+     * 단순히 '시작 직전 BAC + 새 술 기여도'를 더하지 않고,
+     * 기존 잔들과 새 잔이 각각 흡수/분해되는 곡선을 모두 만든 뒤
+     * 그 시뮬레이션 곡선의 최고 BAC와 최고 시각을 반환합니다.
      */
-    function calculateExpectedPeakAfterDrink(priorDrinks, currentDrink, drinkStartMs, mealOffsetHrs, sessionStartMs) {
-        const bacBeforeDrink = calculateBacAtTime(
-            priorDrinks,
-            drinkStartMs,
-            mealOffsetHrs,
-            sessionStartMs
-        );
-
-        const currentContribution = Number(currentDrink?.cMaxContribution) || 0;
-        return Math.max(0, bacBeforeDrink + currentContribution);
-    }
-
-    function calculateSessionExpectedPeak(targetDrinksList, startMs, mealOffsetHrs) {
-        if (!targetDrinksList || targetDrinksList.length === 0) return 0;
-
-        const sortedDrinks = [...targetDrinksList]
+    function calculatePatternPeakThroughDrinks(targetDrinksList, startMs, mealOffsetHrs) {
+        const sortedDrinks = [...(targetDrinksList || [])]
             .filter(d => getDrinkTimeMs(d) > 0)
             .sort((a, b) => getDrinkTimeMs(a) - getDrinkTimeMs(b));
 
-        let maxExpectedPeak = 0;
-        const priorDrinks = [];
+        if (sortedDrinks.length === 0) {
+            return { peakBac: 0, peakTimeMs: startMs || Date.now() };
+        }
 
-        sortedDrinks.forEach(drink => {
-            const drinkStartMs = getDrinkTimeMs(drink);
-            const expectedPeak = calculateExpectedPeakAfterDrink(
-                priorDrinks,
-                drink,
-                drinkStartMs,
-                mealOffsetHrs,
-                startMs
-            );
-            if (expectedPeak > maxExpectedPeak) maxExpectedPeak = expectedPeak;
-            priorDrinks.push(drink);
+        const chartData = generateChartData(sortedDrinks, startMs, mealOffsetHrs);
+        let peakBac = 0;
+        let peakIndex = 0;
+
+        (chartData.dataPoints || []).forEach((value, index) => {
+            const numericValue = Number(value) || 0;
+            if (numericValue > peakBac) {
+                peakBac = numericValue;
+                peakIndex = index;
+            }
         });
 
-        return maxExpectedPeak;
+        // 첫 잔만 있을 때는 사용자가 직관적으로 보는 '해당 술의 순수 BAC 증가 예상치'도 보존합니다.
+        // 추가 잔부터는 전체 패턴 시뮬레이션 최고점이 우선입니다.
+        if (sortedDrinks.length === 1) {
+            const singleContribution = Number(sortedDrinks[0].cMaxContribution) || 0;
+            if (singleContribution > peakBac) {
+                peakBac = singleContribution;
+                peakIndex = -1;
+            }
+        }
+
+        const fallbackDrink = sortedDrinks[sortedDrinks.length - 1];
+        const fallbackPeakTimeMs = getDrinkTimeMs(fallbackDrink) + ((Number(mealOffsetHrs) || 0) * 60 * 60000);
+        const peakTimeMs = peakIndex >= 0 && chartData.timeMsList && chartData.timeMsList[peakIndex]
+            ? chartData.timeMsList[peakIndex]
+            : fallbackPeakTimeMs;
+
+        return { peakBac, peakTimeMs };
+    }
+
+    function calculateExpectedPeakAfterDrink(priorDrinks, currentDrink, drinkStartMs, mealOffsetHrs, sessionStartMs) {
+        return calculatePatternPeakThroughDrinks([...(priorDrinks || []), currentDrink], sessionStartMs, mealOffsetHrs).peakBac;
+    }
+
+    function calculateSessionExpectedPeak(targetDrinksList, startMs, mealOffsetHrs) {
+        return calculatePatternPeakThroughDrinks(targetDrinksList, startMs, mealOffsetHrs).peakBac;
     }
 
 
@@ -834,6 +855,7 @@
             const querySnapshot = await getDocs(q);
             
             pastSessionsData = [];
+            historyCurrentPage = 0;
             let activeSessionFound = null;
             
             querySnapshot.forEach((doc) => {
@@ -875,25 +897,66 @@
             return;
         }
 
+        const totalPages = Math.max(1, Math.ceil(pastSessionsData.length / HISTORY_PAGE_SIZE));
+        historyCurrentPage = Math.min(Math.max(historyCurrentPage, 0), totalPages - 1);
+        const startIndex = historyCurrentPage * HISTORY_PAGE_SIZE;
+        const pageItems = pastSessionsData.slice(startIndex, startIndex + HISTORY_PAGE_SIZE);
+
         let html = '';
-        pastSessionsData.forEach((data) => {
+        pageItems.forEach((data, pageIndex) => {
+            const globalIndex = startIndex + pageIndex;
             const startDate = new Date(toMs(data.startTime));
             const dateStr = startDate.toLocaleDateString('ko-KR', { year:'numeric', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
             const totalDrinks = data.drinksList ? data.drinksList.length : 0;
             const statusStr = data.isFinished ? "종료됨" : "중단됨";
+            const totalAlcohol = (Number(data.totalAlcoholGrams) || 0).toFixed(1);
+            const maxBac = (Number(data.maxBac) || 0).toFixed(3);
+            const durationText = data.endTime && data.startTime
+                ? `${Math.max(0, ((toMs(data.endTime) - toMs(data.startTime)) / 3600000)).toFixed(1)}시간`
+                : '계산 전';
             
             html += `
-                <div class="history-item" onclick="viewHistory('${data.id}')">
-                    <div class="history-date">${dateStr} 세션 <span style="font-size:0.75rem; color:#a0aec0; font-weight:normal;">(${statusStr})</span></div>
-                    <div class="history-summary">
-                        총 ${totalDrinks}회 / 섭취 알코올 ${(data.totalAlcoholGrams || 0).toFixed(1)}g<br>
-                        최고 도달 농도: <b>${(data.maxBac || 0).toFixed(3)}%</b>
+                <div class="history-item" onclick="toggleHistorySummary(${globalIndex})">
+                    <div class="history-toggle-row">
+                        <div class="history-date">${dateStr} 세션 <span style="font-size:0.75rem; color:#a0aec0; font-weight:normal;">(${statusStr})</span></div>
+                        <div class="history-chevron" id="historyChevron_${globalIndex}">⌄</div>
+                    </div>
+                    <div class="history-summary" id="historySummary_${globalIndex}">
+                        총 ${totalDrinks}회 / 섭취 알코올 ${totalAlcohol}g<br>
+                        최고 도달 농도: <b>${maxBac}%</b><br>
+                        세션 길이: <b>${durationText}</b><br>
+                        <button class="history-detail-btn" onclick="event.stopPropagation(); viewHistory('${data.id}')">상세 보기</button>
                     </div>
                 </div>
             `;
         });
+
+        if (totalPages > 1) {
+            html += `
+                <div class="history-pagination">
+                    <button class="history-page-btn" onclick="changeHistoryPage(-1)" ${historyCurrentPage === 0 ? 'disabled' : ''}>&lt;</button>
+                    <span>${historyCurrentPage + 1} / ${totalPages} · 총 ${pastSessionsData.length}개</span>
+                    <button class="history-page-btn" onclick="changeHistoryPage(1)" ${historyCurrentPage >= totalPages - 1 ? 'disabled' : ''}>&gt;</button>
+                </div>
+            `;
+        }
+
         container.innerHTML = html;
     }
+
+    window.toggleHistorySummary = function(globalIndex) {
+        const summaryEl = document.getElementById(`historySummary_${globalIndex}`);
+        const chevronEl = document.getElementById(`historyChevron_${globalIndex}`);
+        if (!summaryEl) return;
+        const isOpen = summaryEl.classList.toggle('expanded');
+        if (chevronEl) chevronEl.innerText = isOpen ? '⌃' : '⌄';
+    };
+
+    window.changeHistoryPage = function(delta) {
+        const totalPages = Math.max(1, Math.ceil(pastSessionsData.length / HISTORY_PAGE_SIZE));
+        historyCurrentPage = Math.min(Math.max(historyCurrentPage + delta, 0), totalPages - 1);
+        renderHistoryList(document.getElementById('pastSessionsContainer'));
+    };
 
     function resumeActiveSession(sessionData) {
         sessionStartTime = new Date(toMs(sessionData.startTime));
@@ -1172,20 +1235,14 @@
             // viewHistory에서는 별도로 렌더링 로직을 분리해 두는 것이 안전합니다.
             // (이 함수는 active session에서만 사용하도록 하겠습니다)
             
-            const maxBacDate = new Date(eTime.getTime() + (mealOffsetHrs * 60 * 60000));
-            const maxBacTimeStr = maxBacDate.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
-
             const priorList = targetList.slice(0, i);
+            const drinksThroughCurrent = targetList.slice(0, i + 1);
+            const patternPeak = calculatePatternPeakThroughDrinks(drinksThroughCurrent, startMs, mealOffsetHrs);
+            const maxBacTimeStr = new Date(patternPeak.peakTimeMs).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
             const bacBeforeDrink = Number.isFinite(Number(d.bacBeforeDrink))
                 ? Number(d.bacBeforeDrink)
                 : calculateBacAtTime(priorList, getDrinkTimeMs(d), mealOffsetHrs, startMs);
-            const exactMaxBac = calculateExpectedPeakAfterDrink(
-                priorList,
-                d,
-                getDrinkTimeMs(d),
-                mealOffsetHrs,
-                startMs
-            );
+            const exactMaxBac = patternPeak.peakBac;
             const grams = d.alcoholGrams || 0;
             const contribution = d.cMaxContribution || 0;
 
@@ -1197,11 +1254,21 @@
             const additionalSequence = Number(d.additionalSequence) || targetList.slice(0, i + 1).filter((item, itemIndex) => !isInitialDrinkRecord(item, itemIndex)).length;
             const entryLabel = isInitialDrinkRecord(d, i) ? '세션 시작 술' : `추가 ${additionalSequence}번째 잔`;
 
+            const isLatestActiveDrink = !isHistory && i === targetList.length - 1;
+            const drinkItemClass = !isHistory
+                ? (isLatestActiveDrink ? 'drink-item drink-item-current' : 'drink-item drink-item-absorbed')
+                : 'drink-item';
+            const stateBadge = !isHistory
+                ? (isLatestActiveDrink
+                    ? '<span class="drink-state-badge drink-state-current">새 시작잔</span>'
+                    : '<span class="drink-state-badge drink-state-absorbed">흡수 진행/반영</span>')
+                : '';
+
             html += `
-                <div class="drink-item">
+                <div class="${drinkItemClass}">
                     <button class="delete-drink-btn" onclick="deleteDrink(${i})" title="삭제">&times;</button>
                     <div class="drink-item-header">
-                        <span>${entryLabel} · ${d.drinkName} - ${d.volume}ml</span>
+                        <span>${entryLabel} · ${d.drinkName} - ${d.volume}ml ${stateBadge}</span>
                     </div>
                     <div class="drink-item-time">음주 시작 시각: ${startDrinkStr}</div>
                     <div class="drink-item-stats">
@@ -1400,20 +1467,14 @@
                 const eTime = new Date(getDrinkTimeMs(d));
                 const startDrinkStr = eTime.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
                 
-                const maxBacDate = new Date(eTime.getTime() + (mealOffsetHrs * 60 * 60000));
-                const maxBacTimeStr = maxBacDate.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
-                
                 const priorList = sessionData.drinksList.slice(0, i);
+                const drinksThroughCurrent = sessionData.drinksList.slice(0, i + 1);
+                const patternPeak = calculatePatternPeakThroughDrinks(drinksThroughCurrent, startMs, mealOffsetHrs);
+                const maxBacTimeStr = new Date(patternPeak.peakTimeMs).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
                 const bacBeforeDrink = Number.isFinite(Number(d.bacBeforeDrink))
                     ? Number(d.bacBeforeDrink)
                     : calculateBacAtTime(priorList, getDrinkTimeMs(d), mealOffsetHrs, startMs);
-                const exactMaxBac = calculateExpectedPeakAfterDrink(
-                    priorList,
-                    d,
-                    getDrinkTimeMs(d),
-                    mealOffsetHrs,
-                    startMs
-                );
+                const exactMaxBac = patternPeak.peakBac;
 
                 const grams = d.alcoholGrams || 0;
                 const contribution = d.cMaxContribution || 0;
