@@ -219,12 +219,6 @@
                 </div>
                 <!-- 커스텀 범례 -->
                 <div class="custom-legend">
-                    <div class="legend-item"><div class="legend-box" style="background: rgba(46, 204, 113, 0.2);"></div><span>안전 (~0.05)</span></div>
-                    <div class="legend-item"><div class="legend-box" style="background: rgba(243, 156, 18, 0.2);"></div><span>주의 (~0.15)</span></div>
-                    <div class="legend-item"><div class="legend-box" style="background: rgba(231, 76, 60, 0.2);"></div><span>위험 (~0.30)</span></div>
-                    <div class="legend-item"><span class="legend-line" style="color: #f39c12;">---</span><span>정지(0.03)</span></div>
-                    <div class="legend-item"><span class="legend-line" style="color: #e74c3c;">---</span><span>취소(0.08)</span></div>
-                    <div class="legend-item"><span class="legend-line" style="color: #e74c3c; font-weight:800;">- - -</span><span>현재 추가잔 포함 BAC</span></div>
                     <div class="legend-item"><span class="legend-line" style="color: #e74c3c; font-weight:800;">━━</span><span>현재 마신 술 기준 BAC</span></div>
                     <div class="legend-item"><span class="legend-line" style="color: #e67e22; font-weight:600;">━━</span><span>이전 잔별 BAC 추이</span></div>
                     <div class="legend-item"><span class="legend-line" style="color: #f1c40f; font-weight:800;">━━</span><span>아세트알데하이드(숙취)</span></div>
@@ -359,9 +353,9 @@
     });
 
     const APP_VERSION = Object.freeze({
-        version: 'v2026.06.06-10',
+        version: 'v2026.06.06-11',
         updatedAt: '2026-06-06 KST',
-        note: '현재시각/정지/취소 기준선 후면 배치, 현재시각 레이블 위치 조정'
+        note: 'activeBacChart 추가잔 포함 BAC 숨김 및 활성 범례 간소화'
     });
 
     const versionEl = document.getElementById('appVersionText');
@@ -1468,7 +1462,7 @@
         document.getElementById('activeChartContainer').style.display = 'block';
         const mealOffsetHrs = parseFloat(document.getElementById('userMeal').value) || 1.0;
 
-        // 활성 차트는 최신 추가잔까지 포함한 BAC와, 최신 추가잔만의 기여 패턴을 분리해서 보여줍니다.
+        // 활성 차트에서는 최신 추가잔까지 포함한 전체 BAC 선은 숨기고, 최신 추가잔의 기여 패턴과 이전 잔별 추이를 분리해서 보여줍니다.
         const chartData = generateChartData(drinksList, sessionStartTime.getTime(), mealOffsetHrs);
         const latestAdditionalIndex = getLatestAdditionalDrinkIndex(drinksList);
         const latestAdditionalDrink = latestAdditionalIndex >= 0 ? drinksList[latestAdditionalIndex] : null;
@@ -1862,12 +1856,12 @@
         }
 
         const totalBacDataset = {
-            label: isActiveSession ? '현재 추가잔 포함 BAC %' : '전체 합산 BAC %',
+            label: '전체 합산 BAC %',
             data: chartData.dataPoints,
             borderColor: '#e74c3c',
             backgroundColor: 'rgba(231, 76, 60, 0.08)',
             borderWidth: 4,
-            borderDash: isActiveSession ? [8, 5] : [],
+            borderDash: [],
             fill: false,
             tension: 0.35,
             pointRadius: 0,
@@ -1915,7 +1909,7 @@
         }).filter(Boolean);
 
         const datasets = [
-            totalBacDataset,
+            ...(!isActiveSession ? [totalBacDataset] : []),
             ...(currentDrinkBasisDataset ? [currentDrinkBasisDataset] : []),
             ...individualBacDatasets,
             {
@@ -1932,7 +1926,13 @@
             }
         ];
 
-        const suggestedMax = Math.max(0.1, (Number(chartData.maxBac) || 0) * 1.25, (Number(chartData.maxAch) || 0) * 1.25);
+        const visibleMax = datasets.reduce((max, dataset) => {
+            const datasetMax = Array.isArray(dataset.data)
+                ? dataset.data.reduce((seriesMax, value) => Math.max(seriesMax, Number(value) || 0), 0)
+                : 0;
+            return Math.max(max, datasetMax);
+        }, 0);
+        const suggestedMax = Math.max(0.1, visibleMax * 1.25);
 
         const newInstance = new Chart(ctx, {
             type: 'line',
