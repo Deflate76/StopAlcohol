@@ -353,9 +353,9 @@
     });
 
     const APP_VERSION = Object.freeze({
-        version: 'v2026.06.06-11',
+        version: 'v2026.06.06-12',
         updatedAt: '2026-06-06 KST',
-        note: 'activeBacChart 추가잔 포함 BAC 숨김 및 활성 범례 간소화'
+        note: 'activeBacChart 현재 BAC plateau 보정 및 반영 기준 정리'
     });
 
     const versionEl = document.getElementById('appVersionText');
@@ -547,7 +547,7 @@
 
         const firstDrinkMs = getDrinkTimeMs(validDrinks[0]);
         const simulationStartMs = Math.min(sessionStartMs || firstDrinkMs, firstDrinkMs);
-        const mealOffsetMin = Math.max(0, Number(mealOffsetHrs) || 0);
+        const mealOffsetMin = Math.max(0, (Number(mealOffsetHrs) || 0) * 60);
         const maxStepMs = 60 * 1000;
         let currentBac = 0;
         let cursorMs = simulationStartMs;
@@ -657,20 +657,50 @@
         return Number(chartData[seriesKey][closestIndex]) || 0;
     }
 
-    function attachCurrentDrinkBasisData(fullChartData, previousOnlyChartData) {
-        if (!fullChartData || !Array.isArray(fullChartData.dataPoints) || !Array.isArray(fullChartData.timeMsList)) return fullChartData;
+    function getAlignedSeriesValueAtTime(sourceTimeMsList, sourceSeries, targetMs) {
+        if (!Array.isArray(sourceTimeMsList) || !Array.isArray(sourceSeries) || sourceTimeMsList.length === 0 || sourceSeries.length === 0) return 0;
+        if (targetMs < sourceTimeMsList[0]) return 0;
+        if (targetMs > sourceTimeMsList[sourceTimeMsList.length - 1]) return 0;
 
-        const previousDataPoints = fullChartData.timeMsList.map(ms =>
-            previousOnlyChartData ? getChartSeriesValueAtTime(previousOnlyChartData, ms, 'dataPoints') : 0
-        );
-
-        fullChartData.previousOnlyDataPoints = previousDataPoints;
-        fullChartData.currentDrinkBasisDataPoints = fullChartData.dataPoints.map((value, index) => {
-            const diff = (Number(value) || 0) - (Number(previousDataPoints[index]) || 0);
-            return Number(Math.max(0, diff).toFixed(4));
+        let closestIndex = 0;
+        let minDiff = Infinity;
+        sourceTimeMsList.forEach((ms, index) => {
+            const diff = Math.abs(ms - targetMs);
+            if (diff < minDiff) {
+                minDiff = diff;
+                closestIndex = index;
+            }
         });
 
-        return fullChartData;
+        return Number(sourceSeries[closestIndex]) || 0;
+    }
+
+    function alignSeriesToChartTimes(sourceChartData, sourceSeries, targetTimeMsList) {
+        if (!Array.isArray(targetTimeMsList)) return [];
+        if (!sourceChartData || !Array.isArray(sourceChartData.timeMsList) || !Array.isArray(sourceSeries) || sourceSeries.length === 0) {
+            return targetTimeMsList.map(() => 0);
+        }
+
+        return targetTimeMsList.map(ms =>
+            Number(Math.max(0, getAlignedSeriesValueAtTime(sourceChartData.timeMsList, sourceSeries, ms)).toFixed(4))
+        );
+    }
+
+    function attachCurrentDrinkBasisData(chartData, basisChartData = null) {
+        if (!chartData || !Array.isArray(chartData.dataPoints) || !Array.isArray(chartData.timeMsList)) return chartData;
+
+        // activeBacChart의 빨간 실선은 "전체 BAC - 이전 BAC" 차이값이 아니라,
+        // 실제로 화면에 반영하기로 한 술 목록의 BAC 곡선 자체를 사용합니다.
+        // 서로 다른 시뮬레이션 곡선을 빼면 피크 이후 감소 구간에서 인위적인 plateau가 생길 수 있습니다.
+        const basisDataPoints = (basisChartData && Array.isArray(basisChartData.dataPoints) && Array.isArray(basisChartData.timeMsList))
+            ? chartData.timeMsList.map(ms => getChartSeriesValueAtTime(basisChartData, ms, 'dataPoints'))
+            : chartData.dataPoints;
+
+        chartData.currentDrinkBasisDataPoints = basisDataPoints.map(value =>
+            Number(Math.max(0, Number(value) || 0).toFixed(4))
+        );
+
+        return chartData;
     }
 
     function formatElapsedFromStart(targetMs = Date.now()) {
@@ -1462,17 +1492,24 @@
         document.getElementById('activeChartContainer').style.display = 'block';
         const mealOffsetHrs = parseFloat(document.getElementById('userMeal').value) || 1.0;
 
-        // 활성 차트에서는 최신 추가잔까지 포함한 전체 BAC 선은 숨기고, 최신 추가잔의 기여 패턴과 이전 잔별 추이를 분리해서 보여줍니다.
-        const chartData = generateChartData(drinksList, sessionStartTime.getTime(), mealOffsetHrs);
+        // 활성 차트는 "최신 추가잔 포함" 전체 BAC를 만들지 않습니다.
+        // 최신 추가잔은 아직 차트/요약 계산에서 제외하고, 그 이전까지 실제 반영되는 술 목록만으로 빨간 실선과 잔별 선을 그립니다.
         const latestAdditionalIndex = getLatestAdditionalDrinkIndex(drinksList);
         const latestAdditionalDrink = latestAdditionalIndex >= 0 ? drinksList[latestAdditionalIndex] : null;
         const summaryDrinks = getDrinksBeforeLatestAdditionalDrink(drinksList);
-        const summaryChartData = summaryDrinks.length > 0
-            ? generateChartData(summaryDrinks, sessionStartTime.getTime(), mealOffsetHrs)
-            : null;
-        attachCurrentDrinkBasisData(chartData, summaryChartData);
+        const chartDrinks = summaryDrinks.length > 0
+            ? summaryDrinks
+            : drinksList.filter((_, index) => index !== latestAdditionalIndex);
+
+        if (chartDrinks.length === 0) {
+            hideActiveAnalysis();
+            return;
+        }
+
+        const chartData = generateChartData(chartDrinks, sessionStartTime.getTime(), mealOffsetHrs);
+        attachCurrentDrinkBasisData(chartData);
         chartData.latestAdditionalDrinkStartedAt = latestAdditionalDrink ? getDrinkTimeMs(latestAdditionalDrink) : null;
-        renderActiveSummary(summaryDrinks, summaryChartData);
+        renderActiveSummary(chartDrinks, chartData);
         
         drawChart(chartData, 'activeBacChart', activeChartInstance, (instance) => activeChartInstance = instance, true);
     }
@@ -1658,9 +1695,9 @@
     };
 
     // 대사 시뮬레이션 알고리즘 개선 (Iterative 방식)
-    // 각 잔의 BAC 기여도를 따로 추적하여 차트에는 잔 개수만큼 보라색 BAC 라인을 표시합니다.
-    // 분해량은 전체 BAC에서 차감하되, 현재 남아있는 각 잔의 BAC 비율에 따라 나누어 빼므로
-    // 잔별 라인을 모두 더하면 기존의 누적 BAC 추이와 거의 같은 흐름이 됩니다.
+    // 각 시간 구간마다 흡수량을 더하고, 실제 남아 있는 BAC 비율에 따라 시간당 0.015% 분해량을 나누어 뺍니다.
+    // 이전 구현처럼 전체 기여도를 고정 비율로 나누어 빼면, 미래에 입력된 추가잔이 과거 잔의 감소율까지 바꿔
+    // activeBacChart의 "현재 마신 술 기준 BAC"가 피크 이후 한동안 평평하게 보일 수 있습니다.
     function generateChartData(targetDrinksList, startMs, mealOffsetHrs) {
         const mealOffsetMin = Math.max(0, (Number(mealOffsetHrs) || 0) * 60);
         const stepMinutes = 5;
@@ -1675,19 +1712,21 @@
         let maxAch = 0;
         let maxBacIndex = 0;
 
+        const emptyResult = () => ({
+            labels: ['00:00'],
+            timeMsList: [startMs || Date.now()],
+            dataPoints: [0],
+            individualBacDataPoints: [],
+            drinksForChart: [],
+            achDataPoints: [0],
+            maxBac: 0,
+            maxAch: 0,
+            maxBacIndex: 0,
+            stepMinutes
+        });
+
         if (!targetDrinksList || targetDrinksList.length === 0) {
-            return {
-                labels: ['00:00'],
-                timeMsList: [startMs || Date.now()],
-                dataPoints: [0],
-                individualBacDataPoints: [],
-                drinksForChart: [],
-                achDataPoints: [0],
-                maxBac: 0,
-                maxAch: 0,
-                maxBacIndex: 0,
-                stepMinutes
-            };
+            return emptyResult();
         }
 
         const sortedDrinks = [...targetDrinksList]
@@ -1695,66 +1734,44 @@
             .sort((a, b) => getDrinkTimeMs(a) - getDrinkTimeMs(b));
 
         if (sortedDrinks.length === 0) {
-            return {
-                labels: ['00:00'],
-                timeMsList: [startMs || Date.now()],
-                dataPoints: [0],
-                individualBacDataPoints: [],
-                drinksForChart: [],
-                achDataPoints: [0],
-                maxBac: 0,
-                maxAch: 0,
-                maxBacIndex: 0,
-                stepMinutes
-            };
+            return emptyResult();
         }
 
         sortedDrinks.forEach(() => individualBacDataPoints.push([]));
 
         const earliestDrinkMs = Math.min(...sortedDrinks.map(d => getDrinkTimeMs(d)));
         const actualPlotStartMs = Math.min(startMs || earliestDrinkMs, earliestDrinkMs);
-        const totalContribution = sortedDrinks.reduce((sum, d) => sum + (Number(d.cMaxContribution) || 0), 0);
         const lastDrinkMs = getDrinkTimeMs(sortedDrinks[sortedDrinks.length - 1]);
         const lastAbsorbEndMs = lastDrinkMs + (mealOffsetMin * 60000);
-
-        // 각 잔의 그래프는 사용자가 이해하기 쉽게 '흡수 완료 시점 = 해당 잔의 BAC 증가 예상치'에 도달하도록 표시합니다.
-        // 이후 분해 구간에서는 전체 분해율 0.015%/h를 각 잔의 기여도 비율대로 나누어 감소시킵니다.
-        function getDisplayedDrinkBacAt(drink, currentMs) {
-            const drinkMs = getDrinkTimeMs(drink);
-            const contribution = Number(drink.cMaxContribution) || 0;
-            if (contribution <= 0 || currentMs <= drinkMs) return 0;
-
-            const absorbEndMs = drinkMs + (mealOffsetMin * 60000);
-            if (mealOffsetMin <= 0) {
-                if (currentMs < drinkMs) return 0;
-            } else if (currentMs < absorbEndMs) {
-                return contribution * ((currentMs - drinkMs) / (mealOffsetMin * 60000));
-            }
-
-            const decayStartMs = mealOffsetMin <= 0 ? drinkMs : absorbEndMs;
-            const elapsedAfterPeakHours = Math.max(0, (currentMs - decayStartMs) / 3600000);
-            const contributionShare = totalContribution > 0 ? contribution / totalContribution : 1 / sortedDrinks.length;
-            const individualClearRate = 0.015 * contributionShare;
-            return Math.max(0, contribution - (individualClearRate * elapsedAfterPeakHours));
-        }
-
-        let previousTotalBac = 0;
+        const currentDrinkBacs = sortedDrinks.map(() => 0);
         let currentAch = 0;
+        let previousMs = actualPlotStartMs;
         const maxPlotMinutes = 24 * 60;
 
-        for (let m = 0; m <= maxPlotMinutes; m += stepMinutes) {
-            const currentMs = actualPlotStartMs + (m * 60000);
+        function getAbsorbedContributionInInterval(drink, intervalStartMs, intervalEndMs) {
+            const drinkMs = getDrinkTimeMs(drink);
+            const contribution = Number(drink.cMaxContribution) || 0;
+            if (contribution <= 0 || intervalEndMs <= drinkMs) return 0;
+
+            if (mealOffsetMin <= 0) {
+                return (drinkMs >= intervalStartMs && drinkMs < intervalEndMs) ? contribution : 0;
+            }
+
+            const absorbStartMs = drinkMs;
+            const absorbEndMs = drinkMs + (mealOffsetMin * 60000);
+            const overlapStartMs = Math.max(intervalStartMs, absorbStartMs);
+            const overlapEndMs = Math.min(intervalEndMs, absorbEndMs);
+            if (overlapStartMs >= overlapEndMs) return 0;
+
+            const overlapMinutes = (overlapEndMs - overlapStartMs) / 60000;
+            return contribution * (overlapMinutes / mealOffsetMin);
+        }
+
+        function pushCurrentPoint(currentMs) {
             const timeObj = new Date(currentMs);
             const timeLabel = timeObj.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
-
-            const currentDrinkBacs = sortedDrinks.map(d => getDisplayedDrinkBacAt(d, currentMs));
             let currentBac = currentDrinkBacs.reduce((sum, v) => sum + v, 0);
             if (currentBac < 0.000001) currentBac = 0;
-
-            const clearedThisStep = Math.max(0, previousTotalBac - currentBac);
-            currentAch += clearedThisStep * 1.5;
-            currentAch -= 0.01 * (stepMinutes / 60);
-            if (currentAch < 0) currentAch = 0;
 
             if (currentBac > maxBac) {
                 maxBac = currentBac;
@@ -1766,11 +1783,38 @@
             timeMsList.push(currentMs);
             dataPoints.push(Number(currentBac.toFixed(4)));
             currentDrinkBacs.forEach((v, index) => {
-                individualBacDataPoints[index].push(Number(v.toFixed(4)));
+                individualBacDataPoints[index].push(Number(Math.max(0, v).toFixed(4)));
             });
             achDataPoints.push(Number(currentAch.toFixed(4)));
 
-            previousTotalBac = currentBac;
+            return currentBac;
+        }
+
+        pushCurrentPoint(actualPlotStartMs);
+
+        for (let m = stepMinutes; m <= maxPlotMinutes; m += stepMinutes) {
+            const currentMs = actualPlotStartMs + (m * 60000);
+            const stepHours = Math.max(0, (currentMs - previousMs) / 3600000);
+
+            sortedDrinks.forEach((drink, index) => {
+                currentDrinkBacs[index] += getAbsorbedContributionInInterval(drink, previousMs, currentMs);
+            });
+
+            const totalBeforeClear = currentDrinkBacs.reduce((sum, v) => sum + Math.max(0, v), 0);
+            const clearAmount = Math.min(totalBeforeClear, 0.015 * stepHours);
+            if (clearAmount > 0 && totalBeforeClear > 0) {
+                currentDrinkBacs.forEach((value, index) => {
+                    const share = Math.max(0, value) / totalBeforeClear;
+                    currentDrinkBacs[index] = Math.max(0, value - (clearAmount * share));
+                });
+            }
+
+            currentAch += clearAmount * 1.5;
+            currentAch -= 0.01 * stepHours;
+            if (currentAch < 0) currentAch = 0;
+
+            const currentBac = pushCurrentPoint(currentMs);
+            previousMs = currentMs;
 
             if (currentBac === 0 && currentAch === 0 && currentMs > lastAbsorbEndMs) {
                 break;
@@ -1908,13 +1952,17 @@
             };
         }).filter(Boolean);
 
+        const achDataForDisplay = (isActiveSession && Array.isArray(chartData.currentDrinkBasisAchDataPoints))
+            ? chartData.currentDrinkBasisAchDataPoints
+            : chartData.achDataPoints;
+
         const datasets = [
             ...(!isActiveSession ? [totalBacDataset] : []),
             ...(currentDrinkBasisDataset ? [currentDrinkBasisDataset] : []),
             ...individualBacDatasets,
             {
                 label: '예상 아세트알데하이드 (숙취)',
-                data: chartData.achDataPoints,
+                data: achDataForDisplay,
                 borderColor: '#f1c40f',
                 backgroundColor: 'transparent',
                 borderWidth: 4,
