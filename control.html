@@ -85,6 +85,7 @@
         
         .profile-edit-btn { border:none; background:#e2e8f0; color:#4a5568; border-radius:6px; padding:4px 10px; font-size:0.8rem; font-weight:700; cursor:pointer; transition:0.2s; }
         .profile-edit-btn:hover { background:#cbd5e0; }
+        .app-version { max-width: 550px; width: 100%; margin: 10px auto 0; text-align: center; color: #a0aec0; font-size: 0.72rem; line-height: 1.5; word-break: keep-all; }
     </style>
 </head>
 <body>
@@ -255,6 +256,8 @@
     </div>
 </div>
 
+<div class="app-version" id="appVersionText">버전 정보를 불러오는 중...</div>
+
 <!-- 시각 재설정 커스텀 모달 -->
 <div class="modal-overlay" id="timeResetModal">
     <div class="modal-content">
@@ -340,6 +343,17 @@
         CONTROL: 'control'
     });
 
+    const APP_VERSION = Object.freeze({
+        version: 'v2026.06.06-03',
+        updatedAt: '2026-06-06 15:30 KST',
+        note: '요약/차트 표시 조건과 열린 세션 정리 로직 개선'
+    });
+
+    const versionEl = document.getElementById('appVersionText');
+    if (versionEl) {
+        versionEl.innerText = `AlcoholAway Control ${APP_VERSION.version} · 업데이트 ${APP_VERSION.updatedAt} · ${APP_VERSION.note}`;
+    }
+
     let userId = null;
     let explicitLogoutInProgress = false;
     let userProfile = null; 
@@ -349,8 +363,83 @@
     let activeChartInstance = null;
     let historyChartInstance = null;
     let pastSessionsData = [];
+    let activeAnalysisUnlocked = false;
     
     let currentSessionDocId = null; 
+
+    function isInitialDrinkRecord(drink, index = 0) {
+        if (!drink) return index === 0;
+        if (drink.isInitialDrink === true) return true;
+        if (drink.entrySource === 'session_start') return true;
+        if (Number(drink.additionalSequence) === 0) return true;
+        return false;
+    }
+
+    function hasAdditionalDrinks(targetList = drinksList) {
+        return Array.isArray(targetList) && targetList.some((d, index) => !isInitialDrinkRecord(d, index));
+    }
+
+    function resetLocalSessionState() {
+        sessionStartTime = null;
+        drinksList = [];
+        currentSessionDocId = null;
+        activeAnalysisUnlocked = false;
+        if (timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+        hideActiveAnalysis();
+    }
+
+    async function getOpenSessionDocs() {
+        if (!userId) return [];
+        const q = query(collection(db, "drinking_sessions"), where("userId", "==", userId), orderBy("startTime", "desc"));
+        const querySnapshot = await getDocs(q);
+        const openSessions = [];
+        querySnapshot.forEach((sessionDoc) => {
+            const data = sessionDoc.data();
+            if (data && data.isFinished === false) {
+                openSessions.push({ id: sessionDoc.id, data });
+            }
+        });
+        return openSessions;
+    }
+
+    async function deleteOpenSessions(reason = 'user_cancelled') {
+        const openSessions = await getOpenSessionDocs();
+        const nowMs = Date.now();
+        for (const openSession of openSessions) {
+            try {
+                await setDoc(doc(db, "drinking_sessions", openSession.id), {
+                    closedBy: reason,
+                    closedAt: nowMs,
+                    updatedAt: serverTimestamp()
+                }, { merge: true });
+                await deleteDoc(doc(db, "drinking_sessions", openSession.id));
+            } catch (error) {
+                console.error(`열린 세션 삭제 실패(${openSession.id}):`, error);
+            }
+        }
+    }
+
+    async function finishOtherOpenSessions(excludeSessionId = null, reason = 'auto_closed') {
+        const openSessions = await getOpenSessionDocs();
+        const nowMs = Date.now();
+        for (const openSession of openSessions) {
+            if (excludeSessionId && openSession.id === excludeSessionId) continue;
+            try {
+                await updateDoc(doc(db, "drinking_sessions", openSession.id), {
+                    isFinished: true,
+                    endTime: nowMs,
+                    autoClosed: true,
+                    autoClosedReason: reason,
+                    updatedAt: serverTimestamp()
+                });
+            } catch (error) {
+                console.error(`열린 세션 자동 종료 실패(${openSession.id}):`, error);
+            }
+        }
+    }
 
     async function saveActiveMode(mode) {
         const uid = auth.currentUser?.uid || userId;
@@ -373,7 +462,9 @@
 
         explicitLogoutInProgress = true;
         try {
-            // 로그아웃하는 순간 DB 모드를 금주 모드로 되돌립니다.
+            // 로그아웃 시에는 진행 중 세션을 다음 접속 때 복원하지 않도록 서버의 열린 세션도 정리합니다.
+            await deleteOpenSessions('logout');
+            resetLocalSessionState();
             await saveActiveMode(APP_MODE.ABSTINENCE);
             sessionStorage.removeItem('session_visited');
             localStorage.removeItem('quitDrinkingDateTime_server');
@@ -532,18 +623,18 @@
     }
 
 
-    function hasAdditionalDrinks(targetList = drinksList) {
-        return Array.isArray(targetList) && targetList.some(d => !d.isInitialDrink);
-    }
-
     function hideActiveAnalysis() {
         const chartContainer = document.getElementById('activeChartContainer');
         const summaryEl = document.getElementById('activeSummary');
 
-        if (chartContainer) chartContainer.style.display = 'none';
+        if (chartContainer) {
+            chartContainer.style.display = 'none';
+            chartContainer.setAttribute('data-visible', 'false');
+        }
         if (summaryEl) {
             summaryEl.style.display = 'none';
             summaryEl.innerHTML = '';
+            summaryEl.setAttribute('data-visible', 'false');
         }
 
         if (activeChartInstance) {
@@ -553,8 +644,9 @@
     }
 
     function refreshActiveAnalysisIfReady() {
-        if (hasAdditionalDrinks()) {
+        if (activeAnalysisUnlocked && hasAdditionalDrinks()) {
             document.getElementById('activeChartContainer').style.display = 'block';
+            document.getElementById('activeChartContainer').setAttribute('data-visible', 'true');
             updateActiveChart();
         } else {
             hideActiveAnalysis();
@@ -653,7 +745,7 @@
     function showLatestPreDrinkBacResult() {
         const panel = document.getElementById('preDrinkBacResult');
         if (!panel) return;
-        const latest = [...drinksList].reverse().find(d => !d.isInitialDrink);
+        const latest = [...drinksList].reverse().find((d, index, arr) => !isInitialDrinkRecord(d, drinksList.indexOf(d)));
         if (!latest) {
             panel.style.display = 'none';
             panel.innerHTML = '';
@@ -663,7 +755,7 @@
         const startedAt = new Date(getDrinkTimeMs(latest));
         const timeText = startedAt.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
         panel.style.display = 'block';
-        const additionalSequence = Number(latest.additionalSequence) || drinksList.filter(d => !d.isInitialDrink).indexOf(latest) + 1;
+        const additionalSequence = Number(latest.additionalSequence) || drinksList.filter((d, index) => !isInitialDrinkRecord(d, index)).indexOf(latest) + 1;
         panel.innerHTML = `
             <b>🧮 추가 ${additionalSequence}번째 잔 시작 직전 역산 결과</b><br>
             ${timeText} 기준, 앞선 <b>${latest.priorDrinkCount}회</b>의 음주와 누적 알코올
@@ -746,6 +838,7 @@
             
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
+                if (data.closedBy) return; // 로그아웃/취소로 정리된 열린 세션은 복원/목록 표시에서 제외합니다.
                 if (data.isFinished === false && !activeSessionFound) {
                     activeSessionFound = { id: doc.id, ...data };
                 } else {
@@ -755,11 +848,15 @@
 
             document.getElementById('loadingArea').style.display = 'none';
             document.getElementById('mainControlArea').style.display = 'block';
+            hideActiveAnalysis();
 
             if (activeSessionFound) {
                 resumeActiveSession(activeSessionFound);
             } else {
+                resetLocalSessionState();
                 document.getElementById('setupCard').style.display = 'block';
+                document.getElementById('activeCard').style.display = 'none';
+                document.getElementById('historyCard').style.display = 'none';
                 renderHistoryList(container);
             }
 
@@ -816,12 +913,14 @@
         document.getElementById('setupCard').style.display = 'none';
         document.getElementById('historyCard').style.display = 'none';
         document.getElementById('activeCard').style.display = 'block';
+        hideActiveAnalysis();
         
         const startStr = sessionStartTime.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
         document.getElementById('startTimeDisplay').innerText = `시작 시각: ${startStr}`;
 
         renderDrinkList();
         showLatestPreDrinkBacResult();
+        activeAnalysisUnlocked = hasAdditionalDrinks();
         refreshActiveAnalysisIfReady();
 
         startTimer();
@@ -843,6 +942,8 @@
         sessionStartTime = new Date();
         drinksList = [];
         currentSessionDocId = null;
+        activeAnalysisUnlocked = false;
+        hideActiveAnalysis();
 
         const initialDrink = createDrinkRecord({
             typeSelectId: 'startDrinkType',
@@ -862,6 +963,7 @@
         document.getElementById('setupCard').style.display = 'none';
         document.getElementById('historyCard').style.display = 'none';
         document.getElementById('activeCard').style.display = 'block';
+        hideActiveAnalysis();
 
         const startStr = sessionStartTime.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
         document.getElementById('startTimeDisplay').innerText = `시작 시각: ${startStr}`;
@@ -887,7 +989,7 @@
             document.getElementById('elapsedTimeDisplay').innerText = `음주 진행 시간: ${h}:${m}:${s}`;
             
             // 실시간으로 차트의 현재시각 세로선만 업데이트 (30초마다 차트 리렌더링)
-            if (activeChartInstance && hasAdditionalDrinks() && new Date().getSeconds() % 30 === 0) {
+            if (activeChartInstance && activeAnalysisUnlocked && hasAdditionalDrinks() && new Date().getSeconds() % 30 === 0) {
                  updateActiveChart();
             }
         }, 1000);
@@ -969,25 +1071,24 @@
 
     window.cancelDrinkingSession = async function() {
         if(confirm("기록 중인 음주 세션을 완전히 취소하시겠습니까?\n(서버에서 현재 진행중인 세션 기록이 완전히 삭제됩니다.)")) {
-            if(currentSessionDocId) {
-                try {
-                    await deleteDoc(doc(db, "drinking_sessions", currentSessionDocId));
-                } catch(e) { console.error("삭제 실패", e); }
+            try {
+                await deleteOpenSessions('user_cancelled');
+            } catch(e) {
+                console.error("진행 중 세션 정리 실패", e);
+                alert("진행 중 세션 정리 중 오류가 발생했습니다: " + e.message);
             }
-            sessionStartTime = null;
-            drinksList = [];
-            currentSessionDocId = null;
-            if(timerInterval) clearInterval(timerInterval);
-            
+
+            resetLocalSessionState();
             document.getElementById('setupCard').style.display = 'block';
             document.getElementById('activeCard').style.display = 'none';
+            document.getElementById('historyCard').style.display = 'none';
             document.getElementById('drinkVolume').value = '500';
             document.getElementById('startDrinkVolume').value = '500';
             document.getElementById('preDrinkBacResult').style.display = 'none';
             
             document.getElementById('mainControlArea').style.display = 'none';
             document.getElementById('loadingArea').style.display = 'flex';
-            loadSessionsAndCheckActive();
+            await loadSessionsAndCheckActive();
         }
     };
 
@@ -1009,6 +1110,7 @@
         }
 
         drinksList.push(newDrink);
+        activeAnalysisUnlocked = true;
         renderDrinkList();
         showLatestPreDrinkBacResult();
         refreshActiveAnalysisIfReady();
@@ -1020,10 +1122,12 @@
             drinksList.splice(index, 1);
             
             if(drinksList.length === 0) {
+                activeAnalysisUnlocked = false;
                 document.getElementById('preDrinkBacResult').style.display = 'none';
                 hideActiveAnalysis();
             } else {
                 recalculateDrinkDerivedFields();
+                activeAnalysisUnlocked = hasAdditionalDrinks();
             }
             renderDrinkList();
             showLatestPreDrinkBacResult();
@@ -1090,8 +1194,8 @@
             const priorAlcoholGrams = Number.isFinite(Number(d.priorAlcoholGrams))
                 ? Number(d.priorAlcoholGrams)
                 : priorList.reduce((sum, item) => sum + (Number(item.alcoholGrams) || 0), 0);
-            const additionalSequence = Number(d.additionalSequence) || targetList.slice(0, i + 1).filter(item => !item.isInitialDrink).length;
-            const entryLabel = d.isInitialDrink ? '세션 시작 술' : `추가 ${additionalSequence}번째 잔`;
+            const additionalSequence = Number(d.additionalSequence) || targetList.slice(0, i + 1).filter((item, itemIndex) => !isInitialDrinkRecord(item, itemIndex)).length;
+            const entryLabel = isInitialDrinkRecord(d, i) ? '세션 시작 술' : `추가 ${additionalSequence}번째 잔`;
 
             html += `
                 <div class="drink-item">
@@ -1115,7 +1219,7 @@
     }
 
     function updateActiveChart() {
-        if(!hasAdditionalDrinks()) {
+        if(!activeAnalysisUnlocked || !hasAdditionalDrinks()) {
             hideActiveAnalysis();
             return;
         }
@@ -1219,18 +1323,22 @@
                 const docRef = await addDoc(collection(db, "drinking_sessions"), sessionData);
                 currentSessionDocId = docRef.id; 
             }
+
+            if (isFinal) {
+                await finishOtherOpenSessions(currentSessionDocId, 'after_final_save');
+            }
             
             if(isFinal) {
                 if(!isSilent) alert("음주 세션이 성공적으로 기록 및 종료되었습니다.");
-                sessionStartTime = null;
-                drinksList = [];
-                currentSessionDocId = null;
+                resetLocalSessionState();
                 document.getElementById('drinkVolume').value = '500';
                 document.getElementById('startDrinkVolume').value = '500';
                 document.getElementById('preDrinkBacResult').style.display = 'none';
+                document.getElementById('activeCard').style.display = 'none';
+                document.getElementById('historyCard').style.display = 'none';
                 
                 document.getElementById('loadingText').innerText = "데이터 갱신 중...";
-                loadSessionsAndCheckActive();
+                await loadSessionsAndCheckActive();
             }
         } catch (error) {
             console.error("Error saving document: ", error);
@@ -1315,8 +1423,8 @@
                 const priorAlcoholGrams = Number.isFinite(Number(d.priorAlcoholGrams))
                     ? Number(d.priorAlcoholGrams)
                     : priorList.reduce((sum, item) => sum + (Number(item.alcoholGrams) || 0), 0);
-                const additionalSequence = Number(d.additionalSequence) || sessionData.drinksList.slice(0, i + 1).filter(item => !item.isInitialDrink).length;
-                const entryLabel = d.isInitialDrink ? '세션 시작 술' : `추가 ${additionalSequence}번째 잔`;
+                const additionalSequence = Number(d.additionalSequence) || sessionData.drinksList.slice(0, i + 1).filter((item, itemIndex) => !isInitialDrinkRecord(item, itemIndex)).length;
+                const entryLabel = isInitialDrinkRecord(d, i) ? '세션 시작 술' : `추가 ${additionalSequence}번째 잔`;
 
                 html += `
                     <div class="drink-item">
@@ -1513,7 +1621,7 @@
 
         const individualBacDatasets = (chartData.individualBacDataPoints || []).map((points, index) => {
             const drink = chartData.drinksForChart && chartData.drinksForChart[index] ? chartData.drinksForChart[index] : null;
-            const labelPrefix = drink && drink.isInitialDrink ? '시작 술' : `${index + 1}번째 잔`;
+            const labelPrefix = drink && isInitialDrinkRecord(drink, index) ? '시작 술' : `${index + 1}번째 잔`;
             const opacity = Math.max(0.35, 0.95 - (index * 0.08));
 
             return {
