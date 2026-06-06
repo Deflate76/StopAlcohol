@@ -358,9 +358,9 @@
     });
 
     const APP_VERSION = Object.freeze({
-        version: 'v2026.06.06-06',
+        version: 'v2026.06.06-07',
         updatedAt: '2026-06-06 KST',
-        note: '차트 색상 체계 정리, 아세트알데하이드 실선 표시, 최근 술 시작 전 추정 BAC 문구 개선'
+        note: '현재 추정 BAC 실시간 갱신, 잔별 직전 BAC 표시 제거, 아세트알데하이드 그래프 굵기 강화'
     });
 
     const versionEl = document.getElementById('appVersionText');
@@ -644,6 +644,26 @@
         return Number(chartData.dataPoints[closestIndex]) || 0;
     }
 
+    function formatElapsedFromStart(targetMs = Date.now()) {
+        if (!sessionStartTime) return '00:00:00';
+        const diff = Math.max(0, targetMs - sessionStartTime.getTime());
+        const h = Math.floor(diff / 3600000).toString().padStart(2, '0');
+        const m = Math.floor((diff / 60000) % 60).toString().padStart(2, '0');
+        const s = Math.floor((diff / 1000) % 60).toString().padStart(2, '0');
+        return `${h}:${m}:${s}`;
+    }
+
+    function getRealtimeEstimatedBac(targetMs = Date.now(), targetDrinks = drinksList) {
+        if (!sessionStartTime || !Array.isArray(targetDrinks) || targetDrinks.length === 0) return 0;
+        const mealOffsetHrs = parseFloat(document.getElementById('userMeal').value) || 1.0;
+        return calculateBacAtTime(
+            targetDrinks,
+            targetMs,
+            mealOffsetHrs,
+            sessionStartTime.getTime()
+        );
+    }
+
 
     function hideActiveAnalysis() {
         const chartContainer = document.getElementById('activeChartContainer');
@@ -767,23 +787,41 @@
     function showLatestPreDrinkBacResult() {
         const panel = document.getElementById('preDrinkBacResult');
         if (!panel) return;
-        const latest = [...drinksList].reverse().find((d, index, arr) => !isInitialDrinkRecord(d, drinksList.indexOf(d)));
+
+        const latest = [...drinksList].reverse().find((d) => !isInitialDrinkRecord(d, drinksList.indexOf(d)));
         if (!latest) {
             panel.style.display = 'none';
             panel.innerHTML = '';
             return;
         }
 
-        const startedAt = new Date(getDrinkTimeMs(latest));
-        const timeText = startedAt.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const nowMs = Date.now();
+        const elapsedText = formatElapsedFromStart(nowMs);
+        const nowText = new Date(nowMs).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const currentEstimatedBac = getRealtimeEstimatedBac(nowMs, drinksList);
+        const totalAlcoholGrams = drinksList.reduce((sum, d) => sum + (Number(d.alcoholGrams) || 0), 0);
+        const absorbedAlcoholGrams = drinksList.reduce((sum, d) => {
+            const drinkMs = getDrinkTimeMs(d);
+            const grams = Number(d.alcoholGrams) || 0;
+            if (!drinkMs || drinkMs > nowMs) return sum;
+
+            const mealOffsetHrs = parseFloat(document.getElementById('userMeal').value) || 1.0;
+            const absorbMinutes = Math.max(0, mealOffsetHrs * 60);
+            if (absorbMinutes <= 0) return sum + grams;
+
+            const elapsedMinutes = Math.max(0, (nowMs - drinkMs) / 60000);
+            const absorbedRatio = Math.min(1, elapsedMinutes / absorbMinutes);
+            return sum + (grams * absorbedRatio);
+        }, 0);
+
         panel.style.display = 'block';
-        const additionalSequence = Number(latest.additionalSequence) || drinksList.filter((d, index) => !isInitialDrinkRecord(d, index)).indexOf(latest) + 1;
         panel.innerHTML = `
-            <b>🧮 추가 ${additionalSequence}번째 잔 시작 직전 역산 결과</b><br>
-            ${timeText} 기준, 앞선 <b>${latest.priorDrinkCount}회</b>의 음주와 누적 알코올
-            <b>${(Number(latest.priorAlcoholGrams) || 0).toFixed(1)}g</b>만 반영한 예상 BAC는
-            <b style="color:var(--danger-color); font-size:1rem;">${(Number(latest.bacBeforeDrink) || 0).toFixed(3)}%</b>입니다.<br>
-            <span style="font-size:0.76rem; color:#8d6e63;">※ 현재 새로 선택한 술의 알코올량은 이 직전 농도 계산에 포함하지 않았습니다.</span>
+            <b>🧮 현재 추정 BAC</b><br>
+            음주 진행 시간 <b>${elapsedText}</b> / 현재 시각 <b>${nowText}</b> 기준,<br>
+            기록된 술 <b>${drinksList.length}회</b> 중 현재까지 흡수된 알코올 약
+            <b>${absorbedAlcoholGrams.toFixed(1)}g</b>을 반영한 예상 BAC는
+            <b style="color:var(--danger-color); font-size:1rem;">${currentEstimatedBac.toFixed(3)}%</b>입니다.<br>
+            <span style="font-size:0.76rem; color:#8d6e63;">※ 총 기록 알코올 ${totalAlcoholGrams.toFixed(1)}g 중 아직 흡수 중인 양은 현재 시각 BAC에 전부 반영하지 않습니다.</span>
         `;
     }
 
@@ -1273,7 +1311,6 @@
                     </div>
                     <div class="drink-item-time">음주 시작 시각: ${startDrinkStr}</div>
                     <div class="drink-item-stats">
-                        • 이 술 시작 직전 예상 BAC: <b style="color:var(--danger-color);">${bacBeforeDrink.toFixed(3)}%</b><br>
                         • 직전 계산에 반영된 누적 알코올: <b>${priorAlcoholGrams.toFixed(1)}g</b><br>
                         • 섭취 알코올 (해당 술): <b>${grams.toFixed(1)}g</b><br>
                         • 이 술의 BAC 증가 예상치: <b>${contribution.toFixed(3)}%</b><br>
@@ -1483,8 +1520,7 @@
                         </div>
                         <div class="drink-item-time">음주 시작 시각: ${startDrinkStr}</div>
                         <div class="drink-item-stats">
-                            • 이 술 시작 직전 예상 BAC: <b style="color:var(--danger-color);">${bacBeforeDrink.toFixed(3)}%</b><br>
-                            • 직전 계산에 반영된 누적 알코올: <b>${priorAlcoholGrams.toFixed(1)}g</b><br>
+                                • 직전 계산에 반영된 누적 알코올: <b>${priorAlcoholGrams.toFixed(1)}g</b><br>
                             • 섭취 알코올 (해당 술): <b>${grams.toFixed(1)}g</b><br>
                             • 이 술의 BAC 증가 예상치: <b>${contribution.toFixed(3)}%</b><br>
                             • <b>이 술 반영 후 예상 최고 BAC: <span style="color:var(--danger-color);">${exactMaxBac.toFixed(3)}%</span></b><br>
@@ -1719,7 +1755,7 @@
                 data: chartData.achDataPoints,
                 borderColor: '#f1c40f',
                 backgroundColor: 'transparent',
-                borderWidth: 2,
+                borderWidth: 4,
                 borderDash: [],
                 fill: false,
                 tension: 0.35,
