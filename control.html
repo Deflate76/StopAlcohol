@@ -138,6 +138,9 @@
         .drink-item-time { font-size: 0.8rem; color: #a0aec0; margin-bottom: 10px; }
         .drink-item-stats { font-size: 0.85rem; color: #4a5568; background: rgba(255,255,255,0.72); padding: 10px; border-radius: 10px; line-height: 1.5; }
         .delete-drink-btn { color: var(--danger-color); font-weight: 800; font-size: 1.2rem; background: none; border: none; padding: 0; cursor: pointer; line-height: 1; }
+        .drink-item-actions { margin-top:10px; display:flex; gap:8px; }
+        .complete-drink-btn { width:100%; border:none; border-radius:12px; padding:11px 12px; background:linear-gradient(135deg, #2ecc71, #27ae60); color:#fff; font-size:0.88rem; font-weight:900; cursor:pointer; box-shadow:0 4px 10px rgba(46,204,113,0.18); }
+        .complete-drink-btn:active { transform:scale(0.98); filter:brightness(0.96); }
         
         details.history-item { background: #f8f9fa; border: 1px solid #e2e8f0; border-radius: 12px; padding: 0; margin-bottom: 10px; text-align: left; cursor: pointer; transition: 0.2s; overflow:hidden; }
         details.history-item:hover { background: #edf2f7; border-color: #cbd5e0; }
@@ -161,6 +164,7 @@
         .drink-warning-list { display:flex; flex-direction:column; gap:8px; margin: 12px 0; }
         .drink-warning-item { background:#fff8e1; border:1px solid #f6c453; border-radius:12px; padding:10px 11px; color:#5d4037; font-size:0.82rem; line-height:1.45; word-break:keep-all; }
         .drink-warning-item-title { font-weight:900; color:#c05621; margin-bottom:3px; }
+        .drink-warning-emphasis { display:inline-block; padding:0 4px; border-radius:6px; background:#fff3cd; color:#c2410c; font-weight:950; font-variant-numeric:tabular-nums; box-shadow:inset 0 -1px 0 rgba(194,65,12,0.18); }
         .drink-warning-pace { margin-top:12px; background:#f8fafc; }
         .drink-warning-pace .who-alcohol-panel { display:block !important; }
         .drink-warning-note { margin-top:10px; color:#718096; font-size:0.75rem; line-height:1.45; word-break:keep-all; }
@@ -556,9 +560,9 @@
     });
 
     const APP_VERSION = Object.freeze({
-        version: 'v2026.06.07-05',
+        version: 'v2026.06.07-06',
         updatedAt: '2026-06-07 KST',
-        note: '추가 음주 경고 팝업 내 기분·다음 잔 갈망 체크 기록 반영'
+        note: '경고 수치 강조, 잔별 음주 완료 전환, 완료 후 BAC 반영'
     });
 
     const versionEl = document.getElementById('appVersionText');
@@ -607,6 +611,93 @@
         return Array.isArray(targetList) && targetList.some((d, index) => !isInitialDrinkRecord(d, index));
     }
 
+    function getExplicitDrinkAbsorptionStatus(drink) {
+        if (!drink) return null;
+        const status = String(drink.absorptionStatus || drink.drinkStatus || '').toLowerCase();
+        if (['absorbed', 'completed', 'complete', 'reflected'].includes(status)) return 'absorbed';
+        if (['current', 'pending', 'active', 'in_progress', 'started'].includes(status)) return 'current';
+        if (drink.isAbsorbed === true || drink.absorbed === true) return 'absorbed';
+        if (drink.isAbsorbed === false || drink.absorbed === false) return 'current';
+        return null;
+    }
+
+    function getDrinkAbsorptionStatus(drink, index = -1, targetList = drinksList) {
+        const explicit = getExplicitDrinkAbsorptionStatus(drink);
+        if (explicit) return explicit;
+        if (Array.isArray(targetList) && index >= 0) {
+            return index === targetList.length - 1 ? 'current' : 'absorbed';
+        }
+        return 'absorbed';
+    }
+
+    function isDrinkCurrentPending(drink, index = -1, targetList = drinksList) {
+        return getDrinkAbsorptionStatus(drink, index, targetList) === 'current';
+    }
+
+    function isDrinkAbsorbedRecord(drink, index = -1, targetList = drinksList) {
+        return getDrinkAbsorptionStatus(drink, index, targetList) === 'absorbed';
+    }
+
+    function markDrinkAsCurrent(drink) {
+        if (!drink) return drink;
+        drink.absorptionStatus = 'current';
+        drink.isAbsorbed = false;
+        return drink;
+    }
+
+    function markDrinkAsAbsorbed(drink, completedAtMs = Date.now()) {
+        if (!drink) return drink;
+        const safeCompletedAtMs = Number.isFinite(Number(completedAtMs)) ? Number(completedAtMs) : Date.now();
+        drink.absorptionStatus = 'absorbed';
+        drink.isAbsorbed = true;
+        drink.drinkCompletedAtMs = drink.drinkCompletedAtMs || safeCompletedAtMs;
+        drink.drinkCompletedAt = drink.drinkCompletedAt || new Date(safeCompletedAtMs).toISOString();
+        drink.absorbedAtMs = drink.absorbedAtMs || safeCompletedAtMs;
+        return drink;
+    }
+
+    function normalizeDrinkAbsorptionStates(targetList = drinksList) {
+        if (!Array.isArray(targetList)) return targetList;
+        const hasExplicitState = targetList.some(d => getExplicitDrinkAbsorptionStatus(d));
+        targetList.forEach((drink, index) => {
+            if (!drink) return;
+            const explicit = getExplicitDrinkAbsorptionStatus(drink);
+            const status = explicit || (hasExplicitState ? 'absorbed' : (index === targetList.length - 1 ? 'current' : 'absorbed'));
+            if (status === 'current') {
+                markDrinkAsCurrent(drink);
+            } else {
+                markDrinkAsAbsorbed(drink, drink.drinkCompletedAtMs || drink.absorbedAtMs || getDrinkTimeMs(drink) || Date.now());
+            }
+        });
+        return targetList;
+    }
+
+    function getCurrentDrinkIndex(targetList = drinksList) {
+        if (!Array.isArray(targetList) || targetList.length === 0) return -1;
+        for (let i = targetList.length - 1; i >= 0; i--) {
+            if (isDrinkCurrentPending(targetList[i], i, targetList)) return i;
+        }
+        return -1;
+    }
+
+    function getBacReflectableDrinks(targetList = drinksList) {
+        if (!Array.isArray(targetList)) return [];
+        return targetList.filter((drink, index) => isDrinkAbsorbedRecord(drink, index, targetList));
+    }
+
+    function hasBacReflectableDrinks(targetList = drinksList) {
+        return getBacReflectableDrinks(targetList).length > 0;
+    }
+
+    function markExistingCurrentDrinksAbsorbed(completedAtMs = Date.now()) {
+        if (!Array.isArray(drinksList)) return;
+        drinksList.forEach((drink, index) => {
+            if (isDrinkCurrentPending(drink, index, drinksList)) {
+                markDrinkAsAbsorbed(drink, completedAtMs);
+            }
+        });
+    }
+
     function setCollapsibleSectionVisible(sectionId, isVisible) {
         const section = document.getElementById(sectionId);
         if (!section) return;
@@ -633,7 +724,7 @@
     };
 
     function refreshActiveAnalysisSectionVisibility() {
-        setCollapsibleSectionVisible('activeAnalysisSection', hasAdditionalDrinks());
+        setCollapsibleSectionVisible('activeAnalysisSection', hasAdditionalDrinks() || hasBacReflectableDrinks());
     }
 
     function updateDrinkItemsSectionMeta(targetList = drinksList) {
@@ -644,7 +735,7 @@
             meta.innerText = '기록 없음';
             return;
         }
-        const currentCount = 1;
+        const currentCount = targetList.filter((drink, index) => isDrinkCurrentPending(drink, index, targetList)).length;
         const absorbedCount = Math.max(0, count - currentCount);
         meta.innerText = `총 ${count}개 · 반영 ${absorbedCount}개 · 현재 ${currentCount}개`;
         setCollapsibleSectionVisible('drinkItemsSection', true);
@@ -1157,12 +1248,10 @@
         return -1;
     }
 
-    // preDrinkBacResult와 activeSummary는 최신 추가잔을 제외하고,
-    // 세션 시작잔 + 최신 추가잔 이전의 잔까지만 기준으로 계산합니다.
+    // preDrinkBacResult와 activeSummary는 아직 완료하지 않은 drink-item-current를 제외하고,
+    // 음주 완료 버튼을 눌러 drink-item-absorbed 상태가 된 잔만 BAC 계산에 반영합니다.
     function getDrinksBeforeLatestAdditionalDrink(targetList = drinksList) {
-        const latestAdditionalIndex = getLatestAdditionalDrinkIndex(targetList);
-        if (latestAdditionalIndex <= 0) return [];
-        return targetList.slice(0, latestAdditionalIndex);
+        return getBacReflectableDrinks(targetList);
     }
 
     function calculateAbsorbedAlcoholGramsAtTime(targetDrinks, targetMs = Date.now()) {
@@ -1447,10 +1536,25 @@
         const mood = Number(drink?.currentMoodScore);
         const craving = Number(drink?.nextDrinkCravingScore);
         const parts = [];
-        if (Number.isFinite(mood) && mood >= 1 && mood <= 10) parts.push(`현재 기분 <b>${mood}/10</b>`);
-        if (Number.isFinite(craving) && craving >= 1 && craving <= 10) parts.push(`다음 잔 갈망 <b>${craving}/10</b>`);
+        if (Number.isFinite(mood) && mood >= 1 && mood <= 10) parts.push(`지금 기분 상태 <b>${mood}/10</b>`);
+        if (Number.isFinite(craving) && craving >= 1 && craving <= 10) parts.push(`이번 잔 시작시 갈망정도 <b>${craving}/10</b>`);
         if (parts.length === 0) return '';
-        return `<span class="drink-checkin-line">• 추가 전 상태 체크: ${parts.join(' · ')}</span><br>`;
+        return `<span class="drink-checkin-line">• ${parts.join(' · ')}</span><br>`;
+    }
+
+    function emphasizeDrinkWarningBody(body, type = '') {
+        let html = escapeHtml(body);
+        if (type === 'interval') {
+            html = html.replace(/(오전|오후)\s?\d{1,2}:\d{2}/g, '<span class="drink-warning-emphasis">$&</span>');
+            html = html.replace(/\d+(?:\.\d+)?분/g, '<span class="drink-warning-emphasis">$&</span>');
+        } else if (type === 'alcohol') {
+            html = html.replace(/\d+(?:\.\d+)?g/g, '<span class="drink-warning-emphasis">$&</span>');
+        } else {
+            html = html
+                .replace(/(오전|오후)\s?\d{1,2}:\d{2}/g, '<span class="drink-warning-emphasis">$&</span>')
+                .replace(/\d+(?:\.\d+)?(?:분|g)/g, '<span class="drink-warning-emphasis">$&</span>');
+        }
+        return html;
     }
 
     function openDrinkWarningModal(warning) {
@@ -1465,7 +1569,7 @@
             listEl.innerHTML = warning.warnings.map(item => `
                 <div class="drink-warning-item">
                     <div class="drink-warning-item-title">${escapeHtml(item.title)}</div>
-                    <div>${escapeHtml(item.body)}</div>
+                    <div>${emphasizeDrinkWarningBody(item.body, item.type)}</div>
                 </div>
             `).join('');
         }
@@ -1482,7 +1586,12 @@
     };
 
     function commitDrinkItem(newDrink) {
+        const newDrinkStartedAt = getDrinkTimeMs(newDrink) || Date.now();
+        // 다음 잔을 시작하면 직전 drink-item-current는 실제로 마신 잔으로 간주하여 BAC 반영 대상으로 전환합니다.
+        markExistingCurrentDrinksAbsorbed(newDrinkStartedAt);
+        markDrinkAsCurrent(newDrink);
         drinksList.push(newDrink);
+        recalculateDrinkDerivedFields();
         activeAnalysisUnlocked = true;
         renderDrinkList();
         refreshDrinkPacePanel();
@@ -1490,6 +1599,20 @@
         refreshActiveAnalysisIfReady();
         executeSaveProcess(false, true);
     }
+
+    window.completeDrinkItem = function(index) {
+        if (!Array.isArray(drinksList) || !drinksList[index]) return;
+        const drink = drinksList[index];
+        if (!isDrinkCurrentPending(drink, index, drinksList)) return;
+        markDrinkAsAbsorbed(drink, Date.now());
+        recalculateDrinkDerivedFields();
+        activeAnalysisUnlocked = hasAdditionalDrinks() || hasBacReflectableDrinks();
+        renderDrinkList();
+        refreshDrinkPacePanel();
+        showLatestPreDrinkBacResult();
+        refreshActiveAnalysisIfReady();
+        executeSaveProcess(false, true);
+    };
 
     window.confirmPendingDrinkAddition = function() {
         if (!pendingDrinkToAdd) {
@@ -1528,7 +1651,7 @@
     }
 
     function refreshActiveAnalysisIfReady() {
-        if (activeAnalysisUnlocked && hasAdditionalDrinks()) {
+        if (activeAnalysisUnlocked && hasBacReflectableDrinks()) {
             setCollapsibleSectionVisible('activeAnalysisSection', true);
             document.getElementById('activeChartContainer').style.display = 'block';
             document.getElementById('activeChartContainer').setAttribute('data-visible', 'true');
@@ -1568,6 +1691,11 @@
             prevTime: prevTimeMs,
             drinkStartedAt: startedAtMs,
             endTime: startedAtMs, // 기존 저장 데이터 및 코드와의 하위 호환용
+            absorptionStatus: 'current',
+            isAbsorbed: false,
+            drinkCompletedAt: null,
+            drinkCompletedAtMs: null,
+            absorbedAtMs: null,
             gapMinutes: isInitialDrink ? 0 : Math.max(0, Math.round((startedAtMs - prevTimeMs) / 60000)),
             alcoholGrams: metrics.alcoholGrams,
             cMaxContribution: metrics.cMaxContribution,
@@ -1579,6 +1707,7 @@
 
     function recalculateDrinkDerivedFields() {
         if (!sessionStartTime || !drinksList) return;
+        normalizeDrinkAbsorptionStates(drinksList);
 
         const gender = document.getElementById('userGender').value;
         const weight = parseFloat(document.getElementById('userWeight').value);
@@ -1605,6 +1734,9 @@
                 drink.additionalSequence = isInitialDrink ? 0 : rebuilt.filter(d => !d.isInitialDrink).length + 1;
                 drink.isInitialDrink = isInitialDrink;
                 drink.entrySource = isInitialDrink ? 'session_start' : (drink.entrySource || 'manual_add');
+                const absorptionStatus = getDrinkAbsorptionStatus(drink, index, drinksList);
+                drink.absorptionStatus = absorptionStatus;
+                drink.isAbsorbed = absorptionStatus === 'absorbed';
                 drink.drinkStartedAt = startedAtMs;
                 drink.endTime = startedAtMs;
                 drink.prevTime = prevTimeMs;
@@ -1631,16 +1763,9 @@
         const panel = document.getElementById('preDrinkBacResult');
         if (!panel) return;
 
-        const latestAdditionalIndex = getLatestAdditionalDrinkIndex(drinksList);
-        if (latestAdditionalIndex < 0) {
-            panel.style.display = 'none';
-            panel.innerHTML = '';
-            refreshActiveAnalysisSectionVisibility();
-            return;
-        }
-
-        const latest = drinksList[latestAdditionalIndex];
-        const referenceDrinks = getDrinksBeforeLatestAdditionalDrink(drinksList);
+        const referenceDrinks = getBacReflectableDrinks(drinksList);
+        const currentDrinkIndex = getCurrentDrinkIndex(drinksList);
+        const hasPendingCurrentDrink = currentDrinkIndex >= 0;
         if (referenceDrinks.length === 0) {
             panel.style.display = 'none';
             panel.innerHTML = '';
@@ -1654,22 +1779,33 @@
         const currentEstimatedBac = getRealtimeEstimatedBac(nowMs, referenceDrinks);
         const referenceTotalAlcoholGrams = referenceDrinks.reduce((sum, d) => sum + (Number(d.alcoholGrams) || 0), 0);
         const absorbedAlcoholGrams = calculateAbsorbedAlcoholGramsAtTime(referenceDrinks, nowMs);
-        const excludedAlcoholGrams = Number(latest.alcoholGrams) || 0;
-        const additionalSequence = Number(latest.additionalSequence)
-            || drinksList.slice(0, latestAdditionalIndex + 1).filter((d, index) => !isInitialDrinkRecord(d, index)).length;
 
         updateWhoAlcoholIntakePanel(nowMs, referenceDrinks);
+
+        let basisLine = `반영된 술 기록 <b>${referenceDrinks.length}회</b>,`;
+        let noteLine = `<span style="font-size:0.76rem; color:#2f855a;">※ 음주 완료 처리된 drink-item-absorbed 기준으로 현재 추정 BAC를 계산했습니다.</span>`;
+        if (hasPendingCurrentDrink) {
+            const currentDrink = drinksList[currentDrinkIndex];
+            const additionalSequence = Number(currentDrink.additionalSequence)
+                || drinksList.slice(0, currentDrinkIndex + 1).filter((d, index) => !isInitialDrinkRecord(d, index)).length;
+            const isInitialCurrent = isInitialDrinkRecord(currentDrink, currentDrinkIndex);
+            const excludedAlcoholGrams = Number(currentDrink.alcoholGrams) || 0;
+            basisLine = isInitialCurrent
+                ? `<b>현재 시작 술은 아직 제외</b>하고 완료된 이전 술 기록 <b>${referenceDrinks.length}회</b>,`
+                : `<b>추가 ${additionalSequence}번째 잔은 제외</b>하고 이전 술 기록 <b>${referenceDrinks.length}회</b>,`;
+            noteLine = `<span style="font-size:0.76rem; color:#8d6e63;">※ drink-item-current 알코올 ${excludedAlcoholGrams.toFixed(1)}g은 음주 완료 전이라 이 현재 추정 BAC 계산에 포함하지 않았습니다.</span>`;
+        }
 
         setCollapsibleSectionVisible('activeAnalysisSection', true);
         panel.style.display = 'block';
         panel.innerHTML = `
             <b>🧮 현재 추정 BAC</b><br>
             음주 진행 시간 <b><span id="preDrinkElapsedValue" class="live-value">${elapsedText}</span></b> / 현재 시각 <b><span id="preDrinkNowValue" class="live-value">${nowText}</span></b> 기준,<br>
-            <b>추가 ${additionalSequence}번째 잔은 제외</b>하고 이전 술 기록 <b>${referenceDrinks.length}회</b>,
+            ${basisLine}
             누적 알코올 <b>${referenceTotalAlcoholGrams.toFixed(1)}g</b> 중 현재까지 흡수된 약
             <b>${absorbedAlcoholGrams.toFixed(1)}g</b>만 반영한 현재 시각 추정 BAC는
             <b><span id="preDrinkBacValue" class="live-value bac-value">${currentEstimatedBac.toFixed(3)}%</span></b>입니다.<br>
-            <span style="font-size:0.76rem; color:#8d6e63;">※ 방금 입력한 추가잔 알코올 ${excludedAlcoholGrams.toFixed(1)}g은 이 현재 추정 BAC 계산에 포함하지 않았습니다.</span>
+            ${noteLine}
         `;
         triggerValueFlashes(['preDrinkElapsedValue', 'preDrinkNowValue', 'preDrinkBacValue']);
     }
@@ -1843,6 +1979,7 @@
     function resumeActiveSession(sessionData) {
         sessionStartTime = new Date(toMs(sessionData.startTime));
         drinksList = sessionData.drinksList || [];
+        normalizeDrinkAbsorptionStates(drinksList);
         currentSessionDocId = sessionData.id;
         
         document.getElementById('userGender').value = sessionData.gender;
@@ -1866,7 +2003,7 @@
         renderDrinkList();
         refreshDrinkPacePanel();
         showLatestPreDrinkBacResult();
-        activeAnalysisUnlocked = hasAdditionalDrinks();
+        activeAnalysisUnlocked = hasAdditionalDrinks() || hasBacReflectableDrinks();
         refreshActiveAnalysisIfReady();
 
         startTimer();
@@ -1935,12 +2072,12 @@
             updateElapsedTimeDisplay(now.getTime());
             refreshDrinkPacePanel(now.getTime());
 
-            // 현재 추정 BAC 패널은 최신 추가잔을 제외한 이전 잔 기준으로 초단위 갱신합니다.
+            // 현재 추정 BAC 패널은 음주 완료 처리된 drink-item-absorbed 기준으로 초단위 갱신합니다.
             showLatestPreDrinkBacResult();
             updateActiveSummaryOnly();
             
             // 차트의 현재시각 세로선은 렌더링 부담을 줄이기 위해 30초마다 리렌더링합니다.
-            if (activeChartInstance && activeAnalysisUnlocked && hasAdditionalDrinks() && now.getSeconds() % 30 === 0) {
+            if (activeChartInstance && activeAnalysisUnlocked && hasBacReflectableDrinks() && now.getSeconds() % 30 === 0) {
                  updateActiveChart();
             }
         }, 1000);
@@ -2085,6 +2222,7 @@
     window.deleteDrink = function(index) {
         if(confirm("이 음주 기록을 삭제하시겠습니까? (삭제 시 혈중농도가 자동 재계산됩니다)")) {
             drinksList.splice(index, 1);
+            normalizeDrinkAbsorptionStates(drinksList);
             
             if(drinksList.length === 0) {
                 activeAnalysisUnlocked = false;
@@ -2092,7 +2230,7 @@
                 hideActiveAnalysis();
             } else {
                 recalculateDrinkDerivedFields();
-                activeAnalysisUnlocked = hasAdditionalDrinks();
+                activeAnalysisUnlocked = hasAdditionalDrinks() || hasBacReflectableDrinks();
             }
             renderDrinkList();
             showLatestPreDrinkBacResult();
@@ -2162,14 +2300,18 @@
                 : `• 직전 계산에 반영된 누적 알코올: <b>${priorAlcoholGrams.toFixed(1)}g</b><br>`;
             const checkinLine = getDrinkWarningCheckinLine(d);
 
-            const isLatestActiveDrink = !isHistory && i === targetList.length - 1;
+            const isCurrentDrink = !isHistory && isDrinkCurrentPending(d, i, targetList);
+            const isAbsorbedDrink = !isHistory && isDrinkAbsorbedRecord(d, i, targetList);
             const drinkItemClass = !isHistory
-                ? (isLatestActiveDrink ? 'drink-item drink-item-current' : 'drink-item drink-item-absorbed')
+                ? (isCurrentDrink ? 'drink-item drink-item-current' : 'drink-item drink-item-absorbed')
                 : 'drink-item';
             const stateBadge = !isHistory
-                ? (isLatestActiveDrink
-                    ? '<span class="drink-state-badge drink-state-current">새 시작잔</span>'
-                    : '<span class="drink-state-badge drink-state-absorbed">흡수 진행/반영</span>')
+                ? (isCurrentDrink
+                    ? '<span class="drink-state-badge drink-state-current">음주 중</span>'
+                    : '<span class="drink-state-badge drink-state-absorbed">흡수한 알코올 반영</span>')
+                : '';
+            const completeButton = isCurrentDrink
+                ? `<div class="drink-item-actions"><button class="complete-drink-btn" type="button" onclick="completeDrinkItem(${i})">✅ 이 잔 음주 완료 · BAC 반영</button></div>`
                 : '';
 
             html += `
@@ -2187,6 +2329,7 @@
                         • <b>이 술 반영 후 예상 최고 BAC: <span style="color:var(--danger-color);">${exactMaxBac.toFixed(3)}%</span></b><br>
                         • 최고농도 도달 예상 시각: <b>${maxBacTimeStr} 경</b>
                     </div>
+                    ${completeButton}
                 </div>
             `;
         }
@@ -2213,8 +2356,10 @@
             return;
         }
 
-        const latestDrink = drinksList[latestAdditionalIndex];
-        const referenceDrinks = Array.isArray(summaryDrinks) ? summaryDrinks : getDrinksBeforeLatestAdditionalDrink(drinksList);
+        const currentDrinkIndex = getCurrentDrinkIndex(drinksList);
+        const hasPendingCurrentDrink = currentDrinkIndex >= 0;
+        const latestDrink = hasPendingCurrentDrink ? drinksList[currentDrinkIndex] : drinksList[latestAdditionalIndex];
+        const referenceDrinks = Array.isArray(summaryDrinks) ? summaryDrinks : getBacReflectableDrinks(drinksList);
         if (referenceDrinks.length === 0) {
             summaryEl.style.display = 'none';
             summaryEl.innerHTML = '';
@@ -2236,9 +2381,16 @@
         const peakHangoverTimeText = peakHangoverTimeMs
             ? `${new Date(peakHangoverTimeMs).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })} 경`
             : '계산 중';
+        const sequenceBasisIndex = hasPendingCurrentDrink ? currentDrinkIndex : latestAdditionalIndex;
         const additionalSequence = Number(latestDrink.additionalSequence)
-            || drinksList.slice(0, latestAdditionalIndex + 1).filter((d, index) => !isInitialDrinkRecord(d, index)).length;
-        const excludedAlcoholGrams = Number(latestDrink.alcoholGrams) || 0;
+            || drinksList.slice(0, sequenceBasisIndex + 1).filter((d, index) => !isInitialDrinkRecord(d, index)).length;
+        const excludedAlcoholGrams = hasPendingCurrentDrink ? (Number(latestDrink.alcoholGrams) || 0) : 0;
+        const summaryBasisLine = hasPendingCurrentDrink
+            ? `🍻 추가 ${additionalSequence}번째 잔 <b>이전 기준</b>: 누적 <b>${referenceDrinks.length}회</b> / 알코올 <b>${totalAlcoholGrams.toFixed(1)}g</b> 반영<br>`
+            : `✅ 음주 완료 반영 기준: 누적 <b>${referenceDrinks.length}회</b> / 알코올 <b>${totalAlcoholGrams.toFixed(1)}g</b> 반영<br>`;
+        const summaryNoteLine = hasPendingCurrentDrink
+            ? `<span style="font-size:0.78rem; color:#8d6e63;">※ drink-item-current 알코올 ${excludedAlcoholGrams.toFixed(1)}g은 완료 전이라 아래 요약 계산에서 제외했습니다.</span><br>`
+            : `<span style="font-size:0.78rem; color:#2f855a;">※ 모든 drink-item-absorbed가 현재 BAC 계산에 반영 중입니다.</span><br>`;
         
         let hangoverStr = "";
         if (chartForSummary.maxAch < 0.015) hangoverStr = "🟢 거의 없음 (양호)";
@@ -2249,8 +2401,8 @@
         summaryEl.style.display = 'block';
         summaryEl.setAttribute('data-visible', 'true');
         summaryEl.innerHTML = `
-            🍻 추가 ${additionalSequence}번째 잔 <b>이전 기준</b>: 누적 <b>${referenceDrinks.length}회</b> / 알코올 <b>${totalAlcoholGrams.toFixed(1)}g</b> 반영<br>
-            <span style="font-size:0.78rem; color:#8d6e63;">※ 방금 입력한 추가잔 알코올 ${excludedAlcoholGrams.toFixed(1)}g은 아래 요약 계산에서 제외했습니다.</span><br>
+            ${summaryBasisLine}
+            ${summaryNoteLine}
             • 종합 예상 최고 농도: <b style="color:var(--danger-color);">${sessionPeakBac.toFixed(3)}%</b><br>
             • 현재 시각 추정 BAC: <b style="color:var(--primary-color);"><span id="activeSummaryCurrentBacValue" class="live-value">${currentEstimatedBac.toFixed(3)}%</span></b><br>
             • 알코올 완전 분해 예상 소요: <b style="color:var(--info-color);">${totalClearHrs.toFixed(1)}시간</b><br>
@@ -2264,7 +2416,7 @@
     }
 
     function updateActiveChart() {
-        if(!activeAnalysisUnlocked || !hasAdditionalDrinks()) {
+        if(!activeAnalysisUnlocked || !hasBacReflectableDrinks()) {
             hideActiveAnalysis();
             return;
         }
@@ -2272,14 +2424,11 @@
         document.getElementById('activeChartContainer').style.display = 'block';
         const mealOffsetHrs = parseFloat(document.getElementById('userMeal').value) || 1.0;
 
-        // 활성 차트는 "최신 추가잔 포함" 전체 BAC를 만들지 않습니다.
-        // 최신 추가잔은 아직 차트/요약 계산에서 제외하고, 그 이전까지 실제 반영되는 술 목록만으로 빨간 실선과 잔별 선을 그립니다.
-        const latestAdditionalIndex = getLatestAdditionalDrinkIndex(drinksList);
-        const latestAdditionalDrink = latestAdditionalIndex >= 0 ? drinksList[latestAdditionalIndex] : null;
-        const summaryDrinks = getDrinksBeforeLatestAdditionalDrink(drinksList);
-        const chartDrinks = summaryDrinks.length > 0
-            ? summaryDrinks
-            : drinksList.filter((_, index) => index !== latestAdditionalIndex);
+        // 활성 차트는 완료되지 않은 drink-item-current를 제외하고,
+        // 음주 완료 버튼으로 drink-item-absorbed가 된 잔만 BAC 반영 대상으로 그립니다.
+        const currentDrinkIndex = getCurrentDrinkIndex(drinksList);
+        const currentDrink = currentDrinkIndex >= 0 ? drinksList[currentDrinkIndex] : null;
+        const chartDrinks = getBacReflectableDrinks(drinksList);
 
         if (chartDrinks.length === 0) {
             hideActiveAnalysis();
@@ -2288,7 +2437,7 @@
 
         const chartData = generateChartData(chartDrinks, sessionStartTime.getTime(), mealOffsetHrs);
         attachCurrentDrinkBasisData(chartData);
-        chartData.latestAdditionalDrinkStartedAt = latestAdditionalDrink ? getDrinkTimeMs(latestAdditionalDrink) : null;
+        chartData.latestAdditionalDrinkStartedAt = currentDrink ? getDrinkTimeMs(currentDrink) : null;
         renderActiveSummary(chartDrinks, chartData);
         
         drawChart(chartData, 'activeBacChart', activeChartInstance, (instance) => activeChartInstance = instance, true);
@@ -2299,6 +2448,12 @@
             alert("기록된 음주 내역이 없어 세션을 종료할 수 없습니다.");
             return;
         }
+        markExistingCurrentDrinksAbsorbed(Date.now());
+        recalculateDrinkDerivedFields();
+        renderDrinkList();
+        refreshDrinkPacePanel();
+        showLatestPreDrinkBacResult();
+        refreshActiveAnalysisIfReady();
         await executeSaveProcess(true, false);
     };
 
