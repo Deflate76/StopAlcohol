@@ -73,7 +73,7 @@
         .collapsible-section { margin-top: 16px; border: 1px solid #e2e8f0; border-radius: 16px; background: #ffffff; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.025); }
         .collapsible-header { width:100%; border:none; background:#f8fafc; padding: 12px 14px; display:flex; align-items:center; justify-content:space-between; gap:10px; cursor:pointer; font-family:inherit; color:var(--text-dark); }
         .collapsible-title { display:flex; align-items:center; gap:7px; font-size:0.92rem; font-weight:900; text-align:left; }
-        .collapsible-meta { display:block; margin-top:1px; font-size:0.7rem; color:#718096; font-weight:800; }
+        .collapsible-meta { display:none; margin-top:1px; font-size:0.7rem; color:#718096; font-weight:800; }
         .collapsible-right { display:flex; align-items:center; gap:6px; color:#718096; font-size:0.76rem; font-weight:900; white-space:nowrap; }
         .collapsible-chevron { font-size:1rem; color:#4a5568; line-height:1; }
         .collapsible-body { padding: 14px; border-top: 1px solid #edf2f7; }
@@ -86,8 +86,12 @@
         .chart-value-panel { margin-top: 10px; padding: 12px 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; text-align: left; font-size: 0.78rem; color: #4a5568; line-height: 1.45; }
         .chart-value-panel.is-selected { background: #ffffff; box-shadow: 0 3px 10px rgba(0,0,0,0.035); }
         .chart-value-panel-hint { color: #94a3b8; text-align: center; font-weight: 800; word-break: keep-all; }
-        .chart-value-panel-title { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 8px; color: var(--text-dark); font-weight: 900; }
+        .chart-value-panel-title { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 8px; color: var(--text-dark); font-weight: 900; }
+        .chart-value-panel-title-actions { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
         .chart-value-panel-time { color: var(--primary-color); white-space: nowrap; font-size: 0.82rem; }
+        .chart-value-panel-close { width: 24px; height: 24px; border: 1px solid #e2e8f0; border-radius: 999px; background: #fff; color: #718096; font-size: 1rem; font-weight: 900; line-height: 1; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0; }
+        .chart-value-panel-close:active { transform: scale(0.94); background: #edf2f7; }
+        .chart-value-panel.is-hidden { display: none; }
         .chart-value-panel-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; align-items: center; }
         .chart-value-series { display: flex; align-items: center; gap: 6px; min-width: 0; }
         .chart-value-swatch { width: 14px; height: 4px; border-radius: 999px; flex: 0 0 14px; background: #718096; }
@@ -97,6 +101,7 @@
         .chart-value-panel-note { margin-top: 8px; font-size: 0.72rem; color: #718096; word-break: keep-all; }
         
         .custom-legend { font-size: 0.75rem; color: #4a5568; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 15px; background: #f8f9fa; padding: 10px; border-radius: 8px; border: 1px solid #edf2f7;}
+        .custom-legend.is-hidden { display: none; }
         .legend-item { display: flex; align-items: center; gap: 4px; }
         .legend-box { width: 12px; height: 12px; border-radius: 3px; }
         .legend-line { font-weight: 900; letter-spacing: -2px; }
@@ -289,11 +294,9 @@
                         <div class="chart-canvas-wrapper">
                             <canvas id="activeBacChart"></canvas>
                         </div>
-                        <div id="activeBacChartValuePanel" class="chart-value-panel" aria-live="polite">
-                            <div class="chart-value-panel-hint">그래프를 탭하면 해당 시각의 값을 아래에 표시합니다.</div>
-                        </div>
+                        <div id="activeBacChartValuePanel" class="chart-value-panel is-hidden" aria-live="polite"></div>
                         <!-- 커스텀 범례 -->
-                        <div class="custom-legend">
+                        <div class="custom-legend" id="activeBacChartLegend">
                             <div class="legend-item"><span class="legend-line" style="color: #e74c3c; font-weight:800;">━━</span><span>현재 마신 술 기준 BAC</span></div>
                             <div class="legend-item"><span class="legend-line" style="color: #e67e22; font-weight:600;">━━</span><span>이전 잔별 BAC 추이</span></div>
                             <div class="legend-item"><span class="legend-line" style="color: #f1c40f; font-weight:800;">━━</span><span>아세트알데하이드(숙취)</span></div>
@@ -443,9 +446,9 @@
     });
 
     const APP_VERSION = Object.freeze({
-        version: 'v2026.06.07-01',
+        version: 'v2026.06.07-02',
         updatedAt: '2026-06-07 KST',
-        note: '과거 기록 접기 UI, 시작 술 기본 용량, 기록 5개 페이지네이션 반영'
+        note: '숙취 최고조 시각, 활성 차트 값 패널 닫기, 범례 전환 반영'
     });
 
     const versionEl = document.getElementById('appVersionText');
@@ -996,7 +999,7 @@
             const remainingText = remainingMs > 0
                 ? `약 ${Math.ceil(remainingMs / 60000)}분 후`
                 : '권장 간격 충족됨';
-            nextEl.innerHTML = `다음 권장 음주 주문 시각: <b>${nextTimeText} 경</b> <span style="color:#718096;">(${remainingText})</span><br><span style="font-size:0.72rem; color:#94a3b8;">※ 최신 drink-item-current 시작 시각 + 권장 ${recommended}분 기준입니다.</span>`;
+            nextEl.innerHTML = `다음 권장 음주 주문 시각: <b>${nextTimeText} 경</b> <span style="color:#718096;">(${remainingText})</span>`;
         }
     }
 
@@ -1753,6 +1756,14 @@
         const currentEstimatedBac = getRealtimeEstimatedBac(Date.now(), referenceDrinks);
         const totalAlcoholGrams = referenceDrinks.reduce((sum, d) => sum + (Number(d.alcoholGrams) || 0), 0);
         const totalClearHrs = ((chartForSummary.dataPoints.length - 1) * (chartForSummary.stepMinutes || 5)) / 60;
+        const maxAchIndex = Math.min(
+            Math.max(Number(chartForSummary.maxAchIndex) || 0, 0),
+            Array.isArray(chartForSummary.timeMsList) ? Math.max(0, chartForSummary.timeMsList.length - 1) : 0
+        );
+        const peakHangoverTimeMs = Array.isArray(chartForSummary.timeMsList) ? chartForSummary.timeMsList[maxAchIndex] : null;
+        const peakHangoverTimeText = peakHangoverTimeMs
+            ? `${new Date(peakHangoverTimeMs).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })} 경`
+            : '계산 중';
         const additionalSequence = Number(latestDrink.additionalSequence)
             || drinksList.slice(0, latestAdditionalIndex + 1).filter((d, index) => !isInitialDrinkRecord(d, index)).length;
         const excludedAlcoholGrams = Number(latestDrink.alcoholGrams) || 0;
@@ -1771,7 +1782,7 @@
             • 종합 예상 최고 농도: <b style="color:var(--danger-color);">${sessionPeakBac.toFixed(3)}%</b><br>
             • 현재 시각 추정 BAC: <b style="color:var(--primary-color);"><span id="activeSummaryCurrentBacValue" class="live-value">${currentEstimatedBac.toFixed(3)}%</span></b><br>
             • 알코올 완전 분해 예상 소요: <b style="color:var(--info-color);">${totalClearHrs.toFixed(1)}시간</b><br>
-            • 예상 숙취 강도: <b>${hangoverStr}</b>
+            • 예상 숙취 강도: <b>${hangoverStr}</b> <span style="color:#718096; font-size:0.78rem; white-space:nowrap;">최고조 <b style="color:var(--warning-color);">${peakHangoverTimeText}</b></span>
         `;
         triggerValueFlash('activeSummaryCurrentBacValue');
     }
@@ -2009,6 +2020,7 @@
         let maxBac = 0;
         let maxAch = 0;
         let maxBacIndex = 0;
+        let maxAchIndex = 0;
 
         const emptyResult = () => ({
             labels: ['00:00'],
@@ -2020,6 +2032,7 @@
             maxBac: 0,
             maxAch: 0,
             maxBacIndex: 0,
+            maxAchIndex: 0,
             stepMinutes
         });
 
@@ -2080,7 +2093,10 @@
                 maxBac = currentBac;
                 maxBacIndex = dataPoints.length;
             }
-            if (currentAch > maxAch) maxAch = currentAch;
+            if (currentAch > maxAch) {
+                maxAch = currentAch;
+                maxAchIndex = dataPoints.length;
+            }
 
             labels.push(timeLabel);
             timeMsList.push(currentMs);
@@ -2142,6 +2158,7 @@
             maxBac,
             maxAch,
             maxBacIndex,
+            maxAchIndex,
             stepMinutes
         };
     }
@@ -2153,6 +2170,29 @@
     function getChartValuePanel(canvasId) {
         return document.getElementById(getChartValuePanelId(canvasId));
     }
+
+    function setActiveChartPanelState(isPanelOpen) {
+        const panel = getChartValuePanel('activeBacChart');
+        const legend = document.getElementById('activeBacChartLegend');
+        if (panel) panel.classList.toggle('is-hidden', !isPanelOpen);
+        if (legend) legend.classList.toggle('is-hidden', isPanelOpen);
+    }
+
+    function removeSelectedPointAnnotation(chart, shouldUpdate = true) {
+        const annotations = chart?.options?.plugins?.annotation?.annotations;
+        if (!annotations || !annotations.lineSelectedPoint) return;
+        delete annotations.lineSelectedPoint;
+        if (shouldUpdate) chart.update('none');
+    }
+
+    window.closeChartValuePanel = function(canvasId) {
+        delete selectedChartPointState[canvasId];
+        const chart = canvasId === 'activeBacChart'
+            ? activeChartInstance
+            : (canvasId === 'historyBacChart' ? historyChartInstance : null);
+        removeSelectedPointAnnotation(chart, true);
+        renderChartValuePanelHint(canvasId);
+    };
 
     function escapeHtml(value) {
         return String(value ?? '').replace(/[&<>"']/g, (char) => ({
@@ -2168,6 +2208,14 @@
         const panel = getChartValuePanel(canvasId);
         if (!panel) return;
         panel.classList.remove('is-selected');
+
+        if (canvasId === 'activeBacChart') {
+            panel.innerHTML = '';
+            setActiveChartPanelState(false);
+            return;
+        }
+
+        panel.classList.remove('is-hidden');
         panel.innerHTML = '<div class="chart-value-panel-hint">그래프를 탭하면 해당 시각의 값을 아래에 표시합니다.</div>';
     }
 
@@ -2241,13 +2289,23 @@
         }).join('');
 
         panel.classList.add('is-selected');
+        panel.classList.remove('is-hidden');
+        if (canvasId === 'activeBacChart') setActiveChartPanelState(true);
+
+        const closeButton = canvasId === 'activeBacChart'
+            ? '<button type="button" class="chart-value-panel-close" onclick="closeChartValuePanel(\'activeBacChart\')" aria-label="값 패널 닫기">×</button>'
+            : '';
+
         panel.innerHTML = `
             <div class="chart-value-panel-title">
                 <span>선택한 시점의 값</span>
-                <span class="chart-value-panel-time">${escapeHtml(timeLabel)}</span>
+                <span class="chart-value-panel-title-actions">
+                    <span class="chart-value-panel-time">${escapeHtml(timeLabel)}</span>
+                    ${closeButton}
+                </span>
             </div>
             <div class="chart-value-panel-grid">${rows || '<div class="chart-value-panel-hint">표시할 값이 없습니다.</div>'}</div>
-            <div class="chart-value-panel-note">검은 팝업 대신 이 패널에 값을 고정해 표시합니다. 다른 지점을 탭하면 값이 바뀝니다.</div>
+            <div class="chart-value-panel-note">다른 지점을 탭하면 값이 바뀌고, 닫으면 범례가 다시 표시됩니다.</div>
         `;
 
         selectedChartPointState[canvasId] = { index: clampedIndex };
