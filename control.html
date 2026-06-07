@@ -86,7 +86,6 @@
         .who-alcohol-mid-label { position:absolute; left:50%; top:20px; transform:translateX(-50%); font-size:0.68rem; color:#718096; font-weight:900; white-space:nowrap; }
         .who-alcohol-absorbed-marker { position:absolute; left:0%; top:-4px; width:3px; height:24px; border-radius:999px; background:var(--primary-color); transform:translateX(-1.5px); box-shadow:0 0 0 2px rgba(255,255,255,0.9); z-index:4; transition:left 0.45s ease; }
         .who-alcohol-scale { display:flex; justify-content:space-between; margin-top:18px; font-size:0.67rem; color:#94a3b8; font-weight:800; }
-        .who-alcohol-detail { margin-top:6px; font-size:0.72rem; color:#718096; line-height:1.35; word-break:keep-all; }
         .next-recommended-time { margin-top:8px; padding:9px 10px; background:#ffffff; border:1px dashed #cbd5e0; border-radius:10px; font-size:0.78rem; color:#4a5568; line-height:1.4; word-break:keep-all; }
 
         .collapsible-section { margin-top: 16px; border: 1px solid #e2e8f0; border-radius: 16px; background: #ffffff; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.025); }
@@ -159,8 +158,6 @@
         .history-who-alcohol-panel .who-alcohol-mid-marker { top:-4px; bottom:-4px; }
         .history-who-alcohol-panel .who-alcohol-mid-label { top:18px; font-size:0.64rem; }
         .history-who-alcohol-panel .who-alcohol-scale { margin-top:17px; font-size:0.64rem; }
-        .history-who-alcohol-panel .who-alcohol-detail { font-size:0.7rem; }
-        .history-who-ratio { display:inline-block; margin-left:4px; color:var(--primary-color); font-weight:900; font-variant-numeric:tabular-nums; }
         .history-detail-btn { margin-top:10px; border:none; border-radius:10px; padding:8px 12px; background:var(--primary-color); color:white; font-weight:800; cursor:pointer; }
         .history-pagination { display:flex; justify-content:center; align-items:center; gap:12px; margin-top:12px; font-size:0.85rem; color:#718096; }
         .history-page-btn { border:1px solid #e2e8f0; background:#fff; color:#4a5568; border-radius:10px; padding:8px 12px; font-size:1rem; font-weight:900; cursor:pointer; min-width:42px; }
@@ -317,7 +314,6 @@
                         <div id="whoAlcoholAbsorbedMarker" class="who-alcohol-absorbed-marker" title="현재까지 흡수된 알코올량"></div>
                     </div>
                     <div class="who-alcohol-scale"><span>0g</span><span id="whoAlcoholReferenceText">기준 --g</span><span>2배+</span></div>
-                    <div id="whoAlcoholDetailText" class="who-alcohol-detail">섭취/흡수량을 계산 중입니다.</div>
                 </div>
                 <div id="nextRecommendedDrinkTime" class="next-recommended-time">다음 권장 음주 주문 시각: --:--</div>
             </div>
@@ -1408,9 +1404,6 @@
         const fillClass = status.diffGrams > 0
             ? 'is-over'
             : (status.consumedAlcoholGrams <= 0 ? 'is-neutral' : '');
-        const weightText = status.weight > 0 ? `, ${status.weight}kg` : '';
-        const ratioText = `${Math.round(status.ratio * 100)}%`;
-
         return `
                         <div class="who-alcohol-panel history-who-alcohol-panel" aria-label="과거 세션 WHO 기준 대비 알코올 섭취량">
                             <div class="who-alcohol-top">
@@ -1423,11 +1416,6 @@
                                 <div class="who-alcohol-mid-label">적정량</div>
                             </div>
                             <div class="who-alcohol-scale"><span>0g</span><span>적정량 ${status.referenceGrams.toFixed(0)}g = 50%</span><span>2배+</span></div>
-                            <div class="who-alcohol-detail">
-                                세션 섭취 <b>${status.consumedAlcoholGrams.toFixed(1)}g</b> / 적정량 <b>${status.referenceGrams.toFixed(0)}g</b>
-                                <span class="history-who-ratio">기준 대비 ${ratioText}</span><br>
-                                ${status.genderLabel}${weightText} 기준 · 적정량과 같으면 progress <b>50%</b> · 현재 progress <b>${status.progressPercent.toFixed(0)}%</b>
-                            </div>
                         </div>`;
     }
 
@@ -1445,7 +1433,6 @@
         const markerEl = document.getElementById('whoAlcoholAbsorbedMarker');
         const statusEl = document.getElementById('whoAlcoholStatusText');
         const referenceEl = document.getElementById('whoAlcoholReferenceText');
-        const detailEl = document.getElementById('whoAlcoholDetailText');
         const absDiffText = `${Math.abs(status.diffGrams).toFixed(1)}g`;
 
         panel.style.display = 'block';
@@ -1472,10 +1459,6 @@
             referenceEl.innerText = `적정량 ${status.referenceGrams.toFixed(0)}g`;
         }
 
-        if (detailEl) {
-            const weightText = status.weight > 0 ? `, ${status.weight}kg` : '';
-            detailEl.innerHTML = `누적 섭취 <b>${status.consumedAlcoholGrams.toFixed(1)}g</b> / 현재 흡수 <b>${status.absorbedAlcoholGrams.toFixed(1)}g</b> · ${status.genderLabel}${weightText} 기준`;
-        }
     }
 
     function buildAddDrinkWarning(newDrink, nowMs = Date.now()) {
@@ -1556,8 +1539,6 @@
         const whoFillClass = projected.diffGrams > 0
             ? 'is-over'
             : (projected.consumedAlcoholGrams <= 0 ? 'is-neutral' : '');
-        const weightText = projected.weight > 0 ? `, ${projected.weight}kg` : '';
-
         return `
             <div class="pace-panel drink-warning-pace" aria-live="polite">
                 <div class="pace-panel-top">
@@ -1582,7 +1563,6 @@
                         <div class="who-alcohol-absorbed-marker" style="left:${projected.absorbedMarkerPercent}%;" title="현재까지 흡수된 알코올량 ${projected.absorbedAlcoholGrams.toFixed(1)}g"></div>
                     </div>
                     <div class="who-alcohol-scale"><span>0g</span><span>적정량 ${projected.referenceGrams.toFixed(0)}g</span><span>2배+</span></div>
-                    <div class="who-alcohol-detail">누적 섭취 <b>${projected.consumedAlcoholGrams.toFixed(1)}g</b> / 현재 흡수 <b>${projected.absorbedAlcoholGrams.toFixed(1)}g</b> · ${projected.genderLabel}${weightText} 기준</div>
                 </div>
                 <div class="next-recommended-time">다음 권장 음주 주문 시각: <b>${nextText} 경</b> <span style="color:#718096;">(${remainingText})</span></div>
             </div>
