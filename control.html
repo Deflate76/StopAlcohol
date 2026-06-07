@@ -115,13 +115,15 @@
         .drink-item-stats { font-size: 0.85rem; color: #4a5568; background: rgba(255,255,255,0.72); padding: 10px; border-radius: 10px; line-height: 1.5; }
         .delete-drink-btn { color: var(--danger-color); font-weight: 800; font-size: 1.2rem; background: none; border: none; padding: 0; cursor: pointer; line-height: 1; }
         
-        .history-item { background: #f8f9fa; border: 1px solid #e2e8f0; border-radius: 12px; padding: 0; margin-bottom: 10px; text-align: left; cursor: pointer; transition: 0.2s; overflow:hidden; }
-        .history-item:hover { background: #edf2f7; border-color: #cbd5e0; }
+        details.history-item { background: #f8f9fa; border: 1px solid #e2e8f0; border-radius: 12px; padding: 0; margin-bottom: 10px; text-align: left; cursor: pointer; transition: 0.2s; overflow:hidden; }
+        details.history-item:hover { background: #edf2f7; border-color: #cbd5e0; }
         .history-date { font-weight: 800; color: #2d3748; font-size: 0.95rem; }
-        .history-toggle-row { display:flex; justify-content:space-between; align-items:center; gap:10px; padding:15px; }
-        .history-chevron { font-size:1rem; color:#718096; font-weight:900; min-width:22px; text-align:center; }
-        .history-summary { font-size: 0.85rem; color: #718096; display:none; padding:0 15px 15px 15px; border-top:1px dashed #e2e8f0; background:rgba(255,255,255,0.55); }
-        .history-summary.expanded { display:block; }
+        details.history-item summary.history-toggle-row { display:flex; justify-content:space-between; align-items:center; gap:10px; padding:15px; list-style:none; outline:none; user-select:none; }
+        details.history-item summary.history-toggle-row::-webkit-details-marker { display:none; }
+        details.history-item summary.history-toggle-row::after { content:'▼'; font-size:0.8rem; color:#cbd5e0; transition: transform 0.3s ease; flex:0 0 auto; }
+        details.history-item[open] summary.history-toggle-row::after { transform: rotate(180deg); }
+        details.history-item[open] summary.history-toggle-row { border-bottom:1px dashed #e2e8f0; }
+        .history-summary { font-size: 0.85rem; color: #718096; padding:12px 15px 15px 15px; background:rgba(255,255,255,0.55); }
         .history-detail-btn { margin-top:10px; border:none; border-radius:10px; padding:8px 12px; background:var(--primary-color); color:white; font-weight:800; cursor:pointer; }
         .history-pagination { display:flex; justify-content:center; align-items:center; gap:12px; margin-top:12px; font-size:0.85rem; color:#718096; }
         .history-page-btn { border:1px solid #e2e8f0; background:#fff; color:#4a5568; border-radius:10px; padding:8px 12px; font-size:1rem; font-weight:900; cursor:pointer; min-width:42px; }
@@ -195,10 +197,12 @@
             <div class="input-group">
                 <label>드시는 술 종류</label>
                 <select id="startDrinkType">
-                    <option value="4.5">맥주 (4.5%)</option>
-                    <option value="16.5">소주 (16.5%)</option>
-                    <option value="13.0">와인 (13%)</option>
-                    <option value="40.0">위스키 (40%)</option>
+                    <option value="4.5" data-default-volume="500">맥주 (4.5%)</option>
+                    <option value="16.5" data-default-volume="50">소주 (16.5%)</option>
+                    <option value="6.5" data-default-volume="250">막걸리 (6.5%)</option>
+                    <option value="7.4" data-default-volume="200">소맥 (7.4%)</option>
+                    <option value="13.0" data-default-volume="500">와인 (13%)</option>
+                    <option value="40.0" data-default-volume="500">위스키 (40%)</option>
                 </select>
             </div>
 
@@ -250,10 +254,12 @@
             <div class="input-group">
                 <label>드시는 술 종류</label>
                 <select id="drinkType">
-                    <option value="4.5">맥주 (4.5%)</option>
-                    <option value="16.5">소주 (16.5%)</option>
-                    <option value="13.0">와인 (13%)</option>
-                    <option value="40.0">위스키 (40%)</option>
+                    <option value="4.5" data-default-volume="500">맥주 (4.5%)</option>
+                    <option value="16.5" data-default-volume="50">소주 (16.5%)</option>
+                    <option value="6.5" data-default-volume="250">막걸리 (6.5%)</option>
+                    <option value="7.4" data-default-volume="200">소맥 (7.4%)</option>
+                    <option value="13.0" data-default-volume="500">와인 (13%)</option>
+                    <option value="40.0" data-default-volume="500">위스키 (40%)</option>
                 </select>
             </div>
             
@@ -437,9 +443,9 @@
     });
 
     const APP_VERSION = Object.freeze({
-        version: 'v2026.06.06-15',
-        updatedAt: '2026-06-06 KST',
-        note: '실시간 값 강조, 분석/목록 접기, 평균 음주 간격 안내 추가'
+        version: 'v2026.06.07-01',
+        updatedAt: '2026-06-07 KST',
+        note: '과거 기록 접기 UI, 시작 술 기본 용량, 기록 5개 페이지네이션 반영'
     });
 
     const versionEl = document.getElementById('appVersionText');
@@ -459,7 +465,7 @@
     let pastSessionsData = [];
     let activeAnalysisUnlocked = false;
     let historyCurrentPage = 0;
-    const HISTORY_PAGE_SIZE = 10;
+    const HISTORY_PAGE_SIZE = 5;
     const RECOMMENDED_DRINK_INTERVAL_MINUTES = 40;
     const collapsibleSectionState = {
         activeAnalysisSection: true,
@@ -681,6 +687,32 @@
             drinkName: typeSelect.options[typeSelect.selectedIndex].text
         };
     }
+
+    function syncDrinkVolumeToSelectedType(typeSelectId, volumeInputId) {
+        const typeSelect = document.getElementById(typeSelectId);
+        const volumeInput = document.getElementById(volumeInputId);
+        if (!typeSelect || !volumeInput) return;
+
+        const selectedOption = typeSelect.options[typeSelect.selectedIndex];
+        const defaultVolume = selectedOption?.dataset?.defaultVolume;
+        if (defaultVolume) volumeInput.value = defaultVolume;
+    }
+
+    function initializeDrinkVolumeAutoFill() {
+        [
+            ['startDrinkType', 'startDrinkVolume'],
+            ['drinkType', 'drinkVolume']
+        ].forEach(([typeSelectId, volumeInputId]) => {
+            const typeSelect = document.getElementById(typeSelectId);
+            if (!typeSelect) return;
+            typeSelect.addEventListener('change', () => syncDrinkVolumeToSelectedType(typeSelectId, volumeInputId));
+        });
+
+        syncDrinkVolumeToSelectedType('startDrinkType', 'startDrinkVolume');
+        syncDrinkVolumeToSelectedType('drinkType', 'drinkVolume');
+    }
+
+    initializeDrinkVolumeAutoFill();
 
     function calculateDrinkMetrics(gender, weight, abv, volume) {
         const r = gender === 'male' ? 0.86 : 0.64;
@@ -1310,18 +1342,17 @@
                 : '계산 전';
             
             html += `
-                <div class="history-item" onclick="toggleHistorySummary(${globalIndex})">
-                    <div class="history-toggle-row">
+                <details class="history-item">
+                    <summary class="history-toggle-row">
                         <div class="history-date">${dateStr} 세션 <span style="font-size:0.75rem; color:#a0aec0; font-weight:normal;">(${statusStr})</span></div>
-                        <div class="history-chevron" id="historyChevron_${globalIndex}">⌄</div>
-                    </div>
-                    <div class="history-summary" id="historySummary_${globalIndex}">
+                    </summary>
+                    <div class="history-summary">
                         총 ${totalDrinks}회 / 섭취 알코올 ${totalAlcohol}g<br>
                         최고 도달 농도: <b>${maxBac}%</b><br>
                         세션 길이: <b>${durationText}</b><br>
                         <button class="history-detail-btn" onclick="event.stopPropagation(); viewHistory('${data.id}')">상세 보기</button>
                     </div>
-                </div>
+                </details>
             `;
         });
 
@@ -1338,13 +1369,8 @@
         container.innerHTML = html;
     }
 
-    window.toggleHistorySummary = function(globalIndex) {
-        const summaryEl = document.getElementById(`historySummary_${globalIndex}`);
-        const chevronEl = document.getElementById(`historyChevron_${globalIndex}`);
-        if (!summaryEl) return;
-        const isOpen = summaryEl.classList.toggle('expanded');
-        if (chevronEl) chevronEl.innerText = isOpen ? '⌃' : '⌄';
-    };
+    // 과거 버전의 inline 호출이 남아 있어도 오류가 나지 않도록 유지합니다.
+    window.toggleHistorySummary = function() {};
 
     window.changeHistoryPage = function(delta) {
         const totalPages = Math.max(1, Math.ceil(pastSessionsData.length / HISTORY_PAGE_SIZE));
@@ -1547,8 +1573,8 @@
             document.getElementById('setupCard').style.display = 'block';
             document.getElementById('activeCard').style.display = 'none';
             document.getElementById('historyCard').style.display = 'none';
-            document.getElementById('drinkVolume').value = '500';
-            document.getElementById('startDrinkVolume').value = '500';
+            syncDrinkVolumeToSelectedType('drinkType', 'drinkVolume');
+            syncDrinkVolumeToSelectedType('startDrinkType', 'startDrinkVolume');
             document.getElementById('preDrinkBacResult').style.display = 'none';
             
             document.getElementById('mainControlArea').style.display = 'none';
@@ -1845,8 +1871,8 @@
             if(isFinal) {
                 if(!isSilent) alert("음주 세션이 성공적으로 기록 및 종료되었습니다.");
                 resetLocalSessionState();
-                document.getElementById('drinkVolume').value = '500';
-                document.getElementById('startDrinkVolume').value = '500';
+                syncDrinkVolumeToSelectedType('drinkType', 'drinkVolume');
+                syncDrinkVolumeToSelectedType('startDrinkType', 'startDrinkVolume');
                 document.getElementById('preDrinkBacResult').style.display = 'none';
                 document.getElementById('activeCard').style.display = 'none';
                 document.getElementById('historyCard').style.display = 'none';
