@@ -151,6 +151,16 @@
         details.history-item[open] summary.history-toggle-row::after { transform: rotate(180deg); }
         details.history-item[open] summary.history-toggle-row { border-bottom:1px dashed #e2e8f0; }
         .history-summary { font-size: 0.85rem; color: #718096; padding:12px 15px 15px 15px; background:rgba(255,255,255,0.55); }
+        .history-summary-lines { line-height:1.55; }
+        .history-who-alcohol-panel { margin:11px 0 8px 0; padding:10px 10px 9px; background:#ffffff; border-style:dashed; }
+        .history-who-alcohol-panel .who-alcohol-top { font-size:0.75rem; flex-wrap:wrap; align-items:flex-start; }
+        .history-who-alcohol-panel .who-alcohol-status { font-size:0.75rem; }
+        .history-who-alcohol-panel .who-alcohol-track { height:14px; }
+        .history-who-alcohol-panel .who-alcohol-mid-marker { top:-4px; bottom:-4px; }
+        .history-who-alcohol-panel .who-alcohol-mid-label { top:18px; font-size:0.64rem; }
+        .history-who-alcohol-panel .who-alcohol-scale { margin-top:17px; font-size:0.64rem; }
+        .history-who-alcohol-panel .who-alcohol-detail { font-size:0.7rem; }
+        .history-who-ratio { display:inline-block; margin-left:4px; color:var(--primary-color); font-weight:900; font-variant-numeric:tabular-nums; }
         .history-detail-btn { margin-top:10px; border:none; border-radius:10px; padding:8px 12px; background:var(--primary-color); color:white; font-weight:800; cursor:pointer; }
         .history-pagination { display:flex; justify-content:center; align-items:center; gap:12px; margin-top:12px; font-size:0.85rem; color:#718096; }
         .history-page-btn { border:1px solid #e2e8f0; background:#fff; color:#4a5568; border-radius:10px; padding:8px 12px; font-size:1rem; font-weight:900; cursor:pointer; min-width:42px; }
@@ -560,9 +570,9 @@
     });
 
     const APP_VERSION = Object.freeze({
-        version: 'v2026.06.07-06',
+        version: 'v2026.06.07-07',
         updatedAt: '2026-06-07 KST',
-        note: '경고 수치 강조, 잔별 음주 완료 전환, 완료 후 BAC 반영'
+        note: '과거 기록 WHO 기준 알코올 섭취량 progress, userGender/userWeight 기준 반영'
     });
 
     const versionEl = document.getElementById('appVersionText');
@@ -591,6 +601,11 @@
     const WHO_DAILY_REFERENCE_GRAMS_BY_GENDER = Object.freeze({
         male: WHO_STANDARD_DRINK_GRAMS * 4,
         female: WHO_STANDARD_DRINK_GRAMS * 2
+    });
+    // 세션별 userGender/userWeight를 기준으로 progress 비교선을 맞추기 위한 앱 내부 체중 보정 기준입니다.
+    const WHO_REFERENCE_BASE_WEIGHT_KG_BY_GENDER = Object.freeze({
+        male: 70,
+        female: 60
     });
     const collapsibleSectionState = {
         activeAnalysisSection: true,
@@ -1271,13 +1286,30 @@
         }, 0);
     }
 
-    function getWhoDailyReferenceGrams(gender = null) {
-        const selectedGender = gender || document.getElementById('userGender')?.value || 'male';
-        return WHO_DAILY_REFERENCE_GRAMS_BY_GENDER[selectedGender] || WHO_DAILY_REFERENCE_GRAMS_BY_GENDER.male;
+    function normalizeGender(gender = null) {
+        return gender === 'female' ? 'female' : 'male';
+    }
+
+    function getNumericWeight(weight = null) {
+        const fallbackWeight = parseFloat(document.getElementById('userWeight')?.value) || Number(userProfile?.weight) || 0;
+        const parsed = weight === null || weight === undefined || weight === ''
+            ? fallbackWeight
+            : parseFloat(weight);
+        return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+    }
+
+    function getWhoDailyReferenceGrams(gender = null, weight = null) {
+        const selectedGender = normalizeGender(gender || document.getElementById('userGender')?.value || userProfile?.gender || 'male');
+        const baseGrams = WHO_DAILY_REFERENCE_GRAMS_BY_GENDER[selectedGender] || WHO_DAILY_REFERENCE_GRAMS_BY_GENDER.male;
+        const baseWeight = WHO_REFERENCE_BASE_WEIGHT_KG_BY_GENDER[selectedGender] || WHO_REFERENCE_BASE_WEIGHT_KG_BY_GENDER.male;
+        const selectedWeight = getNumericWeight(weight);
+        if (!selectedWeight || !baseWeight) return baseGrams;
+        const weightFactor = Math.min(Math.max(selectedWeight / baseWeight, 0.75), 1.25);
+        return Math.max(WHO_STANDARD_DRINK_GRAMS, baseGrams * weightFactor);
     }
 
     function getGenderLabel(gender = null) {
-        const selectedGender = gender || document.getElementById('userGender')?.value || 'male';
+        const selectedGender = normalizeGender(gender || document.getElementById('userGender')?.value || userProfile?.gender || 'male');
         return selectedGender === 'female' ? '여성' : '남성';
     }
 
@@ -1291,9 +1323,9 @@
             .sort((a, b) => getDrinkTimeMs(a) - getDrinkTimeMs(b));
         const consumedAlcoholGrams = validDrinks.reduce((sum, d) => sum + (Number(d.alcoholGrams) || 0), 0);
         const absorbedAlcoholGrams = calculateAbsorbedAlcoholGramsAtTime(validDrinks, nowMs);
-        const gender = document.getElementById('userGender')?.value || 'male';
-        const weight = parseFloat(document.getElementById('userWeight')?.value) || 0;
-        const referenceGrams = getWhoDailyReferenceGrams(gender);
+        const gender = normalizeGender(document.getElementById('userGender')?.value || userProfile?.gender || 'male');
+        const weight = getNumericWeight();
+        const referenceGrams = getWhoDailyReferenceGrams(gender, weight);
         const ratio = referenceGrams > 0 ? consumedAlcoholGrams / referenceGrams : 0;
         const absorbedRatio = referenceGrams > 0 ? absorbedAlcoholGrams / referenceGrams : 0;
         const progressPercent = clampPercent(ratio * 50);
@@ -1303,7 +1335,7 @@
         let statusLabel = '미달';
         let statusIcon = '🟢';
         if (Math.abs(diffGrams) < 0.05) {
-            statusLabel = '기준 도달';
+            statusLabel = '적정량';
             statusIcon = '🟡';
         } else if (diffGrams > 0) {
             statusLabel = '초과';
@@ -1326,6 +1358,77 @@
             genderLabel: getGenderLabel(gender),
             weight
         };
+    }
+
+    function getHistoryAlcoholIntakeComparison(sessionData = {}) {
+        const sessionDrinks = Array.isArray(sessionData.drinksList) ? sessionData.drinksList : [];
+        const totalFromDrinks = sessionDrinks.reduce((sum, d) => sum + (Number(d?.alcoholGrams) || 0), 0);
+        const savedTotal = Number(sessionData.totalAlcoholGrams);
+        const consumedAlcoholGrams = totalFromDrinks > 0
+            ? totalFromDrinks
+            : (Number.isFinite(savedTotal) && savedTotal > 0 ? savedTotal : 0);
+        const rawGender = String(sessionData.gender || sessionData.userGender || userProfile?.gender || document.getElementById('userGender')?.value || 'male').toLowerCase();
+        const gender = normalizeGender(rawGender === 'female' || rawGender === '여성' ? 'female' : 'male');
+        const weight = getNumericWeight(sessionData.weight ?? sessionData.userWeight ?? userProfile?.weight ?? document.getElementById('userWeight')?.value);
+        const referenceGrams = getWhoDailyReferenceGrams(gender, weight);
+        const ratio = referenceGrams > 0 ? consumedAlcoholGrams / referenceGrams : 0;
+        const progressPercent = clampPercent(ratio * 50);
+        const diffGrams = consumedAlcoholGrams - referenceGrams;
+
+        let statusLabel = '미달';
+        let statusIcon = '🟢';
+        if (Math.abs(diffGrams) < 0.05) {
+            statusLabel = '적정';
+            statusIcon = '🟡';
+        } else if (diffGrams > 0) {
+            statusLabel = '초과';
+            statusIcon = '🔴';
+        }
+
+        return {
+            consumedAlcoholGrams,
+            referenceGrams,
+            ratio,
+            progressPercent,
+            diffGrams,
+            statusLabel,
+            statusIcon,
+            gender,
+            genderLabel: getGenderLabel(gender),
+            weight
+        };
+    }
+
+    function buildHistoryWhoAlcoholSummaryHTML(sessionData = {}) {
+        const status = getHistoryAlcoholIntakeComparison(sessionData);
+        const absDiffText = `${Math.abs(status.diffGrams).toFixed(1)}g`;
+        const diffLabel = status.diffGrams > 0
+            ? `+${absDiffText}`
+            : (Math.abs(status.diffGrams) < 0.05 ? '±0.0g' : `-${absDiffText}`);
+        const fillClass = status.diffGrams > 0
+            ? 'is-over'
+            : (status.consumedAlcoholGrams <= 0 ? 'is-neutral' : '');
+        const weightText = status.weight > 0 ? `, ${status.weight}kg` : '';
+        const ratioText = `${Math.round(status.ratio * 100)}%`;
+
+        return `
+                        <div class="who-alcohol-panel history-who-alcohol-panel" aria-label="과거 세션 WHO 기준 대비 알코올 섭취량">
+                            <div class="who-alcohol-top">
+                                <span>WHO 기준 1일 알코올 섭취량</span>
+                                <span class="who-alcohol-status">${status.statusIcon} ${status.statusLabel} <b>${diffLabel}</b></span>
+                            </div>
+                            <div class="who-alcohol-track" aria-label="WHO 기준 대비 세션 알코올 섭취량">
+                                <div class="who-alcohol-fill ${fillClass}" style="width:${status.progressPercent}%;"></div>
+                                <div class="who-alcohol-mid-marker"></div>
+                                <div class="who-alcohol-mid-label">적정량</div>
+                            </div>
+                            <div class="who-alcohol-scale"><span>0g</span><span>적정량 ${status.referenceGrams.toFixed(0)}g = 50%</span><span>2배+</span></div>
+                            <div class="who-alcohol-detail">
+                                세션 섭취 <b>${status.consumedAlcoholGrams.toFixed(1)}g</b> / 적정량 <b>${status.referenceGrams.toFixed(0)}g</b>
+                                <span class="history-who-ratio">기준 대비 ${ratioText}</span><br>
+                                ${status.genderLabel}${weightText} 기준 · 적정량과 같으면 progress <b>50%</b> · 현재 progress <b>${status.progressPercent.toFixed(0)}%</b>
+                            </div>
+                        </div>`;
     }
 
     function updateWhoAlcoholIntakePanel(nowMs = Date.now(), targetDrinks = drinksList) {
@@ -1933,7 +2036,9 @@
             const dateStr = startDate.toLocaleDateString('ko-KR', { year:'numeric', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
             const totalDrinks = data.drinksList ? data.drinksList.length : 0;
             const statusStr = data.isFinished ? "종료됨" : "중단됨";
-            const totalAlcohol = (Number(data.totalAlcoholGrams) || 0).toFixed(1);
+            const historyAlcoholStatus = getHistoryAlcoholIntakeComparison(data);
+            const totalAlcohol = historyAlcoholStatus.consumedAlcoholGrams.toFixed(1);
+            const historyWhoAlcoholSummaryHtml = buildHistoryWhoAlcoholSummaryHTML(data);
             const maxBac = (Number(data.maxBac) || 0).toFixed(3);
             const durationText = data.endTime && data.startTime
                 ? `${Math.max(0, ((toMs(data.endTime) - toMs(data.startTime)) / 3600000)).toFixed(1)}시간`
@@ -1945,9 +2050,12 @@
                         <div class="history-date">${dateStr} 세션 <span style="font-size:0.75rem; color:#a0aec0; font-weight:normal;">(${statusStr})</span></div>
                     </summary>
                     <div class="history-summary">
-                        총 ${totalDrinks}회 / 섭취 알코올 ${totalAlcohol}g<br>
-                        최고 도달 농도: <b>${maxBac}%</b><br>
-                        세션 길이: <b>${durationText}</b><br>
+                        <div class="history-summary-lines">
+                            총 ${totalDrinks}회 / 섭취 알코올 ${totalAlcohol}g<br>
+                            최고 도달 농도: <b>${maxBac}%</b><br>
+                            세션 길이: <b>${durationText}</b>
+                        </div>
+                        ${historyWhoAlcoholSummaryHtml}
                         <button class="history-detail-btn" onclick="event.stopPropagation(); viewHistory('${data.id}')">상세 보기</button>
                     </div>
                 </details>
