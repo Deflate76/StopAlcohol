@@ -164,6 +164,17 @@
         .drink-warning-pace { margin-top:12px; background:#f8fafc; }
         .drink-warning-pace .who-alcohol-panel { display:block !important; }
         .drink-warning-note { margin-top:10px; color:#718096; font-size:0.75rem; line-height:1.45; word-break:keep-all; }
+        .drink-warning-checkin { margin-top:12px; padding:12px; background:#ffffff; border:1px solid #e2e8f0; border-radius:14px; box-shadow:0 2px 8px rgba(0,0,0,0.025); }
+        .drink-warning-checkin-title { font-size:0.86rem; color:var(--text-dark); font-weight:900; margin-bottom:4px; display:flex; align-items:center; gap:6px; }
+        .drink-warning-checkin-desc { font-size:0.73rem; color:#718096; line-height:1.45; word-break:keep-all; margin-bottom:10px; }
+        .warning-scale-row { margin-top:11px; }
+        .warning-scale-label { display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:0.8rem; color:#4a5568; font-weight:900; margin-bottom:7px; }
+        .warning-scale-value { color:var(--primary-color); font-variant-numeric:tabular-nums; white-space:nowrap; }
+        .warning-range { -webkit-appearance:none; appearance:none; width:100%; height:8px; border-radius:999px; background:linear-gradient(to right, var(--primary-color) 0%, var(--primary-color) var(--range-percent, 44.44%), #e2e8f0 var(--range-percent, 44.44%), #e2e8f0 100%); outline:none; margin:6px 0 4px 0; }
+        .warning-range::-webkit-slider-thumb { -webkit-appearance:none; appearance:none; width:22px; height:22px; border-radius:50%; background:#fff; border:3px solid var(--primary-color); box-shadow:0 2px 5px rgba(0,0,0,0.18); cursor:pointer; }
+        .warning-range::-moz-range-thumb { width:16px; height:16px; border-radius:50%; background:#fff; border:3px solid var(--primary-color); box-shadow:0 2px 5px rgba(0,0,0,0.18); cursor:pointer; }
+        .warning-scale-minmax { display:flex; justify-content:space-between; color:#94a3b8; font-size:0.68rem; font-weight:800; }
+        .drink-checkin-line { margin-top:4px; color:#4a5568; }
         .modal-btn-danger { background: var(--danger-color); color:white; }
         .modal-btn-danger:active { filter:brightness(0.9); }
         .modal-title { font-size: 1.2rem; font-weight: 800; margin-bottom: 10px; color: var(--text-dark); display:flex; align-items:center; gap:8px;}
@@ -491,7 +502,27 @@
         </div>
         <div id="drinkWarningMessageList" class="drink-warning-list"></div>
         <div id="drinkWarningPaceSnapshot"></div>
-        <div class="drink-warning-note">확인을 누르면 현재 입력한 술이 진행 중 세션에 추가됩니다.</div>
+        <div class="drink-warning-checkin" id="drinkWarningCheckin">
+            <div class="drink-warning-checkin-title"><span>🧠</span><span>지금 상태 체크</span></div>
+            <div class="drink-warning-checkin-desc">아래 값은 이 추가잔 기록에 함께 저장되어, 나중에 어떤 상태에서 잔을 시작했는지 돌아볼 수 있습니다.</div>
+            <div class="warning-scale-row">
+                <label class="warning-scale-label" for="drinkWarningMoodInput">
+                    <span>현재 기분</span>
+                    <span class="warning-scale-value"><span id="drinkWarningMoodValue">5</span>/10</span>
+                </label>
+                <input class="warning-range" type="range" id="drinkWarningMoodInput" min="1" max="10" value="5" oninput="updateDrinkWarningScaleValue('drinkWarningMoodInput', 'drinkWarningMoodValue')">
+                <div class="warning-scale-minmax"><span>1 낮음</span><span>10 좋음</span></div>
+            </div>
+            <div class="warning-scale-row">
+                <label class="warning-scale-label" for="drinkWarningCravingInput">
+                    <span>다음 잔 갈망 정도</span>
+                    <span class="warning-scale-value"><span id="drinkWarningCravingValue">5</span>/10</span>
+                </label>
+                <input class="warning-range" type="range" id="drinkWarningCravingInput" min="1" max="10" value="5" oninput="updateDrinkWarningScaleValue('drinkWarningCravingInput', 'drinkWarningCravingValue')">
+                <div class="warning-scale-minmax"><span>1 낮음</span><span>10 강함</span></div>
+            </div>
+        </div>
+        <div class="drink-warning-note">확인을 누르면 현재 입력한 술과 지금 상태 체크 값이 진행 중 세션에 추가됩니다.</div>
         <div class="modal-actions">
             <button class="modal-btn modal-btn-cancel" type="button" onclick="closeDrinkWarningModal()">취소</button>
             <button class="modal-btn modal-btn-danger" type="button" onclick="confirmPendingDrinkAddition()">그래도 시작</button>
@@ -525,9 +556,9 @@
     });
 
     const APP_VERSION = Object.freeze({
-        version: 'v2026.06.07-04',
+        version: 'v2026.06.07-05',
         updatedAt: '2026-06-07 KST',
-        note: '상단 설명 모달화, 진행 UI 압축, 커스텀 추가 음주 경고 팝업 반영'
+        note: '추가 음주 경고 팝업 내 기분·다음 잔 갈망 체크 기록 반영'
     });
 
     const versionEl = document.getElementById('appVersionText');
@@ -1366,6 +1397,62 @@
         `;
     }
 
+    function clampScoreToTen(value, fallback = 5) {
+        const parsed = parseInt(value, 10);
+        if (!Number.isFinite(parsed)) return fallback;
+        return Math.min(Math.max(parsed, 1), 10);
+    }
+
+    function setDrinkWarningScaleVisual(input, outputId) {
+        if (!input) return;
+        const min = Number(input.min) || 1;
+        const max = Number(input.max) || 10;
+        const value = clampScoreToTen(input.value, 5);
+        input.value = String(value);
+        const percent = max > min ? ((value - min) / (max - min)) * 100 : 0;
+        input.style.setProperty('--range-percent', `${percent}%`);
+        const output = document.getElementById(outputId);
+        if (output) output.innerText = String(value);
+    }
+
+    window.updateDrinkWarningScaleValue = function(inputId, outputId) {
+        setDrinkWarningScaleVisual(document.getElementById(inputId), outputId);
+    };
+
+    function resetDrinkWarningCheckinInputs() {
+        const moodInput = document.getElementById('drinkWarningMoodInput');
+        const cravingInput = document.getElementById('drinkWarningCravingInput');
+        if (moodInput) moodInput.value = '5';
+        if (cravingInput) cravingInput.value = '5';
+        setDrinkWarningScaleVisual(moodInput, 'drinkWarningMoodValue');
+        setDrinkWarningScaleVisual(cravingInput, 'drinkWarningCravingValue');
+    }
+
+    function collectDrinkWarningCheckin() {
+        return {
+            currentMoodScore: clampScoreToTen(document.getElementById('drinkWarningMoodInput')?.value, 5),
+            nextDrinkCravingScore: clampScoreToTen(document.getElementById('drinkWarningCravingInput')?.value, 5),
+            warningCheckinAt: new Date().toISOString(),
+            warningCheckinAtMs: Date.now()
+        };
+    }
+
+    function attachDrinkWarningCheckinToDrink(drink) {
+        if (!drink) return drink;
+        Object.assign(drink, collectDrinkWarningCheckin());
+        return drink;
+    }
+
+    function getDrinkWarningCheckinLine(drink) {
+        const mood = Number(drink?.currentMoodScore);
+        const craving = Number(drink?.nextDrinkCravingScore);
+        const parts = [];
+        if (Number.isFinite(mood) && mood >= 1 && mood <= 10) parts.push(`현재 기분 <b>${mood}/10</b>`);
+        if (Number.isFinite(craving) && craving >= 1 && craving <= 10) parts.push(`다음 잔 갈망 <b>${craving}/10</b>`);
+        if (parts.length === 0) return '';
+        return `<span class="drink-checkin-line">• 추가 전 상태 체크: ${parts.join(' · ')}</span><br>`;
+    }
+
     function openDrinkWarningModal(warning) {
         pendingDrinkToAdd = warning.newDrink;
         const listEl = document.getElementById('drinkWarningMessageList');
@@ -1383,6 +1470,7 @@
             `).join('');
         }
         if (snapshotEl) snapshotEl.innerHTML = buildDrinkWarningPaceSnapshotHTML(warning);
+        resetDrinkWarningCheckinInputs();
         const modal = document.getElementById('drinkWarningModal');
         if (modal) modal.style.display = 'flex';
     }
@@ -1408,7 +1496,7 @@
             closeDrinkWarningModal();
             return;
         }
-        const drinkToCommit = pendingDrinkToAdd;
+        const drinkToCommit = attachDrinkWarningCheckinToDrink(pendingDrinkToAdd);
         pendingDrinkToAdd = null;
         const modal = document.getElementById('drinkWarningModal');
         if (modal) modal.style.display = 'none';
@@ -2072,6 +2160,7 @@
             const priorAlcoholLine = isInitialEntry
                 ? ''
                 : `• 직전 계산에 반영된 누적 알코올: <b>${priorAlcoholGrams.toFixed(1)}g</b><br>`;
+            const checkinLine = getDrinkWarningCheckinLine(d);
 
             const isLatestActiveDrink = !isHistory && i === targetList.length - 1;
             const drinkItemClass = !isHistory
@@ -2092,6 +2181,7 @@
                     <div class="drink-item-time">음주 시작 시각: ${startDrinkStr}</div>
                     <div class="drink-item-stats">
                         ${priorAlcoholLine}
+                        ${checkinLine}
                         • 섭취 알코올 (해당 술): <b>${grams.toFixed(1)}g</b><br>
                         • 이 술의 BAC 증가 예상치: <b>${contribution.toFixed(3)}%</b><br>
                         • <b>이 술 반영 후 예상 최고 BAC: <span style="color:var(--danger-color);">${exactMaxBac.toFixed(3)}%</span></b><br>
@@ -2356,6 +2446,7 @@
                 const priorAlcoholLine = isInitialEntry
                     ? ''
                     : `• 직전 계산에 반영된 누적 알코올: <b>${priorAlcoholGrams.toFixed(1)}g</b><br>`;
+                const checkinLine = getDrinkWarningCheckinLine(d);
 
                 html += `
                     <div class="drink-item">
@@ -2365,6 +2456,7 @@
                         <div class="drink-item-time">음주 시작 시각: ${startDrinkStr}</div>
                         <div class="drink-item-stats">
                             ${priorAlcoholLine}
+                            ${checkinLine}
                             • 섭취 알코올 (해당 술): <b>${grams.toFixed(1)}g</b><br>
                             • 이 술의 BAC 증가 예상치: <b>${contribution.toFixed(3)}%</b><br>
                             • <b>이 술 반영 후 예상 최고 BAC: <span style="color:var(--danger-color);">${exactMaxBac.toFixed(3)}%</span></b><br>
