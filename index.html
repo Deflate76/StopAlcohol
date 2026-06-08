@@ -240,7 +240,7 @@
 <div class="container">
     <h1>🚫 금주 서바이벌 리포트</h1>
     <button id="enablePushBtn" class="stat-btn" style="margin-bottom: 18px; border-color: var(--primary-color); color: var(--primary-color);">🔔 푸시 알림 허용</button>
-    <button id="sendTestPushBtn" class="stat-btn" style="margin-bottom: 18px; border-color: #9b59b6; color: #9b59b6;">🧪 나에게 테스트 푸시 보내기</button>
+    <button id="sendTestPushBtn" class="stat-btn" style="margin-bottom: 18px; border-color: #9b59b6; color: #9b59b6;">🧪 1분 뒤 테스트 푸시 보내기</button>
 
     <div id="loginArea">
         <p style="color: #666; font-size: 0.95rem; word-break: keep-all;">나만의 금주 기록을 안전하게 저장하고<br>여러 기기에서 확인하기 위해 로그인해 주세요.</p>
@@ -992,38 +992,38 @@
         enablePushBtn.addEventListener("click", enablePush);
     }
 
-    async function sendTestPushToMe() {
+    async function scheduleTestPushToMeAfterOneMinute() {
         if (!userId || !auth.currentUser) {
-            alert("테스트 푸시를 보내려면 먼저 Google 계정으로 로그인해 주세요.");
+            alert("테스트 푸시를 예약하려면 먼저 Google 계정으로 로그인해 주세요.");
             return;
         }
 
         try {
-            const sendTestPushFn = httpsCallable(functions, "sendTestPushToMe");
+            const scheduleTestPushFn = httpsCallable(functions, "scheduleTestPushToMe");
 
-            const result = await sendTestPushFn({
-                title: "AlcoholAway 테스트 알림",
-                body: "푸시 알림 테스트가 성공했습니다.",
+            const result = await scheduleTestPushFn({
+                delaySeconds: 60,
+                title: "AlcoholAway 1분 지연 테스트 알림",
+                body: "브라우저를 닫은 뒤에도 이 알림이 오면 백그라운드 푸시 테스트 성공입니다.",
                 url: "https://www.alcoholaway.com/"
             });
 
-            console.log("테스트 푸시 결과:", result.data);
+            console.log("1분 지연 테스트 푸시 예약 결과:", result.data);
 
             alert(
-                `테스트 푸시 발송 완료\n` +
-                `성공: ${result.data.success}\n` +
-                `실패: ${result.data.failure}\n` +
-                `총 토큰: ${result.data.total}`
+                `1분 뒤 테스트 푸시를 예약했습니다.\n` +
+                `예약 토큰 수: ${result.data.total || 0}\n\n` +
+                `이제 이 탭이나 브라우저를 닫고 1분 뒤 알림이 오는지 확인해 주세요.`
             );
         } catch (error) {
-            console.error("테스트 푸시 발송 실패:", error);
-            alert("테스트 푸시 발송 실패: " + error.message);
+            console.error("1분 지연 테스트 푸시 예약 실패:", error);
+            alert("1분 지연 테스트 푸시 예약 실패: " + error.message);
         }
     }
 
     const sendTestPushBtn = document.getElementById("sendTestPushBtn");
     if (sendTestPushBtn) {
-        sendTestPushBtn.addEventListener("click", sendTestPushToMe);
+        sendTestPushBtn.addEventListener("click", scheduleTestPushToMeAfterOneMinute);
     }
 
     onMessage(messaging, (payload) => {
