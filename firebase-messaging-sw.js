@@ -3,7 +3,7 @@ const DEFAULT_URL = "https://www.alcoholaway.com/";
 
 const ALLOWED_HOSTS = new Set([
   "www.alcoholaway.com",
-  "alcoholaway.com"
+  "alcoholaway.com",
 ]);
 
 function getSafeUrl(rawUrl) {
@@ -32,10 +32,9 @@ self.addEventListener("notificationclick", (event) => {
   event.waitUntil((async () => {
     const windowClients = await clients.matchAll({
       type: "window",
-      includeUncontrolled: true
+      includeUncontrolled: true,
     });
 
-    // 이미 alcoholaway 페이지가 열려 있으면 새 탭 대신 기존 탭을 포커스합니다.
     for (const client of windowClients) {
       try {
         const clientUrl = new URL(client.url);
@@ -61,7 +60,7 @@ firebase.initializeApp({
   projectId: "alcoholaway",
   storageBucket: "alcoholaway.firebasestorage.app",
   messagingSenderId: "1001199235857",
-  appId: "1:1001199235857:web:362c4aae36b44c7eae12b0"
+  appId: "1:1001199235857:web:362c4aae36b44c7eae12b0",
 });
 
 const messaging = firebase.messaging();
@@ -88,9 +87,12 @@ messaging.onBackgroundMessage((payload) => {
     body,
     icon: "/favicon.ico",
     badge: "/favicon.ico",
+    tag: "alcoholaway-push",
+    renotify: true,
+    requireInteraction: true,
     data: {
-      url
-    }
+      url,
+    },
   };
 
   self.registration.showNotification(title, options);
