@@ -930,8 +930,84 @@
     let pressTimer = null;
     let didLongPress = false;
 
-    // 웹 푸시 알림 등록
+    // 웹 푸시 알림 등록 및 토큰 자동 갱신
     const VAPID_PUBLIC_KEY = "BMc9QcT2PDdOul3lY0MnfyYrOu9DmHpyBDoZEy0luRP2yKU8fiLQAySoM4eyBUI-Ty6W8rCLZIlrnsNoGh_A1x0";
+
+    function updatePushButtonState() {
+        const enablePushBtn = document.getElementById("enablePushBtn");
+        if (!enablePushBtn || !("Notification" in window)) return;
+
+        if (Notification.permission === "granted") {
+            enablePushBtn.textContent = "🔔 푸시 알림 켜짐";
+            enablePushBtn.disabled = true;
+            enablePushBtn.style.opacity = "0.65";
+        } else if (Notification.permission === "denied") {
+            enablePushBtn.textContent = "🔕 브라우저 설정에서 알림 허용 필요";
+            enablePushBtn.disabled = true;
+            enablePushBtn.style.opacity = "0.65";
+        } else {
+            enablePushBtn.textContent = "🔔 푸시 알림 허용";
+            enablePushBtn.disabled = false;
+            enablePushBtn.style.opacity = "1";
+        }
+    }
+
+    async function getPushTokenFromBrowser() {
+        if (!("serviceWorker" in navigator)) {
+            throw new Error("이 브라우저는 Service Worker를 지원하지 않습니다.");
+        }
+
+        const swRegistration = await navigator.serviceWorker.register("./firebase-messaging-sw.js");
+
+        const token = await getToken(messaging, {
+            vapidKey: VAPID_PUBLIC_KEY,
+            serviceWorkerRegistration: swRegistration
+        });
+
+        if (!token) {
+            throw new Error("푸시 토큰을 가져오지 못했습니다.");
+        }
+
+        return token;
+    }
+
+    async function savePushTokenToFirestore(token, source = "manual") {
+        if (!userId || !auth.currentUser) {
+            throw new Error("로그인된 사용자가 없습니다.");
+        }
+
+        await setDoc(doc(db, "fcmTokens", token), {
+            token,
+            uid: userId,
+            email: auth.currentUser.email || null,
+            displayName: auth.currentUser.displayName || null,
+            userAgent: navigator.userAgent,
+            source,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+            lastSeenAt: serverTimestamp()
+        }, { merge: true });
+
+        console.log("FCM Token 저장/갱신 완료:", token);
+        return token;
+    }
+
+    async function refreshPushTokenIfAlreadyGranted() {
+        if (!("Notification" in window)) return;
+        if (Notification.permission !== "granted") {
+            updatePushButtonState();
+            return;
+        }
+        if (!userId || !auth.currentUser) return;
+
+        try {
+            const token = await getPushTokenFromBrowser();
+            await savePushTokenToFirestore(token, "auto-refresh");
+            updatePushButtonState();
+        } catch (error) {
+            console.error("자동 푸시 토큰 갱신 실패:", error);
+        }
+    }
 
     async function enablePush() {
         if (!userId || !auth.currentUser) {
@@ -944,43 +1020,20 @@
             return;
         }
 
-        if (!("serviceWorker" in navigator)) {
-            alert("이 브라우저는 Service Worker를 지원하지 않습니다.");
-            return;
-        }
-
         try {
             const permission = await Notification.requestPermission();
 
             if (permission !== "granted") {
+                updatePushButtonState();
                 alert("알림 권한이 허용되지 않았습니다.");
                 return;
             }
 
-            const swRegistration = await navigator.serviceWorker.register("./firebase-messaging-sw.js");
+            const token = await getPushTokenFromBrowser();
+            await savePushTokenToFirestore(token, "manual-enable");
 
-            const token = await getToken(messaging, {
-                vapidKey: VAPID_PUBLIC_KEY,
-                serviceWorkerRegistration: swRegistration
-            });
-
-            if (!token) {
-                alert("푸시 토큰을 가져오지 못했습니다.");
-                return;
-            }
-
-            await setDoc(doc(db, "fcmTokens", token), {
-                token,
-                uid: userId,
-                email: auth.currentUser.email || null,
-                displayName: auth.currentUser.displayName || null,
-                userAgent: navigator.userAgent,
-                createdAt: serverTimestamp(),
-                updatedAt: serverTimestamp()
-            }, { merge: true });
-
+            updatePushButtonState();
             alert("푸시 알림 등록 완료");
-            console.log("FCM Token:", token);
         } catch (error) {
             console.error("푸시 알림 등록 실패:", error);
             alert("푸시 알림 등록 실패: " + error.message);
@@ -992,39 +1045,54 @@
         enablePushBtn.addEventListener("click", enablePush);
     }
 
-    async function scheduleTestPushToMeAfterOneMinute() {
+    async function sendTestPushToMe() {
         if (!userId || !auth.currentUser) {
             alert("테스트 푸시를 예약하려면 먼저 Google 계정으로 로그인해 주세요.");
             return;
         }
 
-        try {
-            const scheduleTestPushFn = httpsCallable(functions, "scheduleTestPushToMe");
+        if (!("Notification" in window) || Notification.permission !== "granted") {
+            alert("먼저 푸시 알림을 허용해 주세요.");
+            return;
+        }
 
-            const result = await scheduleTestPushFn({
-                delaySeconds: 60,
-                title: "AlcoholAway 1분 지연 테스트 알림",
-                body: "브라우저를 닫은 뒤에도 이 알림이 오면 백그라운드 푸시 테스트 성공입니다.",
+        try {
+            // 버튼을 누를 때마다 최신 토큰을 먼저 저장합니다.
+            const token = await getPushTokenFromBrowser();
+            await savePushTokenToFirestore(token, "before-scheduled-test");
+
+            const sendTestPushFn = httpsCallable(functions, "scheduleTestPushToMe");
+
+            const result = await sendTestPushFn({
+                title: "AlcoholAway 1분 뒤 테스트 알림",
+                body: "브라우저를 닫아도 알림이 도착하는지 확인해 보세요.",
                 url: "https://www.alcoholaway.com/"
             });
 
-            console.log("1분 지연 테스트 푸시 예약 결과:", result.data);
+            console.log("1분 뒤 테스트 푸시 예약 결과:", result.data);
+
+            if (!result.data.scheduled) {
+                alert(result.data.message || "테스트 푸시 예약에 실패했습니다.");
+                return;
+            }
 
             alert(
                 `1분 뒤 테스트 푸시를 예약했습니다.\n` +
-                `예약 토큰 수: ${result.data.total || 0}\n\n` +
-                `이제 이 탭이나 브라우저를 닫고 1분 뒤 알림이 오는지 확인해 주세요.`
+                `토큰 수: ${result.data.tokenCount}\n\n` +
+                `이제 사이트 탭을 닫고 약 1분 뒤 알림이 오는지 확인하세요.`
             );
         } catch (error) {
-            console.error("1분 지연 테스트 푸시 예약 실패:", error);
-            alert("1분 지연 테스트 푸시 예약 실패: " + error.message);
+            console.error("1분 뒤 테스트 푸시 예약 실패:", error);
+            alert("1분 뒤 테스트 푸시 예약 실패: " + error.message);
         }
     }
 
     const sendTestPushBtn = document.getElementById("sendTestPushBtn");
     if (sendTestPushBtn) {
-        sendTestPushBtn.addEventListener("click", scheduleTestPushToMeAfterOneMinute);
+        sendTestPushBtn.addEventListener("click", sendTestPushToMe);
     }
+
+    updatePushButtonState();
 
     onMessage(messaging, (payload) => {
         console.log("포그라운드 메시지:", payload);
@@ -1190,6 +1258,7 @@
                 }
 
                 updateGreetingUI();
+                refreshPushTokenIfAlreadyGranted();
 
                 const q = query(collection(db, "users", userId, "challenges"), where("status", "==", "active"));
                 const snapshot = await getDocs(q);
@@ -1223,6 +1292,7 @@
             document.getElementById('loginArea').style.display = 'flex';
             document.getElementById('setupArea').style.display = 'none';
             document.getElementById('displayArea').style.display = 'none';
+            updatePushButtonState();
         }
     });
 
