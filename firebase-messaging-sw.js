@@ -2,13 +2,15 @@ importScripts("https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js
 importScripts("https://www.gstatic.com/firebasejs/10.13.2/firebase-messaging-compat.js");
 
 firebase.initializeApp({
-  apiKey: "기존 alcoholway apiKey",
+  apiKey:"AIzaSyBWDwueP3a0atxCqFIgqd96sgXc0EqYbEY",
   authDomain: "alcoholway.firebaseapp.com",
   projectId: "alcoholway",
   storageBucket: "alcoholway.appspot.com",
-  messagingSenderId: "기존 senderId",
-  appId: "기존 appId"
+  messagingSenderId: "1001199235857",
+  appId:  "1:1001199235857:web:362c4aae36b44c7eae12b0"
 });
+
+   
 
 const messaging = firebase.messaging();
 
