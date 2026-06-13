@@ -1,1 +1,388 @@
+<!--
+ * Copyright (c) 2026 Kim Jung-hoon (김정훈). All rights reserved.
+ * This project and its source code are the intellectual property of the author.
+ * Unauthorized copying, distribution, or modification is strictly prohibited.
+-->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>알콜의존성검사</title>
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="알콜의존성검사" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --danger-color: #e74c3c;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --bg-color: #f0f2f5;
+            --text-dark: #2d3748;
+        }
+        body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; text-align: center; padding: 15px; background: var(--bg-color); color: #333; line-height: 1.6; margin: 0; }
+        .container { max-width: 640px; width: 100%; margin: 0 auto; background: #fff; padding: 28px 20px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); box-sizing: border-box; }
+        h1 { font-size: 1.55rem; margin: 0 0 10px; color: var(--text-dark); letter-spacing: -0.5px; }
+        .subtitle { color: #718096; font-size: 0.92rem; word-break: keep-all; margin: 0 0 18px; }
+        .header-bar { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 18px; font-size: 0.9rem; color: #666; }
+        .user-box { text-align: left; min-width: 0; }
+        .user-name { display: block; font-weight: 800; color: var(--primary-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 330px; }
+        .back-btn { background: #f1f3f5; border: none; padding: 8px 12px; border-radius: 10px; font-weight: 800; cursor: pointer; color: #495057; white-space: nowrap; }
+        .info-box { background: #f8fbff; border: 1px solid #d7eafe; border-radius: 16px; padding: 15px; margin-bottom: 18px; text-align: left; color: #4a5568; font-size: 0.9rem; word-break: keep-all; }
+        .score-guide { display: grid; grid-template-columns: 1fr; gap: 8px; margin-top: 12px; }
+        .guide-chip { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 9px 10px; font-weight: 800; font-size: 0.86rem; }
+        .guide-normal { color: #2f855a; }
+        .guide-caution { color: #b7791f; }
+        .guide-danger { color: #c53030; }
+        .question-card { text-align: left; background: #fff; border: 1px solid #e2e8f0; border-radius: 18px; padding: 17px 15px; margin-bottom: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
+        .question-title { font-weight: 900; color: var(--text-dark); margin-bottom: 12px; word-break: keep-all; }
+        .q-number { color: var(--primary-color); margin-right: 5px; }
+        .option { display: flex; align-items: center; gap: 10px; padding: 10px 8px; border-radius: 12px; cursor: pointer; transition: background 0.15s; }
+        .option:hover { background: #f8fafc; }
+        .option input { transform: scale(1.15); accent-color: var(--primary-color); }
+        .option span { font-size: 0.95rem; color: #4a5568; }
+        .submit-btn { width: 100%; padding: 16px; font-size: 1.12rem; font-weight: 900; background: linear-gradient(135deg, #3498db, #2980b9); color: #fff; border: none; border-radius: 16px; cursor: pointer; box-shadow: 0 10px 20px rgba(52, 152, 219, 0.28); }
+        .submit-btn:disabled { opacity: 0.6; cursor: wait; }
+        .result-box { display: none; margin-top: 18px; padding: 18px; border-radius: 18px; border: 2px solid #e2e8f0; text-align: left; }
+        .result-title { font-size: 1.15rem; font-weight: 900; margin-bottom: 7px; }
+        .result-score { font-size: 2rem; font-weight: 900; margin: 10px 0; }
+        .history-box { margin-top: 24px; text-align: left; }
+        .history-box h3 { margin: 0 0 10px; font-size: 1.05rem; color: var(--text-dark); }
+        .history-item { background: #f8f9fa; border: 1px solid #e2e8f0; border-radius: 14px; padding: 12px; margin-bottom: 9px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+        .history-date { color: #718096; font-size: 0.82rem; }
+        .history-score { font-weight: 900; }
+        .loading { padding: 40px 0; color: #718096; font-weight: 800; }
+        footer { margin-top: 24px; text-align: center; font-size: 0.75rem; color: #9ca3af; }
+        @media (min-width: 560px) {
+            .score-guide { grid-template-columns: repeat(3, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="loadingArea" class="loading">로그인 상태를 확인하는 중입니다...</div>
+
+        <div id="appArea" style="display:none;">
+            <div class="header-bar">
+                <div class="user-box">
+                    <span class="user-name" id="userName">도전자님</span>
+                    <span style="font-size:0.78rem; color:#a0aec0;">검사 결과는 내 계정 DB에 저장됩니다.</span>
+                </div>
+                <button class="back-btn" onclick="location.href='index.html'">← 돌아가기</button>
+            </div>
+
+            <h1>🧪 알콜의존성검사</h1>
+            <p class="subtitle">아래 문항에 답하고 제출하기를 클릭하면 점수를 기초로 알코올 의존도를 확인할 수 있습니다.</p>
+
+            <div class="info-box">
+                이 검사는 자가점검용 선별 도구입니다. 의료적 진단을 대신하지 않으며, 높은 점수이거나 음주 조절이 어렵다면 전문가 상담을 권장합니다.
+                <div class="score-guide">
+                    <div class="guide-chip guide-normal">0~9점: 정상범위</div>
+                    <div class="guide-chip guide-caution">10~19점: 주의 / 위험음주군</div>
+                    <div class="guide-chip guide-danger">20점 이상: 위험 / 사용장애 가능성 높음</div>
+                </div>
+            </div>
+
+            <form id="dependencyForm"></form>
+            <button id="submitBtn" class="submit-btn" type="button">제출하고 DB에 저장하기</button>
+
+            <div id="resultBox" class="result-box">
+                <div class="result-title" id="resultTitle"></div>
+                <div class="result-score" id="resultScore"></div>
+                <div id="resultDesc" style="word-break:keep-all; color:#4a5568;"></div>
+                <div id="savedInfo" style="margin-top:10px; font-size:0.84rem; color:#718096;"></div>
+            </div>
+
+            <div class="history-box">
+                <h3>최근 검사 기록</h3>
+                <div id="historyList" style="color:#718096; font-size:0.9rem;">기록을 불러오는 중입니다...</div>
+            </div>
+        </div>
+    </div>
+
+    <footer>&copy; 2026 Alcoholaway.com All rights reserved.</footer>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBWDwueP3a0atxCqFIgqd96sgXc0EqYbEY",
+            authDomain: "alcoholaway.firebaseapp.com",
+            projectId: "alcoholaway",
+            storageBucket: "alcoholaway.firebasestorage.app",
+            messagingSenderId: "1001199235857",
+            appId: "1:1001199235857:web:362c4aae36b44c7eae12b0",
+            measurementId: "G-JBE26PCZMF"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        let currentUser = null;
+
+        const questions = [
+            {
+                id: "q1",
+                text: "얼마나 술을 자주 마십니까?",
+                options: [
+                    ["전혀 안마심", 0], ["월 1회 미만", 1], ["월 2~4회", 2], ["주 2~3회", 3], ["주 4회 이상", 4]
+                ]
+            },
+            {
+                id: "q2",
+                text: "술을 마시면 한번에 몇 잔 정도 마십니까?",
+                options: [
+                    ["전혀 안마심", 0], ["소주 1~2잔", 0], ["소주 3~4잔", 1], ["소주 5~6잔", 2], ["소주 7~9잔", 3], ["소주 10잔 이상", 4]
+                ]
+            },
+            {
+                id: "q3",
+                text: "한번에 소주 한 병 또는 맥주 4병 이상 마시는 경우는 얼마나 있습니까?",
+                options: [["전혀 없음", 0], ["월 1회 미만", 1], ["월 1회", 2], ["주 1회", 3], ["거의 매일", 4]]
+            },
+            {
+                id: "q4",
+                text: "지난 일년간 한번 술을 마시기 시작하면 멈출 수 없었던 때가 얼마나 자주 있었습니까?",
+                options: [["전혀 없음", 0], ["월 1회 미만", 1], ["월 1회", 2], ["주 1회", 3], ["거의 매일", 4]]
+            },
+            {
+                id: "q5",
+                text: "지난 일년간 평소 같으면 할 수 있던 일을 음주 때문에 하지 못한 적이 얼마나 자주 있었습니까?",
+                options: [["전혀 없음", 0], ["월 1회 미만", 1], ["월 1회", 2], ["주 1회", 3], ["거의 매일", 4]]
+            },
+            {
+                id: "q6",
+                text: "지난 일년간 술을 마신 다음날 해장술을 마신 적은 얼마나 자주 있습니까?",
+                options: [["전혀 없음", 0], ["월 1회 미만", 1], ["월 1회", 2], ["주 1회", 3], ["거의 매일", 4]]
+            },
+            {
+                id: "q7",
+                text: "지난 일년간 음주 후에 죄책감을 느끼거나 후회한 적이 얼마나 자주 있습니까?",
+                options: [["전혀 없음", 0], ["월 1회 미만", 1], ["월 1회", 2], ["주 1회", 3], ["거의 매일", 4]]
+            },
+            {
+                id: "q8",
+                text: "지난 일년간 음주 때문에 전날 밤에 있었던 일이 기억나지 않았던 적이 얼마나 자주 있었습니까?",
+                options: [["전혀 없음", 0], ["월 1회 미만", 1], ["월 1회", 2], ["주 1회", 3], ["거의 매일", 4]]
+            },
+            {
+                id: "q9",
+                text: "음주로 인해 자신이나 다른 사람을 다치게 한 적이 있습니까?",
+                options: [["없음", 0], ["있었지만, 지난 1년간에는 없었음", 2], ["지난 1년간 있었음", 4]]
+            },
+            {
+                id: "q10",
+                text: "친척이나 친구, 의사가 당신이 술 마시는 것을 걱정하거나 당신에게 술 끊기를 권유한 적이 있습니까?",
+                options: [["없음", 0], ["있었지만, 지난 1년간에는 없었음", 2], ["지난 1년간 있었음", 4]]
+            }
+        ];
+
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function renderQuestions() {
+            const form = document.getElementById("dependencyForm");
+            form.innerHTML = questions.map((q, index) => {
+                const optionsHtml = q.options.map(([label, score], optionIndex) => `
+                    <label class="option">
+                        <input type="radio" name="${q.id}" value="${score}" data-label="${escapeHtml(label)}" required>
+                        <span>${escapeHtml(label)}</span>
+                    </label>
+                `).join("");
+
+                return `
+                    <div class="question-card">
+                        <div class="question-title"><span class="q-number">Q ${index + 1}</span>${escapeHtml(q.text)}</div>
+                        ${optionsHtml}
+                    </div>
+                `;
+            }).join("");
+        }
+
+        function getResult(score) {
+            if (score >= 20) {
+                return {
+                    level: "danger",
+                    title: "위험: 알코올 사용장애 가능성이 높습니다",
+                    desc: "현재 점수는 위험 범위입니다. 혼자 버티기보다 의료기관, 중독관리통합지원센터, 정신건강 전문가와 상담해 보시는 것을 권장합니다.",
+                    color: "#c53030",
+                    bg: "#fff5f5",
+                    border: "#feb2b2"
+                };
+            }
+            if (score >= 10) {
+                return {
+                    level: "caution",
+                    title: "주의: 위험음주군에 해당합니다",
+                    desc: "음주 빈도와 양을 줄이고, 단주 또는 절주 계획을 구체적으로 세워 관리하는 것이 좋습니다.",
+                    color: "#b7791f",
+                    bg: "#fffaf0",
+                    border: "#fbd38d"
+                };
+            }
+            return {
+                level: "normal",
+                title: "정상범위입니다",
+                desc: "현재 점수는 정상범위입니다. 지금의 건강한 음주 습관 또는 단주 흐름을 계속 유지해 주세요.",
+                color: "#2f855a",
+                bg: "#f0fff4",
+                border: "#9ae6b4"
+            };
+        }
+
+        function collectAnswers() {
+            const answers = [];
+            let totalScore = 0;
+
+            for (const [index, q] of questions.entries()) {
+                const selected = document.querySelector(`input[name="${q.id}"]:checked`);
+                if (!selected) {
+                    alert(`Q ${index + 1} 문항에 답해 주세요.`);
+                    return null;
+                }
+                const score = parseInt(selected.value, 10);
+                totalScore += score;
+                answers.push({
+                    questionId: q.id,
+                    questionNumber: index + 1,
+                    question: q.text,
+                    answer: selected.dataset.label,
+                    score
+                });
+            }
+
+            return { answers, totalScore };
+        }
+
+        function showResult(score, result, checkedAtText, docId) {
+            const box = document.getElementById("resultBox");
+            box.style.display = "block";
+            box.style.background = result.bg;
+            box.style.borderColor = result.border;
+            document.getElementById("resultTitle").textContent = result.title;
+            document.getElementById("resultTitle").style.color = result.color;
+            document.getElementById("resultScore").textContent = `${score}점`;
+            document.getElementById("resultScore").style.color = result.color;
+            document.getElementById("resultDesc").textContent = result.desc;
+            document.getElementById("savedInfo").textContent = `검사 날짜: ${checkedAtText} · DB 저장 완료${docId ? ` (${docId})` : ""}`;
+            box.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+
+        async function loadHistory() {
+            if (!currentUser) return;
+            const historyList = document.getElementById("historyList");
+            historyList.textContent = "기록을 불러오는 중입니다...";
+
+            try {
+                const checksRef = collection(db, "users", currentUser.uid, "dependency_checks");
+                const historyQuery = query(checksRef, orderBy("checkedAtIso", "desc"), limit(5));
+                const snapshot = await getDocs(historyQuery);
+
+                if (snapshot.empty) {
+                    historyList.innerHTML = "아직 저장된 검사 기록이 없습니다.";
+                    return;
+                }
+
+                historyList.innerHTML = snapshot.docs.map(docSnap => {
+                    const data = docSnap.data();
+                    const result = getResult(data.score || 0);
+                    return `
+                        <div class="history-item">
+                            <div>
+                                <div class="history-score" style="color:${result.color};">${data.score ?? "-"}점 · ${escapeHtml(data.resultTitle || result.title)}</div>
+                                <div class="history-date">${escapeHtml(data.checkedAtText || "날짜 없음")}</div>
+                            </div>
+                            <div style="font-size:1.2rem;">${result.level === "danger" ? "🚨" : result.level === "caution" ? "⚠️" : "✅"}</div>
+                        </div>
+                    `;
+                }).join("");
+            } catch (error) {
+                console.error("검사 기록 불러오기 실패:", error);
+                historyList.innerHTML = "검사 기록을 불러오지 못했습니다. Firestore 보안 규칙과 인덱스를 확인해 주세요.";
+            }
+        }
+
+        async function submitCheck() {
+            if (!currentUser) {
+                alert("로그인이 필요합니다.");
+                location.href = "index.html";
+                return;
+            }
+
+            const collected = collectAnswers();
+            if (!collected) return;
+
+            const submitBtn = document.getElementById("submitBtn");
+            submitBtn.disabled = true;
+            submitBtn.textContent = "저장 중입니다...";
+
+            const checkedAt = new Date();
+            const checkedAtText = checkedAt.toLocaleString("ko-KR", {
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+                hour: "2-digit",
+                minute: "2-digit"
+            });
+            const result = getResult(collected.totalScore);
+
+            try {
+                const payload = {
+                    testName: "알코올 의존도 성인 자가진단",
+                    score: collected.totalScore,
+                    maxScore: 40,
+                    resultLevel: result.level,
+                    resultTitle: result.title,
+                    resultDescription: result.desc,
+                    answers: collected.answers,
+                    checkedAtIso: checkedAt.toISOString(),
+                    checkedAtText,
+                    createdAt: serverTimestamp(),
+                    updatedAt: serverTimestamp()
+                };
+
+                const docRef = await addDoc(collection(db, "users", currentUser.uid, "dependency_checks"), payload);
+                showResult(collected.totalScore, result, checkedAtText, docRef.id);
+                await loadHistory();
+            } catch (error) {
+                console.error("검사 결과 저장 실패:", error);
+                alert("검사 결과 저장에 실패했습니다: " + error.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = "제출하고 DB에 저장하기";
+            }
+        }
+
+        renderQuestions();
+        document.getElementById("submitBtn").addEventListener("click", submitCheck);
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                alert("알콜의존성검사는 로그인 후 이용할 수 있습니다.");
+                location.replace("index.html");
+                return;
+            }
+
+            currentUser = user;
+            document.getElementById("loadingArea").style.display = "none";
+            document.getElementById("appArea").style.display = "block";
+            document.getElementById("userName").textContent = `${user.displayName || user.email || "도전자"}님`;
+            await loadHistory();
+        });
+    </script>
+</body>
+</html>
 
