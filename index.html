@@ -56,6 +56,9 @@
         .start-btn:active { transform: scale(0.97); }
         .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 0.9rem; color: #666; }
         .logout-btn { background: #f1f3f5; border: none; padding: 6px 12px; border-radius: 8px; font-weight: 600; cursor: pointer; color: #495057; }
+        .header-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+        .dependency-btn { background: #fff; border: 1px solid var(--primary-color); color: var(--primary-color); padding: 6px 10px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 0.82rem; white-space: nowrap; }
+        .dependency-btn:active, .logout-btn:active { transform: scale(0.98); }
 
         /* 타이머 & 차트 */
         .timer-display { margin: 15px 0; padding: 20px; background: #fff5f5; border-radius: 20px; border: 1px solid #ffe3e3; display: flex; flex-direction: column; align-items: center; }
@@ -239,8 +242,8 @@
 
 <div class="container">
     <h1>🚫 금주 서바이벌 리포트</h1>
-    <button id="enablePushBtn" class="stat-btn" style="margin-bottom: 18px; border-color: var(--primary-color); color: var(--primary-color);">🔔 푸시 알림 허용</button>
-    <button id="sendTestPushBtn" class="stat-btn" style="margin-bottom: 18px; border-color: #9b59b6; color: #9b59b6;">🧪 1분 뒤 테스트 푸시 보내기</button>
+    <button id="enablePushBtn" class="stat-btn" style="display:none; margin-bottom: 18px; border-color: var(--primary-color); color: var(--primary-color);">🔔 푸시 알림 허용</button>
+    <button id="sendTestPushBtn" class="stat-btn" style="display:none; margin-bottom: 18px; border-color: #9b59b6; color: #9b59b6;">🧪 1분 뒤 테스트 푸시 보내기</button>
 
     <div id="loginArea">
         <p style="color: #666; font-size: 0.95rem; word-break: keep-all;">나만의 금주 기록을 안전하게 저장하고<br>여러 기기에서 확인하기 위해 로그인해 주세요.</p>
@@ -256,7 +259,10 @@
                 <span class="user-display-name" style="font-weight: 800; color: var(--primary-color); cursor: pointer; text-decoration: underline; text-underline-offset: 3px;" onclick="openNicknameModal()" title="별명 수정하기"></span>
                 <span class="visit-stats" style="font-size: 0.75rem; color: #718096; margin-top: 2px;"></span>
             </div>
-            <button class="logout-btn" onclick="logout()">로그아웃</button>
+            <div class="header-actions">
+                <button class="dependency-btn" onclick="goToDependencyCheck()">알콜의존성검사</button>
+                <button class="logout-btn" onclick="logout()">로그아웃</button>
+            </div>
         </div>
 
         <div id="motivationalSummary" style="display: none; width: 100%; margin-bottom: 25px;"></div>
@@ -284,7 +290,10 @@
                 <span class="user-display-name" style="font-weight: 800; color: var(--primary-color); cursor: pointer; text-decoration: underline; text-underline-offset: 3px;" onclick="openNicknameModal()" title="별명 수정하기"></span>
                 <span class="visit-stats" style="font-size: 0.75rem; color: #718096; margin-top: 2px;"></span>
             </div>
-            <button class="logout-btn" onclick="logout()">로그아웃</button>
+            <div class="header-actions">
+                <button class="dependency-btn" onclick="goToDependencyCheck()">알콜의존성검사</button>
+                <button class="logout-btn" onclick="logout()">로그아웃</button>
+            </div>
         </div>
 
         <div class="timer-display">
@@ -935,13 +944,36 @@
 
     function updatePushButtonState() {
         const enablePushBtn = document.getElementById("enablePushBtn");
-        if (!enablePushBtn || !("Notification" in window)) return;
+        const sendTestPushBtn = document.getElementById("sendTestPushBtn");
+        const isLoggedIn = !!(userId && auth.currentUser);
 
-        if (Notification.permission === "granted") {
-            enablePushBtn.textContent = "🔔 푸시 알림 켜짐";
+        // 로그인 전에는 푸시 관련 버튼을 모두 숨깁니다.
+        if (sendTestPushBtn) {
+            sendTestPushBtn.style.display = isLoggedIn ? "block" : "none";
+        }
+        if (!enablePushBtn) return;
+
+        if (!isLoggedIn) {
+            enablePushBtn.style.display = "none";
+            return;
+        }
+
+        if (!("Notification" in window)) {
+            enablePushBtn.style.display = "block";
+            enablePushBtn.textContent = "🔕 이 브라우저는 알림을 지원하지 않습니다";
             enablePushBtn.disabled = true;
             enablePushBtn.style.opacity = "0.65";
-        } else if (Notification.permission === "denied") {
+            return;
+        }
+
+        // 푸시 알림이 이미 켜져 있으면 허용 버튼은 더 이상 보여주지 않습니다.
+        if (Notification.permission === "granted") {
+            enablePushBtn.style.display = "none";
+            return;
+        }
+
+        enablePushBtn.style.display = "block";
+        if (Notification.permission === "denied") {
             enablePushBtn.textContent = "🔕 브라우저 설정에서 알림 허용 필요";
             enablePushBtn.disabled = true;
             enablePushBtn.style.opacity = "0.65";
@@ -1003,11 +1035,59 @@
         try {
             const token = await getPushTokenFromBrowser();
             await savePushTokenToFirestore(token, "auto-refresh");
+            await syncSobrietyReminderSetting("auto-refresh");
             updatePushButtonState();
         } catch (error) {
             console.error("자동 푸시 토큰 갱신 실패:", error);
         }
     }
+
+    function formatSobrietyDurationFromMs(diffMs) {
+        const safeDiff = Math.max(0, diffMs || 0);
+        const days = Math.floor(safeDiff / 86400000);
+        const hours = Math.floor((safeDiff / 3600000) % 24);
+        const minutes = Math.floor((safeDiff / 60000) % 60);
+
+        if (days > 0) return `${days}일 ${hours}시간`;
+        if (hours > 0) return `${hours}시간 ${minutes}분`;
+        return `${minutes}분`;
+    }
+
+    function getCurrentSobrietyDurationText() {
+        const startValue = userQuitDate || localStorage.getItem('quitDrinkingDateTime_server');
+        if (!startValue) return "0분";
+        const start = new Date(startValue);
+        if (isNaN(start.getTime())) return "0분";
+        return formatSobrietyDurationFromMs(new Date().getTime() - start.getTime());
+    }
+
+    async function syncSobrietyReminderSetting(source = "auto") {
+        if (!userId || !auth.currentUser) return;
+        if (!("Notification" in window) || Notification.permission !== "granted") return;
+
+        try {
+            const setReminderFn = httpsCallable(functions, "setSobrietyReminder");
+            await setReminderFn({
+                enabled: true,
+                intervalHours: 3,
+                mode: APP_MODE.ABSTINENCE,
+                source,
+                challengeId: currentChallengeId || null,
+                startDate: userQuitDate || localStorage.getItem('quitDrinkingDateTime_server') || null,
+                currentDurationText: getCurrentSobrietyDurationText()
+            });
+        } catch (error) {
+            console.error("3시간 단주 리마인더 설정 동기화 실패:", error);
+        }
+    }
+
+    window.goToDependencyCheck = function() {
+        if (!userId || !auth.currentUser) {
+            alert("알콜의존성검사는 로그인 후 이용할 수 있습니다.");
+            return;
+        }
+        window.location.href = "checkDependancy.html";
+    };
 
     async function enablePush() {
         if (!userId || !auth.currentUser) {
@@ -1031,9 +1111,10 @@
 
             const token = await getPushTokenFromBrowser();
             await savePushTokenToFirestore(token, "manual-enable");
+            await syncSobrietyReminderSetting("manual-enable");
 
             updatePushButtonState();
-            alert("푸시 알림 등록 완료");
+            alert("푸시 알림과 3시간 단주 리마인더가 등록되었습니다.");
         } catch (error) {
             console.error("푸시 알림 등록 실패:", error);
             alert("푸시 알림 등록 실패: " + error.message);
@@ -1258,6 +1339,7 @@
                 }
 
                 updateGreetingUI();
+                updatePushButtonState();
                 refreshPushTokenIfAlreadyGranted();
 
                 const q = query(collection(db, "users", userId, "challenges"), where("status", "==", "active"));
@@ -1275,6 +1357,7 @@
                     document.getElementById('cravingCount').innerText = actualCravings;
                     
                     startApp(userQuitDate);
+                    syncSobrietyReminderSetting("active-challenge-load");
                 } else {
                     document.getElementById('setupArea').style.display = 'flex';
                 }
@@ -3446,6 +3529,7 @@
             document.getElementById('cravingCount').innerText = 0;
             document.getElementById('startReasonInput').value = ''; 
             startApp(input);
+            await syncSobrietyReminderSetting("challenge-start");
             loadMotivationalStats();
         } catch (e) { alert("연동 에러: " + e.message); }
     };
