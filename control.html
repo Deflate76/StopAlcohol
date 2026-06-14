@@ -28,9 +28,12 @@
         body { font-family: 'Pretendard', -apple-system, sans-serif; text-align: center; padding: 15px; background-color: var(--bg-color); color: #333; line-height: 1.6; display: flex; flex-direction: column; min-height: 95vh; }
         .container { flex: 1; max-width: 550px; width: 100%; margin: 0 auto; background: white; padding: 30px 20px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); box-sizing: border-box; position: relative; }
         h1 { font-size: 1.6rem; white-space: nowrap; word-break: keep-all; margin: 0; letter-spacing: -0.5px; color: var(--text-dark); }
-        .page-title-row { display:flex; justify-content:center; align-items:center; gap:8px; margin-bottom: 18px; }
+        .page-title-row { display:flex; justify-content:center; align-items:center; gap:8px; margin-bottom: 18px; flex-wrap:wrap; }
         .mode-info-btn { width:28px; height:28px; border-radius:999px; border:1px solid #e2e8f0; background:#f8fafc; color:var(--primary-color); font-weight:900; font-size:0.9rem; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,0.04); }
         .mode-info-btn:active { transform:scale(0.94); background:#edf2f7; }
+        .goal-setting-btn { border:none; border-radius:999px; padding:7px 12px; background:#fff7ed; color:#c05621; font-size:0.78rem; font-weight:950; cursor:pointer; box-shadow:0 2px 7px rgba(249,115,22,0.12); border:1px solid #fed7aa; white-space:nowrap; }
+        .goal-setting-btn.has-goal { background:#f0fff4; color:#166534; border-color:#9ae6b4; }
+        .goal-setting-btn:active { transform:scale(0.96); filter:brightness(0.98); }
         
         .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 0.9rem; color: #666; }
         .back-btn { background: #f1f3f5; border: none; padding: 6px 12px; border-radius: 8px; font-weight: 600; cursor: pointer; color: #495057; text-decoration: none; transition: 0.2s; }
@@ -41,7 +44,7 @@
         
         .input-group { margin-bottom: 15px; text-align: left; }
         .input-group label { display: block; font-weight: 700; font-size: 0.9rem; color: #4a5568; margin-bottom: 6px; }
-        input[type="number"], input[type="datetime-local"], select { width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 12px; font-size: 1rem; font-family: inherit; box-sizing: border-box; background: #fff; }
+        input[type="number"], input[type="datetime-local"], input[type="time"], select { width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 12px; font-size: 1rem; font-family: inherit; box-sizing: border-box; background: #fff; }
         input:focus, select:focus { border-color: var(--primary-color); outline: none; }
         
         .action-btn { width: 100%; padding: 18px; font-size: 1.1rem; font-weight: 800; color: white; border: none; border-radius: 16px; cursor: pointer; box-shadow: 0 8px 15px rgba(0,0,0,0.1); transition: transform 0.2s; margin-top: 10px; }
@@ -87,6 +90,15 @@
         .who-alcohol-absorbed-marker { position:absolute; left:0%; top:-4px; width:3px; height:24px; border-radius:999px; background:var(--primary-color); transform:translateX(-1.5px); box-shadow:0 0 0 2px rgba(255,255,255,0.9); z-index:4; transition:left 0.45s ease; }
         .who-alcohol-scale { display:flex; justify-content:space-between; margin-top:18px; font-size:0.67rem; color:#94a3b8; font-weight:800; }
         .next-recommended-time { margin-top:8px; padding:9px 10px; background:#ffffff; border:1px dashed #cbd5e0; border-radius:10px; font-size:0.78rem; color:#4a5568; line-height:1.4; word-break:keep-all; }
+        .goal-status-panel { margin: 10px 0 12px 0; padding: 12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; text-align:left; font-size:0.8rem; color:#4a5568; line-height:1.45; word-break:keep-all; }
+        .goal-status-panel.is-over { background:#fff5f5; border-color:#feb2b2; box-shadow:0 4px 12px rgba(231,76,60,0.08); }
+        .goal-status-title { display:flex; justify-content:space-between; align-items:center; gap:8px; color:var(--text-dark); font-weight:950; margin-bottom:6px; }
+        .goal-status-chip { flex:0 0 auto; padding:3px 8px; border-radius:999px; background:#edf2f7; color:#4a5568; font-size:0.68rem; font-weight:950; }
+        .goal-status-panel.is-over .goal-status-chip { background:#fed7d7; color:#c53030; }
+        .goal-status-lines { font-size:0.76rem; color:#4a5568; }
+        .goal-progress-track { height:10px; border-radius:999px; background:#edf2f7; overflow:hidden; border:1px solid #e2e8f0; margin:8px 0 7px; }
+        .goal-progress-fill { height:100%; width:0%; border-radius:999px; background:linear-gradient(90deg, #2ecc71, #27ae60); transition:width 0.45s ease, background 0.45s ease; }
+        .goal-progress-fill.is-over { background:linear-gradient(90deg, #f39c12, #e74c3c); }
 
         .collapsible-section { margin-top: 16px; border: 1px solid #e2e8f0; border-radius: 16px; background: #ffffff; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.025); }
         .collapsible-header { width:100%; border:none; background:#f8fafc; padding: 12px 14px; display:flex; align-items:center; justify-content:space-between; gap:10px; cursor:pointer; font-family:inherit; color:var(--text-dark); }
@@ -175,6 +187,19 @@
         .drink-warning-pace { margin-top:12px; background:#f8fafc; }
         .drink-warning-pace .who-alcohol-panel { display:block !important; }
         .drink-warning-note { margin-top:10px; color:#718096; font-size:0.75rem; line-height:1.45; word-break:keep-all; }
+        .goal-target-list { display:flex; flex-direction:column; gap:9px; margin:12px 0 14px; }
+        .goal-target-row { display:grid; grid-template-columns:minmax(0, 1fr) 116px; gap:10px; align-items:center; padding:10px 11px; border:1px solid #e2e8f0; border-radius:13px; background:#f8fafc; }
+        .goal-target-name { font-size:0.88rem; color:var(--text-dark); font-weight:950; }
+        .goal-target-unit { font-size:0.7rem; color:#718096; font-weight:800; margin-top:1px; }
+        .goal-target-row input[type="number"] { padding:10px 11px; font-size:0.95rem; text-align:right; }
+        .goal-summary-box { margin-top:12px; padding:11px 12px; border-radius:13px; background:#f8fafc; border:1px dashed #cbd5e0; color:#4a5568; font-size:0.78rem; line-height:1.5; word-break:keep-all; }
+        .goal-summary-box b { color:var(--primary-color); }
+        .goal-time-row { display:grid; grid-template-columns:minmax(0, 1fr) 150px; gap:10px; align-items:end; margin-top:6px; }
+        .goal-help-text { color:#718096; font-size:0.72rem; line-height:1.45; margin-top:6px; word-break:keep-all; }
+        @media (max-width: 420px) {
+            .goal-target-row { grid-template-columns:1fr; gap:7px; }
+            .goal-time-row { grid-template-columns:1fr; }
+        }
         .drink-warning-checkin { margin-top:12px; padding:12px; background:#ffffff; border:1px solid #e2e8f0; border-radius:14px; box-shadow:0 2px 8px rgba(0,0,0,0.025); }
         .drink-warning-checkin-title { font-size:0.86rem; color:var(--text-dark); font-weight:900; margin-bottom:4px; display:flex; align-items:center; gap:6px; }
         .drink-warning-checkin-desc { font-size:0.73rem; color:#718096; line-height:1.45; word-break:keep-all; margin-bottom:10px; }
@@ -216,6 +241,7 @@
 
     <div class="page-title-row">
         <h1>🍷 음주 조절 모드</h1>
+        <button class="goal-setting-btn" id="drinkingGoalButton" type="button" onclick="openDrinkingGoalModal()" aria-label="음주 목표 설정 열기">🎯 음주 목표 설정</button>
         <button class="mode-info-btn" type="button" onclick="openControlModeInfoModal()" aria-label="음주 조절 모드 설명 보기">i</button>
     </div>
 
@@ -317,6 +343,7 @@
                 </div>
                 <div id="nextRecommendedDrinkTime" class="next-recommended-time">다음 권장 음주 주문 시각: --:--</div>
             </div>
+            <div id="drinkingGoalStatusPanel" class="goal-status-panel" style="display:none;" aria-live="polite"></div>
             <div style="border-top: 1px dashed #e2e8f0; margin: 12px 0 18px 0;"></div>
 
             <!-- 신체정보 연동 표시 및 수정 영역 -->
@@ -490,6 +517,69 @@
     </div>
 </div>
 
+
+<!-- 음주 목표 설정 모달 -->
+<div class="modal-overlay" id="drinkingGoalModal" onclick="if(event.target === this) closeDrinkingGoalModal()">
+    <div class="modal-content modal-content-wide">
+        <div class="modal-title"><span>🎯</span> 음주 목표 설정</div>
+        <div class="modal-desc">
+            오늘 마실 최대량과 음주 마무리 시각을 미리 정합니다. 목표량은 아래 기준잔의 알코올 총량으로 환산되어, 실제 음주량이 초과되면 30분 간격으로 경고합니다.
+        </div>
+        <div class="goal-target-list" id="drinkingGoalTargetList">
+            <div class="goal-target-row">
+                <div><div class="goal-target-name">맥주</div><div class="goal-target-unit">500ml 잔 기준</div></div>
+                <input type="number" id="goalTarget_beer" min="0" step="0.5" placeholder="예: 3" oninput="updateDrinkingGoalModalSummary()">
+            </div>
+            <div class="goal-target-row">
+                <div><div class="goal-target-name">소주</div><div class="goal-target-unit">50ml 소주잔 기준</div></div>
+                <input type="number" id="goalTarget_soju" min="0" step="0.5" placeholder="예: 6" oninput="updateDrinkingGoalModalSummary()">
+            </div>
+            <div class="goal-target-row">
+                <div><div class="goal-target-name">막걸리</div><div class="goal-target-unit">250ml 잔 기준</div></div>
+                <input type="number" id="goalTarget_makgeolli" min="0" step="0.5" placeholder="예: 2" oninput="updateDrinkingGoalModalSummary()">
+            </div>
+            <div class="goal-target-row">
+                <div><div class="goal-target-name">소맥</div><div class="goal-target-unit">200ml 잔 기준</div></div>
+                <input type="number" id="goalTarget_somaek" min="0" step="0.5" placeholder="예: 2" oninput="updateDrinkingGoalModalSummary()">
+            </div>
+            <div class="goal-target-row">
+                <div><div class="goal-target-name">와인</div><div class="goal-target-unit">150ml 잔 기준</div></div>
+                <input type="number" id="goalTarget_wine" min="0" step="0.5" placeholder="예: 2" oninput="updateDrinkingGoalModalSummary()">
+            </div>
+            <div class="goal-target-row">
+                <div><div class="goal-target-name">위스키</div><div class="goal-target-unit">30ml 잔 기준</div></div>
+                <input type="number" id="goalTarget_whiskey" min="0" step="0.5" placeholder="예: 2" oninput="updateDrinkingGoalModalSummary()">
+            </div>
+        </div>
+        <div class="goal-time-row">
+            <div class="input-group" style="margin-bottom:0;">
+                <label>음주 마무리 시각</label>
+                <div class="goal-help-text">해당 시각 이후 세션이 계속 진행되거나 새 잔을 시작하면 시간 초과 경고를 보냅니다.</div>
+            </div>
+            <input type="time" id="goalFinishTimeInput" oninput="updateDrinkingGoalModalSummary()">
+        </div>
+        <div id="drinkingGoalModalSummary" class="goal-summary-box">목표량 또는 마무리 시각을 입력해 주세요.</div>
+        <div class="modal-actions">
+            <button class="modal-btn modal-btn-cancel" type="button" onclick="clearDrinkingGoalSettings()">목표 해제</button>
+            <button class="modal-btn modal-btn-cancel" type="button" onclick="closeDrinkingGoalModal()">닫기</button>
+            <button class="modal-btn modal-btn-apply" type="button" onclick="saveDrinkingGoalSettings()">저장</button>
+        </div>
+    </div>
+</div>
+
+<!-- 주기적 조절 경고 팝업 -->
+<div class="modal-overlay" id="controlSafetyAlertModal" onclick="if(event.target === this) closeControlSafetyAlertModal()">
+    <div class="modal-content modal-content-wide">
+        <div class="modal-title" id="controlSafetyAlertTitle"><span>⚠️</span> 조절 경고</div>
+        <div class="modal-desc" id="controlSafetyAlertLead">음주 조절 기준을 확인해 주세요.</div>
+        <div id="controlSafetyAlertList" class="drink-warning-list"></div>
+        <div class="drink-warning-note" id="controlSafetyAlertNote">목표 초과 상태가 유지되면 서버 FCM 푸시와 앱 내 팝업으로 30분 간격 알림을 유지합니다.</div>
+        <div class="modal-actions">
+            <button class="modal-btn modal-btn-apply" type="button" onclick="closeControlSafetyAlertModal()">확인</button>
+        </div>
+    </div>
+</div>
+
 <!-- 음주 조절 모드 설명 모달 -->
 <div class="modal-overlay" id="controlModeInfoModal" onclick="if(event.target === this) closeControlModeInfoModal()">
     <div class="modal-content">
@@ -544,6 +634,8 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
     import { getFirestore, collection, addDoc, doc, setDoc, updateDoc, deleteDoc, getDocs, query, where, orderBy, serverTimestamp, getDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+    import { getMessaging, getToken, onMessage, isSupported as isMessagingSupported } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-messaging.js";
+    import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-functions.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBWDwueP3a0atxCqFIgqd96sgXc0EqYbEY",
@@ -558,6 +650,8 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
+    const functions = getFunctions(app, "asia-northeast3");
+    const setControlDrinkingReminderCallable = httpsCallable(functions, "setControlDrinkingReminder");
 
     // index.html과 동일한 사용자 문서 필드로 현재 모드를 공유합니다.
     const APP_MODE = Object.freeze({
@@ -566,9 +660,9 @@
     });
 
     const APP_VERSION = Object.freeze({
-        version: 'v2026.06.07-07',
-        updatedAt: '2026-06-07 KST',
-        note: '과거 기록 WHO 기준 알코올 섭취량 progress, userGender/userWeight 기준 반영'
+        version: 'v2026.06.14-02',
+        updatedAt: '2026-06-14 KST',
+        note: 'FCM 백그라운드 푸시 기반 BAC/급상승/음주목표 경고 연동'
     });
 
     const versionEl = document.getElementById('appVersionText');
@@ -588,10 +682,39 @@
     let pastSessionsData = [];
     let activeAnalysisUnlocked = false;
     let pendingDrinkToAdd = null;
+    let drinkingGoal = null;
+    let lastBacStatusNotificationAt = 0;
+    let lastRapidBacWarningAt = 0;
+    let lastGoalWarningAt = 0;
+    let lastGoalWarningSignature = '';
+    let messagingInstance = null;
+    let controlServiceWorkerRegistration = null;
+    let controlFcmToken = null;
+    let foregroundFcmHandlerRegistered = false;
+    let controlReminderSyncInFlight = null;
+    let lastControlReminderSyncedAt = 0;
     let historyCurrentPage = 0;
     const HISTORY_PAGE_SIZE = 5;
     const RECOMMENDED_DRINK_INTERVAL_MINUTES = 40;
+    const CONTROL_ALERT_INTERVAL_MS = 30 * 60 * 1000;
+    const BAC_STATUS_NOTIFICATION_INTERVAL_MS = CONTROL_ALERT_INTERVAL_MS;
+    const BAC_RAPID_RISE_LOOKBACK_MS = 10 * 60 * 1000;
+    const BAC_RAPID_RISE_THRESHOLD_PER_30_MIN = 0.012;
+    const BAC_RAPID_RISE_MIN_DELTA = BAC_RAPID_RISE_THRESHOLD_PER_30_MIN * (BAC_RAPID_RISE_LOOKBACK_MS / CONTROL_ALERT_INTERVAL_MS);
+    const CONTROL_REMINDER_SYNC_MIN_INTERVAL_MS = 60 * 1000;
+    const CONTROL_SERVICE_WORKER_URL = "/firebase-messaging-sw.js";
+    // Firebase Console > Project settings > Cloud Messaging > Web Push certificates의 공개 VAPID 키로 교체하세요.
+    // 이미 공통 설정 JS에서 window.ALCOHOLAWAY_FCM_VAPID_PUBLIC_KEY를 주입하고 있다면 그 값을 우선 사용합니다.
+    const FCM_VAPID_PUBLIC_KEY = window.ALCOHOLAWAY_FCM_VAPID_PUBLIC_KEY || "REPLACE_WITH_YOUR_FIREBASE_WEB_PUSH_PUBLIC_VAPID_KEY";
     const WHO_STANDARD_DRINK_GRAMS = 10;
+    const DRINKING_GOAL_TYPES = Object.freeze([
+        { key: 'beer', label: '맥주', matchLabels: ['맥주'], abv: 4.5, unitVolume: 500, unitLabel: '500ml 잔' },
+        { key: 'soju', label: '소주', matchLabels: ['소주'], abv: 16.5, unitVolume: 50, unitLabel: '50ml 소주잔' },
+        { key: 'makgeolli', label: '막걸리', matchLabels: ['막걸리'], abv: 6.5, unitVolume: 250, unitLabel: '250ml 잔' },
+        { key: 'somaek', label: '소맥', matchLabels: ['소맥'], abv: 7.4, unitVolume: 200, unitLabel: '200ml 잔' },
+        { key: 'wine', label: '와인', matchLabels: ['와인'], abv: 13.0, unitVolume: 150, unitLabel: '150ml 잔' },
+        { key: 'whiskey', label: '위스키', matchLabels: ['위스키'], abv: 40.0, unitVolume: 30, unitLabel: '30ml 잔' }
+    ]);
     // 화면 표시는 WHO/AUDIT 표준잔 10g을 기준으로 한 앱 내 1일 참고 기준입니다.
     // WHO는 알코올 섭취에 안전한 절대 기준이 없다고 안내하므로, 이 값은 '권장 음주'가 아니라 초과 여부를 눈에 띄게 보여주는 비교선입니다.
     const WHO_DAILY_REFERENCE_GRAMS_BY_GENDER = Object.freeze({
@@ -783,6 +906,8 @@
         if (pacePanel) pacePanel.style.display = 'none';
         const whoPanel = document.getElementById('whoAlcoholLimitPanel');
         if (whoPanel) whoPanel.style.display = 'none';
+        const goalPanel = document.getElementById('drinkingGoalStatusPanel');
+        if (goalPanel) goalPanel.style.display = 'none';
         setCollapsibleSectionVisible('activeAnalysisSection', false);
         setCollapsibleSectionVisible('drinkItemsSection', false);
         updateDrinkItemsSectionMeta([]);
@@ -794,6 +919,7 @@
         currentSessionDocId = null;
         activeAnalysisUnlocked = false;
         pendingDrinkToAdd = null;
+        resetControlAlertRuntimeState();
         const warningModal = document.getElementById('drinkWarningModal');
         if (warningModal) warningModal.style.display = 'none';
         if (timerInterval) {
@@ -867,6 +993,192 @@
         }, { merge: true });
     }
 
+    function isFcmVapidKeyConfigured() {
+        return typeof FCM_VAPID_PUBLIC_KEY === 'string'
+            && FCM_VAPID_PUBLIC_KEY.trim().length > 20
+            && !FCM_VAPID_PUBLIC_KEY.includes('REPLACE_WITH_');
+    }
+
+    function buildControlFcmTokenPayload(token) {
+        const uid = auth.currentUser?.uid || userId;
+        return {
+            uid,
+            token,
+            platform: 'web',
+            source: 'control.html',
+            serviceWorkerUrl: CONTROL_SERVICE_WORKER_URL,
+            userAgent: navigator.userAgent || '',
+            updatedAt: serverTimestamp()
+        };
+    }
+
+    async function saveControlFcmToken(token) {
+        const uid = auth.currentUser?.uid || userId;
+        if (!uid || !token) return;
+        await setDoc(doc(db, 'fcmTokens', token), buildControlFcmTokenPayload(token), { merge: true });
+    }
+
+    function wireForegroundFcmHandler(messaging) {
+        if (!messaging || foregroundFcmHandlerRegistered) return;
+        foregroundFcmHandlerRegistered = true;
+        onMessage(messaging, (payload) => {
+            const data = payload?.data || {};
+            const title = payload?.notification?.title || data.title || 'AlcoholAway 음주 조절 알림';
+            const body = payload?.notification?.body || data.body || data.message || '음주 조절 상태를 확인해 주세요.';
+            const type = String(data.type || 'control-fcm-message');
+            const tag = data.tag || type || 'alcoholaway-control-alert';
+            const isControlWarning = type === 'control-bac-rapid-rise' || type === 'control-goal-warning';
+
+            // FCM 메시지는 앱이 foreground인 경우 브라우저가 자동 표시하지 않으므로,
+            // 서버에서 도착한 메시지에 한해서만 Notification을 표시합니다.
+            try {
+                if ('Notification' in window && Notification.permission === 'granted') {
+                    new Notification(title, {
+                        body,
+                        tag,
+                        renotify: data.renotify === 'true',
+                        requireInteraction: data.requireInteraction === 'true',
+                        data
+                    });
+                }
+            } catch (error) {
+                console.warn('foreground FCM 알림 표시 실패:', error);
+            }
+
+            if (isControlWarning) {
+                openControlSafetyAlertModal({
+                    title,
+                    lead: '서버에서 전달된 음주 조절 경고 푸시입니다.',
+                    alerts: [{ type: data.alertType || type, title, body }],
+                    note: '앱이 열려 있는 동안에는 경고 푸시를 앱 내 팝업으로도 표시합니다.'
+                });
+            }
+        });
+    }
+
+    async function ensureControlFcmReady() {
+        const uid = auth.currentUser?.uid || userId;
+        if (!uid) return { ok: false, reason: 'no-user' };
+        if (!('Notification' in window)) return { ok: false, reason: 'notification-unsupported' };
+        if (!('serviceWorker' in navigator)) return { ok: false, reason: 'service-worker-unsupported' };
+
+        let permission = Notification.permission;
+        if (permission === 'default') {
+            permission = await Notification.requestPermission();
+        }
+        if (permission !== 'granted') {
+            console.warn('FCM 푸시 권한이 허용되지 않았습니다.', { permission });
+            return { ok: false, reason: 'permission-not-granted', permission };
+        }
+        if (!isFcmVapidKeyConfigured()) {
+            console.warn('Firebase Web Push VAPID 공개 키가 설정되지 않아 FCM 토큰을 발급하지 않았습니다.');
+            return { ok: false, reason: 'missing-vapid-key', permission };
+        }
+
+        const supported = await isMessagingSupported().catch(() => false);
+        if (!supported) return { ok: false, reason: 'messaging-unsupported', permission };
+
+        if (!controlServiceWorkerRegistration) {
+            controlServiceWorkerRegistration = await navigator.serviceWorker.register(CONTROL_SERVICE_WORKER_URL, { scope: '/' });
+        }
+        if (!messagingInstance) {
+            messagingInstance = getMessaging(app);
+            wireForegroundFcmHandler(messagingInstance);
+        }
+
+        const token = await getToken(messagingInstance, {
+            vapidKey: FCM_VAPID_PUBLIC_KEY,
+            serviceWorkerRegistration: controlServiceWorkerRegistration
+        });
+        if (!token) return { ok: false, reason: 'empty-token', permission };
+        controlFcmToken = token;
+        await saveControlFcmToken(token);
+        return { ok: true, token, permission };
+    }
+
+    function buildControlReminderClientSnapshot(nowMs = Date.now()) {
+        const totalAlcoholGrams = Array.isArray(drinksList)
+            ? drinksList.reduce((sum, d) => sum + (Number(d.alcoholGrams) || 0), 0)
+            : 0;
+        const absorbedAlcoholGrams = sessionStartTime && Array.isArray(drinksList)
+            ? calculateAbsorbedAlcoholGramsAtTime(drinksList, nowMs)
+            : 0;
+        const currentBac = sessionStartTime && Array.isArray(drinksList)
+            ? getRealtimeEstimatedBac(nowMs, drinksList)
+            : 0;
+        const rapidInfo = sessionStartTime ? getRapidBacRiseInfo(nowMs) : null;
+        const goalStatus = sessionStartTime ? evaluateDrinkingGoalStatus(nowMs, drinksList, drinkingGoal) : null;
+        return {
+            capturedAtMs: nowMs,
+            currentBac: Number(currentBac.toFixed(4)),
+            totalAlcoholGrams: Number(totalAlcoholGrams.toFixed(2)),
+            absorbedAlcoholGrams: Number(absorbedAlcoholGrams.toFixed(2)),
+            durationText: sessionStartTime ? formatElapsedFromStart(nowMs) : null,
+            rapidBacRise: rapidInfo ? {
+                currentBac: Number(rapidInfo.currentBac.toFixed(4)),
+                previousBac: Number(rapidInfo.previousBac.toFixed(4)),
+                delta: Number(rapidInfo.delta.toFixed(4)),
+                projectedPer30Min: Number(rapidInfo.projectedPer30Min.toFixed(4)),
+                lookbackMinutes: Number(rapidInfo.lookbackMinutes.toFixed(1))
+            } : null,
+            goalExceeded: !!goalStatus?.isExceeded,
+            goalWarningKeys: goalStatus?.warnings?.map(w => w.key) || []
+        };
+    }
+
+    function buildControlReminderPayload({ enabled = true, reason = 'session_update' } = {}) {
+        const nowMs = Date.now();
+        const shouldEnable = Boolean(enabled && sessionStartTime && currentSessionDocId && Array.isArray(drinksList) && drinksList.length > 0);
+        return {
+            enabled: shouldEnable,
+            intervalMinutes: 30,
+            mode: APP_MODE.CONTROL,
+            source: 'control.html',
+            reason,
+            sessionId: currentSessionDocId || null,
+            startTime: sessionStartTime ? sessionStartTime.toISOString() : null,
+            startTimeMs: sessionStartTime ? sessionStartTime.getTime() : null,
+            currentDurationText: sessionStartTime ? formatElapsedFromStart(nowMs) : null,
+            drinkingGoal: sanitizeDrinkingGoalForSave(drinkingGoal),
+            clientSnapshot: buildControlReminderClientSnapshot(nowMs),
+            fcmTokenRegistered: !!controlFcmToken,
+            serviceWorkerUrl: CONTROL_SERVICE_WORKER_URL
+        };
+    }
+
+    async function syncControlDrinkingReminder({ enabled = true, force = false, reason = 'session_update' } = {}) {
+        const uid = auth.currentUser?.uid || userId;
+        if (!uid) return { ok: false, reason: 'no-user' };
+        const nowMs = Date.now();
+        if (!force && enabled && lastControlReminderSyncedAt && (nowMs - lastControlReminderSyncedAt) < CONTROL_REMINDER_SYNC_MIN_INTERVAL_MS) {
+            return { ok: true, skipped: true, reason: 'throttled' };
+        }
+        if (controlReminderSyncInFlight) {
+            try { await controlReminderSyncInFlight; } catch (error) {}
+        }
+
+        controlReminderSyncInFlight = (async () => {
+            if (enabled) {
+                await ensureControlFcmReady().catch(error => {
+                    console.warn('FCM 토큰 준비 실패. 서버 상태 동기화는 계속 진행합니다.', error);
+                });
+            }
+            const payload = buildControlReminderPayload({ enabled, reason });
+            const result = await setControlDrinkingReminderCallable(payload);
+            lastControlReminderSyncedAt = Date.now();
+            return result?.data || { ok: true };
+        })();
+
+        try {
+            return await controlReminderSyncInFlight;
+        } catch (error) {
+            console.warn('음주 조절 FCM 리마인더 동기화 실패:', error);
+            return { ok: false, reason: error.message || 'sync-failed' };
+        } finally {
+            controlReminderSyncInFlight = null;
+        }
+    }
+
     window.logoutFromControl = async function() {
         if (!auth.currentUser) {
             window.location.replace('index.html');
@@ -875,6 +1187,7 @@
 
         explicitLogoutInProgress = true;
         try {
+            await syncControlDrinkingReminder({ enabled: false, force: true, reason: 'logout' });
             // 로그아웃 시에는 진행 중 세션을 다음 접속 때 복원하지 않도록 서버의 열린 세션도 정리합니다.
             await deleteOpenSessions('logout');
             resetLocalSessionState();
@@ -955,9 +1268,618 @@
 
     function calculateDrinkMetrics(gender, weight, abv, volume) {
         const r = gender === 'male' ? 0.86 : 0.64;
-        const alcoholGrams = volume * (abv / 100) * 0.7894;
+        const alcoholGrams = calculateAlcoholGrams(abv, volume);
         const cMaxContribution = (alcoholGrams * 0.7) / (weight * r * 10);
         return { alcoholGrams, cMaxContribution };
+    }
+
+
+    function calculateAlcoholGrams(abv, volume) {
+        const parsedAbv = Number(abv) || 0;
+        const parsedVolume = Number(volume) || 0;
+        return parsedVolume * (parsedAbv / 100) * 0.7894;
+    }
+
+    function getGoalTypeConfig(key) {
+        return DRINKING_GOAL_TYPES.find(item => item.key === key) || null;
+    }
+
+    function getLocalDateKeyFromMs(ms = Date.now()) {
+        const d = new Date(ms);
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+    }
+
+    function getCurrentGoalDateKey() {
+        return getLocalDateKeyFromMs(Date.now());
+    }
+
+    function normalizeGoalTime(value) {
+        const str = String(value || '').trim();
+        if (!str) return '';
+        const match = str.match(/^(\d{1,2}):(\d{2})$/);
+        if (!match) return null;
+        const hour = Number(match[1]);
+        const minute = Number(match[2]);
+        if (!Number.isInteger(hour) || !Number.isInteger(minute) || hour < 0 || hour > 23 || minute < 0 || minute > 59) return null;
+        return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+    }
+
+    function formatGoalNumber(value, digits = 1) {
+        const numeric = Number(value) || 0;
+        return numeric.toLocaleString('ko-KR', { maximumFractionDigits: digits });
+    }
+
+    function getDrinkingGoalStorageKey() {
+        return `alcoholaway_control_drinking_goal_${userId || 'anonymous'}`;
+    }
+
+    function normalizeDrinkingGoal(rawGoal) {
+        if (!rawGoal || rawGoal.enabled === false) return null;
+        const rawTargets = rawGoal.drinkTargets || {};
+        const drinkTargets = {};
+        let hasQuantityTarget = false;
+
+        DRINKING_GOAL_TYPES.forEach(config => {
+            const rawTarget = rawTargets[config.key] || {};
+            const maxCount = Number(rawTarget.maxCount ?? rawTarget.count ?? 0);
+            const safeMaxCount = Number.isFinite(maxCount) && maxCount > 0 ? maxCount : 0;
+            if (safeMaxCount > 0) hasQuantityTarget = true;
+            drinkTargets[config.key] = {
+                key: config.key,
+                label: config.label,
+                unitLabel: rawTarget.unitLabel || config.unitLabel,
+                unitVolume: Number(rawTarget.unitVolume) || config.unitVolume,
+                abv: Number(rawTarget.abv) || config.abv,
+                maxCount: safeMaxCount
+            };
+        });
+
+        const finishTimeHHMM = normalizeGoalTime(rawGoal.finishTimeHHMM || rawGoal.goalEndTime || rawGoal.finishTime || '');
+        if (finishTimeHHMM === null) return null;
+        if (!hasQuantityTarget && !finishTimeHHMM) return null;
+
+        return {
+            enabled: true,
+            goalDate: rawGoal.goalDate || getCurrentGoalDateKey(),
+            drinkTargets,
+            finishTimeHHMM,
+            createdAtMs: Number(rawGoal.createdAtMs) || Date.now(),
+            updatedAtMs: Number(rawGoal.updatedAtMs) || Date.now()
+        };
+    }
+
+    function sanitizeDrinkingGoalForSave(goal = drinkingGoal) {
+        const normalized = normalizeDrinkingGoal(goal);
+        return normalized ? JSON.parse(JSON.stringify(normalized)) : null;
+    }
+
+    function getDrinkingGoalLimitAlcoholGrams(goal = drinkingGoal) {
+        const normalized = normalizeDrinkingGoal(goal);
+        if (!normalized) return 0;
+        return DRINKING_GOAL_TYPES.reduce((sum, config) => {
+            const target = normalized.drinkTargets?.[config.key];
+            const maxCount = Number(target?.maxCount) || 0;
+            if (maxCount <= 0) return sum;
+            return sum + calculateAlcoholGrams(target.abv || config.abv, target.unitVolume || config.unitVolume) * maxCount;
+        }, 0);
+    }
+
+    function refreshGoalButtonState() {
+        const btn = document.getElementById('drinkingGoalButton');
+        if (!btn) return;
+        const hasGoal = !!normalizeDrinkingGoal(drinkingGoal);
+        btn.classList.toggle('has-goal', hasGoal);
+        btn.innerText = hasGoal ? '🎯 목표 보기/수정' : '🎯 음주 목표 설정';
+    }
+
+    function loadSavedDrinkingGoal() {
+        try {
+            const raw = localStorage.getItem(getDrinkingGoalStorageKey());
+            if (!raw) {
+                drinkingGoal = null;
+                refreshGoalButtonState();
+                return null;
+            }
+            const normalized = normalizeDrinkingGoal(JSON.parse(raw));
+            if (!normalized) {
+                localStorage.removeItem(getDrinkingGoalStorageKey());
+                drinkingGoal = null;
+                refreshGoalButtonState();
+                return null;
+            }
+            if (!sessionStartTime && normalized.goalDate < getCurrentGoalDateKey()) {
+                localStorage.removeItem(getDrinkingGoalStorageKey());
+                drinkingGoal = null;
+                refreshGoalButtonState();
+                return null;
+            }
+            drinkingGoal = normalized;
+            refreshGoalButtonState();
+            return drinkingGoal;
+        } catch (error) {
+            console.warn('음주 목표 로드 실패:', error);
+            drinkingGoal = null;
+            refreshGoalButtonState();
+            return null;
+        }
+    }
+
+    function persistDrinkingGoal(goal = drinkingGoal) {
+        const normalized = normalizeDrinkingGoal(goal);
+        if (!normalized) {
+            localStorage.removeItem(getDrinkingGoalStorageKey());
+            drinkingGoal = null;
+        } else {
+            drinkingGoal = normalized;
+            localStorage.setItem(getDrinkingGoalStorageKey(), JSON.stringify(normalized));
+        }
+        refreshGoalButtonState();
+        refreshDrinkingGoalStatusPanel();
+    }
+
+    function getDrinkingGoalFromInputs() {
+        const drinkTargets = {};
+        let hasQuantityTarget = false;
+        for (const config of DRINKING_GOAL_TYPES) {
+            const input = document.getElementById(`goalTarget_${config.key}`);
+            const rawValue = String(input?.value || '').trim();
+            const maxCount = rawValue === '' ? 0 : Number(rawValue);
+            if (!Number.isFinite(maxCount) || maxCount < 0) {
+                throw new Error(`${config.label} 목표 잔 수를 0 이상 숫자로 입력해 주세요.`);
+            }
+            if (maxCount > 0) hasQuantityTarget = true;
+            drinkTargets[config.key] = {
+                key: config.key,
+                label: config.label,
+                unitLabel: config.unitLabel,
+                unitVolume: config.unitVolume,
+                abv: config.abv,
+                maxCount
+            };
+        }
+
+        const finishTimeRaw = document.getElementById('goalFinishTimeInput')?.value || '';
+        const finishTimeHHMM = normalizeGoalTime(finishTimeRaw);
+        if (finishTimeHHMM === null) {
+            throw new Error('마무리 시각을 HH:MM 형식으로 입력해 주세요.');
+        }
+        if (!hasQuantityTarget && !finishTimeHHMM) {
+            throw new Error('최대 음주량 또는 마무리 시각 중 하나 이상을 입력해 주세요.');
+        }
+
+        const previous = normalizeDrinkingGoal(drinkingGoal);
+        return {
+            enabled: true,
+            goalDate: previous?.goalDate || getCurrentGoalDateKey(),
+            drinkTargets,
+            finishTimeHHMM,
+            createdAtMs: previous?.createdAtMs || Date.now(),
+            updatedAtMs: Date.now()
+        };
+    }
+
+    function buildDrinkingGoalSummaryHTML(goal = drinkingGoal) {
+        const normalized = normalizeDrinkingGoal(goal);
+        if (!normalized) return '목표량 또는 마무리 시각을 입력해 주세요.';
+
+        const targetLines = DRINKING_GOAL_TYPES
+            .map(config => normalized.drinkTargets?.[config.key])
+            .filter(target => Number(target?.maxCount) > 0)
+            .map(target => `${escapeHtml(target.label)} <b>${formatGoalNumber(target.maxCount)}</b>${escapeHtml(target.unitLabel)}`);
+        const limitGrams = getDrinkingGoalLimitAlcoholGrams(normalized);
+        const finishText = normalized.finishTimeHHMM ? `<br>• 마무리 시각: <b>${normalized.finishTimeHHMM}</b>` : '';
+        const quantityText = targetLines.length > 0
+            ? `• 최대량: ${targetLines.join(' · ')}<br>• 환산 알코올 한도: <b>${limitGrams.toFixed(1)}g</b>`
+            : '• 최대량: 미설정';
+        return `${quantityText}${finishText}<br><span style="color:#718096; font-size:0.72rem;">저장 후 실제 누적량 또는 마무리 시각을 넘기면 서버 FCM 푸시와 앱 내 팝업을 30분 간격으로 표시합니다.</span>`;
+    }
+
+    window.updateDrinkingGoalModalSummary = function() {
+        const summaryEl = document.getElementById('drinkingGoalModalSummary');
+        if (!summaryEl) return;
+        try {
+            const goal = getDrinkingGoalFromInputs();
+            summaryEl.innerHTML = buildDrinkingGoalSummaryHTML(goal);
+        } catch (error) {
+            summaryEl.innerHTML = `<span style="color:#718096;">${escapeHtml(error.message || '목표값을 입력해 주세요.')}</span>`;
+        }
+    };
+
+    window.openDrinkingGoalModal = function() {
+        const goal = normalizeDrinkingGoal(drinkingGoal) || loadSavedDrinkingGoal();
+        DRINKING_GOAL_TYPES.forEach(config => {
+            const input = document.getElementById(`goalTarget_${config.key}`);
+            if (!input) return;
+            const maxCount = Number(goal?.drinkTargets?.[config.key]?.maxCount) || 0;
+            input.value = maxCount > 0 ? String(maxCount) : '';
+        });
+        const timeInput = document.getElementById('goalFinishTimeInput');
+        if (timeInput) timeInput.value = goal?.finishTimeHHMM || '';
+        window.updateDrinkingGoalModalSummary();
+        const modal = document.getElementById('drinkingGoalModal');
+        if (modal) modal.style.display = 'flex';
+    };
+
+    window.closeDrinkingGoalModal = function() {
+        const modal = document.getElementById('drinkingGoalModal');
+        if (modal) modal.style.display = 'none';
+    };
+
+    window.saveDrinkingGoalSettings = async function() {
+        try {
+            const goal = getDrinkingGoalFromInputs();
+            drinkingGoal = normalizeDrinkingGoal(goal);
+            persistDrinkingGoal(drinkingGoal);
+            await requestControlNotificationPermission();
+            if (sessionStartTime) {
+                refreshDrinkingGoalStatusPanel(Date.now());
+                checkControlNotificationsAndGoalWarnings(Date.now(), true);
+                await executeSaveProcess(false, true);
+            }
+            closeDrinkingGoalModal();
+        } catch (error) {
+            alert(error.message || '음주 목표 저장 중 오류가 발생했습니다.');
+        }
+    };
+
+    window.clearDrinkingGoalSettings = async function() {
+        drinkingGoal = null;
+        localStorage.removeItem(getDrinkingGoalStorageKey());
+        lastGoalWarningAt = 0;
+        lastGoalWarningSignature = '';
+        refreshGoalButtonState();
+        refreshDrinkingGoalStatusPanel();
+        closeDrinkingGoalModal();
+        if (sessionStartTime) {
+            await executeSaveProcess(false, true);
+        }
+    };
+
+    function getGoalEndMs(goal = drinkingGoal) {
+        const normalized = normalizeDrinkingGoal(goal);
+        const finishTimeHHMM = normalizeGoalTime(normalized?.finishTimeHHMM || '');
+        if (!finishTimeHHMM) return null;
+        const [hour, minute] = finishTimeHHMM.split(':').map(Number);
+        const base = sessionStartTime || new Date();
+        const end = new Date(base.getFullYear(), base.getMonth(), base.getDate(), hour, minute, 0, 0);
+        if (sessionStartTime && end.getTime() < sessionStartTime.getTime() - 60000) {
+            end.setDate(end.getDate() + 1);
+        }
+        return end.getTime();
+    }
+
+    function getPriorGoalDayDrinks(goalDateKey = getCurrentGoalDateKey()) {
+        if (!Array.isArray(pastSessionsData) || pastSessionsData.length === 0) return [];
+        return pastSessionsData
+            .filter(session => session && session.isFinished !== false && getLocalDateKeyFromMs(toMs(session.startTime)) === goalDateKey)
+            .flatMap(session => Array.isArray(session.drinksList) ? session.drinksList : []);
+    }
+
+    function getDrinkGoalTypeKey(drink) {
+        if (!drink) return null;
+        if (drink.drinkTypeKey && getGoalTypeConfig(drink.drinkTypeKey)) return drink.drinkTypeKey;
+        const name = String(drink.drinkName || '').toLowerCase();
+        const byName = DRINKING_GOAL_TYPES.find(config => config.matchLabels.some(label => name.includes(label.toLowerCase())));
+        if (byName) return byName.key;
+
+        const abv = Number(drink.abv);
+        if (Number.isFinite(abv)) {
+            let closest = null;
+            let closestDiff = Infinity;
+            DRINKING_GOAL_TYPES.forEach(config => {
+                const diff = Math.abs((Number(config.abv) || 0) - abv);
+                if (diff < closestDiff) {
+                    closest = config;
+                    closestDiff = diff;
+                }
+            });
+            if (closest && closestDiff <= 0.35) return closest.key;
+        }
+        return null;
+    }
+
+    function getGoalConsumptionSnapshot(targetDrinks = drinksList, goal = drinkingGoal, nowMs = Date.now(), includePriorSessions = true) {
+        const normalized = normalizeDrinkingGoal(goal);
+        const goalDateKey = normalized?.goalDate || getCurrentGoalDateKey();
+        const priorDrinks = includePriorSessions ? getPriorGoalDayDrinks(goalDateKey) : [];
+        const activeDrinks = Array.isArray(targetDrinks) ? targetDrinks : [];
+        const allDrinks = [...priorDrinks, ...activeDrinks]
+            .filter(d => getDrinkTimeMs(d) > 0 && getDrinkTimeMs(d) <= nowMs);
+
+        const byType = {};
+        DRINKING_GOAL_TYPES.forEach(config => {
+            byType[config.key] = {
+                key: config.key,
+                label: config.label,
+                unitLabel: config.unitLabel,
+                unitVolume: config.unitVolume,
+                volume: 0,
+                alcoholGrams: 0,
+                equivalentCount: 0
+            };
+        });
+
+        let totalAlcoholGrams = 0;
+        let unknownAlcoholGrams = 0;
+        allDrinks.forEach(drink => {
+            const volume = Number(drink.volume) || 0;
+            const grams = Number.isFinite(Number(drink.alcoholGrams))
+                ? Number(drink.alcoholGrams)
+                : calculateAlcoholGrams(Number(drink.abv) || 0, volume);
+            totalAlcoholGrams += grams;
+            const typeKey = getDrinkGoalTypeKey(drink);
+            const typeBucket = typeKey ? byType[typeKey] : null;
+            if (typeBucket) {
+                typeBucket.volume += volume;
+                typeBucket.alcoholGrams += grams;
+                typeBucket.equivalentCount = typeBucket.unitVolume > 0 ? typeBucket.volume / typeBucket.unitVolume : 0;
+            } else {
+                unknownAlcoholGrams += grams;
+            }
+        });
+
+        return {
+            allDrinks,
+            priorDrinksCount: priorDrinks.length,
+            activeDrinksCount: activeDrinks.length,
+            totalAlcoholGrams,
+            unknownAlcoholGrams,
+            byType
+        };
+    }
+
+    function evaluateDrinkingGoalStatus(nowMs = Date.now(), targetDrinks = drinksList, goal = drinkingGoal, options = {}) {
+        const normalized = normalizeDrinkingGoal(goal);
+        if (!normalized) return { hasGoal: false, warnings: [] };
+        const snapshot = getGoalConsumptionSnapshot(targetDrinks, normalized, nowMs, options.includePriorSessions !== false);
+        const quantityLimitGrams = getDrinkingGoalLimitAlcoholGrams(normalized);
+        const warnings = [];
+        const labelPrefix = options.projected ? '예상' : '현재';
+
+        if (quantityLimitGrams > 0 && snapshot.totalAlcoholGrams > quantityLimitGrams + 0.05) {
+            const overGrams = snapshot.totalAlcoholGrams - quantityLimitGrams;
+            warnings.push({
+                key: 'goal-total-alcohol',
+                type: 'goal',
+                title: `음주 목표량 ${labelPrefix} 초과`,
+                body: `${labelPrefix} 오늘 누적 알코올은 ${snapshot.totalAlcoholGrams.toFixed(1)}g으로, 설정 한도 ${quantityLimitGrams.toFixed(1)}g보다 ${overGrams.toFixed(1)}g 많습니다.`
+            });
+        }
+
+        DRINKING_GOAL_TYPES.forEach(config => {
+            const target = normalized.drinkTargets?.[config.key];
+            const maxCount = Number(target?.maxCount) || 0;
+            if (maxCount <= 0) return;
+            const consumedCount = Number(snapshot.byType?.[config.key]?.equivalentCount) || 0;
+            if (consumedCount > maxCount + 0.01) {
+                warnings.push({
+                    key: `goal-type-${config.key}`,
+                    type: 'goal',
+                    title: `${config.label} 목표 잔 수 ${labelPrefix} 초과`,
+                    body: `${labelPrefix} ${config.label} 환산량은 ${formatGoalNumber(consumedCount)}${config.unitLabel}으로, 목표 ${formatGoalNumber(maxCount)}${config.unitLabel}을 넘었습니다.`
+                });
+            }
+        });
+
+        const endMs = getGoalEndMs(normalized);
+        if (endMs && nowMs > endMs) {
+            const overMinutes = Math.max(1, Math.ceil((nowMs - endMs) / 60000));
+            const endText = new Date(endMs).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+            warnings.push({
+                key: 'goal-finish-time',
+                type: 'goal-time',
+                title: `음주 마무리 시각 ${labelPrefix} 초과`,
+                body: `설정한 마무리 시각 ${endText}을 ${overMinutes}분 지났습니다. 세션을 정리하거나 추가 음주를 멈추는 것이 좋습니다.`
+            });
+        }
+
+        return {
+            hasGoal: true,
+            goal: normalized,
+            snapshot,
+            quantityLimitGrams,
+            endMs,
+            warnings,
+            isExceeded: warnings.length > 0
+        };
+    }
+
+    function refreshDrinkingGoalStatusPanel(nowMs = Date.now()) {
+        const panel = document.getElementById('drinkingGoalStatusPanel');
+        if (!panel) return;
+        const status = evaluateDrinkingGoalStatus(nowMs, drinksList, drinkingGoal);
+        if (!sessionStartTime || !status.hasGoal) {
+            panel.style.display = 'none';
+            return;
+        }
+
+        const goal = status.goal;
+        const limitGrams = status.quantityLimitGrams;
+        const consumedGrams = status.snapshot.totalAlcoholGrams;
+        const progressPercent = limitGrams > 0 ? clampPercent((consumedGrams / limitGrams) * 100) : 0;
+        const amountLine = limitGrams > 0
+            ? `오늘 누적 알코올 <b>${consumedGrams.toFixed(1)}g</b> / 목표 <b>${limitGrams.toFixed(1)}g</b>`
+            : '음주량 목표는 설정하지 않았습니다.';
+        const typeLine = DRINKING_GOAL_TYPES
+            .filter(config => Number(goal.drinkTargets?.[config.key]?.maxCount) > 0)
+            .map(config => {
+                const targetCount = Number(goal.drinkTargets?.[config.key]?.maxCount) || 0;
+                const consumedCount = Number(status.snapshot.byType?.[config.key]?.equivalentCount) || 0;
+                const isOver = consumedCount > targetCount + 0.01;
+                return `${config.label} <b style="color:${isOver ? 'var(--danger-color)' : 'var(--text-dark)'};">${formatGoalNumber(consumedCount)}/${formatGoalNumber(targetCount)}</b>${config.unitLabel}`;
+            })
+            .join(' · ');
+        let timeLine = '마무리 시각 미설정';
+        if (status.endMs) {
+            const endText = new Date(status.endMs).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+            const diffMs = status.endMs - nowMs;
+            timeLine = diffMs >= 0
+                ? `마무리 목표 <b>${endText}</b>까지 약 <b>${Math.ceil(diffMs / 60000)}분</b> 남음`
+                : `마무리 목표 <b>${endText}</b>에서 <b style="color:var(--danger-color);">${Math.ceil(Math.abs(diffMs) / 60000)}분 초과</b>`;
+        }
+
+        panel.style.display = 'block';
+        panel.classList.toggle('is-over', status.isExceeded);
+        panel.innerHTML = `
+            <div class="goal-status-title">
+                <span>🎯 오늘 음주 목표</span>
+                <span class="goal-status-chip">${status.isExceeded ? '초과 경고' : '진행 중'}</span>
+            </div>
+            ${limitGrams > 0 ? `<div class="goal-progress-track"><div class="goal-progress-fill ${status.isExceeded ? 'is-over' : ''}" style="width:${progressPercent}%;"></div></div>` : ''}
+            <div class="goal-status-lines">
+                • ${amountLine}<br>
+                ${typeLine ? `• ${typeLine}<br>` : ''}
+                • ${timeLine}
+            </div>
+        `;
+    }
+
+    function resetControlAlertRuntimeState() {
+        lastBacStatusNotificationAt = 0;
+        lastRapidBacWarningAt = 0;
+        lastGoalWarningAt = 0;
+        lastGoalWarningSignature = '';
+        const modal = document.getElementById('controlSafetyAlertModal');
+        if (modal) modal.style.display = 'none';
+    }
+
+    function primeControlAlertRuntimeState() {
+        if (!lastBacStatusNotificationAt && sessionStartTime) {
+            lastBacStatusNotificationAt = sessionStartTime.getTime();
+        }
+    }
+
+    async function requestControlNotificationPermission() {
+        const result = await ensureControlFcmReady();
+        if (!result.ok) {
+            const reasonMap = {
+                'missing-vapid-key': 'Firebase Web Push VAPID 공개 키가 아직 설정되지 않았습니다.',
+                'permission-not-granted': '브라우저 푸시 권한이 허용되지 않았습니다.',
+                'service-worker-unsupported': '이 브라우저는 Service Worker를 지원하지 않습니다.',
+                'messaging-unsupported': '이 브라우저 환경에서는 Firebase Messaging을 사용할 수 없습니다.'
+            };
+            console.warn('음주 조절 FCM 준비 상태:', reasonMap[result.reason] || result.reason || result);
+        }
+        return result;
+    }
+
+    function sendControlPushAlert(title, body, tag = 'alcoholaway-control-alert') {
+        // 실제 백그라운드 푸시는 Cloud Functions(sendControlDrinkingReminders)가 FCM으로 발송합니다.
+        // 이 함수는 앱이 열린 상태에서 감지된 경고를 콘솔/진동으로만 남겨, 로컬 Notification API와 서버 FCM의 중복 발송을 방지합니다.
+        console.info('control alert detected locally; FCM server scheduler will handle push delivery', { title, body, tag });
+        if (navigator.vibrate) {
+            try { navigator.vibrate([180, 80, 180]); } catch (error) {}
+        }
+        return false;
+    }
+
+    function openControlSafetyAlertModal({ title = '⚠️ 조절 경고', lead = '', alerts = [], note = '' } = {}) {
+        const modal = document.getElementById('controlSafetyAlertModal');
+        if (!modal) return;
+        const titleEl = document.getElementById('controlSafetyAlertTitle');
+        const leadEl = document.getElementById('controlSafetyAlertLead');
+        const listEl = document.getElementById('controlSafetyAlertList');
+        const noteEl = document.getElementById('controlSafetyAlertNote');
+        if (titleEl) titleEl.textContent = title;
+        if (leadEl) leadEl.innerHTML = lead || '음주 조절 기준을 확인해 주세요.';
+        if (listEl) {
+            listEl.innerHTML = (alerts || []).map(item => `
+                <div class="drink-warning-item">
+                    <div class="drink-warning-item-title">${escapeHtml(item.title || '경고')}</div>
+                    <div>${emphasizeDrinkWarningBody(item.body || '', item.type || '')}</div>
+                </div>
+            `).join('');
+        }
+        if (noteEl) noteEl.innerHTML = note || '목표 초과 상태가 유지되면 서버 FCM 푸시와 앱 내 팝업으로 30분 간격 알림을 유지합니다.';
+        modal.style.display = 'flex';
+    }
+
+    window.closeControlSafetyAlertModal = function() {
+        const modal = document.getElementById('controlSafetyAlertModal');
+        if (modal) modal.style.display = 'none';
+    };
+
+    function maybeSendBacStatusNotification(nowMs = Date.now()) {
+        if (!sessionStartTime || !Array.isArray(drinksList) || drinksList.length === 0) return;
+        primeControlAlertRuntimeState();
+        if ((nowMs - lastBacStatusNotificationAt) < BAC_STATUS_NOTIFICATION_INTERVAL_MS) return;
+        const currentBac = getRealtimeEstimatedBac(nowMs, drinksList);
+        const totalAlcoholGrams = drinksList.reduce((sum, d) => sum + (Number(d.alcoholGrams) || 0), 0);
+        const absorbedAlcoholGrams = calculateAbsorbedAlcoholGramsAtTime(drinksList, nowMs);
+        const elapsedText = formatElapsedFromStart(nowMs);
+        sendControlPushAlert(
+            '🍷 현재 BAC 알림',
+            `음주 ${elapsedText} 경과 · 현재 추정 BAC ${currentBac.toFixed(3)}% · 누적 알코올 ${totalAlcoholGrams.toFixed(1)}g 중 흡수 추정 ${absorbedAlcoholGrams.toFixed(1)}g`,
+            'alcoholaway-bac-status'
+        );
+        lastBacStatusNotificationAt = nowMs;
+    }
+
+    function getRapidBacRiseInfo(nowMs = Date.now()) {
+        if (!sessionStartTime || !Array.isArray(drinksList) || drinksList.length === 0) return null;
+        const sessionStartMs = sessionStartTime.getTime();
+        const lookbackStartMs = Math.max(sessionStartMs, nowMs - BAC_RAPID_RISE_LOOKBACK_MS);
+        const actualLookbackMs = nowMs - lookbackStartMs;
+        if (actualLookbackMs < 3 * 60 * 1000) return null;
+        const currentBac = getRealtimeEstimatedBac(nowMs, drinksList);
+        const previousBac = getRealtimeEstimatedBac(lookbackStartMs, drinksList);
+        const delta = currentBac - previousBac;
+        const projectedPer30Min = delta * (CONTROL_ALERT_INTERVAL_MS / actualLookbackMs);
+        if (currentBac >= 0.005 && delta >= BAC_RAPID_RISE_MIN_DELTA && projectedPer30Min >= BAC_RAPID_RISE_THRESHOLD_PER_30_MIN) {
+            return {
+                currentBac,
+                previousBac,
+                delta,
+                projectedPer30Min,
+                lookbackMinutes: actualLookbackMs / 60000
+            };
+        }
+        return null;
+    }
+
+    function maybeSendRapidBacWarning(nowMs = Date.now()) {
+        const info = getRapidBacRiseInfo(nowMs);
+        if (!info) return;
+        if (lastRapidBacWarningAt && (nowMs - lastRapidBacWarningAt) < CONTROL_ALERT_INTERVAL_MS) return;
+        lastRapidBacWarningAt = nowMs;
+        const body = `최근 ${info.lookbackMinutes.toFixed(0)}분 동안 BAC가 ${info.delta.toFixed(3)}% 상승했습니다. 30분 환산 상승폭은 ${info.projectedPer30Min.toFixed(3)}%입니다. 현재 추정 BAC는 ${info.currentBac.toFixed(3)}%입니다.`;
+        sendControlPushAlert('🚨 BAC 급상승 경고', body, 'alcoholaway-bac-rapid-rise');
+        openControlSafetyAlertModal({
+            title: '🚨 BAC 급상승 경고',
+            lead: '혈중알코올농도 상승 속도가 빠르게 감지되었습니다.',
+            alerts: [{ type: 'bac', title: 'BAC 급상승', body }],
+            note: '수분 섭취와 휴식을 우선하고, 다음 잔은 충분히 늦춰 주세요. 같은 급상승 경고는 30분 이내 반복 표시하지 않습니다.'
+        });
+    }
+
+    function maybeSendGoalWarning(nowMs = Date.now(), force = false) {
+        const status = evaluateDrinkingGoalStatus(nowMs, drinksList, drinkingGoal);
+        if (!status.hasGoal || !status.isExceeded) return;
+        const signature = status.warnings.map(w => w.key).sort().join('|');
+        if (!force && signature === lastGoalWarningSignature && lastGoalWarningAt && (nowMs - lastGoalWarningAt) < CONTROL_ALERT_INTERVAL_MS) {
+            return;
+        }
+        lastGoalWarningAt = nowMs;
+        lastGoalWarningSignature = signature;
+        const body = status.warnings.map(w => `${w.title}: ${w.body}`).join(' / ');
+        sendControlPushAlert('⚠️ 음주 목표 초과 경고', body, 'alcoholaway-drinking-goal-warning');
+        openControlSafetyAlertModal({
+            title: '⚠️ 음주 목표 초과 경고',
+            lead: '설정한 오늘의 음주 목표를 초과했습니다.',
+            alerts: status.warnings,
+            note: '목표 초과 상태가 유지되면 서버 FCM 푸시와 이 팝업을 30분 간격으로 다시 표시합니다.'
+        });
+    }
+
+    function checkControlNotificationsAndGoalWarnings(nowMs = Date.now(), forceGoal = false) {
+        if (!sessionStartTime) return;
+        maybeSendBacStatusNotification(nowMs);
+        maybeSendRapidBacWarning(nowMs);
+        maybeSendGoalWarning(nowMs, forceGoal);
+        refreshDrinkingGoalStatusPanel(nowMs);
     }
 
     /**
@@ -1498,6 +2420,17 @@
             });
         }
 
+        const projectedGoalStatus = evaluateDrinkingGoalStatus(nowMs, [...drinksList, newDrink], drinkingGoal, { projected: true });
+        if (projectedGoalStatus.hasGoal && projectedGoalStatus.warnings.length > 0) {
+            projectedGoalStatus.warnings.forEach(goalWarning => {
+                warnings.push({
+                    type: goalWarning.type || 'goal',
+                    title: goalWarning.title,
+                    body: goalWarning.body
+                });
+            });
+        }
+
         if (warnings.length === 0) {
             return { shouldWarn: false, warnings: [], message: '', intervalInfo, currentStatus, projectedStatus };
         }
@@ -1678,8 +2611,10 @@
         activeAnalysisUnlocked = true;
         renderDrinkList();
         refreshDrinkPacePanel();
+        refreshDrinkingGoalStatusPanel();
         showLatestPreDrinkBacResult();
         refreshActiveAnalysisIfReady();
+        checkControlNotificationsAndGoalWarnings(Date.now(), false);
         executeSaveProcess(false, true);
     }
 
@@ -1692,6 +2627,7 @@
         activeAnalysisUnlocked = hasAdditionalDrinks() || hasBacReflectableDrinks();
         renderDrinkList();
         refreshDrinkPacePanel();
+        refreshDrinkingGoalStatusPanel();
         showLatestPreDrinkBacResult();
         refreshActiveAnalysisIfReady();
         executeSaveProcess(false, true);
@@ -1769,6 +2705,7 @@
             entrySource: isInitialDrink ? 'session_start' : 'manual_add',
             isInitialDrink,
             drinkName: input.drinkName,
+            drinkTypeKey: getDrinkGoalTypeKey({ drinkName: input.drinkName, abv: input.abv, volume: input.volume }),
             abv: input.abv,
             volume: input.volume,
             prevTime: prevTimeMs,
@@ -1817,6 +2754,7 @@
                 drink.additionalSequence = isInitialDrink ? 0 : rebuilt.filter(d => !d.isInitialDrink).length + 1;
                 drink.isInitialDrink = isInitialDrink;
                 drink.entrySource = isInitialDrink ? 'session_start' : (drink.entrySource || 'manual_add');
+                drink.drinkTypeKey = getDrinkGoalTypeKey(drink);
                 const absorptionStatus = getDrinkAbsorptionStatus(drink, index, drinksList);
                 drink.absorptionStatus = absorptionStatus;
                 drink.isAbsorbed = absorptionStatus === 'absorbed';
@@ -1957,6 +2895,7 @@
                 document.getElementById('userGender').value = userProfile.gender || 'male';
                 document.getElementById('userWeight').value = userProfile.weight || 70;
             }
+            loadSavedDrinkingGoal();
 
             const q = query(collection(db, "drinking_sessions"), where("userId", "==", userId), orderBy("startTime", "desc"));
             const querySnapshot = await getDocs(q);
@@ -1986,6 +2925,8 @@
                 document.getElementById('setupCard').style.display = 'block';
                 document.getElementById('activeCard').style.display = 'none';
                 document.getElementById('historyCard').style.display = 'none';
+                refreshGoalButtonState();
+                refreshDrinkingGoalStatusPanel();
                 renderHistoryList(container);
             }
 
@@ -2069,6 +3010,9 @@
         drinksList = sessionData.drinksList || [];
         normalizeDrinkAbsorptionStates(drinksList);
         currentSessionDocId = sessionData.id;
+        drinkingGoal = normalizeDrinkingGoal(sessionData.drinkingGoal) || loadSavedDrinkingGoal();
+        if (drinkingGoal) persistDrinkingGoal(drinkingGoal);
+        resetControlAlertRuntimeState();
         
         document.getElementById('userGender').value = sessionData.gender;
         document.getElementById('userWeight').value = sessionData.weight;
@@ -2093,8 +3037,11 @@
         showLatestPreDrinkBacResult();
         activeAnalysisUnlocked = hasAdditionalDrinks() || hasBacReflectableDrinks();
         refreshActiveAnalysisIfReady();
+        refreshDrinkingGoalStatusPanel();
 
         startTimer();
+        syncControlDrinkingReminder({ enabled: true, force: true, reason: 'resume_active_session' })
+            .catch(error => console.warn('음주 조절 FCM 리마인더 재개 동기화 실패:', error));
     }
 
     window.startDrinkSession = async function() {
@@ -2114,6 +3061,9 @@
         drinksList = [];
         currentSessionDocId = null;
         activeAnalysisUnlocked = false;
+        drinkingGoal = normalizeDrinkingGoal(drinkingGoal) || loadSavedDrinkingGoal();
+        resetControlAlertRuntimeState();
+        requestControlNotificationPermission().catch(error => console.warn('알림 권한 요청 실패:', error));
         hideActiveAnalysis();
 
         const initialDrink = createDrinkRecord({
@@ -2142,6 +3092,7 @@
         document.getElementById('preDrinkBacResult').style.display = 'none';
         renderDrinkList();
         refreshDrinkPacePanel();
+        refreshDrinkingGoalStatusPanel();
         hideActiveAnalysis();
         startTimer();
 
@@ -2153,8 +3104,11 @@
 
     function startTimer() {
         if(timerInterval) clearInterval(timerInterval);
+        primeControlAlertRuntimeState();
         updateElapsedTimeDisplay(Date.now());
         refreshDrinkPacePanel(Date.now());
+        refreshDrinkingGoalStatusPanel(Date.now());
+        checkControlNotificationsAndGoalWarnings(Date.now(), false);
         timerInterval = setInterval(() => {
             const now = new Date();
             updateElapsedTimeDisplay(now.getTime());
@@ -2163,6 +3117,7 @@
             // 현재 추정 BAC 패널은 음주 완료 처리된 drink-item-absorbed 기준으로 초단위 갱신합니다.
             showLatestPreDrinkBacResult();
             updateActiveSummaryOnly();
+            checkControlNotificationsAndGoalWarnings(now.getTime(), false);
             
             // 차트의 현재시각 세로선은 렌더링 부담을 줄이기 위해 30초마다 리렌더링합니다.
             if (activeChartInstance && activeAnalysisUnlocked && hasBacReflectableDrinks() && now.getSeconds() % 30 === 0) {
@@ -2217,6 +3172,7 @@
         
         renderDrinkList();
         refreshDrinkPacePanel();
+        refreshDrinkingGoalStatusPanel();
         showLatestPreDrinkBacResult();
         refreshActiveAnalysisIfReady();
         executeSaveProcess(false, true);
@@ -2251,6 +3207,7 @@
         recalculateDrinkDerivedFields();
         renderDrinkList();
         refreshDrinkPacePanel();
+        refreshDrinkingGoalStatusPanel();
         showLatestPreDrinkBacResult();
         refreshActiveAnalysisIfReady();
         executeSaveProcess(false, true);
@@ -2261,6 +3218,7 @@
     window.cancelDrinkingSession = async function() {
         if(confirm("기록 중인 음주 세션을 완전히 취소하시겠습니까?\n(서버에서 현재 진행중인 세션 기록이 완전히 삭제됩니다.)")) {
             try {
+                await syncControlDrinkingReminder({ enabled: false, force: true, reason: 'user_cancelled' });
                 await deleteOpenSessions('user_cancelled');
             } catch(e) {
                 console.error("진행 중 세션 정리 실패", e);
@@ -2321,6 +3279,7 @@
                 activeAnalysisUnlocked = hasAdditionalDrinks() || hasBacReflectableDrinks();
             }
             renderDrinkList();
+            refreshDrinkingGoalStatusPanel();
             showLatestPreDrinkBacResult();
             refreshActiveAnalysisIfReady();
             executeSaveProcess(false, true);
@@ -2540,6 +3499,7 @@
         recalculateDrinkDerivedFields();
         renderDrinkList();
         refreshDrinkPacePanel();
+        refreshDrinkingGoalStatusPanel();
         showLatestPreDrinkBacResult();
         refreshActiveAnalysisIfReady();
         await executeSaveProcess(true, false);
@@ -2551,7 +3511,10 @@
             return;
         }
         
-        if(isFinal && timerInterval) clearInterval(timerInterval);
+        if(isFinal && timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
 
         const mealOffsetHrs = parseFloat(document.getElementById('userMeal').value) || 1.0;
         const chartData = generateChartData(drinksList, sessionStartTime.getTime(), mealOffsetHrs);
@@ -2568,6 +3531,15 @@
             drinksList: drinksList,
             maxBac: sessionExpectedPeak,
             totalAlcoholGrams: totalAlcoholGrams,
+            drinkingGoal: sanitizeDrinkingGoalForSave(drinkingGoal),
+            controlReminder: {
+                enabled: !isFinal,
+                intervalMinutes: 30,
+                serviceWorkerUrl: CONTROL_SERVICE_WORKER_URL,
+                rapidBacLookbackMinutes: BAC_RAPID_RISE_LOOKBACK_MS / 60000,
+                rapidBacRiseThresholdPer30Min: BAC_RAPID_RISE_THRESHOLD_PER_30_MIN
+            },
+            clientSnapshot: buildControlReminderClientSnapshot(Date.now()),
             isFinished: isFinal, 
             updatedAt: serverTimestamp()
         };
@@ -2589,6 +3561,12 @@
                 const docRef = await addDoc(collection(db, "drinking_sessions"), sessionData);
                 currentSessionDocId = docRef.id; 
             }
+
+            await syncControlDrinkingReminder({
+                enabled: !isFinal,
+                force: isFinal || !isSilent,
+                reason: isFinal ? 'session_finished' : 'session_saved'
+            });
 
             if (isFinal) {
                 await finishOtherOpenSessions(currentSessionDocId, 'after_final_save');
