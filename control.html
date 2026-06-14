@@ -705,7 +705,7 @@
     const CONTROL_SERVICE_WORKER_URL = "/firebase-messaging-sw.js";
     // Firebase Console > Project settings > Cloud Messaging > Web Push certificates의 공개 VAPID 키로 교체하세요.
     // 이미 공통 설정 JS에서 window.ALCOHOLAWAY_FCM_VAPID_PUBLIC_KEY를 주입하고 있다면 그 값을 우선 사용합니다.
-    const FCM_VAPID_PUBLIC_KEY = window.ALCOHOLAWAY_FCM_VAPID_PUBLIC_KEY || "REPLACE_WITH_YOUR_FIREBASE_WEB_PUSH_PUBLIC_VAPID_KEY";
+    const FCM_VAPID_PUBLIC_KEY = window.ALCOHOLAWAY_FCM_VAPID_PUBLIC_KEY || "BMc9QcT2PDdOul3lY0MnfyYrOu9DmHpyBDoZEy0luRP2yKU8fiLQAySoM4eyBUI-Ty6W8rCLZIlrnsNoGh_A1x0";
     const WHO_STANDARD_DRINK_GRAMS = 10;
     const DRINKING_GOAL_TYPES = Object.freeze([
         { key: 'beer', label: '맥주', matchLabels: ['맥주'], abv: 4.5, unitVolume: 500, unitLabel: '500ml 잔' },
