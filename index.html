@@ -71,6 +71,17 @@
         .success-rate-box { display: inline-flex; align-items: center; gap: 5px; font-size: 0.72rem; font-weight: 800; color: #2f855a; background: #f0fff4; border: 1px solid #c6f6d5; border-radius: 999px; padding: 3px 7px; white-space: nowrap; }
         .success-rate-progress { width: 46px; height: 7px; border-radius: 999px; background: #c6f6d5; overflow: hidden; }
         .success-rate-progress-fill { height: 100%; width: 0%; background: var(--success-color); transition: width 0.5s ease; }
+        .alcohol-dementia-risk-box { display: inline-flex; align-items: center; gap: 5px; font-size: 0.72rem; font-weight: 900; color: #9a3412; background: linear-gradient(135deg, #fff7ed, #fffbeb); border: 1px solid #fed7aa; border-radius: 999px; padding: 3px 7px; white-space: nowrap; cursor: pointer; box-shadow: 0 2px 8px rgba(234, 88, 12, 0.08); transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .alcohol-dementia-risk-box:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(234, 88, 12, 0.16); }
+        .alcohol-dementia-risk-box.no-data { color: #64748b; background: linear-gradient(135deg, #f8fafc, #ffffff); border-color: #cbd5e0; }
+        .dementia-risk-progress { width: 52px; height: 7px; border-radius: 999px; background: #fed7aa; overflow: hidden; }
+        .dementia-risk-progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #f59e0b, #ef4444); transition: width 0.5s ease; }
+        .risk-period-row { margin-bottom: 13px; }
+        .risk-period-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 0.82rem; font-weight: 800; color: #334155; margin-bottom: 5px; }
+        .risk-period-percent { color: #c2410c; }
+        .risk-progress-bg { height: 14px; border-radius: 999px; background: #ffedd5; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.08); }
+        .risk-progress-fill { height: 100%; width: 0%; border-radius: 999px; background: linear-gradient(90deg, #fbbf24, #f97316, #ef4444); transition: width 0.5s ease; }
+        .risk-note-box { background: #fff7ed; border: 1px dashed #fdba74; color: #7c2d12; border-radius: 12px; padding: 10px; font-size: 0.78rem; line-height: 1.5; word-break: keep-all; }
         .craving-split-row { display: flex; gap: 8px; margin-bottom: 12px; }
         .craving-split-row .craving-btn { flex: 1; width: auto; margin: 0; padding: 15px 8px; }
         
@@ -125,7 +136,10 @@
         .craving-btn.calm-green { background-color: #6f8f72; }
         .craving-btn.calm-purple { background-color: #786b8f; }
         .craving-btn.calm-rust { background-color: #a36f5b; }
-        .stat-btn { background-color: #fff; color: var(--warning-color); border: 2px solid var(--warning-color); padding: 10px; border-radius: 12px; font-size: 0.85rem; cursor: pointer; width: 100%; font-weight: bold; box-sizing: border-box; }
+        .stat-btn { background: linear-gradient(135deg, #ffffff, #f0fdfa); color: #0f766e; border: 1.5px solid rgba(20, 184, 166, 0.55); padding: 10px; border-radius: 14px; font-size: 0.85rem; cursor: pointer; width: 100%; font-weight: 850; box-sizing: border-box; box-shadow: 0 5px 14px rgba(15, 118, 110, 0.10); transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease; }
+        .stat-btn:hover { background: linear-gradient(135deg, #ecfeff, #f0fdf4); transform: translateY(-1px); box-shadow: 0 8px 18px rgba(15, 118, 110, 0.16); }
+        .stat-btn:active { transform: scale(0.98); }
+        details.main-section.highlight .stat-btn { background: linear-gradient(135deg, #ecfeff, #f0fdf4) !important; color: #0f766e !important; border-color: #5eead4 !important; }
         .push-test-link-row { display: none; justify-content: flex-end; align-items: center; gap: 6px; margin: -6px 0 18px; }
         .push-link-btn { appearance: none; background: none; border: none; color: #64748b; cursor: pointer; font-family: inherit; font-size: 0.86rem; font-weight: 800; padding: 4px 0; text-decoration: underline; text-underline-offset: 3px; width: auto; }
         .push-link-btn:hover { color: #334155; }
@@ -504,7 +518,7 @@
         <div id="calLegendContainer" style="margin-bottom: 15px; font-size: 0.8rem; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
             <!-- 모드에 따라 범례 동적 변경 -->
         </div>
-        <p style="text-align: center; font-size: 0.75rem; color: #9b59b6; margin-top: -5px; margin-bottom: 15px;">💡 날짜를 <strong>길게 누르면(Long-click)</strong> 식사량, 음주량, 흡연량을 기록할 수 있습니다.</p>
+        <p style="text-align: center; font-size: 0.75rem; color: #9b59b6; margin-top: -5px; margin-bottom: 15px;">💡 날짜를 <strong>길게 누르면(Long-click)</strong> 식사량, 음주량, 블랙아웃 정도, 흡연량을 기록할 수 있습니다.</p>
 
         <div class="cal-week">
             <div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div>
@@ -522,7 +536,7 @@
     <div class="modal-content">
         <button class="close-btn-top" onclick="closeModal('dailyLogModal')">&times;</button>
         <h3 style="margin-top:0; padding-right: 20px;">📅 <span id="dailyLogDateTitle"></span> 기록</h3>
-        <p style="font-size:0.85rem; color:#666; margin-bottom:15px; word-break:keep-all;">해당 날짜의 식사량, 음주량, 흡연량을 기록합니다. (식사/음주 0: 안함, 흡연 1: 적음 ~ 10: 많음)</p>
+        <p style="font-size:0.85rem; color:#666; margin-bottom:15px; word-break:keep-all;">해당 날짜의 식사량, 음주량, 블랙아웃 정도, 흡연량을 기록합니다. (모두 0: 없음/안함 ~ 10: 많음/심함)</p>
         
         <input type="hidden" id="dailyLogDateHidden">
         <div id="dailyLogFailureSyncNotice" style="display:none; font-size:0.78rem; color:var(--danger-color); font-weight:700; background:#fff5f5; border:1px dashed #feb2b2; border-radius:10px; padding:8px; margin-bottom:12px; text-align:center; word-break:keep-all;">🚨 실패일입니다. 이곳의 음주량은 실패일 음주량과 함께 저장됩니다.</div>
@@ -545,9 +559,14 @@
         <label style="font-weight:700; font-size:0.9rem; display:block; color:var(--danger-color);">🍷 음주량 (<span id="logAlcoholVal" style="font-weight: 800; color: #a0aec0;">0</span>/10)</label>
         <input type="range" id="logAlcoholRange" min="0" max="10" value="0" class="dynamic-range" oninput="markTouched(this); updateRangeStyle(this, 'logAlcoholVal')">
         
+        <!-- 블랙아웃 정도 -->
+        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:10px; color:#6b21a8;">🧠 블랙아웃 정도 (<span id="logBlackoutVal" style="font-weight: 800; color: #a0aec0;">0</span>/10)</label>
+        <input type="range" id="logBlackoutRange" min="0" max="10" value="0" class="dynamic-range" data-touched="false" oninput="markTouched(this); updateRangeStyle(this, 'logBlackoutVal')">
+        <p style="font-size:0.72rem; color:#718096; margin:4px 0 0; word-break:keep-all;">0: 기억 공백 없음 · 10: 기억 공백이 매우 심함</p>
+        
         <!-- 흡연량 -->
         <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:10px; color:#4a5568;">🚬 흡연량 (<span id="logSmokingVal" style="font-weight: 800; color: #a0aec0;">-</span>/10)</label>
-        <input type="range" id="logSmokingRange" min="1" max="10" value="5" class="dynamic-range" data-touched="false" oninput="markTouched(this); updateRangeStyle(this, 'logSmokingVal')">
+        <input type="range" id="logSmokingRange" min="0" max="10" value="0" class="dynamic-range" data-touched="false" oninput="markTouched(this); updateRangeStyle(this, 'logSmokingVal')">
         
         <!-- 체중 -->
         <div style="border-top: 1px dashed #cbd5e0; margin: 20px 0;"></div>
@@ -563,12 +582,42 @@
     <div class="modal-content" style="max-width: 550px;">
         <button class="close-btn-top" onclick="closeModal('mealWeightLogListModal')">&times;</button>
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding-right: 20px;">
-            <h3 style="margin:0;">🥗 식사/체중/음주/흡연 추이</h3>
+            <h3 style="margin:0;">🥗 식사/체중/음주/블랙아웃/흡연 추이</h3>
         </div>
         <div style="height: 250px; position: relative; margin-top: 15px;">
             <canvas id="mealWeightChartCanvas"></canvas>
         </div>
         <div id="mealWeightLogListContainer" style="margin-top: 15px; max-height: 30vh; overflow-y: auto;"></div>
+    </div>
+</div>
+
+<!-- 알콜성 치매 가능성 추정 모달 -->
+<div id="alcoholDementiaRiskModal" class="modal">
+    <div class="modal-content" style="max-width: 460px;">
+        <button class="close-btn-top" onclick="closeModal('alcoholDementiaRiskModal')">&times;</button>
+        <h3 style="margin-top:0; margin-bottom: 12px; padding-right: 20px; color:#9a3412;">🧠 알콜성 치매 가능성 추정</h3>
+        <div class="risk-note-box" style="margin-bottom:15px;">
+            이 수치는 블랙아웃 기록을 바탕으로 만든 <b>개인 기록용 추정 지표</b>입니다. 의학적 진단이나 실제 발병 확률이 아니며, 기억 공백이 반복되면 전문 의료진 상담을 권장합니다.
+        </div>
+
+        <label style="font-weight:700; font-size:0.9rem;">최근 1개월 평균 블랙아웃 횟수</label>
+        <input type="number" id="dementiaMonthlyBlackoutInput" min="0" max="31" step="0.1" placeholder="예: 2" oninput="renderAlcoholDementiaRiskPreview()">
+        <p style="font-size:0.72rem; color:#718096; margin:4px 0 10px;">한 달에 기억 공백을 경험한 평균 횟수를 입력하세요.</p>
+
+        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:10px;">평균 블랙아웃 정도 (<span id="dementiaSeverityVal" style="font-weight: 800; color: #2ecc71;">0</span>/10)</label>
+        <input type="range" id="dementiaSeverityRange" min="0" max="10" value="0" class="dynamic-range" data-touched="true" oninput="updateRangeStyle(this, 'dementiaSeverityVal'); renderAlcoholDementiaRiskPreview()">
+
+        <button class="start-btn" style="margin-top:16px; width:100%; padding: 14px; font-size: 1rem; background: linear-gradient(135deg, #f97316, #dc2626);" onclick="saveAlcoholDementiaRiskProfile()">입력값 저장하고 예측 보기</button>
+
+        <div id="dementiaRiskSourceText" style="font-size:0.78rem; color:#64748b; font-weight:700; margin:14px 0 8px; text-align:center;"></div>
+        <div id="dementiaRiskBars" style="margin-top: 8px;"></div>
+
+        <details style="margin-top: 14px; font-size:0.78rem; color:#64748b; line-height:1.5;">
+            <summary style="cursor:pointer; font-weight:800; color:#9a3412;">계산방법 보기</summary>
+            <div style="margin-top:8px; word-break:keep-all;">
+                월평균 블랙아웃 횟수는 빈도 위험으로, 블랙아웃 정도는 심각도 위험으로 환산합니다. 빈도는 <b>1 - exp(-월횟수/4)</b>, 심각도는 <b>정도/10</b>으로 표준화한 뒤, 65:35 비중으로 합산합니다. 기간별 값은 <b>1 - exp(-월별 위험강도 × 개월 수)</b> 형태의 누적 위험 곡선으로 표시합니다.
+            </div>
+        </details>
     </div>
 </div>
 
@@ -730,11 +779,11 @@
     <div class="modal-content">
         <button class="close-btn-top" onclick="closeModal('smokingLogModal')">&times;</button>
         <h3 style="margin-top:0; margin-bottom: 12px; padding-right: 20px;">🚬 흡연량 기록</h3>
-        <p style="font-size:0.85rem; color:#666; margin-bottom:15px; word-break:keep-all;">오늘의 흡연량을 1~10으로 기록합니다. 달력 롱클릭 기록의 흡연량과 같은 값으로 연동됩니다.</p>
+        <p style="font-size:0.85rem; color:#666; margin-bottom:15px; word-break:keep-all;">오늘의 흡연량을 0~10으로 기록합니다. 달력 롱클릭 기록의 흡연량과 같은 값으로 연동됩니다.</p>
         <input type="hidden" id="smokingLogDateHidden">
         <div id="smokingLogDateText" style="font-size:0.85rem; color:#718096; font-weight:700; margin-bottom:12px; text-align:center;"></div>
-        <label style="font-weight:700; font-size:0.9rem;">흡연량 (<span id="smokingLogVal" style="font-weight: 800;">5</span>/10)</label>
-        <input type="range" id="smokingLogRange" min="1" max="10" value="5" class="dynamic-range" data-touched="true" oninput="updateRangeStyle(this, 'smokingLogVal')">
+        <label style="font-weight:700; font-size:0.9rem;">흡연량 (<span id="smokingLogVal" style="font-weight: 800;">0</span>/10)</label>
+        <input type="range" id="smokingLogRange" min="0" max="10" value="0" class="dynamic-range" data-touched="true" oninput="updateRangeStyle(this, 'smokingLogVal')">
         <button class="start-btn" style="margin-top:20px; width:100%; padding: 14px; font-size: 1.1rem; background: linear-gradient(135deg, #4a5568, #2d3748);" onclick="saveSmokingLog()">흡연량 저장하기</button>
     </div>
 </div>
@@ -915,7 +964,7 @@
     }
 
     let userId = null; 
-    let userProfile = { gender: 'male', weight: 70, height: 170, nickname: '', totalVisits: 0, todayVisits: 0 };
+    let userProfile = { gender: 'male', weight: 70, height: 170, nickname: '', totalVisits: 0, todayVisits: 0, alcoholDementiaRiskProfile: null };
     let cautionDays = []; 
     let isCautionAlertOpen = false;
 
@@ -1262,6 +1311,186 @@
         return Math.max(min, Math.min(max, parsed));
     }
 
+    function clampFloatNumber(value, min, max, fallback) {
+        const parsed = parseFloat(value);
+        if (isNaN(parsed)) return fallback;
+        return Math.max(min, Math.min(max, parsed));
+    }
+
+    function roundOneDecimal(value) {
+        return Math.round(value * 10) / 10;
+    }
+
+    function getDateFromDateKey(dateStr) {
+        if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return null;
+        const [y, m, d] = dateStr.split('-').map(Number);
+        const date = new Date(y, m - 1, d);
+        return isNaN(date.getTime()) ? null : date;
+    }
+
+    function deriveBlackoutRiskProfileFromDailyLogs() {
+        const entries = Object.entries(dailyLogsData || {})
+            .map(([date, data]) => {
+                const parsedDate = getDateFromDateKey(date);
+                const blackout = clampFloatNumber(data?.blackout, 0, 10, 0);
+                const updatedAt = data?.updatedAt || (parsedDate ? parsedDate.getTime() : 0);
+                return { date, parsedDate, blackout, updatedAt };
+            })
+            .filter(item => item.parsedDate && item.blackout > 0);
+
+        if (entries.length === 0) return null;
+
+        entries.sort((a, b) => b.parsedDate - a.parsedDate);
+        const latestDate = entries[0].parsedDate;
+        const latestTime = entries[0].updatedAt || latestDate.getTime();
+        const cutoffTime = latestDate.getTime() - (90 * 86400000);
+        const recentEntries = entries.filter(item => item.parsedDate.getTime() >= cutoffTime);
+        const windowEntries = recentEntries.length > 0 ? recentEntries : entries.slice(0, 12);
+
+        const oldestDate = windowEntries.reduce((oldest, item) => item.parsedDate < oldest ? item.parsedDate : oldest, windowEntries[0].parsedDate);
+        const spanDays = Math.max(30, Math.round((latestDate - oldestDate) / 86400000) + 1);
+        const monthlyBlackoutCount = roundOneDecimal((windowEntries.length * 30) / spanDays);
+        const blackoutSeverity = roundOneDecimal(windowEntries.reduce((sum, item) => sum + item.blackout, 0) / windowEntries.length);
+
+        return {
+            monthlyBlackoutCount,
+            blackoutSeverity,
+            updatedAt: latestTime,
+            source: 'dailyLogDerived',
+            sampleCount: windowEntries.length
+        };
+    }
+
+    function getLatestAlcoholDementiaRiskProfile() {
+        const savedProfile = userProfile.alcoholDementiaRiskProfile;
+        const normalizedSavedProfile = (savedProfile && (savedProfile.monthlyBlackoutCount !== undefined || savedProfile.blackoutSeverity !== undefined))
+            ? {
+                monthlyBlackoutCount: clampFloatNumber(savedProfile.monthlyBlackoutCount, 0, 31, 0),
+                blackoutSeverity: clampFloatNumber(savedProfile.blackoutSeverity, 0, 10, 0),
+                updatedAt: savedProfile.updatedAt || 0,
+                source: savedProfile.source || 'manual'
+            }
+            : null;
+        const derivedProfile = deriveBlackoutRiskProfileFromDailyLogs();
+
+        if (normalizedSavedProfile && derivedProfile) {
+            return (derivedProfile.updatedAt > normalizedSavedProfile.updatedAt) ? derivedProfile : normalizedSavedProfile;
+        }
+        return normalizedSavedProfile || derivedProfile;
+    }
+
+    function calculateAlcoholDementiaRisk(profile) {
+        const monthlyBlackoutCount = clampFloatNumber(profile?.monthlyBlackoutCount, 0, 31, 0);
+        const blackoutSeverity = clampFloatNumber(profile?.blackoutSeverity, 0, 10, 0);
+        const hasData = monthlyBlackoutCount > 0 && blackoutSeverity > 0;
+        const frequencyFactor = hasData ? (1 - Math.exp(-monthlyBlackoutCount / 4)) : 0;
+        const severityFactor = hasData ? (blackoutSeverity / 10) : 0;
+        const exposureScore = Math.min(1, (frequencyFactor * 0.65) + (severityFactor * 0.35));
+        const monthlyHazard = hasData ? 0.0065 * Math.pow(exposureScore, 1.35) : 0;
+        const periods = [
+            { label: '1개월', months: 1 },
+            { label: '6개월', months: 6 },
+            { label: '1년', months: 12 },
+            { label: '3년', months: 36 },
+            { label: '5년', months: 60 },
+            { label: '10년', months: 120 }
+        ].map(period => {
+            const risk = Math.max(0, Math.min(95, Math.round((1 - Math.exp(-monthlyHazard * period.months)) * 100)));
+            return { ...period, risk };
+        });
+
+        const representative = periods.find(period => period.label === '5년')?.risk || 0;
+        return { monthlyBlackoutCount, blackoutSeverity, hasData, exposureScore, representative, periods };
+    }
+
+    function buildAlcoholDementiaRiskBoxHtml() {
+        const profile = getLatestAlcoholDementiaRiskProfile();
+        const risk = calculateAlcoholDementiaRisk(profile);
+        const label = risk.hasData ? `알콜성 치매 가능성 ${risk.representative}%` : '알콜성 치매 가능성 입력';
+        const title = risk.hasData
+            ? `대표값: 5년 누적 추정 · 월 ${risk.monthlyBlackoutCount}회 / 정도 ${risk.blackoutSeverity}/10`
+            : '블랙아웃 빈도와 정도를 입력하면 기간별 추정치를 볼 수 있습니다.';
+        return `
+            <div class="alcohol-dementia-risk-box ${risk.hasData ? '' : 'no-data'}" onclick="openAlcoholDementiaRiskModal(event)" title="${title}">
+                <span>🧠 ${label}</span>
+                <div class="dementia-risk-progress"><div class="dementia-risk-progress-fill" style="width:${risk.representative}%;"></div></div>
+            </div>
+        `;
+    }
+
+    function renderRiskBars(result) {
+        return result.periods.map(period => `
+            <div class="risk-period-row">
+                <div class="risk-period-head"><span>${period.label} 내 추정 가능성</span><span class="risk-period-percent">${period.risk}%</span></div>
+                <div class="risk-progress-bg"><div class="risk-progress-fill" style="width:${period.risk}%;"></div></div>
+            </div>
+        `).join('');
+    }
+
+    window.renderAlcoholDementiaRiskPreview = function(profile = null) {
+        const countInput = document.getElementById('dementiaMonthlyBlackoutInput');
+        const severityRange = document.getElementById('dementiaSeverityRange');
+        const sourceText = document.getElementById('dementiaRiskSourceText');
+        const bars = document.getElementById('dementiaRiskBars');
+        if (!countInput || !severityRange || !bars) return;
+
+        const previewProfile = profile || {
+            monthlyBlackoutCount: clampFloatNumber(countInput.value, 0, 31, 0),
+            blackoutSeverity: clampFloatNumber(severityRange.value, 0, 10, 0),
+            source: 'preview'
+        };
+        const result = calculateAlcoholDementiaRisk(previewProfile);
+        bars.innerHTML = renderRiskBars(result);
+
+        if (sourceText) {
+            if (result.hasData) {
+                sourceText.innerText = `입력 기준: 월평균 블랙아웃 ${result.monthlyBlackoutCount}회 · 평균 정도 ${result.blackoutSeverity}/10 · 대표값은 5년 추정치 ${result.representative}%`;
+            } else {
+                sourceText.innerText = '블랙아웃 횟수와 정도를 입력하면 기간별 프로그레스 바가 표시됩니다.';
+            }
+        }
+    };
+
+    window.openAlcoholDementiaRiskModal = function(event) {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        if (!userId) return alert('로그인이 필요합니다.');
+
+        const profile = getLatestAlcoholDementiaRiskProfile() || { monthlyBlackoutCount: 0, blackoutSeverity: 0, source: 'empty' };
+        const countInput = document.getElementById('dementiaMonthlyBlackoutInput');
+        const severityRange = document.getElementById('dementiaSeverityRange');
+        if (countInput) countInput.value = profile.monthlyBlackoutCount || 0;
+        if (severityRange) {
+            severityRange.value = clampFloatNumber(profile.blackoutSeverity, 0, 10, 0);
+            severityRange.setAttribute('data-touched', 'true');
+            updateRangeStyle(severityRange, 'dementiaSeverityVal');
+        }
+        renderAlcoholDementiaRiskPreview(profile);
+        openModal('alcoholDementiaRiskModal');
+    };
+
+    window.saveAlcoholDementiaRiskProfile = async function() {
+        if (!userId) return alert('로그인이 필요합니다.');
+        const profile = {
+            monthlyBlackoutCount: roundOneDecimal(clampFloatNumber(document.getElementById('dementiaMonthlyBlackoutInput').value, 0, 31, 0)),
+            blackoutSeverity: roundOneDecimal(clampFloatNumber(document.getElementById('dementiaSeverityRange').value, 0, 10, 0)),
+            updatedAt: new Date().getTime(),
+            source: 'manual'
+        };
+
+        try {
+            await setDoc(doc(db, 'users', userId), { alcoholDementiaRiskProfile: profile }, { merge: true });
+            userProfile.alcoholDementiaRiskProfile = profile;
+            renderAlcoholDementiaRiskPreview(profile);
+            alert('알콜성 치매 가능성 추정 입력값이 저장되었습니다.');
+        } catch (e) {
+            console.error('알콜성 치매 가능성 입력값 저장 실패:', e);
+            alert('저장에 실패했습니다: ' + e.message);
+        }
+    };
+
     function findFailedChallengeByDate(dateStr) {
         if (!dateStr) return null;
         return allChallengesData.find(c => c.status === 'failed' && c.endDate && dateToKey(c.endDate) === dateStr) || null;
@@ -1360,7 +1589,7 @@
                     userData.activeMode = APP_MODE.ABSTINENCE;
                 }
 
-                if (userData.weight) userProfile = { ...userProfile, ...userData };
+                userProfile = { ...userProfile, ...userData };
                 if (userData.cautionDays) cautionDays = userData.cautionDays;
 
                 // 방문 횟수 로직
@@ -1432,6 +1661,7 @@
             cautionDays = [];
             dailyLogsData = {};
             userProfile.nickname = '';
+            userProfile.alcoholDementiaRiskProfile = null;
             if (timerInterval) clearInterval(timerInterval);
             document.getElementById('loginArea').style.display = 'flex';
             document.getElementById('setupArea').style.display = 'none';
@@ -1572,7 +1802,8 @@
             { id: 'logDinnerRange', valId: 'logDinnerVal', defaultValue: 0 },
             { id: 'logSnackRange', valId: 'logSnackVal', defaultValue: 0 },
             { id: 'logAlcoholRange', valId: 'logAlcoholVal', defaultValue: 0 },
-            { id: 'logSmokingRange', valId: 'logSmokingVal', defaultValue: 5 }
+            { id: 'logBlackoutRange', valId: 'logBlackoutVal', defaultValue: 0 },
+            { id: 'logSmokingRange', valId: 'logSmokingVal', defaultValue: 0 }
         ];
         
         rangeConfigs.forEach(cfg => {
@@ -1607,6 +1838,7 @@
                 mapDataToUI('dinner', 'logDinnerRange', 'logDinnerVal');
                 mapDataToUI('snack', 'logSnackRange', 'logSnackVal');
                 mapDataToUI('alcohol', 'logAlcoholRange', 'logAlcoholVal');
+                mapDataToUI('blackout', 'logBlackoutRange', 'logBlackoutVal');
                 mapDataToUI('smoking', 'logSmokingRange', 'logSmokingVal');
                 
                 if (data.weight) {
@@ -1648,6 +1880,7 @@
             dinner: getVal('logDinnerRange'),
             snack: getVal('logSnackRange'),
             alcohol: getVal('logAlcoholRange'),
+            blackout: getVal('logBlackoutRange'),
             smoking: getVal('logSmokingRange'),
             weight: parseFloat(document.getElementById('logWeightInput').value) || null
         };
@@ -1662,7 +1895,7 @@
                 await setDoc(doc(db, "users", userId), { weight: logData.weight }, { merge: true });
             }
 
-            alert("식사량, 음주량, 흡연량 및 체중이 성공적으로 기록되었습니다.");
+            alert("식사량, 음주량, 블랙아웃 정도, 흡연량 및 체중이 성공적으로 기록되었습니다.");
             closeModal('dailyLogModal');
 
             // 캘린더가 열려있으면 즉시 리렌더링
@@ -1696,7 +1929,7 @@
             });
 
             if (logs.length === 0) {
-                container.innerHTML = '<div style="text-align:center; padding:20px; color:#666;">아직 기록된 식사량/체중/음주/흡연 데이터가 없습니다.<br>달력에서 날짜를 길게 눌러(Long-click) 기록해보세요.</div>';
+                container.innerHTML = '<div style="text-align:center; padding:20px; color:#666;">아직 기록된 식사량/체중/음주/블랙아웃/흡연 데이터가 없습니다.<br>달력에서 날짜를 길게 눌러(Long-click) 기록해보세요.</div>';
                 if (mealWeightChartInstance) mealWeightChartInstance.destroy();
                 return;
             }
@@ -1708,6 +1941,7 @@
             const weightData = [];
             const mealSumData = [];
             const alcoholData = [];
+            const blackoutData = [];
             const smokingData = [];
 
             // 리스트는 최신순으로 표시하기 위해 배열 뒤집기
@@ -1721,6 +1955,7 @@
                 const dn = data.dinner || 0;
                 const sn = data.snack || 0;
                 const alc = data.alcohol || 0;
+                const blackout = data.blackout || 0;
                 const smk = data.smoking || 0;
                 const sum = bf + lc + dn + sn;
                 const wt = data.weight ? `${data.weight}kg` : '미입력';
@@ -1738,7 +1973,7 @@
                             <div>🍪 간식: <b>${sn}</b></div>
                         </div>
                         <div style="margin-top:8px; font-size:0.85rem; color:var(--danger-color); font-weight:bold;">
-                            🍷 음주량: ${alc} | 🚬 흡연량: ${smk} | 🥗 식사총합: ${sum}
+                            🍷 음주량: ${alc} | 🧠 블랙아웃: ${blackout} | 🚬 흡연량: ${smk} | 🥗 식사총합: ${sum}
                         </div>
                     </div>
                 `;
@@ -1755,6 +1990,7 @@
                 
                 mealSumData.push(bf + lc + dn + sn);
                 alcoholData.push(data.alcohol || 0);
+                blackoutData.push(data.blackout || 0);
                 smokingData.push(data.smoking || 0);
                 weightData.push(data.weight || null);
             });
@@ -1793,6 +2029,13 @@
                         },
                         {
                             type: 'bar',
+                            label: '블랙아웃 정도',
+                            data: blackoutData,
+                            backgroundColor: 'rgba(107, 33, 168, 0.62)',
+                            yAxisID: 'yAmount'
+                        },
+                        {
+                            type: 'bar',
                             label: '흡연량',
                             data: smokingData,
                             backgroundColor: 'rgba(74, 85, 104, 0.65)',
@@ -1808,7 +2051,7 @@
                             type: 'linear',
                             display: true,
                             position: 'left',
-                            title: { display: true, text: '식사/음주/흡연량', font: { size: 10 } },
+                            title: { display: true, text: '식사/음주/블랙아웃/흡연량', font: { size: 10 } },
                             beginAtZero: true,
                             suggestedMax: 40
                         },
@@ -2149,6 +2392,7 @@
                 const logIcons = [];
                 if (mealSum > 0 || dayLog.weight) logIcons.push('🥗');
                 if ((dayLog.alcohol || 0) > 0) logIcons.push('🍷');
+                if ((dayLog.blackout || 0) > 0) logIcons.push('🧠');
                 if ((dayLog.smoking || 0) > 0) logIcons.push('🚬');
                 if (logIcons.length > 0) {
                     logBadge = `<div style="position: absolute; top: 2px; left: 4px; font-size: 0.62rem; z-index: 20; white-space: nowrap; letter-spacing:-2px;">${logIcons.join('')}</div>`;
@@ -3482,6 +3726,7 @@
 
             const successRateRaw = totalCumul > 0 ? ((totalCumul - globalFailedDayCount) / totalCumul) * 100 : 100;
             const successRate = Math.max(0, Math.min(100, Math.round(successRateRaw)));
+            const alcoholDementiaRiskBoxHtml = buildAlcoholDementiaRiskBoxHtml();
 
             document.getElementById('mainDaysContainer').innerHTML = `
                 <div class="cal-hint">👇 클릭하여 달력 보기</div>
@@ -3495,6 +3740,7 @@
                             <span>성공률 ${successRate}%</span>
                             <div class="success-rate-progress"><div class="success-rate-progress-fill" style="width:${successRate}%;"></div></div>
                         </div>
+                        ${alcoholDementiaRiskBoxHtml}
                     </div>
                 </div>
             `;
@@ -3612,7 +3858,7 @@
         document.getElementById('smokingLogDateHidden').value = dateStr;
         document.getElementById('smokingLogDateText').innerText = `${dateStr} 흡연량`;
 
-        let smokingAmount = 5;
+        let smokingAmount = 0;
         try {
             let dailyLog = dailyLogsData[dateStr] || null;
             if (!dailyLog) {
@@ -3622,12 +3868,12 @@
                     dailyLogsData[dateStr] = dailyLog;
                 }
             }
-            if (dailyLog && dailyLog.smoking) smokingAmount = dailyLog.smoking;
+            if (dailyLog && dailyLog.smoking !== undefined && dailyLog.smoking !== null) smokingAmount = dailyLog.smoking;
         } catch (e) {
             console.error("흡연량 기록 불러오기 실패:", e);
         }
 
-        rangeInput.value = clampNumber(smokingAmount, 1, 10, 5);
+        rangeInput.value = clampNumber(smokingAmount, 0, 10, 0);
         rangeInput.setAttribute('data-touched', 'true');
         updateRangeStyle(rangeInput, 'smokingLogVal');
         openModal('smokingLogModal');
@@ -3636,7 +3882,7 @@
     window.saveSmokingLog = async function() {
         if (!userId) return;
         const dateStr = document.getElementById('smokingLogDateHidden').value || getTodayDateKey();
-        const amount = clampNumber(document.getElementById('smokingLogRange').value, 1, 10, 5);
+        const amount = clampNumber(document.getElementById('smokingLogRange').value, 0, 10, 0);
 
         try {
             await mergeDailyLog(dateStr, { smoking: amount });
