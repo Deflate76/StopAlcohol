@@ -61,7 +61,17 @@
         .dependency-btn:active, .logout-btn:active { transform: scale(0.98); }
 
         /* 타이머 & 차트 */
-        .timer-display { margin: 15px 0; padding: 20px; background: #fff5f5; border-radius: 20px; border: 1px solid #ffe3e3; display: flex; flex-direction: column; align-items: center; }
+        .timer-display { margin: 15px 0; padding: 16px 20px 20px; background: #fff5f5; border-radius: 20px; border: 1px solid #ffe3e3; display: flex; flex-direction: column; align-items: center; }
+        .inline-collapsible-section { width: 100%; box-sizing: border-box; }
+        .inline-collapsible-summary { width: 100%; appearance: none; border: none; background: transparent; color: var(--text-dark); cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 10px; font-family: inherit; font-size: 1.02rem; font-weight: 900; line-height: 1.25; padding: 0 0 12px; text-align: left; user-select: none; }
+        .inline-collapsible-summary::after { content: '－'; color: var(--danger-color); font-size: 1.3rem; font-weight: 900; line-height: 1; transition: transform 0.25s ease, color 0.25s ease; }
+        .inline-collapsible-section[data-collapsed="true"] .inline-collapsible-summary { padding-bottom: 0; }
+        .inline-collapsible-section[data-collapsed="true"] .inline-collapsible-summary::after { content: '＋'; color: #a0aec0; }
+        .inline-collapsible-section[data-collapsed="true"] .inline-collapsible-content { display: none !important; }
+        .timer-display .inline-collapsible-content { width: 100%; display: flex; flex-direction: column; align-items: center; }
+        .active-summary-collapsible { background: linear-gradient(135deg, #f8fbff, #ffffff); border: 1px solid #dbeafe; border-radius: 18px; padding: 14px 14px 16px; box-shadow: 0 4px 12px rgba(52, 152, 219, 0.08); margin-bottom: 15px; }
+        .active-summary-collapsible .inline-collapsible-summary { color: var(--primary-color); padding-bottom: 10px; }
+        .active-summary-collapsible[data-collapsed="true"] .inline-collapsible-summary { padding-bottom: 0; }
         
         /* 달력 버튼을 위한 클릭 어포던스 디자인 */
         .clickable-time-box { display: flex; flex-direction: column; align-items: center; padding: 10px 20px; border-radius: 16px; transition: all 0.2s ease; cursor: pointer; border: 2px solid transparent; text-decoration: none; }
@@ -76,7 +86,12 @@
         .alcohol-dementia-risk-box.no-data { color: #64748b; background: linear-gradient(135deg, #f8fafc, #ffffff); border-color: #cbd5e0; }
         .dementia-risk-progress, .disease-risk-progress { width: 52px; height: 7px; border-radius: 999px; background: #fed7aa; overflow: hidden; flex-shrink: 0; }
         .dementia-risk-progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #f59e0b, #ef4444); transition: width 0.5s ease; }
-        .alcohol-risk-stack { display: flex; flex-direction: column; align-items: center; gap: 5px; width: 100%; margin-top: 6px; }
+        .alcohol-risk-stack { display: flex; flex-direction: column; align-items: center; gap: 5px; width: 100%; margin-top: 6px; animation: fadeIn 0.22s ease; }
+        .alcohol-risk-stack.collapsed { display: none; }
+        .alcohol-risk-toggle-btn { appearance: none; align-items: center; background: linear-gradient(135deg, #ffffff, #fff7ed); border: 1px solid #fed7aa; border-radius: 999px; box-shadow: 0 2px 8px rgba(234, 88, 12, 0.09); color: #c2410c; cursor: pointer; display: inline-flex; flex-shrink: 0; font-family: inherit; font-size: 0.9rem; font-weight: 950; height: 25px; justify-content: center; line-height: 1; padding: 0; transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease; width: 25px; }
+        .alcohol-risk-toggle-btn:hover { background: linear-gradient(135deg, #fff7ed, #fffbeb); box-shadow: 0 4px 12px rgba(234, 88, 12, 0.16); transform: translateY(-1px); }
+        .alcohol-risk-toggle-btn:active { transform: scale(0.96); }
+        .alcohol-risk-toggle-btn[aria-expanded="false"] { color: #64748b; border-color: #cbd5e0; background: linear-gradient(135deg, #f8fafc, #ffffff); }
         .alcohol-disease-risk-box { display: inline-flex; align-items: center; justify-content: space-between; gap: 7px; min-width: 172px; max-width: 100%; font-size: 0.71rem; font-weight: 900; color: #7f1d1d; background: linear-gradient(135deg, #fff1f2, #fff7ed); border: 1px solid #fecaca; border-radius: 999px; padding: 3px 8px; white-space: nowrap; cursor: pointer; box-shadow: 0 2px 8px rgba(190, 18, 60, 0.08); transition: transform 0.2s ease, box-shadow 0.2s ease; }
         .alcohol-disease-risk-box:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(190, 18, 60, 0.15); }
         .alcohol-disease-risk-box.no-data { color: #64748b; background: linear-gradient(135deg, #f8fafc, #ffffff); border-color: #cbd5e0; }
@@ -197,9 +212,10 @@
         .range-edit-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 8px; background: #f8fafc; border: 1px dashed #cbd5e0; border-radius: 12px; padding: 9px 10px; margin: 0 0 14px; }
         .range-edit-toggle { appearance: none; border: none; background: linear-gradient(135deg, #0f766e, #14b8a6); color: white; cursor: pointer; font-family: inherit; font-size: 0.82rem; font-weight: 900; border-radius: 999px; padding: 8px 11px; white-space: nowrap; box-shadow: 0 5px 12px rgba(15, 118, 110, 0.16); }
         .range-lock-status { color: #64748b; font-size: 0.74rem; font-weight: 800; line-height: 1.35; text-align: right; word-break: keep-all; }
-        #dailyLogModal .modal-content.range-locked input[type="range"].dynamic-range { pointer-events: none; opacity: 0.68; filter: grayscale(0.15); }
-        #dailyLogModal .modal-content.range-locked input[type="range"].dynamic-range::-webkit-slider-thumb { box-shadow: none; }
-        #dailyLogModal .modal-content.range-locked input[type="range"].dynamic-range::-moz-range-thumb { box-shadow: none; }
+        .modal-content.range-locked input[type="range"].dynamic-range { pointer-events: none; opacity: 0.68; filter: grayscale(0.15); }
+        .modal-content.range-locked input[type="range"].dynamic-range::-webkit-slider-thumb { box-shadow: none; }
+        .modal-content.range-locked input[type="range"].dynamic-range::-moz-range-thumb { box-shadow: none; }
+        .range-edit-toggle.is-unlocked { background: linear-gradient(135deg, #334155, #64748b); box-shadow: 0 5px 12px rgba(51, 65, 85, 0.18); }
         .dynamic-range { touch-action: pan-y; }
 
         .highlight { color: var(--primary-color); font-weight: 700; }
@@ -350,7 +366,9 @@
             </div>
         </div>
 
-        <div class="timer-display">
+        <div class="timer-display inline-collapsible-section" id="timerDisplaySection" data-collapsed="false">
+            <button type="button" class="inline-collapsible-summary" onclick="toggleInlineCollapsible('timerDisplaySection')" aria-label="현재 도전 타이머 접기 또는 펼치기"><span>⏱️ 현재 도전 타이머</span></button>
+            <div class="inline-collapsible-content timer-display-content">
             <div id="mainDaysContainer" style="width: 100%;">
                 <!-- JS에서 동적으로 달력 호버 UI를 생성합니다 -->
             </div>
@@ -390,6 +408,7 @@
                 </div>
                 
                 <div style="font-size: 0.8rem; color: #999; margin-top: 15px;">도전 시작 일시: <span id="displaySettingDate">-</span></div>
+            </div>
             </div>
         </div>
 
@@ -623,7 +642,7 @@
 
 <!-- 알콜성 치매 가능성 추정 모달 -->
 <div id="alcoholDementiaRiskModal" class="modal">
-    <div class="modal-content range-safe-modal" style="max-width: 460px;">
+    <div class="modal-content range-safe-modal range-locked" style="max-width: 460px;">
         <button class="close-btn-top" onclick="closeModal('alcoholDementiaRiskModal')">&times;</button>
         <div class="modal-title-row">
             <h3 style="color:#9a3412;">🧠 알콜성 치매 가능성 추정</h3>
@@ -633,6 +652,10 @@
             이 수치는 블랙아웃 기록을 바탕으로 만든 <b>개인 기록용 추정 지표</b>입니다. 의학적 진단이나 실제 발병 확률이 아니며, 기억 공백이 반복되면 전문 의료진 상담을 권장합니다.
         </div>
 
+        <div class="range-edit-toolbar">
+            <button type="button" class="range-edit-toggle" onclick="toggleModalRangeEdit('alcoholDementiaRiskModal')">🔒 슬라이더 편집 켜기</button>
+            <span class="range-lock-status">스크롤 중 실수로 값이 바뀌지 않도록 잠겨 있습니다.</span>
+        </div>
         <label style="font-weight:700; font-size:0.9rem;">최근 1개월 블랙아웃 횟수</label>
         <input type="number" id="dementiaMonthlyBlackoutInput" min="0" max="31" step="1" placeholder="예: 2" oninput="renderAlcoholDementiaRiskPreview()">
         <p style="font-size:0.72rem; color:#718096; margin:4px 0 10px;">달력 기록에서 오늘 기준 최근 1개월 동안 블랙아웃 정도가 1 이상인 날짜를 자동 카운트합니다. 숫자는 직접 수정할 수 있습니다.</p>
@@ -656,7 +679,7 @@
 
 <!-- 알콜성 질환 가능성 추정 모달 -->
 <div id="alcoholDiseaseRiskModal" class="modal">
-    <div class="modal-content range-safe-modal" style="max-width: 480px;">
+    <div class="modal-content range-safe-modal range-locked" style="max-width: 480px;">
         <button class="close-btn-top" onclick="closeModal('alcoholDiseaseRiskModal')">&times;</button>
         <div class="modal-title-row">
             <h3 style="color:#7f1d1d;">🍷 알콜성 질환 가능성 추정</h3>
@@ -666,6 +689,10 @@
             이 수치는 최근 음주 기록을 바탕으로 만든 <b>개인 기록용 추정 지표</b>입니다. 의학적 진단이나 실제 발병 확률이 아니며, 반복 음주·폭음·복통·황달 등 증상이 있으면 전문 의료진 상담을 권장합니다.
         </div>
 
+        <div class="range-edit-toolbar">
+            <button type="button" class="range-edit-toggle" onclick="toggleModalRangeEdit('alcoholDiseaseRiskModal')">🔒 슬라이더 편집 켜기</button>
+            <span class="range-lock-status">스크롤 중 실수로 값이 바뀌지 않도록 잠겨 있습니다.</span>
+        </div>
         <label style="font-weight:700; font-size:0.9rem;">최근 1개월 음주 횟수</label>
         <input type="number" id="diseaseMonthlyDrinkInput" min="0" max="31" step="1" placeholder="예: 4" oninput="renderAlcoholDiseaseRiskPreview()">
         <p style="font-size:0.72rem; color:#718096; margin:4px 0 10px;">달력 기록에서 오늘 기준 최근 1개월 동안 음주량이 1 이상인 날짜를 자동 카운트합니다. 숫자는 직접 수정할 수 있습니다.</p>
@@ -689,7 +716,7 @@
 
 <!-- 달력에서 실패한 날짜 클릭 시 뜨는 음주량 입력 모달 (유지) -->
 <div id="failAmountModal" class="modal">
-    <div class="modal-content range-safe-modal">
+    <div class="modal-content range-safe-modal range-locked">
         <button class="close-btn-top" onclick="closeModal('failAmountModal')">&times;</button>
         <div class="modal-title-row">
             <h3>🚨 실패일 음주량 기록</h3>
@@ -697,6 +724,10 @@
         </div>
         <p style="font-size:0.85rem; color:#666; margin-bottom:15px; word-break:keep-all;">이 날 얼마나 드셨는지 기록해주세요.<br>(1: 비교적 소량 ~ 10: 심각한 폭음)</p>
         
+        <div class="range-edit-toolbar">
+            <button type="button" class="range-edit-toggle" onclick="toggleModalRangeEdit('failAmountModal')">🔒 슬라이더 편집 켜기</button>
+            <span class="range-lock-status">스크롤 중 실수로 값이 바뀌지 않도록 잠겨 있습니다.</span>
+        </div>
         <label style="font-weight:700; font-size:0.9rem;">음주량 (<span id="failAmountVal" style="font-weight: 800;">5</span>/10)</label>
         <input type="range" id="failAmountRange" min="1" max="10" value="5" class="dynamic-range" oninput="updateRangeStyle(this, 'failAmountVal')">
         
@@ -760,7 +791,7 @@
 
 <!-- 몸상태 기록 모달 -->
 <div id="stateModal" class="modal">
-    <div class="modal-content range-safe-modal">
+    <div class="modal-content range-safe-modal range-locked">
         <button class="close-btn-top" onclick="closeModal('stateModal')">&times;</button>
         <div class="modal-title-row">
             <h3>📝 현재 몸상태 기록</h3>
@@ -768,6 +799,10 @@
         </div>
         <p style="font-size:0.85rem; color:#888; margin-bottom:10px; word-break:keep-all;">기록하고 싶은 항목의 바를 움직여 활성화해 주세요.</p>
         
+        <div class="range-edit-toolbar">
+            <button type="button" class="range-edit-toggle" onclick="toggleModalRangeEdit('stateModal')">🔒 슬라이더 편집 켜기</button>
+            <span class="range-lock-status">스크롤 중 실수로 값이 바뀌지 않도록 잠겨 있습니다.</span>
+        </div>
         <label style="font-weight:700; font-size:0.9rem;">금단증상 정도 (<span id="withdrawalVal" style="font-weight: 800; color: #a0aec0;">-</span>/10)</label>
         <input type="range" id="withdrawalRange" min="0" max="10" value="5" class="dynamic-range" data-touched="false" oninput="markTouched(this); updateRangeStyle(this, 'withdrawalVal')">
         
@@ -806,13 +841,17 @@
 </div>
 
 <div id="evalModal" class="modal">
-    <div class="modal-content range-safe-modal">
+    <div class="modal-content range-safe-modal range-locked">
         <button class="close-btn-top" onclick="closeModal('evalModal')">&times;</button>
         <div class="modal-title-row">
             <h3>🛡️ 극복 행동 효과 점검</h3>
             <button type="button" class="modal-reset-btn" onclick="resetSliderModal('evalModal')">초기화</button>
         </div>
         <p id="evalMessage" style="font-size: 0.85rem; color: #666; margin-bottom: 20px; line-height: 1.5;"></p>
+        <div class="range-edit-toolbar">
+            <button type="button" class="range-edit-toggle" onclick="toggleModalRangeEdit('evalModal')">🔒 슬라이더 편집 켜기</button>
+            <span class="range-lock-status">스크롤 중 실수로 값이 바뀌지 않도록 잠겨 있습니다.</span>
+        </div>
         <label style="font-weight:700; font-size:0.9rem;">대책의 효과 (<span id="evalEffectVal" style="font-weight: 800;">5</span>/10) <br><span style="font-size:0.75rem; color:#999; font-weight:normal;">0: 전혀 없음 ~ 10: 매우 효과적</span></label>
         <input type="range" id="evalEffectRange" min="0" max="10" value="5" class="dynamic-range" oninput="updateRangeStyle(this, 'evalEffectVal')">
         <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px;">현재 갈망 강도 (<span id="evalCravingVal" style="font-weight: 800;">5</span>/10)</label>
@@ -833,11 +872,15 @@
 </div>
 
 <div id="cravingModal" class="modal">
-    <div class="modal-content range-safe-modal">
+    <div class="modal-content range-safe-modal range-locked">
         <button class="close-btn-top" onclick="closeModal('cravingModal')">&times;</button>
         <div class="modal-title-row">
             <h3>고비 기록하기</h3>
             <button type="button" class="modal-reset-btn" onclick="resetSliderModal('cravingModal')">초기화</button>
+        </div>
+        <div class="range-edit-toolbar">
+            <button type="button" class="range-edit-toggle" onclick="toggleModalRangeEdit('cravingModal')">🔒 슬라이더 편집 켜기</button>
+            <span class="range-lock-status">스크롤 중 실수로 값이 바뀌지 않도록 잠겨 있습니다.</span>
         </div>
         <label style="font-weight:700; font-size:0.9rem;">갈망 강도 (<span id="rangeVal" style="font-weight: 800;">5</span>/10)</label>
         <input type="range" id="cravingRange" min="1" max="10" value="5" class="dynamic-range" oninput="updateRangeStyle(this, 'rangeVal')">
@@ -851,7 +894,7 @@
 </div>
 
 <div id="smokingLogModal" class="modal">
-    <div class="modal-content range-safe-modal">
+    <div class="modal-content range-safe-modal range-locked">
         <button class="close-btn-top" onclick="closeModal('smokingLogModal')">&times;</button>
         <div class="modal-title-row">
             <h3>🚬 흡연량 기록</h3>
@@ -860,6 +903,10 @@
         <p style="font-size:0.85rem; color:#666; margin-bottom:15px; word-break:keep-all;">오늘의 흡연량을 0~10으로 기록합니다. 달력 롱클릭 기록의 흡연량과 같은 값으로 연동됩니다.</p>
         <input type="hidden" id="smokingLogDateHidden">
         <div id="smokingLogDateText" style="font-size:0.85rem; color:#718096; font-weight:700; margin-bottom:12px; text-align:center;"></div>
+        <div class="range-edit-toolbar">
+            <button type="button" class="range-edit-toggle" onclick="toggleModalRangeEdit('smokingLogModal')">🔒 슬라이더 편집 켜기</button>
+            <span class="range-lock-status">스크롤 중 실수로 값이 바뀌지 않도록 잠겨 있습니다.</span>
+        </div>
         <label style="font-weight:700; font-size:0.9rem;">흡연량 (<span id="smokingLogVal" style="font-weight: 800;">0</span>/10)</label>
         <input type="range" id="smokingLogRange" min="0" max="10" value="0" class="dynamic-range" data-touched="true" oninput="updateRangeStyle(this, 'smokingLogVal')">
         <button class="start-btn" style="margin-top:20px; width:100%; padding: 14px; font-size: 1.1rem; background: linear-gradient(135deg, #4a5568, #2d3748);" onclick="saveSmokingLog()">흡연량 저장하기</button>
@@ -1062,6 +1109,12 @@
     let unsubscribePosts = null; 
     let totalPastDays = 0;
     let globalFailedDayCount = 0;
+    let alcoholRiskStackExpanded = false;
+    try {
+        alcoholRiskStackExpanded = localStorage.getItem('alcoholRiskStackExpanded') === 'true';
+    } catch (e) {
+        alcoholRiskStackExpanded = false;
+    }
     
     let globalMaxDays = 0;
     let globalBestStartDate = null; 
@@ -1610,12 +1663,23 @@
         return { monthlyDrinkCount, averageAlcoholAmount, hasData, frequencyFactor, amountFactor, exposureScore, representative, conditions };
     }
 
+    function buildAlcoholRiskStackToggleHtml() {
+        const expanded = alcoholRiskStackExpanded === true;
+        const label = expanded ? '알콜성 질환 가능성 숨기기' : '알콜성 질환 가능성 펼치기';
+        return `<button type="button" class="alcohol-risk-toggle-btn" aria-expanded="${expanded ? 'true' : 'false'}" aria-label="${label}" title="${label}" onclick="toggleAlcoholRiskStack(event)">${expanded ? '－' : '＋'}</button>`;
+    }
+
+    function getAlcoholRiskStackClassName() {
+        return alcoholRiskStackExpanded ? 'alcohol-risk-stack' : 'alcohol-risk-stack collapsed';
+    }
+
     function buildAlcoholDiseaseRiskStackHtml() {
         const profile = getLatestAlcoholDiseaseRiskProfile();
         const result = calculateAlcoholDiseaseRisks(profile);
+        const stackClassName = getAlcoholRiskStackClassName();
         if (!result.hasData) {
             return `
-                <div class="alcohol-risk-stack">
+                <div class="${stackClassName}" onclick="event.stopPropagation()">
                     <div class="alcohol-disease-risk-box no-data" onclick="openAlcoholDiseaseRiskModal(event)" title="음주 횟수와 평균 음주량을 입력하면 기간별 추정치를 볼 수 있습니다.">
                         <span>🍷 알콜성 질환 가능성 입력</span>
                         <div class="disease-risk-progress"><div class="disease-risk-progress-fill" style="width:0%;"></div></div>
@@ -1626,7 +1690,7 @@
 
         const title = `최근 1개월 음주 ${result.monthlyDrinkCount}회 · 1회 평균 ${result.averageAlcoholAmount}/10 · 대표값은 5년 추정치`;
         return `
-            <div class="alcohol-risk-stack">
+            <div class="${stackClassName}" onclick="event.stopPropagation()">
                 ${result.conditions.map(condition => `
                     <div class="alcohol-disease-risk-box" onclick="openAlcoholDiseaseRiskModal(event)" title="${title} · ${condition.label} ${condition.representative}%">
                         <span>${condition.icon} ${condition.label} ${condition.representative}%</span>
@@ -2101,7 +2165,9 @@
                 `;
                 document.getElementById('motivationalSummary').innerHTML = htmlContent;
                 document.getElementById('motivationalSummary').style.display = 'block';
-                document.getElementById('activeMotivationalSummary').innerHTML = htmlContent;
+                const activeSummarySection = document.getElementById('activeRecoverySummary');
+                const activeSummaryWasCollapsed = activeSummarySection && activeSummarySection.getAttribute('data-collapsed') === 'true';
+                document.getElementById('activeMotivationalSummary').innerHTML = buildInlineCollapsibleHtml('activeRecoverySummary', '🌱 누적 단주 내공 요약', htmlContent, !!activeSummaryWasCollapsed);
                 document.getElementById('activeMotivationalSummary').style.display = 'block';
             } else {
                 document.getElementById('motivationalSummary').style.display = 'none';
@@ -2109,6 +2175,44 @@
             }
         } catch(e) { console.error(e); }
     }
+
+    function buildInlineCollapsibleHtml(id, title, bodyHtml, collapsed = false) {
+        return `
+            <div class="inline-collapsible-section active-summary-collapsible" id="${id}" data-collapsed="${collapsed ? 'true' : 'false'}">
+                <button type="button" class="inline-collapsible-summary" onclick="toggleInlineCollapsible('${id}')" aria-label="${title} 접기 또는 펼치기"><span>${title}</span></button>
+                <div class="inline-collapsible-content">${bodyHtml}</div>
+            </div>
+        `;
+    }
+
+    window.toggleInlineCollapsible = function(target) {
+        const section = typeof target === 'string' ? document.getElementById(target) : target;
+        if (!section) return;
+        const nextCollapsed = section.getAttribute('data-collapsed') !== 'true';
+        section.setAttribute('data-collapsed', nextCollapsed ? 'true' : 'false');
+    };
+
+    window.toggleAlcoholRiskStack = function(event) {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        alcoholRiskStackExpanded = !alcoholRiskStackExpanded;
+        try {
+            localStorage.setItem('alcoholRiskStackExpanded', alcoholRiskStackExpanded ? 'true' : 'false');
+        } catch (e) {}
+        document.querySelectorAll('.alcohol-risk-stack').forEach(stack => {
+            stack.classList.toggle('collapsed', !alcoholRiskStackExpanded);
+        });
+        document.querySelectorAll('.alcohol-risk-toggle-btn').forEach(button => {
+            const expanded = alcoholRiskStackExpanded === true;
+            button.innerText = expanded ? '－' : '＋';
+            const label = expanded ? '알콜성 질환 가능성 숨기기' : '알콜성 질환 가능성 펼치기';
+            button.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+            button.setAttribute('aria-label', label);
+            button.setAttribute('title', label);
+        });
+    };
 
     // [달력 롱클릭 로직]
     window.startPress = function(e, el) {
@@ -4118,6 +4222,7 @@
                             <div class="success-rate-progress"><div class="success-rate-progress-fill" style="width:${successRate}%;"></div></div>
                         </div>
                         ${alcoholDementiaRiskBoxHtml}
+                        ${buildAlcoholRiskStackToggleHtml()}
                     </div>
                     ${alcoholDiseaseRiskStackHtml}
                 </div>
@@ -4453,19 +4558,49 @@
         window.setDailyLogRangeEditMode(false);
     };
 
+    const RANGE_LOCKED_MODAL_IDS = new Set([
+        'dailyLogModal',
+        'stateModal',
+        'cravingModal',
+        'evalModal',
+        'failAmountModal',
+        'smokingLogModal',
+        'alcoholDementiaRiskModal',
+        'alcoholDiseaseRiskModal'
+    ]);
+
+    window.setModalRangeEditMode = function(modalId, enabled) {
+        const modal = document.getElementById(modalId);
+        const content = modal ? modal.querySelector('.modal-content.range-safe-modal') : null;
+        if (!content) return;
+        content.classList.toggle('range-locked', !enabled);
+        const toggle = content.querySelector('.range-edit-toggle');
+        const text = content.querySelector('.range-lock-status');
+        if (toggle) {
+            toggle.innerText = enabled ? '🔓 슬라이더 편집 끄기' : '🔒 슬라이더 편집 켜기';
+            toggle.classList.toggle('is-unlocked', !!enabled);
+            toggle.setAttribute('aria-pressed', enabled ? 'true' : 'false');
+        }
+        if (text) {
+            text.innerText = enabled
+                ? '이제 값을 조절할 수 있습니다. 스크롤할 때는 다시 잠그면 안전합니다.'
+                : '스크롤 중 실수로 값이 바뀌지 않도록 잠겨 있습니다.';
+        }
+    };
+
+    window.toggleModalRangeEdit = function(modalId) {
+        const modal = document.getElementById(modalId);
+        const content = modal ? modal.querySelector('.modal-content.range-safe-modal') : null;
+        const enabled = content ? content.classList.contains('range-locked') : true;
+        window.setModalRangeEditMode(modalId, enabled);
+    };
+
     window.setDailyLogRangeEditMode = function(enabled) {
-        const content = document.getElementById('dailyLogModalContent');
-        const toggle = document.getElementById('dailyLogRangeEditToggle');
-        const text = document.getElementById('dailyLogRangeLockText');
-        if (content) content.classList.toggle('range-locked', !enabled);
-        if (toggle) toggle.innerText = enabled ? '🔓 슬라이더 편집 끄기' : '🔒 슬라이더 편집 켜기';
-        if (text) text.innerText = enabled ? '이제 값을 조절할 수 있습니다. 스크롤할 때는 다시 잠그면 안전합니다.' : '스크롤 중 실수로 값이 바뀌지 않도록 잠겨 있습니다.';
+        window.setModalRangeEditMode('dailyLogModal', enabled);
     };
 
     window.toggleDailyLogRangeEdit = function() {
-        const content = document.getElementById('dailyLogModalContent');
-        const enabled = content ? content.classList.contains('range-locked') : true;
-        window.setDailyLogRangeEditMode(enabled);
+        window.toggleModalRangeEdit('dailyLogModal');
     };
 
     window.resetSliderModal = function(modalId) {
@@ -4485,11 +4620,13 @@
     };
 
     window.openModal = (id) => {
-        document.getElementById(id).style.display = 'flex';
+        const modal = document.getElementById(id);
+        if (!modal) return;
+        modal.style.display = 'flex';
         if (id === 'cravingModal') { updateRangeStyle(document.getElementById('cravingRange'), 'rangeVal'); }
         if (id === 'stateModal') { resetStateModal(); }
         if (id === 'evalModal') { updateRangeStyle(document.getElementById('evalEffectRange'), 'evalEffectVal'); updateRangeStyle(document.getElementById('evalCravingRange'), 'evalCravingVal'); }
-        if (id === 'dailyLogModal') { window.setDailyLogRangeEditMode(false); }
+        if (RANGE_LOCKED_MODAL_IDS.has(id)) { window.setModalRangeEditMode(id, false); }
     };
     
     window.closeModal = (id) => document.getElementById(id).style.display = 'none';
