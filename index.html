@@ -54,11 +54,15 @@
         
         .start-btn { width: 100%; max-width: 320px; padding: 18px; font-size: 1.2rem; font-weight: 800; background: linear-gradient(135deg, #3498db, #2980b9); color: white; border: none; border-radius: 16px; cursor: pointer; box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3); transition: transform 0.2s; box-sizing: border-box; }
         .start-btn:active { transform: scale(0.97); }
-        .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 0.9rem; color: #666; }
-        .logout-btn { background: #f1f3f5; border: none; padding: 6px 12px; border-radius: 8px; font-weight: 600; cursor: pointer; color: #495057; }
-        .header-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-        .dependency-btn { background: #fff; border: 1px solid var(--primary-color); color: var(--primary-color); padding: 6px 10px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 0.82rem; white-space: nowrap; }
-        .dependency-btn:active, .logout-btn:active { transform: scale(0.98); }
+        .header-bar { display: flex; flex-direction: column; align-items: stretch; gap: 8px; margin-bottom: 15px; font-size: 0.9rem; color: #666; }
+        .header-user-info { display: flex; flex-direction: column; align-items: flex-start; text-align: left; width: 100%; }
+        .header-actions { display: flex; align-items: center; justify-content: flex-start; gap: 6px; flex-wrap: wrap; width: 100%; }
+        .header-actions button { flex: 1 1 72px; min-width: 72px; }
+        .logout-btn { background: #f1f3f5; border: 1px solid #e2e8f0; padding: 7px 8px; border-radius: 9px; font-weight: 800; cursor: pointer; color: #495057; font-size: 0.78rem; white-space: nowrap; }
+        .dependency-btn, .header-nav-btn { background: #fff; border: 1px solid var(--primary-color); color: var(--primary-color); padding: 7px 8px; border-radius: 9px; font-weight: 900; cursor: pointer; font-size: 0.78rem; white-space: nowrap; }
+        .daily-english-btn { border-color: #14b8a6; color: #0f766e; background: linear-gradient(135deg, #ffffff, #f0fdfa); }
+        .dementia-check-btn { border-color: #f97316; color: #c2410c; background: linear-gradient(135deg, #ffffff, #fff7ed); }
+        .dependency-btn:active, .logout-btn:active, .header-nav-btn:active { transform: scale(0.98); }
 
         /* 타이머 & 차트 */
         .timer-display { margin: 15px 0; padding: 16px 20px 20px; background: #fff5f5; border-radius: 20px; border: 1px solid #ffe3e3; display: flex; flex-direction: column; align-items: center; }
@@ -86,7 +90,7 @@
         .alcohol-dementia-risk-box.no-data { color: #64748b; background: linear-gradient(135deg, #f8fafc, #ffffff); border-color: #cbd5e0; }
         .dementia-risk-progress, .disease-risk-progress { width: 52px; height: 7px; border-radius: 999px; background: #fed7aa; overflow: hidden; flex-shrink: 0; }
         .dementia-risk-progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #f59e0b, #ef4444); transition: width 0.5s ease; }
-        .alcohol-risk-stack { display: flex; flex-direction: column; align-items: center; gap: 5px; width: 100%; margin-top: 6px; animation: fadeIn 0.22s ease; }
+        .alcohol-risk-stack { display: flex; flex-direction: column; align-items: center; gap: 5px; width: 100%; margin-top: 6px; }
         .alcohol-risk-stack.collapsed { display: none; }
         .alcohol-risk-toggle-btn { appearance: none; align-items: center; background: linear-gradient(135deg, #ffffff, #fff7ed); border: 1px solid #fed7aa; border-radius: 999px; box-shadow: 0 2px 8px rgba(234, 88, 12, 0.09); color: #c2410c; cursor: pointer; display: inline-flex; flex-shrink: 0; font-family: inherit; font-size: 0.9rem; font-weight: 950; height: 25px; justify-content: center; line-height: 1; padding: 0; transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease; width: 25px; }
         .alcohol-risk-toggle-btn:hover { background: linear-gradient(135deg, #fff7ed, #fffbeb); box-shadow: 0 4px 12px rgba(234, 88, 12, 0.16); transform: translateY(-1px); }
@@ -325,12 +329,14 @@
     
     <div id="setupArea">
         <div class="header-bar" style="width: 100%;">
-            <div style="display: flex; flex-direction: column; align-items: flex-start; text-align: left;">
+            <div class="header-user-info">
                 <span class="user-display-name" style="font-weight: 800; color: var(--primary-color); cursor: pointer; text-decoration: underline; text-underline-offset: 3px;" onclick="openNicknameModal()" title="별명 수정하기"></span>
                 <span class="visit-stats" style="font-size: 0.75rem; color: #718096; margin-top: 2px;"></span>
             </div>
             <div class="header-actions">
                 <button class="dependency-btn" onclick="goToDependencyCheck()">의존성검사</button>
+                <button class="header-nav-btn daily-english-btn" onclick="goToDailyEnglish()">일일영어</button>
+                <button class="header-nav-btn dementia-check-btn" onclick="goToDementiaCheck()">치매검사</button>
                 <button class="logout-btn" onclick="logout()">로그아웃</button>
             </div>
         </div>
@@ -356,12 +362,14 @@
 
     <div id="displayArea" style="display: none;">
         <div class="header-bar">
-            <div style="display: flex; flex-direction: column; align-items: flex-start; text-align: left;">
+            <div class="header-user-info">
                 <span class="user-display-name" style="font-weight: 800; color: var(--primary-color); cursor: pointer; text-decoration: underline; text-underline-offset: 3px;" onclick="openNicknameModal()" title="별명 수정하기"></span>
                 <span class="visit-stats" style="font-size: 0.75rem; color: #718096; margin-top: 2px;"></span>
             </div>
             <div class="header-actions">
                 <button class="dependency-btn" onclick="goToDependencyCheck()">의존성검사</button>
+                <button class="header-nav-btn daily-english-btn" onclick="goToDailyEnglish()">일일영어</button>
+                <button class="header-nav-btn dementia-check-btn" onclick="goToDementiaCheck()">치매검사</button>
                 <button class="logout-btn" onclick="logout()">로그아웃</button>
             </div>
         </div>
@@ -1115,6 +1123,7 @@
     } catch (e) {
         alcoholRiskStackExpanded = false;
     }
+    let lastMainDaysRenderState = null;
     
     let globalMaxDays = 0;
     let globalBestStartDate = null; 
@@ -1327,6 +1336,14 @@
             return;
         }
         window.location.href = "CheckDependancy.html";
+    };
+
+    window.goToDailyEnglish = function() {
+        window.location.href = 'English.html';
+    };
+
+    window.goToDementiaCheck = function() {
+        window.location.href = 'dementia.html';
     };
 
     async function enablePush() {
@@ -1701,6 +1718,70 @@
         `;
     }
 
+    function buildMainDaysRenderKey(currentDays, totalCumul, successRate) {
+        const dementiaRisk = calculateAlcoholDementiaRisk(getLatestAlcoholDementiaRiskProfile());
+        const diseaseRisk = calculateAlcoholDiseaseRisks(getLatestAlcoholDiseaseRiskProfile());
+        const diseaseRepresentativeKey = diseaseRisk.conditions.map(condition => `${condition.key}:${condition.representative}`).join(',');
+        return [
+            currentDays,
+            totalCumul,
+            successRate,
+            alcoholRiskStackExpanded ? 'expanded' : 'collapsed',
+            dementiaRisk.hasData ? 'dementia-data' : 'dementia-empty',
+            dementiaRisk.monthlyBlackoutCount,
+            dementiaRisk.blackoutSeverity,
+            dementiaRisk.representative,
+            diseaseRisk.hasData ? 'disease-data' : 'disease-empty',
+            diseaseRisk.monthlyDrinkCount,
+            diseaseRisk.averageAlcoholAmount,
+            diseaseRepresentativeKey
+        ].join('|');
+    }
+
+    function buildMainDaysContainerHtml(currentDays, totalCumul, successRate) {
+        const alcoholDementiaRiskBoxHtml = buildAlcoholDementiaRiskBoxHtml();
+        const alcoholDiseaseRiskStackHtml = buildAlcoholDiseaseRiskStackHtml();
+        return `
+                <div class="cal-hint">👇 클릭하여 달력 보기</div>
+                <div class="clickable-time-box" onclick="openCalendarModal('current')">
+                    <div class="time-unit">${currentDays}일</div>
+                </div>
+                <div class="clickable-time-box" onclick="openCalendarModal('accumulated')" style="margin-top: -10px; padding: 5px 15px;">
+                    <div class="cumulative-success-row">
+                        <span class="sub-time-clickable">(누적 ${totalCumul}일 보기)</span>
+                        <div class="success-rate-box" title="성공률 = (금주 도전일 수 - 실패일수) / 금주 도전일 수">
+                            <span>성공률 ${successRate}%</span>
+                            <div class="success-rate-progress"><div class="success-rate-progress-fill" style="width:${successRate}%;"></div></div>
+                        </div>
+                        ${alcoholDementiaRiskBoxHtml}
+                        ${buildAlcoholRiskStackToggleHtml()}
+                    </div>
+                    ${alcoholDiseaseRiskStackHtml}
+                </div>
+            `;
+    }
+
+    function renderMainDaysContainerIfNeeded(currentDays, totalCumul, successRate) {
+        const container = document.getElementById('mainDaysContainer');
+        if (!container) return;
+
+        const renderKey = buildMainDaysRenderKey(currentDays, totalCumul, successRate);
+        lastMainDaysRenderState = { currentDays, totalCumul, successRate, renderKey };
+
+        if (container.getAttribute('data-render-key') === renderKey && container.innerHTML.trim()) {
+            return;
+        }
+
+        container.innerHTML = buildMainDaysContainerHtml(currentDays, totalCumul, successRate);
+        container.setAttribute('data-render-key', renderKey);
+    }
+
+    function invalidateMainDaysContainerRender() {
+        const container = document.getElementById('mainDaysContainer');
+        if (container) container.removeAttribute('data-render-key');
+        if (lastMainDaysRenderState) lastMainDaysRenderState.renderKey = '';
+    }
+
     function renderRiskBars(result) {
         return result.periods.map(period => `
             <div class="risk-period-row">
@@ -1775,6 +1856,7 @@
             await setDoc(doc(db, 'users', userId), { alcoholDementiaRiskProfile: profile }, { merge: true });
             userProfile.alcoholDementiaRiskProfile = profile;
             renderAlcoholDementiaRiskPreview(profile);
+            invalidateMainDaysContainerRender();
             alert('알콜성 치매 가능성 추정 입력값이 저장되었습니다.');
         } catch (e) {
             console.error('알콜성 치매 가능성 입력값 저장 실패:', e);
@@ -1869,6 +1951,7 @@
             await setDoc(doc(db, 'users', userId), { alcoholDiseaseRiskProfile: profile }, { merge: true });
             userProfile.alcoholDiseaseRiskProfile = profile;
             renderAlcoholDiseaseRiskPreview(profile);
+            invalidateMainDaysContainerRender();
             alert('알콜성 질환 가능성 추정 입력값이 저장되었습니다.');
         } catch (e) {
             console.error('알콜성 질환 가능성 입력값 저장 실패:', e);
@@ -1906,6 +1989,7 @@
         const nextData = { ...existing, ...partialData, updatedAt: new Date().getTime() };
         await setDoc(doc(db, "users", userId, "daily_logs", dateStr), nextData, { merge: true });
         dailyLogsData[dateStr] = nextData;
+        invalidateMainDaysContainerRender();
         return nextData;
     }
 
@@ -2212,6 +2296,17 @@
             button.setAttribute('aria-label', label);
             button.setAttribute('title', label);
         });
+
+        const container = document.getElementById('mainDaysContainer');
+        if (container && lastMainDaysRenderState) {
+            const renderKey = buildMainDaysRenderKey(
+                lastMainDaysRenderState.currentDays,
+                lastMainDaysRenderState.totalCumul,
+                lastMainDaysRenderState.successRate
+            );
+            container.setAttribute('data-render-key', renderKey);
+            lastMainDaysRenderState.renderKey = renderKey;
+        }
     };
 
     // [달력 롱클릭 로직]
@@ -4206,27 +4301,7 @@
 
             const successRateRaw = totalCumul > 0 ? ((totalCumul - globalFailedDayCount) / totalCumul) * 100 : 100;
             const successRate = Math.max(0, Math.min(100, Math.round(successRateRaw)));
-            const alcoholDementiaRiskBoxHtml = buildAlcoholDementiaRiskBoxHtml();
-            const alcoholDiseaseRiskStackHtml = buildAlcoholDiseaseRiskStackHtml();
-
-            document.getElementById('mainDaysContainer').innerHTML = `
-                <div class="cal-hint">👇 클릭하여 달력 보기</div>
-                <div class="clickable-time-box" onclick="openCalendarModal('current')">
-                    <div class="time-unit">${currentDays}일</div>
-                </div>
-                <div class="clickable-time-box" onclick="openCalendarModal('accumulated')" style="margin-top: -10px; padding: 5px 15px;">
-                    <div class="cumulative-success-row">
-                        <span class="sub-time-clickable">(누적 ${totalCumul}일 보기)</span>
-                        <div class="success-rate-box" title="성공률 = (금주 도전일 수 - 실패일수) / 금주 도전일 수">
-                            <span>성공률 ${successRate}%</span>
-                            <div class="success-rate-progress"><div class="success-rate-progress-fill" style="width:${successRate}%;"></div></div>
-                        </div>
-                        ${alcoholDementiaRiskBoxHtml}
-                        ${buildAlcoholRiskStackToggleHtml()}
-                    </div>
-                    ${alcoholDiseaseRiskStackHtml}
-                </div>
-            `;
+            renderMainDaysContainerIfNeeded(currentDays, totalCumul, successRate);
             
             document.querySelectorAll('.dynamic-total-days').forEach(el => el.innerText = `${totalCumul}일`);
             document.querySelectorAll('.dynamic-max-days').forEach(el => el.innerText = `${currentMax}일`);
