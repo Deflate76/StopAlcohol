@@ -74,8 +74,17 @@
         .alcohol-dementia-risk-box { display: inline-flex; align-items: center; gap: 5px; font-size: 0.72rem; font-weight: 900; color: #9a3412; background: linear-gradient(135deg, #fff7ed, #fffbeb); border: 1px solid #fed7aa; border-radius: 999px; padding: 3px 7px; white-space: nowrap; cursor: pointer; box-shadow: 0 2px 8px rgba(234, 88, 12, 0.08); transition: transform 0.2s ease, box-shadow 0.2s ease; }
         .alcohol-dementia-risk-box:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(234, 88, 12, 0.16); }
         .alcohol-dementia-risk-box.no-data { color: #64748b; background: linear-gradient(135deg, #f8fafc, #ffffff); border-color: #cbd5e0; }
-        .dementia-risk-progress { width: 52px; height: 7px; border-radius: 999px; background: #fed7aa; overflow: hidden; }
+        .dementia-risk-progress, .disease-risk-progress { width: 52px; height: 7px; border-radius: 999px; background: #fed7aa; overflow: hidden; flex-shrink: 0; }
         .dementia-risk-progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #f59e0b, #ef4444); transition: width 0.5s ease; }
+        .alcohol-risk-stack { display: flex; flex-direction: column; align-items: center; gap: 5px; width: 100%; margin-top: 6px; }
+        .alcohol-disease-risk-box { display: inline-flex; align-items: center; justify-content: space-between; gap: 7px; min-width: 172px; max-width: 100%; font-size: 0.71rem; font-weight: 900; color: #7f1d1d; background: linear-gradient(135deg, #fff1f2, #fff7ed); border: 1px solid #fecaca; border-radius: 999px; padding: 3px 8px; white-space: nowrap; cursor: pointer; box-shadow: 0 2px 8px rgba(190, 18, 60, 0.08); transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .alcohol-disease-risk-box:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(190, 18, 60, 0.15); }
+        .alcohol-disease-risk-box.no-data { color: #64748b; background: linear-gradient(135deg, #f8fafc, #ffffff); border-color: #cbd5e0; }
+        .disease-risk-progress { background: #fecaca; }
+        .disease-risk-progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #fb7185, #ef4444, #991b1b); transition: width 0.5s ease; }
+        .disease-risk-card { background: #fff7ed; border: 1px solid #fed7aa; border-radius: 14px; padding: 12px; margin-bottom: 13px; }
+        .disease-risk-card-title { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 0.88rem; font-weight: 900; color: #7c2d12; margin-bottom: 9px; }
+        .cal-day.alcohol-day-mark { font-weight: 900; }
         .risk-period-row { margin-bottom: 13px; }
         .risk-period-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 0.82rem; font-weight: 800; color: #334155; margin-bottom: 5px; }
         .risk-period-percent { color: #c2410c; }
@@ -177,8 +186,21 @@
 
         .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; backdrop-filter: blur(4px); }
         .modal-content { background: white; padding: 20px; border-radius: 24px; width: 88%; max-width: 400px; max-height: 90vh; overflow-y: auto; text-align: left; position: relative; box-sizing: border-box; }
-        .close-btn-top { position: absolute; top: 18px; right: 20px; font-size: 1.8rem; color: #cbd5e0; background: none; border: none; cursor: pointer; line-height: 1; transition: color 0.2s ease; padding: 0; }
+        .close-btn-top { position: absolute; top: 18px; right: 20px; font-size: 1.8rem; color: #cbd5e0; background: none; border: none; cursor: pointer; line-height: 1; transition: color 0.2s ease; padding: 0; z-index: 5; }
         .close-btn-top:hover { color: var(--danger-color); }
+        .modal-title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 15px; padding-right: 58px; }
+        .modal-title-row h3 { margin: 0; line-height: 1.3; flex: 1; min-width: 0; word-break: keep-all; }
+        .modal-reset-btn { appearance: none; border: 1px solid #cbd5e0; background: linear-gradient(135deg, #ffffff, #f8fafc); color: #475569; cursor: pointer; font-family: inherit; font-size: 0.92rem; font-weight: 900; line-height: 1; padding: 9px 13px; border-radius: 999px; white-space: nowrap; box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08); transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease; }
+        .modal-reset-btn:hover { border-color: #94a3b8; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12); }
+        .modal-reset-btn:active { transform: scale(0.98); }
+        .range-safe-modal { overscroll-behavior: contain; }
+        .range-edit-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 8px; background: #f8fafc; border: 1px dashed #cbd5e0; border-radius: 12px; padding: 9px 10px; margin: 0 0 14px; }
+        .range-edit-toggle { appearance: none; border: none; background: linear-gradient(135deg, #0f766e, #14b8a6); color: white; cursor: pointer; font-family: inherit; font-size: 0.82rem; font-weight: 900; border-radius: 999px; padding: 8px 11px; white-space: nowrap; box-shadow: 0 5px 12px rgba(15, 118, 110, 0.16); }
+        .range-lock-status { color: #64748b; font-size: 0.74rem; font-weight: 800; line-height: 1.35; text-align: right; word-break: keep-all; }
+        #dailyLogModal .modal-content.range-locked input[type="range"].dynamic-range { pointer-events: none; opacity: 0.68; filter: grayscale(0.15); }
+        #dailyLogModal .modal-content.range-locked input[type="range"].dynamic-range::-webkit-slider-thumb { box-shadow: none; }
+        #dailyLogModal .modal-content.range-locked input[type="range"].dynamic-range::-moz-range-thumb { box-shadow: none; }
+        .dynamic-range { touch-action: pan-y; }
 
         .highlight { color: var(--primary-color); font-weight: 700; }
         textarea, select, input[type="number"], input[type="datetime-local"], input[type="date"], input[type="text"] { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; margin-top: 8px; font-family: inherit; box-sizing: border-box; resize: none; font-size:1rem; }
@@ -534,10 +556,17 @@
 
 <!-- 식사량/음주량 입력 모달 (Long-click) -->
 <div id="dailyLogModal" class="modal">
-    <div class="modal-content">
+    <div class="modal-content range-safe-modal range-locked" id="dailyLogModalContent">
         <button class="close-btn-top" onclick="closeModal('dailyLogModal')">&times;</button>
-        <h3 style="margin-top:0; padding-right: 20px;">📅 <span id="dailyLogDateTitle"></span> 기록</h3>
-        <p style="font-size:0.85rem; color:#666; margin-bottom:15px; word-break:keep-all;">해당 날짜의 식사량, 음주량, 블랙아웃 정도, 흡연량을 기록합니다. (모두 0: 없음/안함 ~ 10: 많음/심함)</p>
+        <div class="modal-title-row">
+            <h3>📅 <span id="dailyLogDateTitle"></span> 기록</h3>
+            <button type="button" class="modal-reset-btn" onclick="resetDailyLogModalInputs()">초기화</button>
+        </div>
+        <p style="font-size:0.85rem; color:#666; margin-bottom:10px; word-break:keep-all;">해당 날짜의 식사량, 음주량, 블랙아웃 정도, 흡연량을 기록합니다. (모두 0: 없음/안함 ~ 10: 많음/심함)</p>
+        <div class="range-edit-toolbar">
+            <button type="button" id="dailyLogRangeEditToggle" class="range-edit-toggle" onclick="toggleDailyLogRangeEdit()">🔒 슬라이더 편집 켜기</button>
+            <span id="dailyLogRangeLockText" class="range-lock-status">스크롤 중 실수로 값이 바뀌지 않도록 잠겨 있습니다.</span>
+        </div>
         
         <input type="hidden" id="dailyLogDateHidden">
         <div id="dailyLogFailureSyncNotice" style="display:none; font-size:0.78rem; color:var(--danger-color); font-weight:700; background:#fff5f5; border:1px dashed #feb2b2; border-radius:10px; padding:8px; margin-bottom:12px; text-align:center; word-break:keep-all;">🚨 실패일입니다. 이곳의 음주량은 실패일 음주량과 함께 저장됩니다.</div>
@@ -594,9 +623,12 @@
 
 <!-- 알콜성 치매 가능성 추정 모달 -->
 <div id="alcoholDementiaRiskModal" class="modal">
-    <div class="modal-content" style="max-width: 460px;">
+    <div class="modal-content range-safe-modal" style="max-width: 460px;">
         <button class="close-btn-top" onclick="closeModal('alcoholDementiaRiskModal')">&times;</button>
-        <h3 style="margin-top:0; margin-bottom: 12px; padding-right: 20px; color:#9a3412;">🧠 알콜성 치매 가능성 추정</h3>
+        <div class="modal-title-row">
+            <h3 style="color:#9a3412;">🧠 알콜성 치매 가능성 추정</h3>
+            <button type="button" class="modal-reset-btn" onclick="resetAlcoholDementiaRiskProfile()">초기화</button>
+        </div>
         <div class="risk-note-box" style="margin-bottom:15px;">
             이 수치는 블랙아웃 기록을 바탕으로 만든 <b>개인 기록용 추정 지표</b>입니다. 의학적 진단이나 실제 발병 확률이 아니며, 기억 공백이 반복되면 전문 의료진 상담을 권장합니다.
         </div>
@@ -622,11 +654,47 @@
     </div>
 </div>
 
+<!-- 알콜성 질환 가능성 추정 모달 -->
+<div id="alcoholDiseaseRiskModal" class="modal">
+    <div class="modal-content range-safe-modal" style="max-width: 480px;">
+        <button class="close-btn-top" onclick="closeModal('alcoholDiseaseRiskModal')">&times;</button>
+        <div class="modal-title-row">
+            <h3 style="color:#7f1d1d;">🍷 알콜성 질환 가능성 추정</h3>
+            <button type="button" class="modal-reset-btn" onclick="resetAlcoholDiseaseRiskProfile()">초기화</button>
+        </div>
+        <div class="risk-note-box" style="margin-bottom:15px; background:#fff1f2; border-color:#fecdd3; color:#7f1d1d;">
+            이 수치는 최근 음주 기록을 바탕으로 만든 <b>개인 기록용 추정 지표</b>입니다. 의학적 진단이나 실제 발병 확률이 아니며, 반복 음주·폭음·복통·황달 등 증상이 있으면 전문 의료진 상담을 권장합니다.
+        </div>
+
+        <label style="font-weight:700; font-size:0.9rem;">최근 1개월 음주 횟수</label>
+        <input type="number" id="diseaseMonthlyDrinkInput" min="0" max="31" step="1" placeholder="예: 4" oninput="renderAlcoholDiseaseRiskPreview()">
+        <p style="font-size:0.72rem; color:#718096; margin:4px 0 10px;">달력 기록에서 오늘 기준 최근 1개월 동안 음주량이 1 이상인 날짜를 자동 카운트합니다. 숫자는 직접 수정할 수 있습니다.</p>
+
+        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:10px;">1회 평균 음주량 (<span id="diseaseAmountVal" style="font-weight: 800; color: #2ecc71;">0</span>/10)</label>
+        <input type="range" id="diseaseAmountRange" min="0" max="10" step="0.1" value="0" class="dynamic-range" data-touched="true" oninput="updateRangeStyle(this, 'diseaseAmountVal'); renderAlcoholDiseaseRiskPreview()">
+
+        <button class="start-btn" style="margin-top:16px; width:100%; padding: 14px; font-size: 1rem; background: linear-gradient(135deg, #be123c, #7f1d1d);" onclick="saveAlcoholDiseaseRiskProfile()">입력값 저장하고 예측 보기</button>
+
+        <div id="diseaseRiskSourceText" style="font-size:0.78rem; color:#64748b; font-weight:700; margin:14px 0 8px; text-align:center; white-space:pre-line;"></div>
+        <div id="diseaseRiskBars" style="margin-top: 8px;"></div>
+
+        <details style="margin-top: 14px; font-size:0.78rem; color:#64748b; line-height:1.5;">
+            <summary style="cursor:pointer; font-weight:800; color:#7f1d1d;">계산방법 보기</summary>
+            <div style="margin-top:8px; word-break:keep-all;">
+                최근 1개월 음주 횟수는 빈도 위험으로, 1회 평균 음주량은 강도 위험으로 환산합니다. 빈도는 <b>1 - exp(-월횟수/10)</b>, 음주량은 <b>평균 음주량/10</b>으로 표준화한 뒤 질환별 민감도를 곱해 기간별 누적 추정치로 표시합니다.
+            </div>
+        </details>
+    </div>
+</div>
+
 <!-- 달력에서 실패한 날짜 클릭 시 뜨는 음주량 입력 모달 (유지) -->
 <div id="failAmountModal" class="modal">
-    <div class="modal-content">
+    <div class="modal-content range-safe-modal">
         <button class="close-btn-top" onclick="closeModal('failAmountModal')">&times;</button>
-        <h3 style="margin-top:0; padding-right: 20px;">🚨 실패일 음주량 기록</h3>
+        <div class="modal-title-row">
+            <h3>🚨 실패일 음주량 기록</h3>
+            <button type="button" class="modal-reset-btn" onclick="resetSliderModal('failAmountModal')">초기화</button>
+        </div>
         <p style="font-size:0.85rem; color:#666; margin-bottom:15px; word-break:keep-all;">이 날 얼마나 드셨는지 기록해주세요.<br>(1: 비교적 소량 ~ 10: 심각한 폭음)</p>
         
         <label style="font-weight:700; font-size:0.9rem;">음주량 (<span id="failAmountVal" style="font-weight: 800;">5</span>/10)</label>
@@ -692,11 +760,11 @@
 
 <!-- 몸상태 기록 모달 -->
 <div id="stateModal" class="modal">
-    <div class="modal-content">
+    <div class="modal-content range-safe-modal">
         <button class="close-btn-top" onclick="closeModal('stateModal')">&times;</button>
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-right: 25px;">
-            <h3 style="margin:0;">📝 현재 몸상태 기록</h3>
-            <button onclick="resetStateModal()" style="background:none; border:none; color:#718096; font-weight:bold; cursor:pointer; font-size:0.85rem; text-decoration:underline; padding:0;">초기화</button>
+        <div class="modal-title-row">
+            <h3>📝 현재 몸상태 기록</h3>
+            <button type="button" class="modal-reset-btn" onclick="resetStateModal()">초기화</button>
         </div>
         <p style="font-size:0.85rem; color:#888; margin-bottom:10px; word-break:keep-all;">기록하고 싶은 항목의 바를 움직여 활성화해 주세요.</p>
         
@@ -738,9 +806,12 @@
 </div>
 
 <div id="evalModal" class="modal">
-    <div class="modal-content">
+    <div class="modal-content range-safe-modal">
         <button class="close-btn-top" onclick="closeModal('evalModal')">&times;</button>
-        <h3 style="margin-top:0; margin-bottom: 12px; padding-right: 20px;">🛡️ 극복 행동 효과 점검</h3>
+        <div class="modal-title-row">
+            <h3>🛡️ 극복 행동 효과 점검</h3>
+            <button type="button" class="modal-reset-btn" onclick="resetSliderModal('evalModal')">초기화</button>
+        </div>
         <p id="evalMessage" style="font-size: 0.85rem; color: #666; margin-bottom: 20px; line-height: 1.5;"></p>
         <label style="font-weight:700; font-size:0.9rem;">대책의 효과 (<span id="evalEffectVal" style="font-weight: 800;">5</span>/10) <br><span style="font-size:0.75rem; color:#999; font-weight:normal;">0: 전혀 없음 ~ 10: 매우 효과적</span></label>
         <input type="range" id="evalEffectRange" min="0" max="10" value="5" class="dynamic-range" oninput="updateRangeStyle(this, 'evalEffectVal')">
@@ -762,9 +833,12 @@
 </div>
 
 <div id="cravingModal" class="modal">
-    <div class="modal-content">
+    <div class="modal-content range-safe-modal">
         <button class="close-btn-top" onclick="closeModal('cravingModal')">&times;</button>
-        <h3 style="margin-top:0; margin-bottom: 12px; padding-right: 20px;">고비 기록하기</h3>
+        <div class="modal-title-row">
+            <h3>고비 기록하기</h3>
+            <button type="button" class="modal-reset-btn" onclick="resetSliderModal('cravingModal')">초기화</button>
+        </div>
         <label style="font-weight:700; font-size:0.9rem;">갈망 강도 (<span id="rangeVal" style="font-weight: 800;">5</span>/10)</label>
         <input type="range" id="cravingRange" min="1" max="10" value="5" class="dynamic-range" oninput="updateRangeStyle(this, 'rangeVal')">
         <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:10px;">갈망의 원인</label>
@@ -777,9 +851,12 @@
 </div>
 
 <div id="smokingLogModal" class="modal">
-    <div class="modal-content">
+    <div class="modal-content range-safe-modal">
         <button class="close-btn-top" onclick="closeModal('smokingLogModal')">&times;</button>
-        <h3 style="margin-top:0; margin-bottom: 12px; padding-right: 20px;">🚬 흡연량 기록</h3>
+        <div class="modal-title-row">
+            <h3>🚬 흡연량 기록</h3>
+            <button type="button" class="modal-reset-btn" onclick="resetSliderModal('smokingLogModal')">초기화</button>
+        </div>
         <p style="font-size:0.85rem; color:#666; margin-bottom:15px; word-break:keep-all;">오늘의 흡연량을 0~10으로 기록합니다. 달력 롱클릭 기록의 흡연량과 같은 값으로 연동됩니다.</p>
         <input type="hidden" id="smokingLogDateHidden">
         <div id="smokingLogDateText" style="font-size:0.85rem; color:#718096; font-weight:700; margin-bottom:12px; text-align:center;"></div>
@@ -965,7 +1042,7 @@
     }
 
     let userId = null; 
-    let userProfile = { gender: 'male', weight: 70, height: 170, nickname: '', totalVisits: 0, todayVisits: 0, alcoholDementiaRiskProfile: null };
+    let userProfile = { gender: 'male', weight: 70, height: 170, nickname: '', totalVisits: 0, todayVisits: 0, alcoholDementiaRiskProfile: null, alcoholDiseaseRiskProfile: null };
     let cautionDays = []; 
     let isCautionAlertOpen = false;
 
@@ -1438,6 +1515,128 @@
         `;
     }
 
+    function deriveAlcoholConsumptionRiskProfileFromDailyLogs(referenceDate = new Date()) {
+        const todayStart = new Date(referenceDate.getFullYear(), referenceDate.getMonth(), referenceDate.getDate());
+        const windowStart = addMonthsClamped(todayStart, -1);
+        const windowEnd = new Date(todayStart.getFullYear(), todayStart.getMonth(), todayStart.getDate(), 23, 59, 59, 999);
+
+        if (!windowStart) return null;
+
+        const entries = Object.entries(dailyLogsData || {})
+            .map(([date, data]) => {
+                const parsedDate = getDateFromDateKey(date);
+                const alcohol = clampFloatNumber(data?.alcohol, 0, 10, 0);
+                const updatedAt = data?.updatedAt || (parsedDate ? parsedDate.getTime() : 0);
+                return { date, parsedDate, alcohol, updatedAt };
+            })
+            .filter(item =>
+                item.parsedDate &&
+                item.parsedDate >= windowStart &&
+                item.parsedDate <= windowEnd &&
+                item.alcohol > 0
+            )
+            .sort((a, b) => a.parsedDate - b.parsedDate);
+
+        if (entries.length === 0) return null;
+
+        const totalAlcoholAmount = entries.reduce((sum, item) => sum + item.alcohol, 0);
+        const monthlyDrinkCount = entries.length;
+        const averageAlcoholAmount = roundOneDecimal(totalAlcoholAmount / entries.length);
+        const latestTime = entries.reduce((latest, item) => Math.max(latest, item.updatedAt || item.parsedDate.getTime()), 0);
+
+        return {
+            monthlyDrinkCount,
+            averageAlcoholAmount,
+            updatedAt: latestTime,
+            source: 'dailyLogDerived',
+            sampleCount: entries.length,
+            amountTotal: roundOneDecimal(totalAlcoholAmount),
+            windowStart: dateToKey(windowStart),
+            windowEnd: dateToKey(windowEnd)
+        };
+    }
+
+    function getLatestAlcoholDiseaseRiskProfile() {
+        const savedProfile = userProfile.alcoholDiseaseRiskProfile;
+        const normalizedSavedProfile = (savedProfile && (savedProfile.monthlyDrinkCount !== undefined || savedProfile.averageAlcoholAmount !== undefined))
+            ? {
+                monthlyDrinkCount: clampFloatNumber(savedProfile.monthlyDrinkCount, 0, 31, 0),
+                averageAlcoholAmount: clampFloatNumber(savedProfile.averageAlcoholAmount, 0, 10, 0),
+                updatedAt: savedProfile.updatedAt || 0,
+                source: savedProfile.source || 'manual'
+            }
+            : null;
+        const derivedProfile = deriveAlcoholConsumptionRiskProfileFromDailyLogs();
+
+        if (normalizedSavedProfile && derivedProfile) {
+            return (derivedProfile.updatedAt > normalizedSavedProfile.updatedAt) ? derivedProfile : normalizedSavedProfile;
+        }
+        return normalizedSavedProfile || derivedProfile;
+    }
+
+    function calculateAlcoholDiseaseRisks(profile) {
+        const monthlyDrinkCount = clampFloatNumber(profile?.monthlyDrinkCount, 0, 31, 0);
+        const averageAlcoholAmount = clampFloatNumber(profile?.averageAlcoholAmount, 0, 10, 0);
+        const hasData = monthlyDrinkCount > 0 && averageAlcoholAmount > 0;
+        const frequencyFactor = hasData ? (1 - Math.exp(-monthlyDrinkCount / 10)) : 0;
+        const amountFactor = hasData ? (averageAlcoholAmount / 10) : 0;
+        const exposureScore = Math.min(1, (frequencyFactor * 0.55) + (amountFactor * 0.45));
+        const periods = [
+            { label: '1개월', months: 1 },
+            { label: '6개월', months: 6 },
+            { label: '1년', months: 12 },
+            { label: '3년', months: 36 },
+            { label: '5년', months: 60 },
+            { label: '10년', months: 120 }
+        ];
+        const diseaseModels = [
+            { key: 'hepatitis', icon: '🟠', label: '알콜성 간염', monthlyBase: 0.0052, exponent: 1.22 },
+            { key: 'pancreatitis', icon: '🩺', label: '알콜성 췌장염', monthlyBase: 0.0035, exponent: 1.34 },
+            { key: 'pancreaticCancer', icon: '🧬', label: '알콜 관련 췌장암', monthlyBase: 0.00115, exponent: 1.48 },
+            { key: 'cirrhosis', icon: '🟤', label: '알콜성 간경변', monthlyBase: 0.0025, exponent: 1.42 }
+        ];
+
+        const conditions = diseaseModels.map(model => {
+            const monthlyHazard = hasData ? model.monthlyBase * Math.pow(exposureScore, model.exponent) : 0;
+            const conditionPeriods = periods.map(period => {
+                const risk = Math.max(0, Math.min(95, Math.round((1 - Math.exp(-monthlyHazard * period.months)) * 100)));
+                return { ...period, risk };
+            });
+            const representative = conditionPeriods.find(period => period.label === '5년')?.risk || 0;
+            return { ...model, monthlyHazard, representative, periods: conditionPeriods };
+        });
+
+        const representative = conditions.reduce((max, item) => Math.max(max, item.representative), 0);
+        return { monthlyDrinkCount, averageAlcoholAmount, hasData, frequencyFactor, amountFactor, exposureScore, representative, conditions };
+    }
+
+    function buildAlcoholDiseaseRiskStackHtml() {
+        const profile = getLatestAlcoholDiseaseRiskProfile();
+        const result = calculateAlcoholDiseaseRisks(profile);
+        if (!result.hasData) {
+            return `
+                <div class="alcohol-risk-stack">
+                    <div class="alcohol-disease-risk-box no-data" onclick="openAlcoholDiseaseRiskModal(event)" title="음주 횟수와 평균 음주량을 입력하면 기간별 추정치를 볼 수 있습니다.">
+                        <span>🍷 알콜성 질환 가능성 입력</span>
+                        <div class="disease-risk-progress"><div class="disease-risk-progress-fill" style="width:0%;"></div></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        const title = `최근 1개월 음주 ${result.monthlyDrinkCount}회 · 1회 평균 ${result.averageAlcoholAmount}/10 · 대표값은 5년 추정치`;
+        return `
+            <div class="alcohol-risk-stack">
+                ${result.conditions.map(condition => `
+                    <div class="alcohol-disease-risk-box" onclick="openAlcoholDiseaseRiskModal(event)" title="${title} · ${condition.label} ${condition.representative}%">
+                        <span>${condition.icon} ${condition.label} ${condition.representative}%</span>
+                        <div class="disease-risk-progress"><div class="disease-risk-progress-fill" style="width:${condition.representative}%;"></div></div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
     function renderRiskBars(result) {
         return result.periods.map(period => `
             <div class="risk-period-row">
@@ -1517,6 +1716,119 @@
             console.error('알콜성 치매 가능성 입력값 저장 실패:', e);
             alert('저장에 실패했습니다: ' + e.message);
         }
+    };
+
+    function renderDiseaseRiskBars(result) {
+        if (!result.hasData) {
+            return '<div class="risk-note-box" style="background:#f8fafc; border-color:#cbd5e0; color:#64748b; text-align:center;">최근 1개월 안에 음주량이 입력된 날짜가 없거나, 직접 입력값이 0입니다.</div>';
+        }
+
+        return result.conditions.map(condition => `
+            <div class="disease-risk-card">
+                <div class="disease-risk-card-title"><span>${condition.icon} ${condition.label}</span><span>${condition.representative}%</span></div>
+                ${condition.periods.map(period => `
+                    <div class="risk-period-row">
+                        <div class="risk-period-head"><span>${period.label} 내 추정 가능성</span><span class="risk-period-percent">${period.risk}%</span></div>
+                        <div class="risk-progress-bg"><div class="risk-progress-fill" style="width:${period.risk}%; background:linear-gradient(90deg, #fb7185, #ef4444, #991b1b);"></div></div>
+                    </div>
+                `).join('')}
+            </div>
+        `).join('');
+    }
+
+    function applyAlcoholDiseaseRiskProfileToInputs(profile) {
+        const countInput = document.getElementById('diseaseMonthlyDrinkInput');
+        const amountRange = document.getElementById('diseaseAmountRange');
+        if (countInput) countInput.value = profile.monthlyDrinkCount || 0;
+        if (amountRange) {
+            amountRange.value = clampFloatNumber(profile.averageAlcoholAmount, 0, 10, 0);
+            amountRange.setAttribute('data-touched', 'true');
+            updateRangeStyle(amountRange, 'diseaseAmountVal');
+        }
+    }
+
+    window.renderAlcoholDiseaseRiskPreview = function(profile = null) {
+        const countInput = document.getElementById('diseaseMonthlyDrinkInput');
+        const amountRange = document.getElementById('diseaseAmountRange');
+        const sourceText = document.getElementById('diseaseRiskSourceText');
+        const bars = document.getElementById('diseaseRiskBars');
+        if (!countInput || !amountRange || !bars) return;
+
+        const previewProfile = profile || {
+            monthlyDrinkCount: clampFloatNumber(countInput.value, 0, 31, 0),
+            averageAlcoholAmount: clampFloatNumber(amountRange.value, 0, 10, 0),
+            source: 'preview'
+        };
+        const result = calculateAlcoholDiseaseRisks(previewProfile);
+        window.lastAlcoholDiseaseRiskResult = result;
+        bars.innerHTML = renderDiseaseRiskBars(result);
+
+        if (sourceText) {
+            if (result.hasData) {
+                let sourcePrefix = '직접 입력/수정값 기준';
+                if (previewProfile.source === 'dailyLogDerived') {
+                    sourcePrefix = `캘린더 자동 계산 기준: ${previewProfile.windowStart}~${previewProfile.windowEnd} · ${previewProfile.sampleCount}회 · 음주량 합계 ${previewProfile.amountTotal}`;
+                } else if (previewProfile.source === 'manual') {
+                    sourcePrefix = '저장된 직접 입력값 기준';
+                }
+                sourceText.innerText = `${sourcePrefix}\n음주 ${result.monthlyDrinkCount}회 · 1회 평균 ${result.averageAlcoholAmount}/10 · 대표값은 5년 최대 추정치 ${result.representative}%`;
+            } else {
+                sourceText.innerText = '오늘 기준 최근 1개월 안에 음주량이 입력된 날짜가 없거나, 직접 입력값이 0입니다.';
+            }
+        }
+    };
+
+    window.openAlcoholDiseaseRiskModal = function(event) {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        if (!userId) return alert('로그인이 필요합니다.');
+
+        const autoProfile = deriveAlcoholConsumptionRiskProfileFromDailyLogs();
+        const profile = autoProfile || getLatestAlcoholDiseaseRiskProfile() || { monthlyDrinkCount: 0, averageAlcoholAmount: 0, source: 'empty' };
+        applyAlcoholDiseaseRiskProfileToInputs(profile);
+        renderAlcoholDiseaseRiskPreview(profile);
+        openModal('alcoholDiseaseRiskModal');
+    };
+
+    window.saveAlcoholDiseaseRiskProfile = async function() {
+        if (!userId) return alert('로그인이 필요합니다.');
+        const profile = {
+            monthlyDrinkCount: roundOneDecimal(clampFloatNumber(document.getElementById('diseaseMonthlyDrinkInput').value, 0, 31, 0)),
+            averageAlcoholAmount: roundOneDecimal(clampFloatNumber(document.getElementById('diseaseAmountRange').value, 0, 10, 0)),
+            updatedAt: new Date().getTime(),
+            source: 'manual'
+        };
+
+        try {
+            await setDoc(doc(db, 'users', userId), { alcoholDiseaseRiskProfile: profile }, { merge: true });
+            userProfile.alcoholDiseaseRiskProfile = profile;
+            renderAlcoholDiseaseRiskPreview(profile);
+            alert('알콜성 질환 가능성 추정 입력값이 저장되었습니다.');
+        } catch (e) {
+            console.error('알콜성 질환 가능성 입력값 저장 실패:', e);
+            alert('저장에 실패했습니다: ' + e.message);
+        }
+    };
+
+    window.resetAlcoholDiseaseRiskProfile = function() {
+        const profile = deriveAlcoholConsumptionRiskProfileFromDailyLogs() || { monthlyDrinkCount: 0, averageAlcoholAmount: 0, source: 'empty' };
+        applyAlcoholDiseaseRiskProfileToInputs(profile);
+        renderAlcoholDiseaseRiskPreview(profile);
+    };
+
+    window.resetAlcoholDementiaRiskProfile = function() {
+        const profile = deriveBlackoutRiskProfileFromDailyLogs() || { monthlyBlackoutCount: 0, blackoutSeverity: 0, source: 'empty' };
+        const countInput = document.getElementById('dementiaMonthlyBlackoutInput');
+        const severityRange = document.getElementById('dementiaSeverityRange');
+        if (countInput) countInput.value = profile.monthlyBlackoutCount || 0;
+        if (severityRange) {
+            severityRange.value = clampFloatNumber(profile.blackoutSeverity, 0, 10, 0);
+            severityRange.setAttribute('data-touched', 'true');
+            updateRangeStyle(severityRange, 'dementiaSeverityVal');
+        }
+        renderAlcoholDementiaRiskPreview(profile);
     };
 
     function findFailedChallengeByDate(dateStr) {
@@ -1690,6 +2002,7 @@
             dailyLogsData = {};
             userProfile.nickname = '';
             userProfile.alcoholDementiaRiskProfile = null;
+            userProfile.alcoholDiseaseRiskProfile = null;
             if (timerInterval) clearInterval(timerInterval);
             document.getElementById('loginArea').style.display = 'flex';
             document.getElementById('setupArea').style.display = 'none';
@@ -1818,6 +2131,9 @@
     };
 
     window.openDailyLogModal = async function(dateStr) {
+        window.setDailyLogRangeEditMode(false);
+        const dailyModalContent = document.getElementById('dailyLogModalContent');
+        if (dailyModalContent) dailyModalContent.scrollTop = 0;
         document.getElementById('dailyLogDateTitle').innerText = dateStr;
         document.getElementById('dailyLogDateHidden').value = dateStr;
         const syncNotice = document.getElementById('dailyLogFailureSyncNotice');
@@ -2244,6 +2560,24 @@
         }
     }
 
+    function appendInlineStyle(existingStyleAttr, styleText) {
+        if (!styleText) return existingStyleAttr || '';
+        if (!existingStyleAttr) return `style="${styleText}"`;
+        return existingStyleAttr.replace(/"\s*$/, ` ${styleText}"`);
+    }
+
+    function getAlcoholDayCellInlineStyle(amount) {
+        const safeAmount = clampFloatNumber(amount, 0, 10, 0);
+        if (safeAmount <= 0) return '';
+        const intensity = Math.max(0.08, Math.min(1, safeAmount / 10));
+        const hue = Math.round(45 - (intensity * 35));
+        const lightness = Math.round(92 - (intensity * 39));
+        const endLightness = Math.max(42, lightness - 8);
+        const textColor = safeAmount >= 5 ? 'white' : '#7c2d12';
+        const shadowAlpha = (0.08 + intensity * 0.17).toFixed(2);
+        return `background:linear-gradient(135deg, hsl(${hue}, 94%, ${lightness}%), hsl(${Math.max(0, hue - 5)}, 88%, ${endLightness}%)) !important; color:${textColor} !important; border:1px solid rgba(194,65,12,0.36); box-shadow:0 2px 8px rgba(194,65,12,${shadowAlpha});`;
+    }
+
     window.openCalendarModal = function(mode) {
         currentCalMode = mode;
         currentCalDate = new Date();
@@ -2260,13 +2594,21 @@
         document.getElementById('calMonthTitle').innerText = `${year}년 ${month + 1}월`;
         
         const legendContainer = document.getElementById('calLegendContainer');
+        const alcoholLegendHtml = `
+            <div style="display:flex; align-items:center; gap:4px; margin-top: 4px;">
+                <span style="display:inline-block; width:28px; height:10px; background:linear-gradient(90deg, #fde68a, #f97316, #b91c1c); border:1px solid #fbbf24; border-radius:999px;"></span>
+                음주량 낮음~높음
+            </div>
+        `;
         if (mode === 'current') {
             legendContainer.innerHTML = `
                 <div><span style="display:inline-block; width:10px; height:10px; background:var(--primary-color); border-radius:2px;"></span> 현재 기록</div>
+                ${alcoholLegendHtml}
             `;
         } else if (mode === 'longest') {
             legendContainer.innerHTML = `
                 <div><span style="display:inline-block; width:10px; height:10px; background:var(--warning-color); border-radius:2px;"></span> 최장 금주 구간</div>
+                ${alcoholLegendHtml}
             `;
         } else {
             legendContainer.innerHTML = `
@@ -2277,6 +2619,7 @@
                     <span style="display:inline-block; width:10px; height:10px; background:hsl(0,85%,45%); border:1px solid #ddd; position:relative; border-radius:2px;"><span style="position:absolute; font-size:6px; top:-2px; left:-1px;">❌</span></span>
                     실패한 날
                 </div>
+                ${alcoholLegendHtml}
             `;
         }
 
@@ -2384,9 +2727,9 @@
                         onClickEvent = `onclick="openFailAmountModalFromClick(event, '${c.id}', ${c.failAmount || 5}, '${dateToKey(c.endDate)}')"`;
                         
                         if (c.failAmount) {
-                            const amt = Math.max(1, Math.min(10, c.failAmount));
-                            const hue = 120 - ((amt - 1) / 9) * 120; 
-                            customStyle = `style="background-color: hsl(${hue}, 85%, 45%) !important; color: white !important;"`;
+                            const amt = clampFloatNumber(c.failAmount, 1, 10, 5);
+                            if (!classList.includes('alcohol-day-mark')) classList.push('alcohol-day-mark');
+                            customStyle = appendInlineStyle(customStyle, getAlcoholDayCellInlineStyle(amt));
                         }
                     }
                 });
@@ -2412,14 +2755,19 @@
                 cBadge = `<div class="caution-badge" onclick="showCautionReason(event, '${cautionForDay.reason}')">🚨</div>`;
             }
 
-            // 🥗 식사/음주/흡연 기록 배지 추가 (global dailyLogsData 확인)
+            // 🥗 식사/음주/흡연 기록 배지 및 음주량 기반 셀 색상 추가 (global dailyLogsData 확인)
             let logBadge = '';
             const dayLog = dailyLogsData[iterDateStrCal];
             if (dayLog) {
                 const mealSum = (dayLog.breakfast || 0) + (dayLog.lunch || 0) + (dayLog.dinner || 0) + (dayLog.snack || 0);
                 const logIcons = [];
+                const alcoholAmountForDay = clampFloatNumber(dayLog.alcohol, 0, 10, 0);
                 if (mealSum > 0 || dayLog.weight) logIcons.push('🥗');
-                if ((dayLog.alcohol || 0) > 0) logIcons.push('🍷');
+                if (alcoholAmountForDay > 0) {
+                    logIcons.push('🍷');
+                    if (!classList.includes('alcohol-day-mark')) classList.push('alcohol-day-mark');
+                    customStyle = appendInlineStyle(customStyle, getAlcoholDayCellInlineStyle(alcoholAmountForDay));
+                }
                 if ((dayLog.blackout || 0) > 0) logIcons.push('🧠');
                 if ((dayLog.smoking || 0) > 0) logIcons.push('🚬');
                 if (logIcons.length > 0) {
@@ -3755,6 +4103,7 @@
             const successRateRaw = totalCumul > 0 ? ((totalCumul - globalFailedDayCount) / totalCumul) * 100 : 100;
             const successRate = Math.max(0, Math.min(100, Math.round(successRateRaw)));
             const alcoholDementiaRiskBoxHtml = buildAlcoholDementiaRiskBoxHtml();
+            const alcoholDiseaseRiskStackHtml = buildAlcoholDiseaseRiskStackHtml();
 
             document.getElementById('mainDaysContainer').innerHTML = `
                 <div class="cal-hint">👇 클릭하여 달력 보기</div>
@@ -3770,6 +4119,7 @@
                         </div>
                         ${alcoholDementiaRiskBoxHtml}
                     </div>
+                    ${alcoholDiseaseRiskStackHtml}
                 </div>
             `;
             
@@ -4073,13 +4423,65 @@
         if (textId) { const textEl = document.getElementById(textId); if (textEl) { textEl.innerText = displayVal; textEl.style.color = color; } }
     };
 
+    function setRangeValue(id, valId, value, touched = true) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.value = value;
+        el.setAttribute('data-touched', touched ? 'true' : 'false');
+        updateRangeStyle(el, valId);
+    }
+
     window.resetStateModal = function() {
         const ranges = ['withdrawalRange', 'moodRange', 'thirstRange', 'fatigueRange', 'stressRange', 'sleepRange', 'hungerRange', 'brainFogRange'];
         const valIds = ['withdrawalVal', 'moodVal', 'thirstVal', 'fatigueVal', 'stressVal', 'sleepVal', 'hungerVal', 'brainFogVal'];
-        ranges.forEach((id, index) => {
-            const el = document.getElementById(id);
-            if(el) { el.value = 5; el.setAttribute('data-touched', 'false'); updateRangeStyle(el, valIds[index]); }
-        });
+        ranges.forEach((id, index) => setRangeValue(id, valIds[index], 5, false));
+    };
+
+    window.resetDailyLogModalInputs = function() {
+        const ranges = [
+            ['logBreakfastRange', 'logBreakfastVal'],
+            ['logLunchRange', 'logLunchVal'],
+            ['logDinnerRange', 'logDinnerVal'],
+            ['logSnackRange', 'logSnackVal'],
+            ['logAlcoholRange', 'logAlcoholVal'],
+            ['logBlackoutRange', 'logBlackoutVal'],
+            ['logSmokingRange', 'logSmokingVal']
+        ];
+        ranges.forEach(([id, valId]) => setRangeValue(id, valId, 0, false));
+        const weightInput = document.getElementById('logWeightInput');
+        if (weightInput) weightInput.value = userProfile.weight || '';
+        window.setDailyLogRangeEditMode(false);
+    };
+
+    window.setDailyLogRangeEditMode = function(enabled) {
+        const content = document.getElementById('dailyLogModalContent');
+        const toggle = document.getElementById('dailyLogRangeEditToggle');
+        const text = document.getElementById('dailyLogRangeLockText');
+        if (content) content.classList.toggle('range-locked', !enabled);
+        if (toggle) toggle.innerText = enabled ? '🔓 슬라이더 편집 끄기' : '🔒 슬라이더 편집 켜기';
+        if (text) text.innerText = enabled ? '이제 값을 조절할 수 있습니다. 스크롤할 때는 다시 잠그면 안전합니다.' : '스크롤 중 실수로 값이 바뀌지 않도록 잠겨 있습니다.';
+    };
+
+    window.toggleDailyLogRangeEdit = function() {
+        const content = document.getElementById('dailyLogModalContent');
+        const enabled = content ? content.classList.contains('range-locked') : true;
+        window.setDailyLogRangeEditMode(enabled);
+    };
+
+    window.resetSliderModal = function(modalId) {
+        const configs = {
+            failAmountModal: [['failAmountRange', 'failAmountVal', 5, true]],
+            evalModal: [['evalEffectRange', 'evalEffectVal', 5, true], ['evalCravingRange', 'evalCravingVal', 5, true]],
+            cravingModal: [['cravingRange', 'rangeVal', 5, true]],
+            smokingLogModal: [['smokingLogRange', 'smokingLogVal', 0, true]]
+        };
+        (configs[modalId] || []).forEach(([id, valId, value, touched]) => setRangeValue(id, valId, value, touched));
+        if (modalId === 'cravingModal') {
+            const reason = document.getElementById('cravingReason');
+            const etcReason = document.getElementById('etcReason');
+            if (reason) reason.value = '스트레스';
+            if (etcReason) { etcReason.value = ''; etcReason.style.display = 'none'; }
+        }
     };
 
     window.openModal = (id) => {
@@ -4087,6 +4489,7 @@
         if (id === 'cravingModal') { updateRangeStyle(document.getElementById('cravingRange'), 'rangeVal'); }
         if (id === 'stateModal') { resetStateModal(); }
         if (id === 'evalModal') { updateRangeStyle(document.getElementById('evalEffectRange'), 'evalEffectVal'); updateRangeStyle(document.getElementById('evalCravingRange'), 'evalCravingVal'); }
+        if (id === 'dailyLogModal') { window.setDailyLogRangeEditMode(false); }
     };
     
     window.closeModal = (id) => document.getElementById(id).style.display = 'none';
