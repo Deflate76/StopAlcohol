@@ -55,9 +55,10 @@
         .start-btn { width: 100%; max-width: 320px; padding: 18px; font-size: 1.2rem; font-weight: 800; background: linear-gradient(135deg, #3498db, #2980b9); color: white; border: none; border-radius: 16px; cursor: pointer; box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3); transition: transform 0.2s; box-sizing: border-box; }
         .start-btn:active { transform: scale(0.97); }
         .header-bar { display: flex; flex-direction: column; align-items: stretch; gap: 8px; margin-bottom: 15px; font-size: 0.9rem; color: #666; }
-        .header-user-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; width: 100%; }
-        .header-user-info { display: flex; flex: 1 1 auto; flex-direction: column; align-items: flex-start; text-align: left; width: auto; min-width: 0; }
-        .header-user-row .push-test-link-row { flex: 0 0 auto; justify-content: flex-end; align-self: flex-start; max-width: 46%; margin: 0; text-align: right; }
+        .header-top-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; width: 100%; }
+        .header-top-row .header-user-info { flex: 1 1 auto; min-width: 0; width: auto; }
+        .header-user-info { display: flex; flex-direction: column; align-items: flex-start; text-align: left; width: 100%; }
+        .push-test-link-slot { display: flex; align-items: flex-start; justify-content: flex-end; flex: 0 0 auto; max-width: 44%; }
         .header-actions { display: flex; align-items: center; justify-content: flex-start; gap: 6px; flex-wrap: wrap; width: 100%; }
         .header-actions button { flex: 1 1 72px; min-width: 72px; }
         .logout-btn { background: #f1f3f5; border: 1px solid #e2e8f0; padding: 7px 8px; border-radius: 9px; font-weight: 800; cursor: pointer; color: #495057; font-size: 0.78rem; white-space: nowrap; }
@@ -82,7 +83,7 @@
         /* 달력 버튼을 위한 클릭 어포던스 디자인 */
         .clickable-time-box { display: flex; flex-direction: column; align-items: center; padding: 10px 20px; border-radius: 16px; transition: all 0.2s ease; cursor: pointer; border: 2px solid transparent; text-decoration: none; }
         .clickable-time-box:hover { background-color: rgba(255, 255, 255, 0.8); border-color: #ffcccc; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(231, 76, 60, 0.1); }
-        .cal-hint { font-size: 0.75rem; color: var(--danger-color); font-weight: bold; opacity: 0.8; margin: 0 auto 4px; display: flex; align-items: center; justify-content: center; gap: 4px; width: 100%; text-align: center; line-height: 1.2; }
+        .cal-hint { font-size: 0.75rem; color: var(--danger-color); font-weight: bold; opacity: 0.8; margin-bottom: 4px; display: flex; align-items: center; justify-content: center; gap: 4px; width: 100%; text-align: center; }
         .cumulative-success-row { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; }
         .success-rate-box { display: inline-flex; align-items: center; gap: 5px; font-size: 0.72rem; font-weight: 800; color: #2f855a; background: #f0fff4; border: 1px solid #c6f6d5; border-radius: 999px; padding: 3px 7px; white-space: nowrap; }
         .success-rate-progress { width: 46px; height: 7px; border-radius: 999px; background: #c6f6d5; overflow: hidden; }
@@ -171,18 +172,13 @@
         .stat-btn:hover { background: linear-gradient(135deg, #ecfeff, #f0fdf4); transform: translateY(-1px); box-shadow: 0 8px 18px rgba(15, 118, 110, 0.16); }
         .stat-btn:active { transform: scale(0.98); }
         details.main-section.highlight .stat-btn { background: linear-gradient(135deg, #ecfeff, #f0fdf4) !important; color: #0f766e !important; border-color: #5eead4 !important; }
-        .push-test-link-row { display: none; justify-content: flex-end; align-items: center; gap: 6px; margin: 0; }
-        .push-link-btn { appearance: none; background: none; border: none; color: #64748b; cursor: pointer; font-family: inherit; font-size: 0.86rem; font-weight: 800; padding: 4px 0; text-decoration: underline; text-underline-offset: 3px; width: auto; }
+        .push-test-link-row { display: none; justify-content: flex-end; align-items: center; gap: 6px; margin: 0; flex-shrink: 0; white-space: nowrap; }
+        .header-top-row .push-test-link-row { align-self: flex-start; }
+        .push-link-btn { appearance: none; background: none; border: none; color: #64748b; cursor: pointer; font-family: inherit; font-size: 0.78rem; font-weight: 800; padding: 2px 0; text-decoration: underline; text-underline-offset: 3px; width: auto; }
         .push-link-btn:hover { color: #334155; }
         .push-info-btn { align-items: center; background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 50%; color: #64748b; cursor: pointer; display: inline-flex; font-size: 0.78rem; font-weight: 900; height: 22px; justify-content: center; line-height: 1; padding: 0; width: 22px; }
         .push-info-btn:hover { background: #eef2f7; color: #334155; }
         .push-link-btn:active, .push-info-btn:active { transform: scale(0.98); }
-        @media (max-width: 420px) {
-            .header-user-row { gap: 6px; }
-            .header-user-row .push-test-link-row { max-width: 42%; flex-wrap: wrap; }
-            .push-link-btn { font-size: 0.74rem; line-height: 1.2; text-align: right; }
-            .push-info-btn { width: 20px; height: 20px; font-size: 0.7rem; }
-        }
         
         .chart-container { position: relative; height: 250px; width: 100%; margin: 10px 0; }
         
@@ -269,15 +265,16 @@
         .history-gap::before { content: '⚠️'; font-size: 0.9rem; }
         .gap-days { font-weight: 800; color: #ed8936; }
         
-        .med-list-item { background: #f8f9fa; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; text-align: left; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center; gap: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
-        .med-list-time { color: #718096; font-size: 0.78rem; font-weight: 700; margin-top: 4px; word-break: keep-all; }
-        .med-list-dose { color: #4a5568; font-size: 0.9rem; font-weight: 800; white-space: nowrap; }
-        @media (max-width: 420px) { .med-list-item { align-items: flex-start; flex-direction: column; } .med-list-dose { white-space: normal; } }
+        .med-list-item { background: #f8f9fa; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; text-align: left; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
         
         .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 0 10px; }
         .cal-btn { background: #f0f2f5; border: none; width: 36px; height: 36px; border-radius: 10px; font-weight: bold; font-size: 1.1rem; color: #4a5568; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
         .cal-btn:hover { background: #e2e8f0; color: var(--primary-color); }
         .cal-title { font-size: 1.1rem; font-weight: 800; color: var(--text-dark); }
+        .cal-month-success-container { margin: -10px 10px 14px; text-align: center; }
+        .cal-month-success-label { color: #2f855a; font-size: 0.8rem; font-weight: 900; margin-bottom: 6px; word-break: keep-all; }
+        .cal-month-success-progress { background: #e2e8f0; border-radius: 999px; height: 10px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.08); }
+        .cal-month-success-fill { background: linear-gradient(90deg, #2ecc71, #27ae60); height: 100%; width: 0%; transition: width 0.35s ease; }
         .cal-week { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 0.8rem; font-weight: bold; color: #a0aec0; margin-bottom: 10px; }
         .cal-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
         
@@ -340,11 +337,12 @@
     
     <div id="setupArea">
         <div class="header-bar" style="width: 100%;">
-            <div class="header-user-row">
+            <div class="header-top-row">
                 <div class="header-user-info">
                     <span class="user-display-name" style="font-weight: 800; color: var(--primary-color); cursor: pointer; text-decoration: underline; text-underline-offset: 3px;" onclick="openNicknameModal()" title="별명 수정하기"></span>
                     <span class="visit-stats" style="font-size: 0.75rem; color: #718096; margin-top: 2px;"></span>
                 </div>
+                <div class="push-test-link-slot" data-push-slot="setup"></div>
             </div>
             <div class="header-actions">
                 <button class="dependency-btn" onclick="goToDependencyCheck()">의존성검사</button>
@@ -375,11 +373,12 @@
 
     <div id="displayArea" style="display: none;">
         <div class="header-bar">
-            <div class="header-user-row">
+            <div class="header-top-row">
                 <div class="header-user-info">
                     <span class="user-display-name" style="font-weight: 800; color: var(--primary-color); cursor: pointer; text-decoration: underline; text-underline-offset: 3px;" onclick="openNicknameModal()" title="별명 수정하기"></span>
                     <span class="visit-stats" style="font-size: 0.75rem; color: #718096; margin-top: 2px;"></span>
                 </div>
+                <div class="push-test-link-slot" data-push-slot="display"></div>
             </div>
             <div class="header-actions">
                 <button class="dependency-btn" onclick="goToDependencyCheck()">의존성검사</button>
@@ -579,6 +578,10 @@
             <div class="cal-title" id="calMonthTitle">2026년 5월</div>
             <button class="cal-btn" onclick="changeCalMonth(1)">&#10095;</button>
         </div>
+        <div id="calMonthSuccessContainer" class="cal-month-success-container">
+            <div id="calMonthSuccessText" class="cal-month-success-label">금주 성공률 계산 중</div>
+            <div class="cal-month-success-progress"><div id="calMonthSuccessFill" class="cal-month-success-fill"></div></div>
+        </div>
         
         <div id="calLegendContainer" style="margin-bottom: 15px; font-size: 0.8rem; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
             <!-- 모드에 따라 범례 동적 변경 -->
@@ -764,7 +767,9 @@
         <button class="close-btn-top" onclick="closeModal('bodyInfoModal')">&times;</button>
         <h3 style="margin-top:0; margin-bottom: 12px; padding-right: 20px;">⚖️ 신체계측 기록</h3>
         <p style="font-size:0.85rem; color:#888; margin-bottom:15px; word-break:keep-all;">입력하신 정보는 약물 대사 및 음주 조절 모드에서의 혈중 알코올 농도 계산에 활용됩니다.</p>
-        <label style="font-weight:700; font-size:0.9rem;">성별</label>
+        <label style="font-weight:700; font-size:0.9rem;">기록 일시</label>
+        <input type="datetime-local" id="bodyInfoDateTimeInput">
+        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px;">성별</label>
         <select id="bodyGender">
             <option value="male">남성</option><option value="female">여성</option>
         </select>
@@ -781,13 +786,13 @@
     <div class="modal-content">
         <button class="close-btn-top" onclick="closeModal('medModal')">&times;</button>
         <h3 style="margin-top:0; margin-bottom: 12px; padding-right: 20px;">💊 약물 복용 기록</h3>
-        <label style="font-weight:700; font-size:0.9rem;">약물 종류</label>
+        <label style="font-weight:700; font-size:0.9rem;">복용 일시</label>
+        <input type="datetime-local" id="medDateTimeInput">
+        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px;">약물 종류</label>
         <select id="medType">
             <option value="acamprosate">아캄프로세이트 (Acamprosate)</option>
             <option value="naltrexone">날트렉손 (Naltrexone)</option>
         </select>
-        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px;">복용 일시</label>
-        <input type="datetime-local" id="medTakenAt">
         <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px;">복용량 (mg)</label>
         <input type="number" id="medDose" placeholder="예: 333 (1정)">
         <p style="font-size:0.75rem; color:#999; margin-top:4px;">일반적으로 아캄프로세이트는 1정 333mg, 날트렉손은 1정 50mg 입니다.</p>
@@ -798,8 +803,7 @@
 <div id="medListModal" class="modal">
     <div class="modal-content" style="max-width: 450px;">
         <button class="close-btn-top" onclick="closeModal('medListModal')">&times;</button>
-        <h3 style="margin-top:0; padding-right: 20px;">💊 약물 복용 내역</h3>
-        <p style="font-size:0.78rem; color:#718096; margin: -4px 0 10px; word-break: keep-all;">복용 기록은 날짜와 시간까지 함께 표시됩니다.</p>
+        <h3 style="margin-top:0; padding-right: 20px;">💊 전체 약물 복용 내역</h3>
         <div id="medListContentModal" style="margin-top: 15px; max-height: 50vh; overflow-y: auto; padding-right: 5px;"></div>
         <button class="start-btn" style="width: 100%; padding: 15px; margin-top: 20px; background: #e2e8f0; color: #4a5568;" onclick="closeModal('medListModal')">닫기</button>
     </div>
@@ -1169,32 +1173,34 @@
     const SOBRIETY_REMINDER_WINDOW_START_HOUR = 7;
     const SOBRIETY_REMINDER_WINDOW_END_HOUR = 22;
 
-    function getVisibleHeaderUserRow() {
-        const displayArea = document.getElementById('displayArea');
-        const setupArea = document.getElementById('setupArea');
-        const isVisible = (el) => !!(el && el.style.display !== 'none' && window.getComputedStyle(el).display !== 'none');
-        const activeArea = isVisible(displayArea) ? displayArea : (isVisible(setupArea) ? setupArea : null);
-        return activeArea ? activeArea.querySelector('.header-user-row') : null;
-    }
-
     function placePushTestLinkRow() {
-        const pushTestLinkRow = document.getElementById("pushTestLinkRow");
-        const targetRow = getVisibleHeaderUserRow();
-        if (pushTestLinkRow && targetRow && pushTestLinkRow.parentElement !== targetRow) {
-            targetRow.appendChild(pushTestLinkRow);
+        const row = document.getElementById("pushTestLinkRow");
+        if (!row) return;
+
+        const setupArea = document.getElementById('setupArea');
+        const displayArea = document.getElementById('displayArea');
+        const setupVisible = setupArea && setupArea.style.display !== 'none' && setupArea.style.display !== '';
+        const displayVisible = displayArea && displayArea.style.display !== 'none' && displayArea.style.display !== '';
+
+        let slot = null;
+        if (displayVisible) slot = displayArea.querySelector('.push-test-link-slot');
+        if (!slot && setupVisible) slot = setupArea.querySelector('.push-test-link-slot');
+        if (!slot) slot = document.querySelector('.push-test-link-slot');
+
+        if (slot && row.parentElement !== slot) {
+            slot.appendChild(row);
         }
-        return targetRow;
     }
 
     function updatePushButtonState() {
+        placePushTestLinkRow();
         const enablePushBtn = document.getElementById("enablePushBtn");
         const pushTestLinkRow = document.getElementById("pushTestLinkRow");
-        const pushHeaderRow = placePushTestLinkRow();
         const isLoggedIn = !!(userId && auth.currentUser);
 
-        // 로그인 전 또는 활성 헤더가 없을 때는 푸시 관련 버튼을 숨깁니다.
+        // 로그인 전에는 푸시 관련 버튼을 모두 숨깁니다.
         if (pushTestLinkRow) {
-            pushTestLinkRow.style.display = (isLoggedIn && pushHeaderRow) ? "flex" : "none";
+            pushTestLinkRow.style.display = isLoggedIn ? "flex" : "none";
         }
         if (!enablePushBtn) return;
 
@@ -1485,10 +1491,6 @@
         return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     }
 
-    function getTodayDateKey() {
-        return dateToKey(new Date());
-    }
-
     function toDateTimeLocalValue(dateValue = new Date()) {
         const d = dateValue instanceof Date ? new Date(dateValue.getTime()) : new Date(dateValue);
         if (isNaN(d.getTime())) return '';
@@ -1496,36 +1498,26 @@
         return d.toISOString().slice(0, 16);
     }
 
-    function formatKoreanDateTime(dateValue) {
-        const d = dateValue instanceof Date ? dateValue : new Date(dateValue);
-        if (isNaN(d.getTime())) return '일시 미상';
+    function getDateTimeInputDate(value, fallbackDate = new Date()) {
+        if (value) {
+            const parsed = new Date(value);
+            if (!isNaN(parsed.getTime())) return parsed;
+        }
+        if (fallbackDate === null || fallbackDate === undefined) return null;
+        return fallbackDate instanceof Date ? new Date(fallbackDate.getTime()) : new Date(fallbackDate);
+    }
+
+    function formatDateTimeKo(dateValue) {
+        const d = dateValue instanceof Date ? new Date(dateValue.getTime()) : new Date(dateValue);
+        if (isNaN(d.getTime())) return '-';
         return d.toLocaleString('ko-KR', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit'
+            year: 'numeric', month: '2-digit', day: '2-digit',
+            hour: '2-digit', minute: '2-digit'
         });
     }
 
-    function getMedicationTimestamp(record) {
-        if (!record) return 0;
-        if (typeof record.timestamp === 'number') return record.timestamp;
-        if (record.timestamp && !isNaN(parseInt(record.timestamp))) return parseInt(record.timestamp);
-
-        const candidates = [record.takenAtISO, record.takenAt, record.date];
-        for (const value of candidates) {
-            if (!value) continue;
-            const parsed = new Date(value);
-            if (!isNaN(parsed.getTime())) return parsed.getTime();
-        }
-        return 0;
-    }
-
-    function getMedicationDateTimeLabel(record) {
-        const timestamp = getMedicationTimestamp(record);
-        if (timestamp) return formatKoreanDateTime(timestamp);
-        return record?.date || '일시 미상';
+    function getTodayDateKey() {
+        return dateToKey(new Date());
     }
 
     function clampNumber(value, min, max, fallback) {
@@ -2213,7 +2205,6 @@
                     syncSobrietyReminderSetting("active-challenge-load");
                 } else {
                     document.getElementById('setupArea').style.display = 'flex';
-                    updatePushButtonState();
                 }
                 
                 loadMotivationalStats();
@@ -2578,6 +2569,8 @@
                 const smk = data.smoking || 0;
                 const sum = bf + lc + dn + sn;
                 const wt = data.weight ? `${data.weight}kg` : '미입력';
+                const bodyMeasuredText = data.bodyMeasuredAt ? formatDateTimeKo(data.bodyMeasuredAt) : (data.bodyMeasuredDateTime || '');
+                const bodyMetaHtml = bodyMeasuredText ? `<div style="margin-top:8px; font-size:0.78rem; color:#64748b; font-weight:700;">⚖️ 신체계측: ${bodyMeasuredText}${data.bodyHeight ? ` · 신장 ${data.bodyHeight}cm` : ''}</div>` : '';
 
                 listHtml += `
                     <div class="history-item" onclick="openDailyLogModal('${dateStr}')" style="text-align:left;">
@@ -2594,6 +2587,7 @@
                         <div style="margin-top:8px; font-size:0.85rem; color:var(--danger-color); font-weight:bold;">
                             🍷 음주량: ${alc} | 🧠 블랙아웃: ${blackout} | 🚬 흡연량: ${smk} | 🥗 식사총합: ${sum}
                         </div>
+                        ${bodyMetaHtml}
                     </div>
                 `;
             });
@@ -2853,6 +2847,66 @@
         return `background:linear-gradient(135deg, hsl(${hue}, 94%, ${lightness}%), hsl(${Math.max(0, hue - 5)}, 88%, ${endLightness}%)) !important; color:${textColor} !important; border:1px solid rgba(194,65,12,0.36); box-shadow:0 2px 8px rgba(194,65,12,${shadowAlpha});`;
     }
 
+    function getAlcoholRecordForDate(dateStr) {
+        const dayLog = dailyLogsData?.[dateStr] || null;
+        const dailyAmount = clampFloatNumber(dayLog?.alcohol, 0, 10, 0);
+        let failAmount = 0;
+        let hasFailedChallenge = false;
+
+        (allChallengesData || []).forEach(c => {
+            if (c.status === 'failed' && c.endDate && dateToKey(c.endDate) === dateStr) {
+                hasFailedChallenge = true;
+                failAmount = Math.max(failAmount, clampFloatNumber(c.failAmount, 0, 10, 0));
+            }
+        });
+
+        const hasRecord = dailyAmount > 0 || hasFailedChallenge;
+        const amount = Math.max(dailyAmount, failAmount || (hasFailedChallenge ? 5 : 0));
+        return { hasRecord, amount: Math.max(0, Math.min(10, amount)), dailyAmount, failAmount, hasFailedChallenge };
+    }
+
+    function getMonthlyAbstinenceSuccessStats(year, month) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const monthStart = new Date(year, month, 1);
+        monthStart.setHours(0, 0, 0, 0);
+        const monthLast = new Date(year, month + 1, 0);
+        monthLast.setHours(0, 0, 0, 0);
+
+        if (monthStart > today) {
+            return { totalDays: 0, successDays: 0, drinkDays: 0, percent: 0, endDay: 0, isFuture: true };
+        }
+
+        const endDate = monthLast > today ? today : monthLast;
+        let totalDays = 0;
+        let drinkDays = 0;
+
+        for (let d = new Date(monthStart.getTime()); d <= endDate; d.setDate(d.getDate() + 1)) {
+            totalDays++;
+            if (getAlcoholRecordForDate(dateToKey(d)).hasRecord) drinkDays++;
+        }
+
+        const successDays = Math.max(0, totalDays - drinkDays);
+        const percent = totalDays > 0 ? Math.round((successDays / totalDays) * 100) : 0;
+        return { totalDays, successDays, drinkDays, percent, endDay: endDate.getDate(), isFuture: false };
+    }
+
+    function updateCalendarMonthSuccessUI(year, month) {
+        const textEl = document.getElementById('calMonthSuccessText');
+        const fillEl = document.getElementById('calMonthSuccessFill');
+        if (!textEl || !fillEl) return;
+
+        const stats = getMonthlyAbstinenceSuccessStats(year, month);
+        if (stats.totalDays <= 0) {
+            textEl.innerText = '이 달은 아직 금주 성공률을 집계할 날짜가 없습니다.';
+            fillEl.style.width = '0%';
+            return;
+        }
+
+        textEl.innerText = `이달 금주 성공률 ${stats.percent}% · ${stats.successDays}/${stats.totalDays}일 성공`;
+        fillEl.style.width = `${stats.percent}%`;
+    }
+
     window.openCalendarModal = function(mode) {
         currentCalMode = mode;
         currentCalDate = new Date();
@@ -2867,6 +2921,7 @@
 
     function renderCalendar(year, month, mode) {
         document.getElementById('calMonthTitle').innerText = `${year}년 ${month + 1}월`;
+        updateCalendarMonthSuccessUI(year, month);
         
         const legendContainer = document.getElementById('calLegendContainer');
         const alcoholLegendHtml = `
@@ -2950,6 +3005,9 @@
 
             let customStyle = ""; 
             let onClickEvent = ""; 
+            const iterDateStrCal = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+            const failedChallengeForDay = findFailedChallengeByDate(iterDateStrCal);
+            const alcoholRecordForDay = getAlcoholRecordForDate(iterDateStrCal);
 
             if (mode === 'current' && userQuitDate) {
                 const sDate = new Date(userQuitDate); sDate.setHours(0,0,0,0);
@@ -2998,19 +3056,24 @@
                     
                     if (c.status === 'failed' && isEnd) {
                         if (!classList.includes('fail-mark')) classList.push('fail-mark');
-                        
-                        onClickEvent = `onclick="openFailAmountModalFromClick(event, '${c.id}', ${c.failAmount || 5}, '${dateToKey(c.endDate)}')"`;
-                        
-                        if (c.failAmount) {
-                            const amt = clampFloatNumber(c.failAmount, 1, 10, 5);
-                            if (!classList.includes('alcohol-day-mark')) classList.push('alcohol-day-mark');
-                            customStyle = appendInlineStyle(customStyle, getAlcoholDayCellInlineStyle(amt));
-                        }
+                        const failDateKey = dateToKey(c.endDate);
+                        const failAlcoholRecord = getAlcoholRecordForDate(failDateKey);
+                        onClickEvent = `onclick="openFailAmountModalFromClick(event, '${c.id}', ${failAlcoholRecord.amount || c.failAmount || 5}, '${failDateKey}')"`;
                     }
                 });
             }
 
-            const iterDateStrCal = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+            if (failedChallengeForDay) {
+                if (!classList.includes('fail-mark')) classList.push('fail-mark');
+                if (!onClickEvent) {
+                    onClickEvent = `onclick="openFailAmountModalFromClick(event, '${failedChallengeForDay.id}', ${alcoholRecordForDay.amount || failedChallengeForDay.failAmount || 5}, '${iterDateStrCal}')"`;
+                }
+            }
+
+            if (alcoholRecordForDay.hasRecord && alcoholRecordForDay.amount > 0) {
+                if (!classList.includes('alcohol-day-mark')) classList.push('alcohol-day-mark');
+                customStyle = appendInlineStyle(customStyle, getAlcoholDayCellInlineStyle(alcoholRecordForDay.amount));
+            }
             
             // 갈망 뱃지
             let cravingBadge = '';
@@ -3030,21 +3093,16 @@
                 cBadge = `<div class="caution-badge" onclick="showCautionReason(event, '${cautionForDay.reason}')">🚨</div>`;
             }
 
-            // 🥗 식사/음주/흡연 기록 배지 및 음주량 기반 셀 색상 추가 (global dailyLogsData 확인)
+            // 🥗 식사/음주/흡연 기록 배지 및 음주량 기반 셀 색상 추가 (global dailyLogsData + 실패일 음주량 통합 확인)
             let logBadge = '';
-            const dayLog = dailyLogsData[iterDateStrCal];
-            if (dayLog) {
-                const mealSum = (dayLog.breakfast || 0) + (dayLog.lunch || 0) + (dayLog.dinner || 0) + (dayLog.snack || 0);
+            const dayLog = dailyLogsData[iterDateStrCal] || null;
+            if (dayLog || alcoholRecordForDay.hasRecord) {
+                const mealSum = dayLog ? (dayLog.breakfast || 0) + (dayLog.lunch || 0) + (dayLog.dinner || 0) + (dayLog.snack || 0) : 0;
                 const logIcons = [];
-                const alcoholAmountForDay = clampFloatNumber(dayLog.alcohol, 0, 10, 0);
-                if (mealSum > 0 || dayLog.weight) logIcons.push('🥗');
-                if (alcoholAmountForDay > 0) {
-                    logIcons.push('🍷');
-                    if (!classList.includes('alcohol-day-mark')) classList.push('alcohol-day-mark');
-                    customStyle = appendInlineStyle(customStyle, getAlcoholDayCellInlineStyle(alcoholAmountForDay));
-                }
-                if ((dayLog.blackout || 0) > 0) logIcons.push('🧠');
-                if ((dayLog.smoking || 0) > 0) logIcons.push('🚬');
+                if (mealSum > 0 || dayLog?.weight) logIcons.push('🥗');
+                if (alcoholRecordForDay.hasRecord) logIcons.push('🍷');
+                if ((dayLog?.blackout || 0) > 0) logIcons.push('🧠');
+                if ((dayLog?.smoking || 0) > 0) logIcons.push('🚬');
                 if (logIcons.length > 0) {
                     logBadge = `<div style="position: absolute; top: 2px; left: 4px; font-size: 0.62rem; z-index: 20; white-space: nowrap; letter-spacing:-2px;">${logIcons.join('')}</div>`;
                 }
@@ -3593,7 +3651,6 @@
                     if (timerInterval) clearInterval(timerInterval);
                     document.getElementById('setupArea').style.display = 'flex';
                     document.getElementById('displayArea').style.display = 'none';
-                    updatePushButtonState();
                     closeModal('historyListModal');
                 } else {
                     openHistoryList(); 
@@ -4114,22 +4171,22 @@
     window.openMedListModal = function() {
         const medData = cravingData
             .filter(d => d.type === 'medication')
-            .slice()
-            .sort((a, b) => getMedicationTimestamp(b) - getMedicationTimestamp(a));
+            .sort((a, b) => (b.takenAt || b.timestamp || 0) - (a.takenAt || a.timestamp || 0));
         const medContent = document.getElementById('medListContentModal');
         
         if (medData.length === 0) {
             medContent.innerHTML = '<div style="text-align:center; padding:20px; color:#999; font-size:0.9rem;">아직 기록된 약물 복용 내역이 없습니다.</div>';
         } else {
             medContent.innerHTML = medData.map(m => {
-                const dateTimeStr = getMedicationDateTimeLabel(m);
+                const takenAt = m.takenAt || m.timestamp || null;
+                const dateTimeStr = takenAt ? formatDateTimeKo(takenAt) : (m.date || '-');
                 return `
-                <div class="med-list-item" style="margin-bottom:8px;">
-                    <div style="min-width:0;">
+                <div class="med-list-item" style="margin-bottom:8px; align-items:flex-start; gap:8px;">
+                    <div>
                         <strong style="color: #8e44ad; font-size: 0.95rem;">💊 ${m.drugName}</strong>
-                        <div class="med-list-time">${dateTimeStr} 복용</div>
+                        <span style="color: #4a5568; margin-left: 6px;">${m.dose}mg</span>
                     </div>
-                    <div class="med-list-dose">${m.dose}mg</div>
+                    <div style="color: #718096; font-size: 0.78rem; font-weight:800; text-align:right; white-space:nowrap;">${dateTimeStr}<br>복용</div>
                 </div>
                 `;
             }).join('');
@@ -4283,6 +4340,7 @@
     };
 
     window.openBodyInfoModal = function() {
+        document.getElementById('bodyInfoDateTimeInput').value = toDateTimeLocalValue(new Date());
         document.getElementById('bodyGender').value = userProfile.gender || 'male';
         document.getElementById('bodyWeight').value = userProfile.weight || 70;
         document.getElementById('bodyHeight').value = userProfile.height || 175;
@@ -4291,16 +4349,49 @@
 
     window.saveBodyInfo = async function() {
         if (!userId) return alert("로그인이 필요합니다.");
+        const dateTimeValue = document.getElementById('bodyInfoDateTimeInput').value;
+        const measuredDate = getDateTimeInputDate(dateTimeValue, null);
+        if (!dateTimeValue || !measuredDate || isNaN(measuredDate.getTime())) return alert("신체계측 기록 일시를 올바르게 입력해주세요.");
+
         const gender = document.getElementById('bodyGender').value;
         const weight = parseFloat(document.getElementById('bodyWeight').value);
         const height = parseFloat(document.getElementById('bodyHeight').value);
         if (!weight || !height) return alert("체중과 신장을 올바르게 입력해주세요.");
 
+        const measuredAt = measuredDate.getTime();
+        const measuredDateKey = dateToKey(measuredDate);
+        const bodyInfoLog = {
+            gender, weight, height,
+            measuredAt,
+            measuredDateTimeLocal: toDateTimeLocalValue(measuredDate),
+            measuredDateTimeText: formatDateTimeKo(measuredDate),
+            dateKey: measuredDateKey,
+            recordedAt: new Date().getTime()
+        };
+
         userProfile.gender = gender; userProfile.weight = weight; userProfile.height = height;
         try {
-            await setDoc(doc(db, "users", userId), { gender, weight, height }, { merge: true });
-            alert("신체 정보가 안전하게 저장되었습니다.\n약물 농도 및 음주 조절 BAC 계산에 활용됩니다.");
+            await setDoc(doc(db, "users", userId), {
+                gender, weight, height,
+                bodyInfoMeasuredAt: measuredAt,
+                bodyInfoDateTimeLocal: bodyInfoLog.measuredDateTimeLocal,
+                bodyInfoUpdatedAt: bodyInfoLog.recordedAt,
+                bodyInfoLogs: arrayUnion(bodyInfoLog)
+            }, { merge: true });
+            if (measuredDateKey) {
+                await mergeDailyLog(measuredDateKey, {
+                    weight,
+                    bodyGender: gender,
+                    bodyHeight: height,
+                    bodyMeasuredAt: measuredAt,
+                    bodyMeasuredDateTime: bodyInfoLog.measuredDateTimeText
+                });
+            }
+            alert("신체 정보가 날짜/시간 단위로 저장되었습니다.\n체중은 식사/체중 조회에도 반영됩니다.");
             closeModal('bodyInfoModal');
+            if (document.getElementById('mealWeightLogListModal').style.display === 'flex') {
+                openMealWeightLogList();
+            }
         } catch(e) { console.error(e); alert("저장 실패: " + e.message); }
     };
 
@@ -4310,33 +4401,33 @@
             openBodyInfoModal();
             return;
         }
+        document.getElementById('medDateTimeInput').value = toDateTimeLocalValue(new Date());
         document.getElementById('medDose').value = '';
-        const medTakenAtInput = document.getElementById('medTakenAt');
-        if (medTakenAtInput) medTakenAtInput.value = toDateTimeLocalValue(new Date());
         openModal('medModal');
     };
 
     window.submitMedication = async function() {
         if (!userId || !currentChallengeId) return;
+        const dateTimeValue = document.getElementById('medDateTimeInput').value;
+        const takenDate = getDateTimeInputDate(dateTimeValue, null);
+        if (!dateTimeValue || !takenDate || isNaN(takenDate.getTime())) return alert("복용 일시를 올바르게 입력해주세요.");
+
         const drug = document.getElementById('medType').value;
         const dose = parseFloat(document.getElementById('medDose').value);
-        const medTakenAtValue = document.getElementById('medTakenAt').value;
-        const medTakenAtDate = new Date(medTakenAtValue);
         const drugName = drug === 'acamprosate' ? '아캄프로세이트' : '날트렉손';
 
-        if (!medTakenAtValue || isNaN(medTakenAtDate.getTime())) return alert("복용 일시를 올바르게 선택해주세요.");
         if (!dose || dose <= 0) return alert("복용량을 올바르게 입력해주세요.");
 
-        const medDateTimeLabel = formatKoreanDateTime(medTakenAtDate);
+        const takenAt = takenDate.getTime();
         const entry = {
             type: 'medication',
-            date: medDateTimeLabel,
-            takenAt: medTakenAtValue,
-            takenAtISO: medTakenAtDate.toISOString(),
+            date: formatDateTimeKo(takenDate),
+            dateTimeLocal: toDateTimeLocalValue(takenDate),
             drug: drug,
             drugName: drugName,
             dose: dose,
-            timestamp: medTakenAtDate.getTime(),
+            takenAt,
+            timestamp: takenAt,
             recordedAt: new Date().getTime()
         };
 
@@ -4345,9 +4436,7 @@
             await updateDoc(challengeRef, { cravings: arrayUnion(entry) });
             cravingData.push(entry);
             closeModal('medModal');
-            alert(`[${medDateTimeLabel}] ${drugName} ${dose}mg 복용 기록이 완료되었습니다.`);
-            const descEl = document.getElementById('medChartDesc');
-            if (descEl) descEl.innerText = `${medDateTimeLabel} 복용 기준 예상 체내 대사 곡선입니다.`;
+            alert(`[${formatDateTimeKo(takenAt)}] ${drugName} ${dose}mg 복용 기록이 완료되었습니다.`);
             openModal('medChartModal');
             setTimeout(() => { plotMedicationGraph(drug, dose, userProfile.weight); }, 200);
             loadMotivationalStats();
