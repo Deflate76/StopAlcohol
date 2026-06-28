@@ -87,7 +87,7 @@ messaging.onBackgroundMessage((payload) => {
   const options = {
   body,
   icon: "/favicon.ico",
-  badge: "/icons/notification-badge-96.png?v=3",
+  badge: "/icons/notification-badge-96.png",
   tag: "alcoholaway-push",
   renotify: true,
   requireInteraction: true,
