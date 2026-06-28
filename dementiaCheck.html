@@ -1,0 +1,279 @@
+<!--
+ * Copyright (c) 2026 Kim Jung-hoon (김정훈). All rights reserved.
+ * This project and its source code are the intellectual property of the author.
+ * Unauthorized copying, distribution, or modification is strictly prohibited.
+-->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>간단 알콜성 치매 자가점검</title>
+    <meta name="theme-color" content="#ffffff" />
+    <style>
+        :root { --orange:#f97316; --orange-dark:#c2410c; --danger:#e74c3c; --success:#2ecc71; --bg:#f0f2f5; --text:#2d3748; --muted:#718096; }
+        * { box-sizing:border-box; }
+        body { margin:0; padding:15px; background:var(--bg); color:#333; font-family:'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height:1.6; text-align:center; }
+        .container { max-width:550px; min-height:calc(100vh - 30px); margin:0 auto; background:white; padding:28px 20px; border-radius:24px; box-shadow:0 10px 30px rgba(0,0,0,.1); }
+        .topbar { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:18px; }
+        .back-btn, .small-btn { appearance:none; border:1px solid #cbd5e0; background:#fff; color:#475569; border-radius:999px; padding:8px 12px; font-weight:900; cursor:pointer; font-family:inherit; }
+        h1 { margin:8px 0 4px; color:var(--text); font-size:1.5rem; letter-spacing:-.5px; }
+        .subtitle { margin:0 0 18px; color:var(--muted); font-size:.9rem; word-break:keep-all; }
+        .notice { background:#fff7ed; border:1px solid #fed7aa; border-radius:16px; padding:12px; color:#7c2d12; font-size:.82rem; font-weight:800; text-align:left; word-break:keep-all; margin-bottom:15px; }
+        #loginArea { display:none; padding:28px 0; }
+        .google-btn { display:inline-flex; align-items:center; justify-content:center; gap:10px; width:100%; max-width:320px; padding:15px; border-radius:14px; border:1px solid #ddd; background:white; font-weight:900; cursor:pointer; box-shadow:0 3px 8px rgba(0,0,0,.06); }
+        .date-card, .meta-card, .question-card, .result-card { background:#fff; border:1px solid #e2e8f0; border-radius:18px; padding:14px; margin-top:14px; text-align:left; box-shadow:0 3px 12px rgba(194,65,12,.04); }
+        .date-card { background:linear-gradient(135deg,#fff7ed,#ffffff); border-color:#fed7aa; text-align:center; }
+        label.main-label { display:block; font-weight:950; color:var(--text); margin-bottom:6px; }
+        input[type="date"], input[type="number"], textarea, select { width:100%; border:1px solid #cbd5e0; border-radius:12px; padding:12px; font:inherit; }
+        .question-title { font-weight:950; color:#334155; margin-bottom:8px; word-break:keep-all; }
+        .choices { display:grid; grid-template-columns:repeat(2, 1fr); gap:7px; }
+        .choices label { border:1px solid #e2e8f0; border-radius:12px; padding:9px; font-size:.84rem; color:#475569; cursor:pointer; background:#f8fafc; }
+        .choices input { margin-right:4px; }
+        .save-btn { width:100%; border:0; border-radius:16px; padding:16px; margin-top:16px; color:white; font:inherit; font-weight:950; background:linear-gradient(135deg,#f97316,#dc2626); cursor:pointer; box-shadow:0 8px 18px rgba(249,115,22,.25); }
+        .save-btn:active, .back-btn:active, .small-btn:active, .google-btn:active { transform:scale(.98); }
+        .progress-bg { height:18px; background:#fee2e2; border-radius:999px; overflow:hidden; margin:10px 0; }
+        .progress-fill { height:100%; width:0%; background:linear-gradient(90deg,#fbbf24,#f97316,#dc2626); transition:width .3s ease; }
+        .result-card { display:none; background:#f8fafc; }
+        .risk-low { color:#0f766e; } .risk-watch { color:#c2410c; } .risk-high { color:#dc2626; } .risk-urgent { color:#991b1b; }
+        .history-note { color:#64748b; font-size:.78rem; margin-top:8px; white-space:pre-line; }
+        .help-box { margin-top:12px; background:#f8fafc; border:1px dashed #cbd5e0; border-radius:14px; padding:11px; color:#475569; font-size:.8rem; word-break:keep-all; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="topbar">
+        <button class="back-btn" onclick="location.href='index.html'">← 메인</button>
+        <button id="logoutBtn" class="small-btn" style="display:none;" type="button">로그아웃</button>
+    </div>
+    <h1>🧠 간단 알콜성 치매 자가점검</h1>
+    <p class="subtitle">음주와 관련된 기억·집중·일상 기능 변화를 짧게 점검하고 날짜별로 저장합니다.</p>
+    <div class="notice">이 페이지는 진단 도구가 아니라 개인 기록용 자가점검입니다. 점수가 높거나 기억 공백, 혼란, 보행 불안정, 일상 기능 저하가 반복되면 전문 의료진 상담을 권장합니다.</div>
+
+    <div id="loginArea">
+        <p class="subtitle">검사 결과 저장을 위해 Google 로그인이 필요합니다.</p>
+        <button id="loginBtn" class="google-btn" type="button">Google 계정으로 로그인</button>
+    </div>
+
+    <div id="checkArea" style="display:none;">
+        <div class="date-card">
+            <label class="main-label" for="checkDate">검사 날짜</label>
+            <input type="date" id="checkDate">
+            <div class="history-note" id="savedNote"></div>
+        </div>
+
+        <div class="meta-card">
+            <label class="main-label" for="drinkDaysInput">최근 1개월 음주 횟수</label>
+            <input type="number" id="drinkDaysInput" min="0" max="31" step="1" placeholder="예: 4">
+            <label class="main-label" for="blackoutDaysInput" style="margin-top:12px;">최근 1개월 블랙아웃/기억공백 횟수</label>
+            <input type="number" id="blackoutDaysInput" min="0" max="31" step="1" placeholder="예: 1">
+            <label class="main-label" for="avgDrinkAmountInput" style="margin-top:12px;">1회 평균 음주량 체감</label>
+            <select id="avgDrinkAmountInput">
+                <option value="0">0 - 거의 없음</option>
+                <option value="2">2 - 적음</option>
+                <option value="4">4 - 보통</option>
+                <option value="6">6 - 많음</option>
+                <option value="8">8 - 매우 많음</option>
+                <option value="10">10 - 폭음 수준</option>
+            </select>
+        </div>
+
+        <div id="questions"></div>
+
+        <div class="meta-card">
+            <label class="main-label" for="memoInput">메모</label>
+            <textarea id="memoInput" rows="3" placeholder="최근 기억, 집중, 음주 패턴에서 신경 쓰이는 점을 적어주세요."></textarea>
+        </div>
+
+        <button class="save-btn" id="saveBtn" type="button">검사 결과 저장</button>
+
+        <div id="resultCard" class="result-card">
+            <div id="resultTitle" style="font-size:1.2rem; font-weight:950;"></div>
+            <div class="progress-bg"><div class="progress-fill" id="riskFill"></div></div>
+            <div id="resultDesc" style="font-size:.9rem; color:#475569; word-break:keep-all;"></div>
+            <div class="help-box">점수는 오늘 입력값 기준의 추적 지표입니다. 날짜별 결과는 Firestore의 <b>daily_logs</b>와 <b>dementia_check_results</b>에 함께 저장됩니다.</div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
+    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
+
+    
+const firebaseConfig = {
+    apiKey: "AIzaSyBWDwueP3a0atxCqFIgqd96sgXc0EqYbEY",
+    authDomain: "alcoholaway.firebaseapp.com",
+    projectId: "alcoholaway",
+    storageBucket: "alcoholaway.firebasestorage.app",
+    messagingSenderId: "1001199235857",
+    appId: "1:1001199235857:web:362c4aae36b44c7eae12b0",
+    measurementId: "G-JBE26PCZMF"
+};
+
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+    let userId = null;
+
+    const questions = [
+        '최근 기억 공백이나 “무슨 일이 있었는지 잘 모르겠다”는 일이 있었다.',
+        '약속, 일정, 해야 할 일을 예전보다 자주 잊는다.',
+        '같은 질문이나 이야기를 반복한다는 말을 들은 적이 있다.',
+        '집중이 오래 유지되지 않고 일을 끝내기가 어렵다.',
+        '단어가 잘 떠오르지 않거나 말이 막히는 일이 늘었다.',
+        '돈 관리, 일정 관리, 복잡한 선택이 예전보다 어렵다.',
+        '음주 후 성격, 감정 기복, 짜증이 눈에 띄게 심해진다.',
+        '균형감각, 손 떨림, 보행 불안정이 걱정된다.',
+        '식사나 수면이 불규칙해지고 몸 관리가 어려워졌다.',
+        '술을 줄이거나 쉬려고 해도 계획대로 조절하기 어렵다.',
+        '가족이나 주변 사람이 기억력·판단력 저하를 걱정한 적이 있다.',
+        '일상생활, 업무, 대인관계에 음주 후유증이 영향을 준다.'
+    ];
+    const choiceLabels = ['0 전혀 없음', '1 가끔', '2 자주', '3 매우 자주'];
+    const maxScore = questions.length * 3;
+
+    function dateToKey(dateValue = new Date()) {
+        const d = dateValue instanceof Date ? dateValue : new Date(dateValue);
+        if (isNaN(d.getTime())) return '';
+        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+    function todayKey() { return dateToKey(new Date()); }
+    function escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+    }
+    function clamp(value, min, max, fallback = 0) {
+        const n = parseInt(value, 10);
+        if (Number.isNaN(n)) return fallback;
+        return Math.max(min, Math.min(max, n));
+    }
+    function getRisk(totalScore, blackoutDays, drinkDays, avgDrinkAmount) {
+        const extra = Math.min(8, blackoutDays * 2) + Math.min(5, Math.floor(drinkDays / 6)) + Math.min(4, Math.floor(avgDrinkAmount / 3));
+        const adjusted = Math.min(maxScore, totalScore + extra);
+        if (adjusted <= 7) return { level:'low', label:'낮음', className:'risk-low', adjusted, desc:'현재 입력 기준으로 뚜렷한 위험 신호는 낮게 나타났습니다. 그래도 음주량과 기억 변화를 계속 기록해 주세요.' };
+        if (adjusted <= 15) return { level:'watch', label:'주의', className:'risk-watch', adjusted, desc:'기억·집중 또는 음주 패턴에서 주의가 필요합니다. 음주량을 줄이고 수면, 영양, 운동 기록을 함께 확인해 보세요.' };
+        if (adjusted <= 24) return { level:'high', label:'높음', className:'risk-high', adjusted, desc:'반복적인 기억 공백이나 일상 기능 저하가 의심됩니다. 음주 중단 계획과 전문 상담을 적극적으로 고려해 주세요.' };
+        return { level:'urgent', label:'매우 높음', className:'risk-urgent', adjusted, desc:'높은 위험 신호가 누적되었습니다. 혼란, 보행 불안정, 심한 기억 공백이 있으면 빠르게 의료기관 또는 중독 전문 상담을 이용하세요.' };
+    }
+    function renderQuestions() {
+        document.getElementById('questions').innerHTML = questions.map((q, qi) => `
+            <div class="question-card">
+                <div class="question-title">${qi + 1}. ${escapeHtml(q)}</div>
+                <div class="choices">
+                    ${choiceLabels.map((label, score) => `
+                        <label><input type="radio" name="q-${qi}" value="${score}" ${score === 0 ? 'checked' : ''}>${label}</label>
+                    `).join('')}
+                </div>
+            </div>
+        `).join('');
+    }
+    function collectAnswers() {
+        return questions.map((question, qi) => {
+            const checked = document.querySelector(`input[name="q-${qi}"]:checked`);
+            return { question, score: checked ? clamp(checked.value, 0, 3, 0) : 0 };
+        });
+    }
+    function calculateResult() {
+        const answers = collectAnswers();
+        const totalScore = answers.reduce((sum, item) => sum + item.score, 0);
+        const drinkDays = clamp(document.getElementById('drinkDaysInput').value, 0, 31, 0);
+        const blackoutDays = clamp(document.getElementById('blackoutDaysInput').value, 0, 31, 0);
+        const avgDrinkAmount = clamp(document.getElementById('avgDrinkAmountInput').value, 0, 10, 0);
+        const risk = getRisk(totalScore, blackoutDays, drinkDays, avgDrinkAmount);
+        return { answers, totalScore, drinkDays, blackoutDays, avgDrinkAmount, risk };
+    }
+    function showResult(result) {
+        const card = document.getElementById('resultCard');
+        const title = document.getElementById('resultTitle');
+        const desc = document.getElementById('resultDesc');
+        const fill = document.getElementById('riskFill');
+        title.className = result.risk.className;
+        title.innerText = `결과: ${result.risk.label} · 기본 ${result.totalScore}/${maxScore}점 · 보정 ${result.risk.adjusted}/${maxScore}점`;
+        desc.innerText = result.risk.desc;
+        fill.style.width = `${Math.round((result.risk.adjusted / maxScore) * 100)}%`;
+        card.style.display = 'block';
+    }
+    async function loadSavedResult() {
+        if (!userId) return;
+        const dateKey = document.getElementById('checkDate').value || todayKey();
+        const snap = await getDoc(doc(db, 'users', userId, 'dementia_check_results', dateKey));
+        document.getElementById('savedNote').innerText = '';
+        renderQuestions();
+        document.getElementById('drinkDaysInput').value = '';
+        document.getElementById('blackoutDaysInput').value = '';
+        document.getElementById('avgDrinkAmountInput').value = '0';
+        document.getElementById('memoInput').value = '';
+        document.getElementById('resultCard').style.display = 'none';
+        if (snap.exists()) {
+            const data = snap.data();
+            document.getElementById('drinkDaysInput').value = data.drinkDays ?? '';
+            document.getElementById('blackoutDaysInput').value = data.blackoutDays ?? '';
+            document.getElementById('avgDrinkAmountInput').value = String(data.avgDrinkAmount ?? 0);
+            document.getElementById('memoInput').value = data.memo || '';
+            (data.answers || []).forEach((answer, qi) => {
+                const el = document.querySelector(`input[name="q-${qi}"][value="${answer.score}"]`);
+                if (el) el.checked = true;
+            });
+            document.getElementById('savedNote').innerText = `이미 저장된 결과: ${data.totalScore ?? 0}/${data.maxScore ?? maxScore}점 · ${data.riskLabel || '-'} 단계`;
+            showResult({ totalScore:data.totalScore || 0, risk:{ label:data.riskLabel || '-', adjusted:data.adjustedScore || data.totalScore || 0, desc:data.resultDescription || '', className: data.riskLevel === 'urgent' ? 'risk-urgent' : data.riskLevel === 'high' ? 'risk-high' : data.riskLevel === 'watch' ? 'risk-watch' : 'risk-low' } });
+        }
+    }
+    async function saveResult() {
+        if (!userId) return alert('로그인이 필요합니다.');
+        const dateKey = document.getElementById('checkDate').value || todayKey();
+        const result = calculateResult();
+        const now = Date.now();
+        const payload = {
+            dateKey,
+            answers: result.answers,
+            totalScore: result.totalScore,
+            adjustedScore: result.risk.adjusted,
+            maxScore,
+            riskLevel: result.risk.level,
+            riskLabel: result.risk.label,
+            resultDescription: result.risk.desc,
+            drinkDays: result.drinkDays,
+            blackoutDays: result.blackoutDays,
+            avgDrinkAmount: result.avgDrinkAmount,
+            memo: document.getElementById('memoInput').value.trim(),
+            checkedAt: now,
+            savedAt: now
+        };
+        await setDoc(doc(db, 'users', userId, 'dementia_check_results', dateKey), payload, { merge:true });
+        await setDoc(doc(db, 'users', userId, 'daily_logs', dateKey), {
+            dementiaCheck: {
+                totalScore: payload.totalScore,
+                adjustedScore: payload.adjustedScore,
+                maxScore: payload.maxScore,
+                riskLevel: payload.riskLevel,
+                riskLabel: payload.riskLabel,
+                drinkDays: payload.drinkDays,
+                blackoutDays: payload.blackoutDays,
+                avgDrinkAmount: payload.avgDrinkAmount,
+                savedAt: now
+            },
+            updatedAt: now
+        }, { merge:true });
+        document.getElementById('savedNote').innerText = `저장 완료: ${payload.totalScore}/${payload.maxScore}점 · ${payload.riskLabel} 단계`;
+        showResult(result);
+    }
+
+    document.getElementById('checkDate').value = todayKey();
+    document.getElementById('checkDate').addEventListener('change', loadSavedResult);
+    document.getElementById('saveBtn').addEventListener('click', () => saveResult().catch(e => alert('저장 실패: ' + e.message)));
+    document.getElementById('loginBtn').addEventListener('click', () => signInWithPopup(auth, provider).catch(e => alert('로그인 실패: ' + e.message)));
+    document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
+
+    onAuthStateChanged(auth, user => {
+        userId = user ? user.uid : null;
+        document.getElementById('loginArea').style.display = user ? 'none' : 'block';
+        document.getElementById('checkArea').style.display = user ? 'block' : 'none';
+        document.getElementById('logoutBtn').style.display = user ? 'inline-block' : 'none';
+        if (user) loadSavedResult();
+    });
+</script>
+</body>
+</html>

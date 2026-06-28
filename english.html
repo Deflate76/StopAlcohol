@@ -1,0 +1,435 @@
+<!--
+ * Copyright (c) 2026 Kim Jung-hoon (김정훈). All rights reserved.
+ * This project and its source code are the intellectual property of the author.
+ * Unauthorized copying, distribution, or modification is strictly prohibited.
+-->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>일일영어 공부</title>
+    <meta name="theme-color" content="#ffffff" />
+    <style>
+        :root { --primary:#14b8a6; --primary-dark:#0f766e; --bg:#f0f2f5; --text:#2d3748; --danger:#e74c3c; --muted:#718096; }
+        * { box-sizing: border-box; }
+        body { margin:0; padding:15px; background:var(--bg); color:#333; font-family:'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height:1.6; text-align:center; }
+        .container { max-width:550px; min-height:calc(100vh - 30px); margin:0 auto; background:white; padding:28px 20px; border-radius:24px; box-shadow:0 10px 30px rgba(0,0,0,.1); }
+        .topbar { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:18px; }
+        .back-btn, .small-btn { appearance:none; border:1px solid #cbd5e0; background:#fff; color:#475569; border-radius:999px; padding:8px 12px; font-weight:900; cursor:pointer; font-family:inherit; }
+        .small-btn.primary { border-color:var(--primary); color:var(--primary-dark); background:linear-gradient(135deg,#fff,#f0fdfa); }
+        h1 { margin:8px 0 4px; color:var(--text); font-size:1.55rem; letter-spacing:-.4px; }
+        .subtitle { margin:0 0 20px; color:var(--muted); font-size:.9rem; word-break:keep-all; }
+        #loginArea { display:none; padding:28px 0; }
+        .google-btn { display:inline-flex; align-items:center; justify-content:center; gap:10px; width:100%; max-width:320px; padding:15px; border-radius:14px; border:1px solid #ddd; background:white; font-weight:900; cursor:pointer; box-shadow:0 3px 8px rgba(0,0,0,.06); }
+        .date-card { background:linear-gradient(135deg,#ecfeff,#ffffff); border:1px solid #99f6e4; border-radius:18px; padding:14px; margin-bottom:16px; }
+        input[type="date"], textarea, select { width:100%; border:1px solid #cbd5e0; border-radius:12px; padding:12px; font:inherit; }
+        .lesson-title { color:var(--primary-dark); font-size:1.1rem; font-weight:950; margin:8px 0 3px; }
+        .lesson-desc { color:#64748b; font-size:.84rem; margin:0; word-break:keep-all; }
+        details.study-section { margin-top:14px; border:1px solid #e2e8f0; border-radius:18px; padding:0 16px 16px; background:#fff; text-align:left; box-shadow:0 3px 12px rgba(15,118,110,.05); }
+        details.study-section summary { cursor:pointer; list-style:none; display:flex; justify-content:space-between; align-items:center; padding:16px 0 0; font-size:1rem; font-weight:950; color:var(--text); }
+        details.study-section[open] summary { padding-bottom:12px; margin-bottom:12px; border-bottom:1px dashed #cbd5e0; }
+        details.study-section summary::-webkit-details-marker { display:none; }
+        details.study-section summary::after { content:'＋'; color:#94a3b8; font-size:1.2rem; font-weight:950; }
+        details.study-section[open] summary::after { content:'－'; color:var(--danger); }
+        .item { display:flex; gap:10px; align-items:flex-start; padding:10px 0; border-bottom:1px solid #f1f5f9; }
+        .item:last-child { border-bottom:0; }
+        .item input { margin-top:5px; transform:scale(1.15); }
+        .en { color:#0f172a; font-weight:950; font-size:.98rem; }
+        .ko { color:#64748b; font-size:.84rem; margin-top:2px; }
+        .tag { display:inline-block; color:var(--primary-dark); background:#ccfbf1; border:1px solid #99f6e4; border-radius:999px; padding:1px 7px; font-size:.7rem; font-weight:900; margin-left:4px; vertical-align:middle; }
+        .quiz-card { background:#f8fafc; border:1px solid #e2e8f0; border-radius:16px; padding:14px; margin-top:14px; text-align:left; }
+        .quiz-q { font-weight:950; color:var(--text); margin:0 0 8px; }
+        .quiz-card label { display:block; margin:6px 0; color:#475569; font-size:.9rem; }
+        .result-box { display:none; margin-top:14px; background:#f0fdfa; border:1px solid #99f6e4; color:#0f766e; border-radius:16px; padding:13px; font-weight:900; word-break:keep-all; }
+        .save-btn { width:100%; border:0; border-radius:16px; padding:16px; margin-top:16px; color:white; font:inherit; font-weight:950; background:linear-gradient(135deg,#14b8a6,#0f766e); cursor:pointer; box-shadow:0 8px 18px rgba(20,184,166,.25); }
+        .save-btn:active, .back-btn:active, .small-btn:active, .google-btn:active { transform:scale(.98); }
+        .history-note { color:#64748b; font-size:.78rem; margin-top:10px; white-space:pre-line; }
+        .progress { height:10px; background:#e2e8f0; border-radius:999px; overflow:hidden; margin-top:10px; }
+        .progress-fill { height:100%; width:0%; background:linear-gradient(90deg,#2dd4bf,#0f766e); transition:width .25s ease; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="topbar">
+        <button class="back-btn" onclick="location.href='index.html'">← 메인</button>
+        <button id="logoutBtn" class="small-btn" style="display:none;" type="button">로그아웃</button>
+    </div>
+    <h1>🇬🇧 일일영어 공부</h1>
+    <p class="subtitle">오늘의 주요 영어 표현, 숙어, 단어, 문구를 확인하고 공부 결과를 날짜별로 저장합니다.</p>
+
+    <div id="loginArea">
+        <p class="subtitle">공부 결과 저장을 위해 Google 로그인이 필요합니다.</p>
+        <button id="loginBtn" class="google-btn" type="button">Google 계정으로 로그인</button>
+    </div>
+
+    <div id="studyArea" style="display:none;">
+        <div class="date-card">
+            <label for="studyDate" style="font-weight:950; color:var(--text);">공부 날짜</label>
+            <input type="date" id="studyDate">
+            <div class="lesson-title" id="lessonTitle">오늘의 학습 세트</div>
+            <p class="lesson-desc" id="lessonDesc"></p>
+            <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
+            <div class="history-note" id="savedNote"></div>
+        </div>
+
+        <div id="lessonContent"></div>
+
+        <div class="quiz-card">
+            <p class="quiz-q">📝 오늘의 확인 퀴즈</p>
+            <div id="quizContent"></div>
+        </div>
+
+        <div class="quiz-card">
+            <label for="selfRating" style="font-weight:950; color:var(--text);">오늘 학습 체감 난이도/이해도</label>
+            <select id="selfRating">
+                <option value="5">5 - 아주 잘 이해함</option>
+                <option value="4">4 - 대부분 이해함</option>
+                <option value="3" selected>3 - 보통</option>
+                <option value="2">2 - 조금 어려움</option>
+                <option value="1">1 - 다시 공부 필요</option>
+            </select>
+            <label for="studyMemo" style="display:block; margin-top:12px; font-weight:950; color:var(--text);">메모</label>
+            <textarea id="studyMemo" rows="3" placeholder="기억하고 싶은 표현이나 오늘의 느낌을 적어주세요."></textarea>
+        </div>
+
+        <button class="save-btn" type="button" id="saveBtn">오늘 공부 결과 저장</button>
+        <div id="resultBox" class="result-box"></div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
+    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
+
+    
+const firebaseConfig = {
+    apiKey: "AIzaSyBWDwueP3a0atxCqFIgqd96sgXc0EqYbEY",
+    authDomain: "alcoholaway.firebaseapp.com",
+    projectId: "alcoholaway",
+    storageBucket: "alcoholaway.firebasestorage.app",
+    messagingSenderId: "1001199235857",
+    appId: "1:1001199235857:web:362c4aae36b44c7eae12b0",
+    measurementId: "G-JBE26PCZMF"
+};
+
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+    let userId = null;
+    let currentLesson = null;
+
+    const lessonSets = [
+        {
+            id: 'sobriety-basic-01',
+            title: '금주 결심을 영어로 말하기',
+            desc: '술자리 거절, 자기관리, 회복 루틴을 영어로 표현하는 세트입니다.',
+            expressions: [
+                ['I’m taking a break from drinking.', '당분간 술을 쉬고 있어요.'],
+                ['I’m trying to stay sober today.', '오늘은 술을 마시지 않으려고 해요.'],
+                ['I need to protect my routine.', '제 루틴을 지켜야 해요.'],
+                ['Thanks, but I’ll pass on alcohol.', '고맙지만 술은 사양할게요.']
+            ],
+            idioms: [
+                ['one day at a time', '하루하루 차근차근'],
+                ['draw the line', '선을 긋다, 한계를 정하다'],
+                ['keep myself accountable', '스스로 책임감을 유지하다']
+            ],
+            words: [
+                ['craving', '갈망'], ['trigger', '유발 요인'], ['routine', '루틴'], ['recovery', '회복'], ['boundary', '경계선'], ['commitment', '다짐']
+            ],
+            phrases: [
+                ['I’m good with water.', '저는 물이면 괜찮아요.'],
+                ['Let’s meet for coffee instead.', '대신 커피 마시러 만나요.'],
+                ['I have an early morning tomorrow.', '내일 아침 일찍 일정이 있어요.']
+            ],
+            quiz: [
+                { q:'“당분간 술을 쉬고 있어요.”에 가장 가까운 표현은?', choices:['I’m taking a break from drinking.','I’m breaking a drink.','I drink on a break.'], answer:0 },
+                { q:'craving의 의미는?', choices:['경계선','갈망','운동'], answer:1 },
+                { q:'one day at a time의 자연스러운 뜻은?', choices:['한 번에 하루씩 차근차근','하루에 한 번만','어제와 오늘'], answer:0 }
+            ]
+        },
+        {
+            id: 'health-check-02',
+            title: '몸상태와 컨디션 말하기',
+            desc: '피로, 수면, 스트레스 상태를 부드럽게 설명하는 표현입니다.',
+            expressions: [
+                ['I feel a bit foggy today.', '오늘 머리가 조금 멍해요.'],
+                ['I didn’t sleep well last night.', '어젯밤 잠을 잘 못 잤어요.'],
+                ['I’m trying to manage my stress.', '스트레스를 관리하려고 노력 중이에요.'],
+                ['I feel better when I stick to my plan.', '계획을 지키면 컨디션이 더 좋아져요.']
+            ],
+            idioms: [
+                ['get back on track', '다시 정상 궤도로 돌아오다'],
+                ['clear my head', '머리를 맑게 하다'],
+                ['listen to my body', '몸의 신호에 귀 기울이다']
+            ],
+            words: [
+                ['fatigue', '피로'], ['sleep quality', '수면의 질'], ['stress level', '스트레스 수준'], ['focus', '집중'], ['hydration', '수분 보충'], ['balance', '균형']
+            ],
+            phrases: [
+                ['I need some fresh air.', '바람 좀 쐬어야겠어요.'],
+                ['I’ll take a short walk.', '잠깐 산책할게요.'],
+                ['I’m keeping things simple today.', '오늘은 단순하게 지내려고 해요.']
+            ],
+            quiz: [
+                { q:'“다시 정상 궤도로 돌아오다”는?', choices:['clear my head','get back on track','listen to my body'], answer:1 },
+                { q:'fatigue의 의미는?', choices:['피로','수분','균형'], answer:0 },
+                { q:'I feel a bit foggy today.의 뜻은?', choices:['오늘 안개가 많이 끼었어요.','오늘 머리가 조금 멍해요.','오늘 기분이 아주 좋아요.'], answer:1 }
+            ]
+        },
+        {
+            id: 'social-boundary-03',
+            title: '술자리에서 정중하게 거절하기',
+            desc: '관계를 해치지 않으면서 선을 긋는 문장입니다.',
+            expressions: [
+                ['I’m not drinking tonight.', '오늘 밤은 술을 마시지 않아요.'],
+                ['I’m focusing on my health these days.', '요즘 건강에 집중하고 있어요.'],
+                ['Please don’t pressure me.', '부담 주지 말아 주세요.'],
+                ['I’d rather have a non-alcoholic drink.', '무알콜 음료가 더 좋겠어요.']
+            ],
+            idioms: [
+                ['stand my ground', '입장을 굽히지 않다'],
+                ['say no politely', '정중히 거절하다'],
+                ['put my health first', '건강을 우선하다']
+            ],
+            words: [
+                ['pressure', '압박'], ['choice', '선택'], ['non-alcoholic', '무알콜의'], ['supportive', '지지하는'], ['priority', '우선순위'], ['respect', '존중']
+            ],
+            phrases: [
+                ['I appreciate your understanding.', '이해해 주셔서 감사합니다.'],
+                ['I’ll join the conversation, not the drinks.', '대화에는 함께하되 술은 마시지 않을게요.'],
+                ['That doesn’t work for me.', '그건 저에게 맞지 않아요.']
+            ],
+            quiz: [
+                { q:'non-alcoholic의 의미는?', choices:['무알콜의','강한','취한'], answer:0 },
+                { q:'stand my ground의 의미는?', choices:['땅에 서 있다','입장을 굽히지 않다','빨리 걷다'], answer:1 },
+                { q:'“오늘 밤은 술을 마시지 않아요.”는?', choices:['I’m not drinking tonight.','I’m not drink yesterday.','I drink tonight.'], answer:0 }
+            ]
+        },
+        {
+            id: 'motivation-04',
+            title: '동기부여와 자기격려',
+            desc: '스스로를 다독이는 회복 영어 표현입니다.',
+            expressions: [
+                ['I’m proud of myself for trying.', '시도하는 제 자신이 자랑스러워요.'],
+                ['Progress is still progress.', '작은 진전도 진전이에요.'],
+                ['I can make a better choice right now.', '지금 더 나은 선택을 할 수 있어요.'],
+                ['This urge will pass.', '이 충동은 지나갈 거예요.']
+            ],
+            idioms: [
+                ['hang in there', '버티다, 힘내다'],
+                ['small wins', '작은 성공들'],
+                ['turn things around', '상황을 반전시키다']
+            ],
+            words: [
+                ['progress', '진전'], ['urge', '충동'], ['choice', '선택'], ['confidence', '자신감'], ['patience', '인내'], ['momentum', '탄력']
+            ],
+            phrases: [
+                ['I’ll focus on the next hour.', '다음 한 시간에 집중할게요.'],
+                ['I’m building a new habit.', '새 습관을 만들고 있어요.'],
+                ['I deserve a clear mind.', '저는 맑은 정신을 누릴 자격이 있어요.']
+            ],
+            quiz: [
+                { q:'This urge will pass.의 뜻은?', choices:['이 충동은 지나갈 거예요.','이 길은 지나갑니다.','이 계획은 실패합니다.'], answer:0 },
+                { q:'hang in there의 의미는?', choices:['걸어두다','힘내고 버티다','서두르다'], answer:1 },
+                { q:'progress는?', choices:['진전','실수','갈증'], answer:0 }
+            ]
+        },
+        {
+            id: 'daily-routine-05',
+            title: '건강 루틴 만들기',
+            desc: '물, 운동, 수면, 식사를 영어로 기록할 때 유용합니다.',
+            expressions: [
+                ['I’m drinking more water today.', '오늘 물을 더 많이 마시고 있어요.'],
+                ['I’m going for a walk after dinner.', '저녁 후 산책할 거예요.'],
+                ['I’m trying to sleep earlier.', '더 일찍 자려고 해요.'],
+                ['I feel more stable with a routine.', '루틴이 있으면 더 안정돼요.']
+            ],
+            idioms: [
+                ['build momentum', '탄력을 만들다'],
+                ['stick to a routine', '루틴을 지키다'],
+                ['take care of myself', '나 자신을 돌보다']
+            ],
+            words: [
+                ['hydration', '수분 보충'], ['walk', '산책'], ['meal', '식사'], ['sleep', '수면'], ['stability', '안정감'], ['habit', '습관']
+            ],
+            phrases: [
+                ['A short walk helps me reset.', '짧은 산책은 저를 리셋하는 데 도움이 돼요.'],
+                ['I’m choosing rest tonight.', '오늘 밤은 휴식을 선택할게요.'],
+                ['I’ll keep it simple.', '단순하게 할게요.']
+            ],
+            quiz: [
+                { q:'stick to a routine의 뜻은?', choices:['루틴을 지키다','루틴을 버리다','식사를 하다'], answer:0 },
+                { q:'hydration의 의미는?', choices:['집중','수분 보충','피로'], answer:1 },
+                { q:'I’ll keep it simple.의 뜻은?', choices:['단순하게 할게요.','복잡하게 만들게요.','간단히 마실게요.'], answer:0 }
+            ]
+        }
+    ];
+
+    function dateToKey(dateValue = new Date()) {
+        const d = dateValue instanceof Date ? dateValue : new Date(dateValue);
+        if (isNaN(d.getTime())) return '';
+        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+    function todayKey() { return dateToKey(new Date()); }
+    function escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+    }
+    function lessonIndexForDate(dateKey) {
+        const d = new Date(`${dateKey}T00:00:00`);
+        const days = Math.floor(d.getTime() / 86400000);
+        return Math.abs(days) % lessonSets.length;
+    }
+    function getAllItems(lesson) {
+        return [
+            ...lesson.expressions.map((item, index) => ({ section:'표현', id:`expression-${index}`, item })),
+            ...lesson.idioms.map((item, index) => ({ section:'숙어', id:`idiom-${index}`, item })),
+            ...lesson.words.map((item, index) => ({ section:'단어', id:`word-${index}`, item })),
+            ...lesson.phrases.map((item, index) => ({ section:'문구', id:`phrase-${index}`, item }))
+        ];
+    }
+    function renderSection(title, items, prefix, open = true) {
+        return `
+            <details class="study-section" ${open ? 'open' : ''}>
+                <summary>${title}</summary>
+                ${items.map((item, index) => `
+                    <label class="item">
+                        <input type="checkbox" class="study-check" data-item-id="${prefix}-${index}">
+                        <span><span class="en">${escapeHtml(item[0])}</span><span class="tag">${title.replace(/^.+ /,'')}</span><br><span class="ko">${escapeHtml(item[1])}</span></span>
+                    </label>
+                `).join('')}
+            </details>`;
+    }
+    function renderLesson() {
+        const dateKey = document.getElementById('studyDate').value || todayKey();
+        currentLesson = lessonSets[lessonIndexForDate(dateKey)];
+        document.getElementById('lessonTitle').innerText = currentLesson.title;
+        document.getElementById('lessonDesc').innerText = currentLesson.desc;
+        document.getElementById('lessonContent').innerHTML = [
+            renderSection('💬 주요 영어 표현', currentLesson.expressions, 'expression', true),
+            renderSection('🧩 숙어', currentLesson.idioms, 'idiom', true),
+            renderSection('📚 단어', currentLesson.words, 'word', true),
+            renderSection('🗣️ 문구', currentLesson.phrases, 'phrase', true)
+        ].join('');
+        document.getElementById('quizContent').innerHTML = currentLesson.quiz.map((quiz, qi) => `
+            <div style="margin-bottom:12px;">
+                <div style="font-weight:900; color:#334155;">${qi+1}. ${escapeHtml(quiz.q)}</div>
+                ${quiz.choices.map((choice, ci) => `
+                    <label><input type="radio" name="quiz-${qi}" value="${ci}"> ${escapeHtml(choice)}</label>
+                `).join('')}
+            </div>
+        `).join('');
+        document.querySelectorAll('.study-check').forEach(el => el.addEventListener('change', updateProgress));
+        updateProgress();
+        loadSavedResult();
+    }
+    function updateProgress() {
+        const checks = [...document.querySelectorAll('.study-check')];
+        const done = checks.filter(el => el.checked).length;
+        const total = checks.length || 1;
+        document.getElementById('progressFill').style.width = `${Math.round(done / total * 100)}%`;
+    }
+    function calculateQuizScore() {
+        let score = 0;
+        const answers = [];
+        currentLesson.quiz.forEach((quiz, qi) => {
+            const checked = document.querySelector(`input[name="quiz-${qi}"]:checked`);
+            const selected = checked ? parseInt(checked.value, 10) : null;
+            if (selected === quiz.answer) score++;
+            answers.push({ question: quiz.q, selected, answer: quiz.answer, correct: selected === quiz.answer });
+        });
+        return { score, answers };
+    }
+    async function loadSavedResult() {
+        const note = document.getElementById('savedNote');
+        const resultBox = document.getElementById('resultBox');
+        resultBox.style.display = 'none';
+        note.innerText = '';
+        if (!userId) return;
+        const dateKey = document.getElementById('studyDate').value || todayKey();
+        const snap = await getDoc(doc(db, 'users', userId, 'daily_english_logs', dateKey));
+        document.querySelectorAll('.study-check').forEach(el => el.checked = false);
+        document.querySelectorAll('input[type="radio"]').forEach(el => el.checked = false);
+        document.getElementById('studyMemo').value = '';
+        document.getElementById('selfRating').value = '3';
+        if (snap.exists()) {
+            const data = snap.data();
+            (data.completedItemIds || []).forEach(id => {
+                const el = document.querySelector(`.study-check[data-item-id="${id}"]`);
+                if (el) el.checked = true;
+            });
+            (data.quizAnswers || []).forEach((answer, qi) => {
+                if (answer.selected !== null && answer.selected !== undefined) {
+                    const el = document.querySelector(`input[name="quiz-${qi}"][value="${answer.selected}"]`);
+                    if (el) el.checked = true;
+                }
+            });
+            if (data.memo) document.getElementById('studyMemo').value = data.memo;
+            if (data.selfRating) document.getElementById('selfRating').value = String(data.selfRating);
+            note.innerText = `이미 저장된 기록: ${data.completedCount || 0}/${data.totalCount || 0}개 학습 · 퀴즈 ${data.quizScore ?? '-'}점`;
+        }
+        updateProgress();
+    }
+    async function saveResult() {
+        if (!userId) return alert('로그인이 필요합니다.');
+        const dateKey = document.getElementById('studyDate').value || todayKey();
+        const allItems = getAllItems(currentLesson);
+        const completedItemIds = [...document.querySelectorAll('.study-check:checked')].map(el => el.dataset.itemId);
+        const { score, answers } = calculateQuizScore();
+        const now = Date.now();
+        const payload = {
+            dateKey,
+            lessonId: currentLesson.id,
+            lessonTitle: currentLesson.title,
+            completedItemIds,
+            completedCount: completedItemIds.length,
+            totalCount: allItems.length,
+            selfRating: parseInt(document.getElementById('selfRating').value, 10),
+            memo: document.getElementById('studyMemo').value.trim(),
+            quizScore: score,
+            totalQuiz: currentLesson.quiz.length,
+            quizAnswers: answers,
+            studiedAt: now,
+            savedAt: now
+        };
+        await setDoc(doc(db, 'users', userId, 'daily_english_logs', dateKey), payload, { merge:true });
+        await setDoc(doc(db, 'users', userId, 'daily_logs', dateKey), {
+            englishStudy: {
+                lessonId: payload.lessonId,
+                lessonTitle: payload.lessonTitle,
+                completedCount: payload.completedCount,
+                totalCount: payload.totalCount,
+                selfRating: payload.selfRating,
+                quizScore: payload.quizScore,
+                totalQuiz: payload.totalQuiz,
+                memo: payload.memo,
+                savedAt: now
+            },
+            updatedAt: now
+        }, { merge:true });
+        document.getElementById('savedNote').innerText = `저장 완료: ${payload.completedCount}/${payload.totalCount}개 학습 · 퀴즈 ${payload.quizScore}/${payload.totalQuiz}`;
+        const box = document.getElementById('resultBox');
+        box.innerText = `오늘의 영어 공부 결과가 ${dateKey} 기준으로 저장되었습니다.`;
+        box.style.display = 'block';
+    }
+
+    document.getElementById('studyDate').value = todayKey();
+    document.getElementById('studyDate').addEventListener('change', renderLesson);
+    document.getElementById('saveBtn').addEventListener('click', () => saveResult().catch(e => alert('저장 실패: ' + e.message)));
+    document.getElementById('loginBtn').addEventListener('click', () => signInWithPopup(auth, provider).catch(e => alert('로그인 실패: ' + e.message)));
+    document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
+
+    onAuthStateChanged(auth, user => {
+        userId = user ? user.uid : null;
+        document.getElementById('loginArea').style.display = user ? 'none' : 'block';
+        document.getElementById('studyArea').style.display = user ? 'block' : 'none';
+        document.getElementById('logoutBtn').style.display = user ? 'inline-block' : 'none';
+        if (user) renderLesson();
+    });
+</script>
+</body>
+</html>
