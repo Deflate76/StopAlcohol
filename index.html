@@ -276,8 +276,15 @@
         .cal-month-success-progress { background: #e2e8f0; border-radius: 999px; height: 10px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.08); }
         .cal-month-success-fill { background: linear-gradient(90deg, #2ecc71, #27ae60); height: 100%; width: 0%; transition: width 0.35s ease; }
         .cal-month-alcohol-box { margin-top: 12px; background: linear-gradient(135deg, #fff7ed, #ffffff); border: 1px solid #fed7aa; border-radius: 14px; padding: 10px; text-align: left; box-shadow: 0 3px 10px rgba(234, 88, 12, 0.08); }
+        .cal-month-alcohol-toggle { appearance: none; align-items: center; background: transparent; border: none; color: #9a3412; cursor: pointer; display: flex; font-family: inherit; font-size: 0.82rem; font-weight: 950; justify-content: space-between; gap: 8px; line-height: 1.35; padding: 0; text-align: left; width: 100%; }
+        .cal-month-alcohol-toggle::after { content: '＋'; color: #c2410c; flex-shrink: 0; font-size: 1.1rem; font-weight: 950; line-height: 1; }
+        .cal-month-alcohol-box[data-collapsed="false"] .cal-month-alcohol-toggle::after { content: '－'; color: var(--danger-color); }
+        .cal-month-alcohol-toggle-sub { color: #64748b; display: block; font-size: 0.7rem; font-weight: 800; margin-top: 2px; word-break: keep-all; }
+        .cal-month-alcohol-content { margin-top: 10px; }
+        .cal-month-alcohol-box[data-collapsed="true"] .cal-month-alcohol-content { display: none; }
         .cal-month-alcohol-summary { color: #9a3412; font-size: 0.78rem; font-weight: 900; line-height: 1.45; text-align: center; word-break: keep-all; }
-        .cal-month-alcohol-chart-wrap { height: 120px; margin-top: 8px; position: relative; width: 100%; }
+        .cal-month-alcohol-chart-title { align-items: center; color: #7c2d12; display: flex; font-size: 0.77rem; font-weight: 950; justify-content: space-between; margin: 11px 2px 4px; word-break: keep-all; }
+        .cal-month-alcohol-chart-wrap { height: 118px; margin-top: 4px; position: relative; width: 100%; }
         .cal-weekly-trend-btn { appearance: none; background: linear-gradient(135deg, #ffffff, #fff7ed); border: 1px solid #fdba74; border-radius: 12px; box-shadow: 0 4px 10px rgba(234, 88, 12, 0.09); color: #c2410c; cursor: pointer; font-family: inherit; font-size: 0.85rem; font-weight: 900; margin-top: 10px; padding: 10px 12px; transition: transform 0.18s ease, box-shadow 0.18s ease; width: 100%; }
         .cal-weekly-trend-btn:hover { box-shadow: 0 6px 14px rgba(234, 88, 12, 0.16); transform: translateY(-1px); }
         .cal-weekly-trend-btn:active { transform: scale(0.98); }
@@ -594,10 +601,18 @@
         <div id="calMonthSuccessContainer" class="cal-month-success-container">
             <div id="calMonthSuccessText" class="cal-month-success-label">금주 성공률 계산 중</div>
             <div class="cal-month-success-progress"><div id="calMonthSuccessFill" class="cal-month-success-fill"></div></div>
-            <div id="calMonthAlcoholCompareBox" class="cal-month-alcohol-box">
-                <div id="calMonthAlcoholSummary" class="cal-month-alcohol-summary">음주량 추이를 계산 중입니다.</div>
-                <div class="cal-month-alcohol-chart-wrap"><canvas id="calMonthAlcoholCompareChart"></canvas></div>
-                <button type="button" class="cal-weekly-trend-btn" onclick="openWeeklyAlcoholTrendModal()">📊 이번 달 음주량·음주 횟수 주차별 추이</button>
+            <div id="calMonthAlcoholCompareBox" class="cal-month-alcohol-box" data-collapsed="true">
+                <button type="button" id="calMonthAlcoholToggleBtn" class="cal-month-alcohol-toggle" onclick="toggleCalMonthAlcoholCompareBox()" aria-expanded="false">
+                    <span>🍷 월간 음주량 비교<span id="calMonthAlcoholToggleSub" class="cal-month-alcohol-toggle-sub">펼쳐서 지난달과 이번달을 비교해 보세요.</span></span>
+                </button>
+                <div id="calMonthAlcoholCompareContent" class="cal-month-alcohol-content">
+                    <div id="calMonthAlcoholSummary" class="cal-month-alcohol-summary">음주량 추이를 계산 중입니다.</div>
+                    <div class="cal-month-alcohol-chart-title"><span>전체 음주량</span><span id="calMonthAlcoholTotalDeltaText"></span></div>
+                    <div class="cal-month-alcohol-chart-wrap"><canvas id="calMonthAlcoholTotalCompareChart"></canvas></div>
+                    <div class="cal-month-alcohol-chart-title"><span>평균 음주량</span><span id="calMonthAlcoholAverageDeltaText"></span></div>
+                    <div class="cal-month-alcohol-chart-wrap"><canvas id="calMonthAlcoholAverageCompareChart"></canvas></div>
+                    <button type="button" class="cal-weekly-trend-btn" onclick="openWeeklyAlcoholTrendModal()">📊 이번 달 음주량·음주 횟수 주차별 추이</button>
+                </div>
             </div>
         </div>
         
@@ -647,7 +662,7 @@
             <h3>📅 <span id="dailyLogDateTitle"></span> 기록</h3>
             <button type="button" class="modal-reset-btn" onclick="resetDailyLogModalInputs()">초기화</button>
         </div>
-        <p style="font-size:0.85rem; color:#666; margin-bottom:10px; word-break:keep-all;">해당 날짜의 식사량, 음주량, 블랙아웃 정도, 흡연량을 기록합니다. (모두 0: 없음/안함 ~ 10: 많음/심함)</p>
+        <p style="font-size:0.85rem; color:#666; margin-bottom:10px; word-break:keep-all;">해당 날짜의 식사량, 음주량, 블랙아웃 정도, 흡연량, 음주 비용/시간을 기록합니다. (수치 항목은 0: 없음/안함 ~ 10: 많음/심함)</p>
         <div class="range-edit-toolbar">
             <button type="button" id="dailyLogRangeEditToggle" class="range-edit-toggle" onclick="toggleDailyLogRangeEdit()">🔒 슬라이더 편집 켜기</button>
             <span id="dailyLogRangeLockText" class="range-lock-status">스크롤 중 실수로 값이 바뀌지 않도록 잠겨 있습니다.</span>
@@ -687,6 +702,16 @@
         <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:10px; color:#4a5568;">🚬 흡연량 (<span id="logSmokingVal" style="font-weight: 800; color: #a0aec0;">-</span>/10)</label>
         <input type="range" id="logSmokingRange" min="0" max="10" value="0" class="dynamic-range" data-touched="false" oninput="markTouched(this); updateRangeStyle(this, 'logSmokingVal')">
         
+        <!-- 음주 비용/시간 -->
+        <div style="border-top: 1px dashed #cbd5e0; margin: 20px 0;"></div>
+        <label style="font-weight:700; font-size:0.9rem; display:block; color:#c2410c;">💸 음주로 사용한 비용 (<span id="logAlcoholCostVal" style="font-weight: 800; color: #a0aec0;">-</span>)</label>
+        <input type="range" id="logAlcoholCostRange" min="0" max="4" step="1" value="0" class="dynamic-range" data-touched="false" oninput="markTouched(this); window.updateCategoryRangeStyle(this, 'logAlcoholCostVal', window.ALCOHOL_COST_LABELS)">
+        <p style="font-size:0.72rem; color:#718096; margin:4px 0 0; word-break:keep-all;">~1만원 · ~3만원 · ~5만원 · ~10만원 · 10만원 이상</p>
+
+        <label style="font-weight:700; font-size:0.9rem; display:block; margin-top:12px; color:#c2410c;">⏱️ 음주에 소요한 시간 (<span id="logAlcoholTimeVal" style="font-weight: 800; color: #a0aec0;">-</span>)</label>
+        <input type="range" id="logAlcoholTimeRange" min="0" max="4" step="1" value="0" class="dynamic-range" data-touched="false" oninput="markTouched(this); window.updateCategoryRangeStyle(this, 'logAlcoholTimeVal', window.ALCOHOL_TIME_LABELS)">
+        <p style="font-size:0.72rem; color:#718096; margin:4px 0 0; word-break:keep-all;">~1시간 · ~2시간 · ~3시간 · ~5시간 · 5시간 이상</p>
+
         <!-- 체중 -->
         <div style="border-top: 1px dashed #cbd5e0; margin: 20px 0;"></div>
         <label style="font-weight:700; font-size:0.9rem; display:block;">당일 체중 (kg)</label>
@@ -1121,6 +1146,16 @@
         { id: '고비행동 현재불가', title: '⏳ 고비행동 현재불가', desc: '현재 상황상 적극적 대처는 어렵지만, 고비가 왔음을 인지하고 버티는 상태를 기록합니다.', color: '#7f8c8d', bg: '#f8f9f9' }
     ];
 
+    const ALCOHOL_COST_LABELS = ['~1만원', '~3만원', '~5만원', '~10만원', '10만원 이상'];
+    const ALCOHOL_TIME_LABELS = ['~1시간', '~2시간', '~3시간', '~5시간', '5시간 이상'];
+    window.ALCOHOL_COST_LABELS = ALCOHOL_COST_LABELS;
+    window.ALCOHOL_TIME_LABELS = ALCOHOL_TIME_LABELS;
+
+    function getCategoryLabel(labels, value) {
+        const index = clampNumber(value, 0, labels.length - 1, 0);
+        return labels[index] || '-';
+    }
+
     const firebaseConfig = {
         apiKey: "AIzaSyBWDwueP3a0atxCqFIgqd96sgXc0EqYbEY",
         authDomain: "alcoholaway.firebaseapp.com",
@@ -1176,7 +1211,8 @@
     let stateStatsChart = null; 
     let medChartInstance = null; 
     let mealWeightChartInstance = null; // 식사량 체중 차트 인스턴스
-    let calMonthAlcoholCompareChart = null;
+    let calMonthAlcoholTotalCompareChart = null;
+    let calMonthAlcoholAverageCompareChart = null;
     let calWeeklyAlcoholTrendChart = null;
     let calendarDayDetailDate = null;
     let cravingData = [];
@@ -2460,7 +2496,9 @@
             { id: 'logSnackRange', valId: 'logSnackVal', defaultValue: 0 },
             { id: 'logAlcoholRange', valId: 'logAlcoholVal', defaultValue: 0 },
             { id: 'logBlackoutRange', valId: 'logBlackoutVal', defaultValue: 0 },
-            { id: 'logSmokingRange', valId: 'logSmokingVal', defaultValue: 0 }
+            { id: 'logSmokingRange', valId: 'logSmokingVal', defaultValue: 0 },
+            { id: 'logAlcoholCostRange', valId: 'logAlcoholCostVal', defaultValue: 0, labels: ALCOHOL_COST_LABELS },
+            { id: 'logAlcoholTimeRange', valId: 'logAlcoholTimeVal', defaultValue: 0, labels: ALCOHOL_TIME_LABELS }
         ];
         
         rangeConfigs.forEach(cfg => {
@@ -2468,7 +2506,8 @@
             if(el) { 
                 el.value = cfg.defaultValue; 
                 el.setAttribute('data-touched', 'false'); 
-                updateRangeStyle(el, cfg.valId); 
+                if (cfg.labels) updateCategoryRangeStyle(el, cfg.valId, cfg.labels);
+                else updateRangeStyle(el, cfg.valId); 
             }
         });
         document.getElementById('logWeightInput').value = userProfile.weight || '';
@@ -2489,6 +2528,14 @@
                         updateRangeStyle(el, valId);
                     }
                 };
+                const mapCategoryDataToUI = (dataKey, elementId, valId, labels) => {
+                    const el = document.getElementById(elementId);
+                    if (el && data[dataKey] !== undefined && data[dataKey] !== null) {
+                        el.value = clampNumber(data[dataKey], 0, labels.length - 1, 0);
+                        el.setAttribute('data-touched', 'true');
+                        updateCategoryRangeStyle(el, valId, labels);
+                    }
+                };
                 
                 mapDataToUI('breakfast', 'logBreakfastRange', 'logBreakfastVal');
                 mapDataToUI('lunch', 'logLunchRange', 'logLunchVal');
@@ -2497,6 +2544,8 @@
                 mapDataToUI('alcohol', 'logAlcoholRange', 'logAlcoholVal');
                 mapDataToUI('blackout', 'logBlackoutRange', 'logBlackoutVal');
                 mapDataToUI('smoking', 'logSmokingRange', 'logSmokingVal');
+                mapCategoryDataToUI('alcoholCost', 'logAlcoholCostRange', 'logAlcoholCostVal', ALCOHOL_COST_LABELS);
+                mapCategoryDataToUI('alcoholTime', 'logAlcoholTimeRange', 'logAlcoholTimeVal', ALCOHOL_TIME_LABELS);
                 
                 if (data.weight) {
                     document.getElementById('logWeightInput').value = data.weight;
@@ -2527,9 +2576,16 @@
             if (el && el.getAttribute('data-touched') === 'true') { return parseInt(el.value); } 
             return 0; // Default 0 if untouched
         };
+        const getCategoryVal = (id, labels) => {
+            const el = document.getElementById(id);
+            if (el && el.getAttribute('data-touched') === 'true') return clampNumber(el.value, 0, labels.length - 1, 0);
+            return null;
+        };
 
         const alcoholEl = document.getElementById('logAlcoholRange');
         const alcoholTouched = alcoholEl && alcoholEl.getAttribute('data-touched') === 'true';
+        const alcoholCost = getCategoryVal('logAlcoholCostRange', ALCOHOL_COST_LABELS);
+        const alcoholTime = getCategoryVal('logAlcoholTimeRange', ALCOHOL_TIME_LABELS);
 
         const logData = {
             breakfast: getVal('logBreakfastRange'),
@@ -2539,6 +2595,10 @@
             alcohol: getVal('logAlcoholRange'),
             blackout: getVal('logBlackoutRange'),
             smoking: getVal('logSmokingRange'),
+            alcoholCost,
+            alcoholTime,
+            alcoholCostLabel: alcoholCost !== null ? getCategoryLabel(ALCOHOL_COST_LABELS, alcoholCost) : null,
+            alcoholTimeLabel: alcoholTime !== null ? getCategoryLabel(ALCOHOL_TIME_LABELS, alcoholTime) : null,
             weight: parseFloat(document.getElementById('logWeightInput').value) || null
         };
 
@@ -2552,7 +2612,7 @@
                 await setDoc(doc(db, "users", userId), { weight: logData.weight }, { merge: true });
             }
 
-            alert("식사량, 음주량, 블랙아웃 정도, 흡연량 및 체중이 성공적으로 기록되었습니다.");
+            alert("식사량, 음주량, 블랙아웃 정도, 흡연량, 음주 비용/시간 및 체중이 성공적으로 기록되었습니다.");
             closeModal('dailyLogModal');
 
             // 캘린더가 열려있으면 즉시 리렌더링
@@ -2615,6 +2675,8 @@
                 const blackout = data.blackout || 0;
                 const smk = data.smoking || 0;
                 const sum = bf + lc + dn + sn;
+                const costText = data.alcoholCost !== undefined && data.alcoholCost !== null ? getCategoryLabel(ALCOHOL_COST_LABELS, data.alcoholCost) : (data.alcoholCostLabel || '미입력');
+                const timeText = data.alcoholTime !== undefined && data.alcoholTime !== null ? getCategoryLabel(ALCOHOL_TIME_LABELS, data.alcoholTime) : (data.alcoholTimeLabel || '미입력');
                 const wt = data.weight ? `${data.weight}kg` : '미입력';
                 const bodyMeasuredText = data.bodyMeasuredAt ? formatDateTimeKo(data.bodyMeasuredAt) : (data.bodyMeasuredDateTime || '');
                 const bodyMetaHtml = bodyMeasuredText ? `<div style="margin-top:8px; font-size:0.78rem; color:#64748b; font-weight:700;">⚖️ 신체계측: ${bodyMeasuredText}${data.bodyHeight ? ` · 신장 ${data.bodyHeight}cm` : ''}</div>` : '';
@@ -2632,7 +2694,7 @@
                             <div>🍪 간식: <b>${sn}</b></div>
                         </div>
                         <div style="margin-top:8px; font-size:0.85rem; color:var(--danger-color); font-weight:bold;">
-                            🍷 음주량: ${alc} | 🧠 블랙아웃: ${blackout} | 🚬 흡연량: ${smk} | 🥗 식사총합: ${sum}
+                            🍷 음주량: ${alc} | 🧠 블랙아웃: ${blackout} | 🚬 흡연량: ${smk} | 🥗 식사총합: ${sum}<br>💸 음주 비용: ${costText} | ⏱️ 소요 시간: ${timeText}
                         </div>
                         ${bodyMetaHtml}
                     </div>
@@ -2922,7 +2984,7 @@
         if (!data) return false;
         const keys = [
             'breakfast', 'lunch', 'dinner', 'snack',
-            'alcohol', 'blackout', 'smoking', 'weight',
+            'alcohol', 'blackout', 'smoking', 'alcoholCost', 'alcoholTime', 'alcoholCostLabel', 'alcoholTimeLabel', 'weight',
             'bodyMeasuredAt', 'bodyMeasuredDateTime', 'bodyHeight', 'bodyGender'
         ];
         return keys.some(key => data[key] !== undefined && data[key] !== null && data[key] !== '') || !!data.updatedAt;
@@ -3022,6 +3084,10 @@
             `식사 총합 ${mealTotal}/40`,
             `음주량 ${alcoholAmount}/10 · 블랙아웃 ${dayLog?.blackout ?? 0}/10 · 흡연량 ${dayLog?.smoking ?? 0}/10`
         ];
+        if (dayLog?.alcoholCost !== undefined && dayLog?.alcoholCost !== null) rows.push(`음주 비용 ${getCategoryLabel(ALCOHOL_COST_LABELS, dayLog.alcoholCost)}`);
+        else if (dayLog?.alcoholCostLabel && dayLog.alcoholCostLabel !== '미입력/없음') rows.push(`음주 비용 ${dayLog.alcoholCostLabel}`);
+        if (dayLog?.alcoholTime !== undefined && dayLog?.alcoholTime !== null) rows.push(`음주 소요 시간 ${getCategoryLabel(ALCOHOL_TIME_LABELS, dayLog.alcoholTime)}`);
+        else if (dayLog?.alcoholTimeLabel && dayLog.alcoholTimeLabel !== '미입력/없음') rows.push(`음주 소요 시간 ${dayLog.alcoholTimeLabel}`);
         if (dayLog?.weight) rows.push(`체중 ${dayLog.weight}kg`);
         if (dayLog?.bodyMeasuredAt || dayLog?.bodyMeasuredDateTime) {
             const bodyTime = dayLog.bodyMeasuredDateTime || formatDateTimeKo(dayLog.bodyMeasuredAt);
@@ -3150,58 +3216,109 @@
         return `<span style="color:#64748b;">변화 없음</span>`;
     }
 
-    function updateCalendarMonthAlcoholCompareUI(year, month) {
-        const summaryEl = document.getElementById('calMonthAlcoholSummary');
-        const canvas = document.getElementById('calMonthAlcoholCompareChart');
-        if (!summaryEl || !canvas) return;
+    function isCalMonthAlcoholCompareExpanded() {
+        const box = document.getElementById('calMonthAlcoholCompareBox');
+        return box && box.getAttribute('data-collapsed') !== 'true';
+    }
 
-        const current = getMonthlyAlcoholStats(year, month);
-        const prevMonthDate = new Date(year, month - 1, 1);
-        const previous = getMonthlyAlcoholStats(prevMonthDate.getFullYear(), prevMonthDate.getMonth());
-        const monthLabel = `${year}년 ${month + 1}월`;
-        const prevLabel = `${prevMonthDate.getFullYear()}년 ${prevMonthDate.getMonth() + 1}월`;
+    function updateCalMonthAlcoholToggleState() {
+        const box = document.getElementById('calMonthAlcoholCompareBox');
+        const button = document.getElementById('calMonthAlcoholToggleBtn');
+        if (!box || !button) return;
+        const expanded = box.getAttribute('data-collapsed') !== 'true';
+        button.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    }
 
-        summaryEl.innerHTML = `${monthLabel} 전체 음주량 <b>${current.totalAmount}</b> (${formatTrendDelta(current.totalAmount - previous.totalAmount)}) · 평균 <b>${current.averageAmount}</b> (${formatTrendDelta(current.averageAmount - previous.averageAmount)}) · 음주 <b>${current.drinkCount}</b>회`;
+    function setCalMonthAlcoholCompareCollapsed(collapsed = true) {
+        const box = document.getElementById('calMonthAlcoholCompareBox');
+        if (!box) return;
+        box.setAttribute('data-collapsed', collapsed ? 'true' : 'false');
+        updateCalMonthAlcoholToggleState();
+    }
 
-        if (calMonthAlcoholCompareChart) calMonthAlcoholCompareChart.destroy();
-        calMonthAlcoholCompareChart = new Chart(canvas.getContext('2d'), {
+    window.toggleCalMonthAlcoholCompareBox = function() {
+        const box = document.getElementById('calMonthAlcoholCompareBox');
+        if (!box) return;
+        const nextExpanded = box.getAttribute('data-collapsed') === 'true';
+        setCalMonthAlcoholCompareCollapsed(!nextExpanded);
+        if (nextExpanded) {
+            setTimeout(() => updateCalendarMonthAlcoholCompareUI(currentCalDate.getFullYear(), currentCalDate.getMonth(), true), 60);
+        }
+    };
+
+    function renderTwoMonthCompareChart(canvasId, existingChart, label, previousValue, currentValue, color) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return null;
+        if (existingChart) existingChart.destroy();
+        return new Chart(canvas.getContext('2d'), {
             type: 'bar',
             data: {
                 labels: ['지난달', '이번달'],
-                datasets: [
-                    {
-                        label: '전체 음주량',
-                        data: [previous.totalAmount, current.totalAmount],
-                        backgroundColor: 'rgba(231, 76, 60, 0.68)',
-                        yAxisID: 'yAmount'
-                    },
-                    {
-                        label: '평균 음주량',
-                        data: [previous.averageAmount, current.averageAmount],
-                        backgroundColor: 'rgba(243, 156, 18, 0.68)',
-                        yAxisID: 'yAmount'
-                    }
-                ]
+                datasets: [{
+                    label,
+                    data: [previousValue, currentValue],
+                    backgroundColor: color,
+                    borderRadius: 8
+                }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
-                    yAmount: { beginAtZero: true, title: { display: false } },
+                    y: { beginAtZero: true, title: { display: false } },
                     x: { ticks: { font: { size: 10 } } }
                 },
                 plugins: {
-                    legend: { display: true, position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } },
-                    tooltip: {
-                        callbacks: {
-                            afterTitle: function(items) {
-                                return items[0]?.dataIndex === 0 ? prevLabel : monthLabel;
-                            }
-                        }
-                    }
+                    legend: { display: false },
+                    tooltip: { mode: 'index', intersect: false }
                 }
             }
         });
+    }
+
+    function updateCalendarMonthAlcoholCompareUI(year, month, forceRender = false) {
+        const summaryEl = document.getElementById('calMonthAlcoholSummary');
+        const toggleSubEl = document.getElementById('calMonthAlcoholToggleSub');
+        const totalDeltaEl = document.getElementById('calMonthAlcoholTotalDeltaText');
+        const averageDeltaEl = document.getElementById('calMonthAlcoholAverageDeltaText');
+        if (!summaryEl) return;
+
+        const current = getMonthlyAlcoholStats(year, month);
+        const prevMonthDate = new Date(year, month - 1, 1);
+        const previous = getMonthlyAlcoholStats(prevMonthDate.getFullYear(), prevMonthDate.getMonth());
+        const monthLabel = `${year}년 ${month + 1}월`;
+
+        const totalDelta = current.totalAmount - previous.totalAmount;
+        const averageDelta = current.averageAmount - previous.averageAmount;
+        const totalDeltaHtml = formatTrendDelta(totalDelta);
+        const averageDeltaHtml = formatTrendDelta(averageDelta);
+
+        if (toggleSubEl) {
+            toggleSubEl.innerHTML = `${monthLabel} 전체 ${current.totalAmount} · 평균 ${current.averageAmount} · 음주 ${current.drinkCount}회`;
+        }
+        summaryEl.innerHTML = `${monthLabel} 음주 ${current.drinkCount}회<br>전체 음주량 <b>${current.totalAmount}</b> (${totalDeltaHtml}) · 평균 음주량 <b>${current.averageAmount}</b> (${averageDeltaHtml})`;
+        if (totalDeltaEl) totalDeltaEl.innerHTML = totalDeltaHtml;
+        if (averageDeltaEl) averageDeltaEl.innerHTML = averageDeltaHtml;
+        updateCalMonthAlcoholToggleState();
+
+        if (!forceRender && !isCalMonthAlcoholCompareExpanded()) return;
+
+        calMonthAlcoholTotalCompareChart = renderTwoMonthCompareChart(
+            'calMonthAlcoholTotalCompareChart',
+            calMonthAlcoholTotalCompareChart,
+            '전체 음주량',
+            previous.totalAmount,
+            current.totalAmount,
+            'rgba(231, 76, 60, 0.68)'
+        );
+        calMonthAlcoholAverageCompareChart = renderTwoMonthCompareChart(
+            'calMonthAlcoholAverageCompareChart',
+            calMonthAlcoholAverageCompareChart,
+            '평균 음주량',
+            previous.averageAmount,
+            current.averageAmount,
+            'rgba(243, 156, 18, 0.72)'
+        );
     }
 
     function getWeeklyAlcoholTrendData(year, month) {
@@ -3338,6 +3455,7 @@
     window.openCalendarModal = function(mode) {
         currentCalMode = mode;
         currentCalDate = new Date();
+        setCalMonthAlcoholCompareCollapsed(true);
         renderCalendar(currentCalDate.getFullYear(), currentCalDate.getMonth(), mode);
         openModal('calendarModal');
         setTimeout(() => updateCalendarMonthAlcoholCompareUI(currentCalDate.getFullYear(), currentCalDate.getMonth()), 60);
@@ -3531,7 +3649,9 @@
                 const mealSum = dayLog ? (dayLog.breakfast || 0) + (dayLog.lunch || 0) + (dayLog.dinner || 0) + (dayLog.snack || 0) : 0;
                 const logIcons = [];
                 if (mealSum > 0 || dayLog?.weight || dayLog?.bodyMeasuredAt) logIcons.push('🥗');
-                if (alcoholRecordForDay.hasRecord) logIcons.push('🍷');
+                if (alcoholRecordForDay.hasRecord || (dayLog?.alcoholCost !== undefined && dayLog?.alcoholCost !== null) || (dayLog?.alcoholTime !== undefined && dayLog?.alcoholTime !== null)) logIcons.push('🍷');
+                if (dayLog?.alcoholCost !== undefined && dayLog?.alcoholCost !== null) logIcons.push('💸');
+                if (dayLog?.alcoholTime !== undefined && dayLog?.alcoholTime !== null) logIcons.push('⏱️');
                 if ((dayLog?.blackout || 0) > 0) logIcons.push('🧠');
                 if ((dayLog?.smoking || 0) > 0) logIcons.push('🚬');
                 if (challengeEntriesForDay.some(entry => entry.type === 'medication')) logIcons.push('💊');
@@ -5209,7 +5329,7 @@
         }
     };
 
-    window.updateRangeStyle = function(el, textId) {
+    function updateRangeStyle(el, textId) {
         const val = parseFloat(el.value);
         const minStr = el.getAttribute('min'); const min = minStr !== null ? parseFloat(minStr) : 1;
         const maxStr = el.getAttribute('max'); const max = maxStr !== null ? parseFloat(maxStr) : 10;
@@ -5228,7 +5348,38 @@
         const displayVal = Number.isInteger(val) ? String(val) : val.toFixed(1);
         el.style.setProperty('--range-color', color); el.style.setProperty('--range-percent', `${percent}%`);
         if (textId) { const textEl = document.getElementById(textId); if (textEl) { textEl.innerText = displayVal; textEl.style.color = color; } }
-    };
+    }
+    window.updateRangeStyle = updateRangeStyle;
+
+    function updateCategoryRangeStyle(el, textId, labels) {
+        const safeLabels = Array.isArray(labels) ? labels : [];
+        const minStr = el.getAttribute('min'); const min = minStr !== null ? parseFloat(minStr) : 0;
+        const maxStr = el.getAttribute('max'); const max = maxStr !== null ? parseFloat(maxStr) : Math.max(0, safeLabels.length - 1);
+        const val = clampNumber(el.value, min, max, min);
+        const safePercent = max === min ? 0 : ((val - min) / (max - min)) * 100;
+        const percent = Math.max(0, Math.min(100, safePercent));
+        const isTouched = el.getAttribute('data-touched') === 'true';
+
+        if (!isTouched && el.closest('#dailyLogModal')) {
+            el.style.setProperty('--range-color', '#cbd5e0');
+            el.style.setProperty('--range-percent', '50%');
+            if (textId) {
+                const textEl = document.getElementById(textId);
+                if (textEl) { textEl.innerText = '-'; textEl.style.color = '#a0aec0'; }
+            }
+            return;
+        }
+
+        const hue = 120 - ((val - min) / Math.max(1, (max - min))) * 120;
+        const color = `hsl(${hue}, 85%, 45%)`;
+        el.style.setProperty('--range-color', color);
+        el.style.setProperty('--range-percent', `${percent}%`);
+        if (textId) {
+            const textEl = document.getElementById(textId);
+            if (textEl) { textEl.innerText = getCategoryLabel(safeLabels, val); textEl.style.color = color; }
+        }
+    }
+    window.updateCategoryRangeStyle = updateCategoryRangeStyle;
 
     function setRangeValue(id, valId, value, touched = true) {
         const el = document.getElementById(id);
@@ -5236,6 +5387,14 @@
         el.value = value;
         el.setAttribute('data-touched', touched ? 'true' : 'false');
         updateRangeStyle(el, valId);
+    }
+
+    function setCategoryRangeValue(id, valId, value, labels, touched = true) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.value = value;
+        el.setAttribute('data-touched', touched ? 'true' : 'false');
+        updateCategoryRangeStyle(el, valId, labels);
     }
 
     window.resetStateModal = function() {
@@ -5255,6 +5414,8 @@
             ['logSmokingRange', 'logSmokingVal']
         ];
         ranges.forEach(([id, valId]) => setRangeValue(id, valId, 0, false));
+        setCategoryRangeValue('logAlcoholCostRange', 'logAlcoholCostVal', 0, ALCOHOL_COST_LABELS, false);
+        setCategoryRangeValue('logAlcoholTimeRange', 'logAlcoholTimeVal', 0, ALCOHOL_TIME_LABELS, false);
         const weightInput = document.getElementById('logWeightInput');
         if (weightInput) weightInput.value = userProfile.weight || '';
         window.setDailyLogRangeEditMode(false);
