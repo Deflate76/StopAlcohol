@@ -275,6 +275,19 @@
         .cal-month-success-label { color: #2f855a; font-size: 0.8rem; font-weight: 900; margin-bottom: 6px; word-break: keep-all; }
         .cal-month-success-progress { background: #e2e8f0; border-radius: 999px; height: 10px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.08); }
         .cal-month-success-fill { background: linear-gradient(90deg, #2ecc71, #27ae60); height: 100%; width: 0%; transition: width 0.35s ease; }
+        .cal-month-alcohol-box { margin-top: 12px; background: linear-gradient(135deg, #fff7ed, #ffffff); border: 1px solid #fed7aa; border-radius: 14px; padding: 10px; text-align: left; box-shadow: 0 3px 10px rgba(234, 88, 12, 0.08); }
+        .cal-month-alcohol-summary { color: #9a3412; font-size: 0.78rem; font-weight: 900; line-height: 1.45; text-align: center; word-break: keep-all; }
+        .cal-month-alcohol-chart-wrap { height: 120px; margin-top: 8px; position: relative; width: 100%; }
+        .cal-weekly-trend-btn { appearance: none; background: linear-gradient(135deg, #ffffff, #fff7ed); border: 1px solid #fdba74; border-radius: 12px; box-shadow: 0 4px 10px rgba(234, 88, 12, 0.09); color: #c2410c; cursor: pointer; font-family: inherit; font-size: 0.85rem; font-weight: 900; margin-top: 10px; padding: 10px 12px; transition: transform 0.18s ease, box-shadow 0.18s ease; width: 100%; }
+        .cal-weekly-trend-btn:hover { box-shadow: 0 6px 14px rgba(234, 88, 12, 0.16); transform: translateY(-1px); }
+        .cal-weekly-trend-btn:active { transform: scale(0.98); }
+        .cal-day.has-user-input { cursor: pointer; box-shadow: inset 0 0 0 1px rgba(15, 118, 110, 0.22); }
+        .cal-day.has-user-input:not(.fail-mark):hover { box-shadow: 0 4px 10px rgba(15, 118, 110, 0.22), inset 0 0 0 1px rgba(15, 118, 110, 0.32); transform: scale(1.1); z-index: 25; }
+        .calendar-detail-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; margin-bottom: 10px; padding: 12px; }
+        .calendar-detail-card-title { color: var(--text-dark); font-size: 0.9rem; font-weight: 900; margin-bottom: 6px; }
+        .calendar-detail-row { color: #4a5568; font-size: 0.83rem; line-height: 1.55; word-break: keep-all; }
+        .calendar-detail-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+        .calendar-detail-actions .start-btn { max-width: none; width: 100%; }
         .cal-week { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 0.8rem; font-weight: bold; color: #a0aec0; margin-bottom: 10px; }
         .cal-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
         
@@ -581,6 +594,11 @@
         <div id="calMonthSuccessContainer" class="cal-month-success-container">
             <div id="calMonthSuccessText" class="cal-month-success-label">금주 성공률 계산 중</div>
             <div class="cal-month-success-progress"><div id="calMonthSuccessFill" class="cal-month-success-fill"></div></div>
+            <div id="calMonthAlcoholCompareBox" class="cal-month-alcohol-box">
+                <div id="calMonthAlcoholSummary" class="cal-month-alcohol-summary">음주량 추이를 계산 중입니다.</div>
+                <div class="cal-month-alcohol-chart-wrap"><canvas id="calMonthAlcoholCompareChart"></canvas></div>
+                <button type="button" class="cal-weekly-trend-btn" onclick="openWeeklyAlcoholTrendModal()">📊 이번 달 음주량·음주 횟수 주차별 추이</button>
+            </div>
         </div>
         
         <div id="calLegendContainer" style="margin-bottom: 15px; font-size: 0.8rem; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
@@ -596,6 +614,28 @@
         </div>
         
         <button class="start-btn" style="width: 100%; margin-top: 20px; padding: 12px; font-size: 1rem; background: #e2e8f0; color: #4a5568;" onclick="closeModal('calendarModal')">닫기</button>
+    </div>
+</div>
+
+<!-- 달력 날짜 상세 내용 모달 -->
+<div id="calendarDayDetailModal" class="modal">
+    <div class="modal-content" style="max-width: 450px;">
+        <button class="close-btn-top" onclick="closeModal('calendarDayDetailModal')">&times;</button>
+        <h3 id="calendarDayDetailTitle" style="margin-top:0; padding-right: 20px;">📅 날짜 기록</h3>
+        <div id="calendarDayDetailContent" style="margin-top: 12px;"></div>
+        <div id="calendarDayDetailActions" class="calendar-detail-actions"></div>
+    </div>
+</div>
+
+<!-- 이번 달 음주량/횟수 주차별 추이 모달 -->
+<div id="weeklyAlcoholTrendModal" class="modal">
+    <div class="modal-content" style="max-width: 520px;">
+        <button class="close-btn-top" onclick="closeModal('weeklyAlcoholTrendModal')">&times;</button>
+        <h3 style="margin-top:0; padding-right: 20px; color:#c2410c;">📊 주차별 음주 추이</h3>
+        <p id="weeklyAlcoholTrendDesc" style="font-size:0.83rem; color:#64748b; font-weight:700; line-height:1.45; word-break:keep-all; margin-bottom:12px;"></p>
+        <div style="height: 280px; position: relative;">
+            <canvas id="weeklyAlcoholTrendChartCanvas"></canvas>
+        </div>
     </div>
 </div>
 
@@ -631,6 +671,10 @@
 
         <!-- 음주량 -->
         <div style="border-top: 1px dashed #cbd5e0; margin: 20px 0;"></div>
+        <div class="range-edit-toolbar" style="margin-bottom:10px;">
+            <button type="button" id="dailyLogAlcoholRangeEditToggle" class="range-edit-toggle" onclick="toggleDailyLogRangeEdit()">🔒 슬라이더 편집 켜기</button>
+            <span id="dailyLogAlcoholRangeLockText" class="range-lock-status">음주량 입력 전에도 여기서 슬라이더 잠금을 풀 수 있습니다.</span>
+        </div>
         <label style="font-weight:700; font-size:0.9rem; display:block; color:var(--danger-color);">🍷 음주량 (<span id="logAlcoholVal" style="font-weight: 800; color: #a0aec0;">0</span>/10)</label>
         <input type="range" id="logAlcoholRange" min="0" max="10" value="0" class="dynamic-range" oninput="markTouched(this); updateRangeStyle(this, 'logAlcoholVal')">
         
@@ -1132,6 +1176,9 @@
     let stateStatsChart = null; 
     let medChartInstance = null; 
     let mealWeightChartInstance = null; // 식사량 체중 차트 인스턴스
+    let calMonthAlcoholCompareChart = null;
+    let calWeeklyAlcoholTrendChart = null;
+    let calendarDayDetailDate = null;
     let cravingData = [];
     let dailyLogsData = {}; // 달력 배지 표시를 위한 전역 데이터
     let timerInterval = null;
@@ -2865,6 +2912,387 @@
         return { hasRecord, amount: Math.max(0, Math.min(10, amount)), dailyAmount, failAmount, hasFailedChallenge };
     }
 
+    function escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>"']/g, (char) => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[char]));
+    }
+
+    function hasMeaningfulDailyLog(data) {
+        if (!data) return false;
+        const keys = [
+            'breakfast', 'lunch', 'dinner', 'snack',
+            'alcohol', 'blackout', 'smoking', 'weight',
+            'bodyMeasuredAt', 'bodyMeasuredDateTime', 'bodyHeight', 'bodyGender'
+        ];
+        return keys.some(key => data[key] !== undefined && data[key] !== null && data[key] !== '') || !!data.updatedAt;
+    }
+
+    function getChallengeEntriesForDate(dateStr) {
+        const entries = [];
+        (allChallengesData || []).forEach(challenge => {
+            (challenge.cravings || []).forEach(entry => {
+                const rawTime = entry.timestamp || entry.takenAt || entry.recordedAt || null;
+                if (!rawTime || dateToKey(rawTime) !== dateStr) return;
+                entries.push({ ...entry, challengeId: challenge.id });
+            });
+        });
+        return entries.sort((a, b) => {
+            const aTime = a.timestamp || a.takenAt || a.recordedAt || 0;
+            const bTime = b.timestamp || b.takenAt || b.recordedAt || 0;
+            return aTime - bTime;
+        });
+    }
+
+    function getCautionDaysForDate(dateStr) {
+        return (cautionDays || []).filter(item => item.date === dateStr);
+    }
+
+    function hasCalendarDayUserInput(dateStr) {
+        const dayLog = dailyLogsData?.[dateStr] || null;
+        return hasMeaningfulDailyLog(dayLog)
+            || !!findFailedChallengeByDate(dateStr)
+            || getAlcoholRecordForDate(dateStr).hasRecord
+            || getCautionDaysForDate(dateStr).length > 0
+            || getChallengeEntriesForDate(dateStr).length > 0;
+    }
+
+    function formatEntryTime(entry) {
+        const rawTime = entry.timestamp || entry.takenAt || entry.recordedAt || null;
+        if (!rawTime) return entry.date ? escapeHtml(entry.date) : '-';
+        return formatDateTimeKo(rawTime);
+    }
+
+    function buildCalendarEntryHtml(entry) {
+        const timeText = formatEntryTime(entry);
+        if (entry.type === 'action') {
+            return `
+                <div class="calendar-detail-card">
+                    <div class="calendar-detail-card-title">🛡️ 고비 극복 행동</div>
+                    <div class="calendar-detail-row">${timeText}<br><b>${escapeHtml(entry.actionName || '-')}</b><br>${escapeHtml(entry.actionDesc || '')}</div>
+                </div>
+            `;
+        }
+        if (entry.type === 'state') {
+            const stateLabels = [
+                ['withdrawal', '금단증상'], ['mood', '기분'], ['thirst', '갈증'], ['fatigue', '피로'],
+                ['stress', '스트레스'], ['sleep', '수면 부족'], ['hunger', '배고픔'], ['brainFog', '브레인포그']
+            ];
+            const stateText = stateLabels
+                .filter(([key]) => entry[key] !== undefined && entry[key] !== null)
+                .map(([key, label]) => `${label} ${entry[key]}/10`)
+                .join(' · ');
+            return `
+                <div class="calendar-detail-card">
+                    <div class="calendar-detail-card-title">📝 몸상태 기록</div>
+                    <div class="calendar-detail-row">${timeText}<br>${escapeHtml(stateText || '입력값 없음')}</div>
+                </div>
+            `;
+        }
+        if (entry.type === 'eval') {
+            return `
+                <div class="calendar-detail-card">
+                    <div class="calendar-detail-card-title">✅ 행동 효과 평가</div>
+                    <div class="calendar-detail-row">${timeText}<br>효과 ${escapeHtml(entry.effect ?? '-')}/10 · 현재 갈망 ${escapeHtml(entry.strength ?? '-')}/10</div>
+                </div>
+            `;
+        }
+        if (entry.type === 'medication') {
+            return `
+                <div class="calendar-detail-card">
+                    <div class="calendar-detail-card-title">💊 약물 복용</div>
+                    <div class="calendar-detail-row">${timeText}<br>${escapeHtml(entry.drugName || entry.drug || '-')} ${escapeHtml(entry.dose ?? '-') }mg</div>
+                </div>
+            `;
+        }
+        return `
+            <div class="calendar-detail-card">
+                <div class="calendar-detail-card-title">🔥 갈망 기록</div>
+                <div class="calendar-detail-row">${timeText}<br>강도 ${escapeHtml(entry.strength ?? '-')}/10 · 원인: ${escapeHtml(entry.reason || '-')}</div>
+            </div>
+        `;
+    }
+
+    function buildDailyLogDetailHtml(dateStr, dayLog, alcoholRecord) {
+        if (!hasMeaningfulDailyLog(dayLog) && !alcoholRecord.hasRecord) return '';
+        const mealTotal = dayLog ? (dayLog.breakfast || 0) + (dayLog.lunch || 0) + (dayLog.dinner || 0) + (dayLog.snack || 0) : 0;
+        const alcoholAmount = alcoholRecord.amount || dayLog?.alcohol || 0;
+        const rows = [
+            `아침 ${dayLog?.breakfast ?? 0}/10 · 점심 ${dayLog?.lunch ?? 0}/10 · 저녁 ${dayLog?.dinner ?? 0}/10 · 간식 ${dayLog?.snack ?? 0}/10`,
+            `식사 총합 ${mealTotal}/40`,
+            `음주량 ${alcoholAmount}/10 · 블랙아웃 ${dayLog?.blackout ?? 0}/10 · 흡연량 ${dayLog?.smoking ?? 0}/10`
+        ];
+        if (dayLog?.weight) rows.push(`체중 ${dayLog.weight}kg`);
+        if (dayLog?.bodyMeasuredAt || dayLog?.bodyMeasuredDateTime) {
+            const bodyTime = dayLog.bodyMeasuredDateTime || formatDateTimeKo(dayLog.bodyMeasuredAt);
+            rows.push(`신체계측 ${bodyTime}${dayLog.bodyHeight ? ` · 신장 ${dayLog.bodyHeight}cm` : ''}`);
+        }
+        return `
+            <div class="calendar-detail-card">
+                <div class="calendar-detail-card-title">🥗 매일 기록</div>
+                <div class="calendar-detail-row">${rows.map(escapeHtml).join('<br>')}</div>
+            </div>
+        `;
+    }
+
+    window.openCalendarDayContentFromClick = function(event, dateStr) {
+        if (didLongPress) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            setTimeout(() => { didLongPress = false; }, 0);
+            return;
+        }
+        if (event) event.stopPropagation();
+        if (!hasCalendarDayUserInput(dateStr)) return;
+        openCalendarDayDetailModal(dateStr);
+    };
+
+    window.openCalendarDayDetailModal = function(dateStr) {
+        calendarDayDetailDate = dateStr;
+        const titleEl = document.getElementById('calendarDayDetailTitle');
+        const contentEl = document.getElementById('calendarDayDetailContent');
+        const actionsEl = document.getElementById('calendarDayDetailActions');
+        if (!titleEl || !contentEl || !actionsEl) return;
+
+        const dayLog = dailyLogsData?.[dateStr] || null;
+        const failedChallenge = findFailedChallengeByDate(dateStr);
+        const alcoholRecord = getAlcoholRecordForDate(dateStr);
+        const cautions = getCautionDaysForDate(dateStr);
+        const entries = getChallengeEntriesForDate(dateStr);
+        const htmlBlocks = [];
+
+        titleEl.innerText = `📅 ${dateStr} 기록 내용`;
+
+        if (failedChallenge) {
+            const failRows = [];
+            failRows.push(`실패 시 음주량 ${alcoholRecord.amount || failedChallenge.failAmount || 5}/10`);
+            if (failedChallenge.failReason) failRows.push(`중단 사유: ${failedChallenge.failReason}`);
+            htmlBlocks.push(`
+                <div class="calendar-detail-card" style="background:#fff5f5; border-color:#fecaca;">
+                    <div class="calendar-detail-card-title" style="color:var(--danger-color);">🚨 금주 실패일</div>
+                    <div class="calendar-detail-row">${failRows.map(escapeHtml).join('<br>')}</div>
+                </div>
+            `);
+        }
+
+        const dailyHtml = buildDailyLogDetailHtml(dateStr, dayLog, alcoholRecord);
+        if (dailyHtml) htmlBlocks.push(dailyHtml);
+
+        cautions.forEach(item => {
+            htmlBlocks.push(`
+                <div class="calendar-detail-card" style="background:#fffbeb; border-color:#fde68a;">
+                    <div class="calendar-detail-card-title" style="color:#b45309;">🚨 요주의 날</div>
+                    <div class="calendar-detail-row">${escapeHtml(item.reason || '-')}</div>
+                </div>
+            `);
+        });
+
+        entries.forEach(entry => htmlBlocks.push(buildCalendarEntryHtml(entry)));
+
+        contentEl.innerHTML = htmlBlocks.length > 0
+            ? htmlBlocks.join('')
+            : '<div class="calendar-detail-card"><div class="calendar-detail-row" style="text-align:center; color:#64748b;">이 날짜에는 아직 표시할 기록이 없습니다.</div></div>';
+
+        let actionsHtml = `
+            <button type="button" class="start-btn" style="padding: 13px; font-size: 1rem; background: linear-gradient(135deg, #16a085, #1abc9c);" onclick="openDailyLogFromCalendarDetail()">✏️ 이 날짜 기록 수정/입력</button>
+        `;
+        if (failedChallenge) {
+            const amount = alcoholRecord.amount || failedChallenge.failAmount || 5;
+            actionsHtml += `
+                <button type="button" class="start-btn" style="padding: 13px; font-size: 1rem; background: linear-gradient(135deg, #e74c3c, #c0392b);" onclick="openFailureAmountFromCalendarDetail('${failedChallenge.id}', ${amount}, '${dateStr}')">🚨 실패일 음주량 수정</button>
+            `;
+        }
+        actionsHtml += `<button type="button" class="start-btn" style="padding: 12px; font-size: 1rem; background:#e2e8f0; color:#4a5568;" onclick="closeModal('calendarDayDetailModal')">닫기</button>`;
+        actionsEl.innerHTML = actionsHtml;
+
+        openModal('calendarDayDetailModal');
+    };
+
+    window.openDailyLogFromCalendarDetail = function() {
+        const dateStr = calendarDayDetailDate;
+        closeModal('calendarDayDetailModal');
+        if (dateStr) openDailyLogModal(dateStr);
+    };
+
+    window.openFailureAmountFromCalendarDetail = function(challengeId, amount, dateStr) {
+        closeModal('calendarDayDetailModal');
+        openFailAmountModal(challengeId, amount, dateStr);
+    };
+
+    function getMonthlyAlcoholStats(year, month) {
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        let totalAmount = 0;
+        let drinkCount = 0;
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const record = getAlcoholRecordForDate(dateStr);
+            const amount = clampFloatNumber(record.amount, 0, 10, 0);
+            if (amount > 0) {
+                totalAmount += amount;
+                drinkCount++;
+            }
+        }
+
+        return {
+            totalAmount: roundOneDecimal(totalAmount),
+            drinkCount,
+            averageAmount: drinkCount > 0 ? roundOneDecimal(totalAmount / drinkCount) : 0
+        };
+    }
+
+    function formatTrendDelta(delta, suffix = '') {
+        const rounded = roundOneDecimal(delta || 0);
+        if (rounded > 0) return `<span style="color:var(--danger-color);">▲ ${rounded}${suffix}</span>`;
+        if (rounded < 0) return `<span style="color:var(--success-color);">▼ ${Math.abs(rounded)}${suffix}</span>`;
+        return `<span style="color:#64748b;">변화 없음</span>`;
+    }
+
+    function updateCalendarMonthAlcoholCompareUI(year, month) {
+        const summaryEl = document.getElementById('calMonthAlcoholSummary');
+        const canvas = document.getElementById('calMonthAlcoholCompareChart');
+        if (!summaryEl || !canvas) return;
+
+        const current = getMonthlyAlcoholStats(year, month);
+        const prevMonthDate = new Date(year, month - 1, 1);
+        const previous = getMonthlyAlcoholStats(prevMonthDate.getFullYear(), prevMonthDate.getMonth());
+        const monthLabel = `${year}년 ${month + 1}월`;
+        const prevLabel = `${prevMonthDate.getFullYear()}년 ${prevMonthDate.getMonth() + 1}월`;
+
+        summaryEl.innerHTML = `${monthLabel} 전체 음주량 <b>${current.totalAmount}</b> (${formatTrendDelta(current.totalAmount - previous.totalAmount)}) · 평균 <b>${current.averageAmount}</b> (${formatTrendDelta(current.averageAmount - previous.averageAmount)}) · 음주 <b>${current.drinkCount}</b>회`;
+
+        if (calMonthAlcoholCompareChart) calMonthAlcoholCompareChart.destroy();
+        calMonthAlcoholCompareChart = new Chart(canvas.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: ['지난달', '이번달'],
+                datasets: [
+                    {
+                        label: '전체 음주량',
+                        data: [previous.totalAmount, current.totalAmount],
+                        backgroundColor: 'rgba(231, 76, 60, 0.68)',
+                        yAxisID: 'yAmount'
+                    },
+                    {
+                        label: '평균 음주량',
+                        data: [previous.averageAmount, current.averageAmount],
+                        backgroundColor: 'rgba(243, 156, 18, 0.68)',
+                        yAxisID: 'yAmount'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    yAmount: { beginAtZero: true, title: { display: false } },
+                    x: { ticks: { font: { size: 10 } } }
+                },
+                plugins: {
+                    legend: { display: true, position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } },
+                    tooltip: {
+                        callbacks: {
+                            afterTitle: function(items) {
+                                return items[0]?.dataIndex === 0 ? prevLabel : monthLabel;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function getWeeklyAlcoholTrendData(year, month) {
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const weeks = [];
+        for (let startDay = 1; startDay <= daysInMonth; startDay += 7) {
+            const endDay = Math.min(startDay + 6, daysInMonth);
+            let totalAmount = 0;
+            let drinkCount = 0;
+
+            for (let day = startDay; day <= endDay; day++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const record = getAlcoholRecordForDate(dateStr);
+                const amount = clampFloatNumber(record.amount, 0, 10, 0);
+                if (amount > 0) {
+                    totalAmount += amount;
+                    drinkCount++;
+                }
+            }
+
+            weeks.push({
+                week: `${weeks.length + 1}주차`,
+                range: `${startDay}~${endDay}일`,
+                totalAmount: roundOneDecimal(totalAmount),
+                drinkCount
+            });
+        }
+        return weeks;
+    }
+
+    function renderWeeklyAlcoholTrendChart(year, month) {
+        const canvas = document.getElementById('weeklyAlcoholTrendChartCanvas');
+        const desc = document.getElementById('weeklyAlcoholTrendDesc');
+        if (!canvas) return;
+
+        const data = getWeeklyAlcoholTrendData(year, month);
+        const monthLabel = `${year}년 ${month + 1}월`;
+        const total = data.reduce((sum, item) => sum + item.totalAmount, 0);
+        const count = data.reduce((sum, item) => sum + item.drinkCount, 0);
+        if (desc) {
+            desc.innerText = `${monthLabel}을 7일 단위 주차로 나누어 음주량 합계와 음주 횟수를 함께 표시합니다. 이번 달 합계 ${roundOneDecimal(total)}, 음주 ${count}회입니다.`;
+        }
+
+        if (calWeeklyAlcoholTrendChart) calWeeklyAlcoholTrendChart.destroy();
+        calWeeklyAlcoholTrendChart = new Chart(canvas.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: data.map(item => `${item.week}\n(${item.range})`),
+                datasets: [
+                    {
+                        type: 'bar',
+                        label: '음주량 합계',
+                        data: data.map(item => item.totalAmount),
+                        backgroundColor: 'rgba(231, 76, 60, 0.68)',
+                        yAxisID: 'yAmount'
+                    },
+                    {
+                        type: 'line',
+                        label: '음주 횟수',
+                        data: data.map(item => item.drinkCount),
+                        borderColor: '#9b59b6',
+                        backgroundColor: '#9b59b6',
+                        tension: 0.3,
+                        pointRadius: 4,
+                        yAxisID: 'yCount'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    yAmount: { type: 'linear', position: 'left', beginAtZero: true, title: { display: true, text: '음주량 합계', font: { size: 10 } } },
+                    yCount: { type: 'linear', position: 'right', beginAtZero: true, ticks: { stepSize: 1 }, grid: { drawOnChartArea: false }, title: { display: true, text: '음주 횟수', font: { size: 10 } } },
+                    x: { ticks: { font: { size: 10 } } }
+                },
+                plugins: {
+                    legend: { display: true, position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
+                    tooltip: { mode: 'index', intersect: false }
+                }
+            }
+        });
+    }
+
+    window.openWeeklyAlcoholTrendModal = function() {
+        const year = currentCalDate.getFullYear();
+        const month = currentCalDate.getMonth();
+        openModal('weeklyAlcoholTrendModal');
+        setTimeout(() => renderWeeklyAlcoholTrendChart(year, month), 60);
+    };
+
     function getMonthlyAbstinenceSuccessStats(year, month) {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -2912,6 +3340,7 @@
         currentCalDate = new Date();
         renderCalendar(currentCalDate.getFullYear(), currentCalDate.getMonth(), mode);
         openModal('calendarModal');
+        setTimeout(() => updateCalendarMonthAlcoholCompareUI(currentCalDate.getFullYear(), currentCalDate.getMonth()), 60);
     };
 
     window.changeCalMonth = function(offset) {
@@ -2922,6 +3351,7 @@
     function renderCalendar(year, month, mode) {
         document.getElementById('calMonthTitle').innerText = `${year}년 ${month + 1}월`;
         updateCalendarMonthSuccessUI(year, month);
+        updateCalendarMonthAlcoholCompareUI(year, month);
         
         const legendContainer = document.getElementById('calLegendContainer');
         const alcoholLegendHtml = `
@@ -3090,22 +3520,30 @@
             let cBadge = '';
             const cautionForDay = cautionDays.find(c => c.date === iterDateStrCal);
             if(cautionForDay) {
-                cBadge = `<div class="caution-badge" onclick="showCautionReason(event, '${cautionForDay.reason}')">🚨</div>`;
+                cBadge = `<div class="caution-badge" onclick="openCalendarDayContentFromClick(event, '${iterDateStrCal}')">🚨</div>`;
             }
 
             // 🥗 식사/음주/흡연 기록 배지 및 음주량 기반 셀 색상 추가 (global dailyLogsData + 실패일 음주량 통합 확인)
             let logBadge = '';
             const dayLog = dailyLogsData[iterDateStrCal] || null;
-            if (dayLog || alcoholRecordForDay.hasRecord) {
+            const challengeEntriesForDay = getChallengeEntriesForDate(iterDateStrCal);
+            if (dayLog || alcoholRecordForDay.hasRecord || challengeEntriesForDay.length > 0) {
                 const mealSum = dayLog ? (dayLog.breakfast || 0) + (dayLog.lunch || 0) + (dayLog.dinner || 0) + (dayLog.snack || 0) : 0;
                 const logIcons = [];
-                if (mealSum > 0 || dayLog?.weight) logIcons.push('🥗');
+                if (mealSum > 0 || dayLog?.weight || dayLog?.bodyMeasuredAt) logIcons.push('🥗');
                 if (alcoholRecordForDay.hasRecord) logIcons.push('🍷');
                 if ((dayLog?.blackout || 0) > 0) logIcons.push('🧠');
                 if ((dayLog?.smoking || 0) > 0) logIcons.push('🚬');
+                if (challengeEntriesForDay.some(entry => entry.type === 'medication')) logIcons.push('💊');
+                if (challengeEntriesForDay.some(entry => entry.type && entry.type !== 'medication')) logIcons.push('📝');
                 if (logIcons.length > 0) {
                     logBadge = `<div style="position: absolute; top: 2px; left: 4px; font-size: 0.62rem; z-index: 20; white-space: nowrap; letter-spacing:-2px;">${logIcons.join('')}</div>`;
                 }
+            }
+
+            if (hasCalendarDayUserInput(iterDateStrCal)) {
+                if (!classList.includes('has-user-input')) classList.push('has-user-input');
+                onClickEvent = `onclick="openCalendarDayContentFromClick(event, '${iterDateStrCal}')"`;
             }
 
             grid.innerHTML += `<div class="${classList.join(' ')}" ${customStyle} ${onClickEvent} data-date="${iterDateStrCal}" onmousedown="startPress(event, this)" onmouseup="cancelPress()" onmouseleave="cancelPress()" ontouchstart="startPress(event, this)" ontouchend="cancelPress()">${day}${cravingBadge}${cBadge}${logBadge}</div>`;
@@ -4838,18 +5276,16 @@
         const content = modal ? modal.querySelector('.modal-content.range-safe-modal') : null;
         if (!content) return;
         content.classList.toggle('range-locked', !enabled);
-        const toggle = content.querySelector('.range-edit-toggle');
-        const text = content.querySelector('.range-lock-status');
-        if (toggle) {
+        content.querySelectorAll('.range-edit-toggle').forEach(toggle => {
             toggle.innerText = enabled ? '🔓 슬라이더 편집 끄기' : '🔒 슬라이더 편집 켜기';
             toggle.classList.toggle('is-unlocked', !!enabled);
             toggle.setAttribute('aria-pressed', enabled ? 'true' : 'false');
-        }
-        if (text) {
+        });
+        content.querySelectorAll('.range-lock-status').forEach(text => {
             text.innerText = enabled
                 ? '이제 값을 조절할 수 있습니다. 스크롤할 때는 다시 잠그면 안전합니다.'
                 : '스크롤 중 실수로 값이 바뀌지 않도록 잠겨 있습니다.';
-        }
+        });
     };
 
     window.toggleModalRangeEdit = function(modalId) {
