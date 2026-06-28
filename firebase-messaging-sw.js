@@ -83,17 +83,18 @@ messaging.onBackgroundMessage((payload) => {
     payload.fcmOptions?.link ||
     DEFAULT_URL;
 
+
   const options = {
-    body,
-    icon: "/favicon.ico",
-    badge: "/favicon.ico",
-    tag: "alcoholaway-push",
-    renotify: true,
-    requireInteraction: true,
-    data: {
-      url,
-    },
-  };
+  body,
+  icon: "/favicon.ico",
+  badge: "/icons/notification-badge-96.png?v=3",
+  tag: "alcoholaway-push",
+  renotify: true,
+  requireInteraction: true,
+  data: {
+    url,
+  },
+};
 
   self.registration.showNotification(title, options);
 });
