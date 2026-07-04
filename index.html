@@ -296,6 +296,11 @@
         .cal-weekly-trend-btn { appearance: none; background: linear-gradient(135deg, #ffffff, #fff7ed); border: 1px solid #fdba74; border-radius: 12px; box-shadow: 0 4px 10px rgba(234, 88, 12, 0.09); color: #c2410c; cursor: pointer; font-family: inherit; font-size: 0.85rem; font-weight: 900; margin-top: 10px; padding: 10px 12px; transition: transform 0.18s ease, box-shadow 0.18s ease; width: 100%; }
         .cal-weekly-trend-btn:hover { box-shadow: 0 6px 14px rgba(234, 88, 12, 0.16); transform: translateY(-1px); }
         .cal-weekly-trend-btn:active { transform: scale(0.98); }
+        .cal-med-compare-control { background: #f8fafc; border: 1px dashed #cbd5e0; border-radius: 12px; padding: 10px; margin: 10px 0 12px; text-align: left; }
+        .cal-med-compare-control label { color: #475569; display: block; font-size: 0.75rem; font-weight: 950; margin-bottom: 4px; }
+        .cal-med-compare-control input[type="date"] { margin-top: 0; padding: 10px; font-size: 0.88rem; }
+        .cal-med-period-desc { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; color: #64748b; font-size: 0.74rem; font-weight: 760; line-height: 1.45; margin-top: 10px; padding: 9px; text-align: left; word-break: keep-all; }
+        .cal-med-period-chip { display: inline-block; background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 999px; color: #6d28d9; font-size: 0.68rem; font-weight: 900; margin: 2px 3px 2px 0; padding: 2px 7px; white-space: nowrap; }
         .cal-day.has-user-input { cursor: pointer; box-shadow: inset 0 0 0 1px rgba(15, 118, 110, 0.22); }
         .cal-day.has-user-input:not(.fail-mark):hover { box-shadow: 0 4px 10px rgba(15, 118, 110, 0.22), inset 0 0 0 1px rgba(15, 118, 110, 0.32); transform: scale(1.1); z-index: 25; }
         .calendar-detail-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; margin-bottom: 10px; padding: 12px; }
@@ -679,6 +684,24 @@
                     <div class="cal-month-alcohol-chart-wrap"><canvas id="calMonthToDateAlcoholTotalCompareChart"></canvas></div>
                     <div class="cal-month-alcohol-chart-title"><span>동기간 평균 음주량</span><span id="calMonthToDateAlcoholAverageDeltaText"></span></div>
                     <div class="cal-month-alcohol-chart-wrap"><canvas id="calMonthToDateAlcoholAverageCompareChart"></canvas></div>
+                </div>
+            </div>
+            <div id="calMedicationAlcoholCompareBox" class="cal-month-alcohol-box" data-collapsed="true">
+                <button type="button" id="calMedicationAlcoholToggleBtn" class="cal-month-alcohol-toggle" onclick="toggleCalMedicationAlcoholCompareBox()" aria-expanded="false">
+                    <span>💊 약물 복용기간 음주 비교<span id="calMedicationAlcoholToggleSub" class="cal-month-alcohol-toggle-sub">아캄프로세이트/날트렉손 복용기간과 비복용기간을 비교합니다.</span></span>
+                </button>
+                <div id="calMedicationAlcoholCompareContent" class="cal-month-alcohol-content">
+                    <div class="cal-med-compare-control">
+                        <label for="calMedicationNonMedStartDate">비복용기간 시작일</label>
+                        <input type="date" id="calMedicationNonMedStartDate" onchange="saveCalMedicationNonMedStartDateAndRender()">
+                        <div class="filter-desc">선택한 날짜부터 오늘까지를 분석 범위로 삼고, 그 안에서 약물 복용기간과 비복용기간을 나눠 비교합니다.</div>
+                    </div>
+                    <div id="calMedicationAlcoholSummary" class="cal-month-alcohol-summary">약물 복용기간 음주 비교를 계산 중입니다.</div>
+                    <div class="cal-month-alcohol-chart-title"><span>평균 음주량</span><span id="calMedicationAlcoholAverageDeltaText"></span></div>
+                    <div class="cal-month-alcohol-chart-wrap"><canvas id="calMedicationAlcoholAverageCompareChart"></canvas></div>
+                    <div class="cal-month-alcohol-chart-title"><span>주당 평균 음주횟수</span><span id="calMedicationAlcoholFrequencyDeltaText"></span></div>
+                    <div class="cal-month-alcohol-chart-wrap"><canvas id="calMedicationAlcoholFrequencyCompareChart"></canvas></div>
+                    <div id="calMedicationAlcoholPeriodDesc" class="cal-med-period-desc"></div>
                 </div>
             </div>
         </div>
@@ -1319,6 +1342,8 @@
     let calMonthAlcoholAverageCompareChart = null;
     let calMonthToDateAlcoholTotalCompareChart = null;
     let calMonthToDateAlcoholAverageCompareChart = null;
+    let calMedicationAlcoholAverageCompareChart = null;
+    let calMedicationAlcoholFrequencyCompareChart = null;
     let calWeeklyAlcoholTrendChart = null;
     let calendarDayDetailDate = null;
     let cravingData = [];
@@ -3706,6 +3731,275 @@
         );
     }
 
+    function getMedicationCompareStorageKey() {
+        return `calMedicationNonMedStartDate_${userId || 'guest'}`;
+    }
+
+    function getDefaultMedicationNonMedStartDateKey() {
+        const today = new Date();
+        const oneMonthAgo = addMonthsClamped(today, -1);
+        return dateToKey(oneMonthAgo || new Date(today.getFullYear(), today.getMonth(), 1));
+    }
+
+    function initCalMedicationNonMedStartDate() {
+        const input = document.getElementById('calMedicationNonMedStartDate');
+        if (!input) return;
+        const todayKey = dateToKey(new Date());
+        let savedValue = '';
+        try { savedValue = localStorage.getItem(getMedicationCompareStorageKey()) || ''; } catch (e) { savedValue = ''; }
+        input.max = todayKey;
+        input.value = savedValue || getDefaultMedicationNonMedStartDateKey();
+        if (input.value > todayKey) input.value = todayKey;
+    }
+
+    window.saveCalMedicationNonMedStartDateAndRender = function() {
+        const input = document.getElementById('calMedicationNonMedStartDate');
+        if (!input) return;
+        const todayKey = dateToKey(new Date());
+        if (!input.value) input.value = getDefaultMedicationNonMedStartDateKey();
+        if (input.value > todayKey) input.value = todayKey;
+        try { localStorage.setItem(getMedicationCompareStorageKey(), input.value); } catch (e) {}
+        updateCalendarMedicationAlcoholCompareUI(true);
+    };
+
+    function getMedicationRecordDateKeys() {
+        const dateSet = new Set();
+        (allChallengesData || []).forEach(challenge => {
+            (challenge.cravings || []).forEach(entry => {
+                if (entry.type !== 'medication') return;
+                if (!['acamprosate', 'naltrexone'].includes(entry.drug)) return;
+                const ts = getEntryTimestamp(entry);
+                const key = ts ? dateToKey(ts) : dateToKey(entry.dateTimeLocal || entry.takenAt || entry.timestamp);
+                if (key) dateSet.add(key);
+            });
+        });
+        return [...dateSet].sort();
+    }
+
+    function daysBetweenDateKeys(startKey, endKey) {
+        const start = getDateFromDateKey(startKey);
+        const end = getDateFromDateKey(endKey);
+        if (!start || !end) return Infinity;
+        start.setHours(0, 0, 0, 0);
+        end.setHours(0, 0, 0, 0);
+        return Math.round((end.getTime() - start.getTime()) / 86400000);
+    }
+
+    function addDaysToDateKey(dateKey, days) {
+        const date = getDateFromDateKey(dateKey);
+        if (!date) return '';
+        date.setDate(date.getDate() + days);
+        return dateToKey(date);
+    }
+
+    function minDateKey(a, b) {
+        if (!a) return b;
+        if (!b) return a;
+        return a <= b ? a : b;
+    }
+
+    function maxDateKey(a, b) {
+        if (!a) return b;
+        if (!b) return a;
+        return a >= b ? a : b;
+    }
+
+    function buildMedicationPeriodsByThreeDayGap() {
+        const medDates = getMedicationRecordDateKeys();
+        if (medDates.length === 0) return [];
+
+        const periods = [];
+        let start = medDates[0];
+        let end = medDates[0];
+        let prev = medDates[0];
+
+        for (let i = 1; i < medDates.length; i++) {
+            const current = medDates[i];
+            const gapDays = daysBetweenDateKeys(prev, current);
+            if (gapDays <= 3) {
+                end = current;
+            } else {
+                periods.push({ start, end });
+                start = current;
+                end = current;
+            }
+            prev = current;
+        }
+        periods.push({ start, end });
+        return periods;
+    }
+
+    function forEachDateKeyInRange(startKey, endKey, callback) {
+        const start = getDateFromDateKey(startKey);
+        const end = getDateFromDateKey(endKey);
+        if (!start || !end || start > end) return;
+        for (let d = new Date(start.getTime()); d <= end; d.setDate(d.getDate() + 1)) {
+            callback(dateToKey(d));
+        }
+    }
+
+    function getDateKeysBetween(startKey, endKey) {
+        const keys = [];
+        forEachDateKeyInRange(startKey, endKey, key => keys.push(key));
+        return keys;
+    }
+
+    function buildMedicationDateSetInRange(periods, rangeStartKey, rangeEndKey) {
+        const medDateSet = new Set();
+        const clippedPeriods = [];
+        (periods || []).forEach(period => {
+            const clippedStart = maxDateKey(period.start, rangeStartKey);
+            const clippedEnd = minDateKey(period.end, rangeEndKey);
+            if (!clippedStart || !clippedEnd || clippedStart > clippedEnd) return;
+            clippedPeriods.push({ start: clippedStart, end: clippedEnd });
+            forEachDateKeyInRange(clippedStart, clippedEnd, key => medDateSet.add(key));
+        });
+        return { medDateSet, clippedPeriods };
+    }
+
+    function getAlcoholStatsForDateKeys(dateKeys) {
+        let totalAmount = 0;
+        let drinkCount = 0;
+        const keys = dateKeys || [];
+        keys.forEach(dateKey => {
+            const record = getAlcoholRecordForDate(dateKey);
+            const amount = clampFloatNumber(record.amount, 0, 10, 0);
+            if (amount > 0) {
+                totalAmount += amount;
+                drinkCount++;
+            }
+        });
+        const totalDays = keys.length;
+        return {
+            totalDays,
+            drinkCount,
+            totalAmount: roundOneDecimal(totalAmount),
+            averageAmount: drinkCount > 0 ? roundOneDecimal(totalAmount / drinkCount) : 0,
+            weeklyDrinkCount: totalDays > 0 ? roundOneDecimal((drinkCount / totalDays) * 7) : 0
+        };
+    }
+
+    function getMedicationAlcoholCompareStats() {
+        const input = document.getElementById('calMedicationNonMedStartDate');
+        const todayKey = dateToKey(new Date());
+        const startKey = (input && input.value) ? input.value : getDefaultMedicationNonMedStartDateKey();
+        const safeStartKey = startKey > todayKey ? todayKey : startKey;
+        const allDateKeys = getDateKeysBetween(safeStartKey, todayKey);
+        const periods = buildMedicationPeriodsByThreeDayGap();
+        const { medDateSet, clippedPeriods } = buildMedicationDateSetInRange(periods, safeStartKey, todayKey);
+        const medDateKeys = allDateKeys.filter(key => medDateSet.has(key));
+        const nonMedDateKeys = allDateKeys.filter(key => !medDateSet.has(key));
+
+        return {
+            startKey: safeStartKey,
+            endKey: todayKey,
+            medRecordCount: getMedicationRecordDateKeys().length,
+            periods,
+            clippedPeriods,
+            med: getAlcoholStatsForDateKeys(medDateKeys),
+            nonMed: getAlcoholStatsForDateKeys(nonMedDateKeys)
+        };
+    }
+
+    function isCalMedicationAlcoholCompareExpanded() {
+        const box = document.getElementById('calMedicationAlcoholCompareBox');
+        return box && box.getAttribute('data-collapsed') !== 'true';
+    }
+
+    function updateCalMedicationAlcoholToggleState() {
+        const box = document.getElementById('calMedicationAlcoholCompareBox');
+        const button = document.getElementById('calMedicationAlcoholToggleBtn');
+        if (!box || !button) return;
+        const expanded = box.getAttribute('data-collapsed') !== 'true';
+        button.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    }
+
+    function setCalMedicationAlcoholCompareCollapsed(collapsed = true) {
+        const box = document.getElementById('calMedicationAlcoholCompareBox');
+        if (!box) return;
+        box.setAttribute('data-collapsed', collapsed ? 'true' : 'false');
+        updateCalMedicationAlcoholToggleState();
+    }
+
+    window.toggleCalMedicationAlcoholCompareBox = function() {
+        const box = document.getElementById('calMedicationAlcoholCompareBox');
+        if (!box) return;
+        const nextExpanded = box.getAttribute('data-collapsed') === 'true';
+        setCalMedicationAlcoholCompareCollapsed(!nextExpanded);
+        if (nextExpanded) {
+            initCalMedicationNonMedStartDate();
+            setTimeout(() => updateCalendarMedicationAlcoholCompareUI(true), 60);
+        }
+    };
+
+    function formatMedicationCompareDelta(medValue, nonMedValue, suffix = '') {
+        const delta = roundOneDecimal(medValue - nonMedValue);
+        if (delta > 0) return `<span style="color:var(--danger-color);">약물기간 +${delta}${suffix}</span>`;
+        if (delta < 0) return `<span style="color:var(--success-color);">약물기간 -${Math.abs(delta)}${suffix}</span>`;
+        return `<span style="color:#64748b;">차이 없음</span>`;
+    }
+
+    function updateCalendarMedicationAlcoholCompareUI(forceRender = false) {
+        const summaryEl = document.getElementById('calMedicationAlcoholSummary');
+        const toggleSubEl = document.getElementById('calMedicationAlcoholToggleSub');
+        const averageDeltaEl = document.getElementById('calMedicationAlcoholAverageDeltaText');
+        const frequencyDeltaEl = document.getElementById('calMedicationAlcoholFrequencyDeltaText');
+        const descEl = document.getElementById('calMedicationAlcoholPeriodDesc');
+        if (!summaryEl) return;
+
+        initCalMedicationNonMedStartDate();
+        const stats = getMedicationAlcoholCompareStats();
+        const avgDeltaHtml = formatMedicationCompareDelta(stats.med.averageAmount, stats.nonMed.averageAmount);
+        const freqDeltaHtml = formatMedicationCompareDelta(stats.med.weeklyDrinkCount, stats.nonMed.weeklyDrinkCount, '회/주');
+
+        if (stats.medRecordCount === 0) {
+            if (toggleSubEl) toggleSubEl.innerHTML = '약물 복용 기록이 아직 없습니다.';
+            summaryEl.innerHTML = '아캄프로세이트 또는 날트렉손 복용 기록이 있으면 자동으로 복용기간을 계산합니다.';
+            if (averageDeltaEl) averageDeltaEl.innerHTML = '';
+            if (frequencyDeltaEl) frequencyDeltaEl.innerHTML = '';
+            if (descEl) descEl.innerHTML = '복용 기록 저장 시 입력된 날짜가 약물 복용일로 잡힙니다. 복용일 사이 간격이 3일 이하면 그 사이 날짜도 약물 복용기간으로 포함합니다.';
+            updateCalMedicationAlcoholToggleState();
+            return;
+        }
+
+        if (toggleSubEl) {
+            toggleSubEl.innerHTML = `분석범위 ${stats.startKey}~${stats.endKey} · 약물기간 ${stats.med.totalDays}일 · 비복용기간 ${stats.nonMed.totalDays}일`;
+        }
+        summaryEl.innerHTML = `약물기간: ${stats.med.totalDays}일 중 음주 ${stats.med.drinkCount}회 · 평균 ${stats.med.averageAmount} · 주당 ${stats.med.weeklyDrinkCount}회<br>비복용기간: ${stats.nonMed.totalDays}일 중 음주 ${stats.nonMed.drinkCount}회 · 평균 ${stats.nonMed.averageAmount} · 주당 ${stats.nonMed.weeklyDrinkCount}회`;
+        if (averageDeltaEl) averageDeltaEl.innerHTML = avgDeltaHtml;
+        if (frequencyDeltaEl) frequencyDeltaEl.innerHTML = freqDeltaHtml;
+        if (descEl) {
+            const periodChips = stats.clippedPeriods.length > 0
+                ? stats.clippedPeriods.map(period => `<span class="cal-med-period-chip">${period.start}${period.start === period.end ? '' : `~${period.end}`}</span>`).join('')
+                : '<span style="color:#94a3b8;">선택한 분석범위 안에 약물 복용기간이 없습니다.</span>';
+            descEl.innerHTML = `기준: 복용기록일 포함, 복용기록 간격이 3일 이하면 사이 날짜도 약물 복용기간으로 연결합니다.<br>확정된 약물 복용기간: ${periodChips}`;
+        }
+        updateCalMedicationAlcoholToggleState();
+
+        if (!forceRender && !isCalMedicationAlcoholCompareExpanded()) return;
+
+        calMedicationAlcoholAverageCompareChart = renderTwoRangeCompareChart(
+            'calMedicationAlcoholAverageCompareChart',
+            calMedicationAlcoholAverageCompareChart,
+            '평균 음주량',
+            '약물기간',
+            '비복용기간',
+            stats.med.averageAmount,
+            stats.nonMed.averageAmount,
+            ['rgba(142, 68, 173, 0.68)', 'rgba(231, 76, 60, 0.62)']
+        );
+        calMedicationAlcoholFrequencyCompareChart = renderTwoRangeCompareChart(
+            'calMedicationAlcoholFrequencyCompareChart',
+            calMedicationAlcoholFrequencyCompareChart,
+            '주당 평균 음주횟수',
+            '약물기간',
+            '비복용기간',
+            stats.med.weeklyDrinkCount,
+            stats.nonMed.weeklyDrinkCount,
+            ['rgba(142, 68, 173, 0.68)', 'rgba(231, 76, 60, 0.62)']
+        );
+    }
+
     function getWeeklyAlcoholTrendData(year, month) {
         const daysInMonth = new Date(year, month + 1, 0).getDate();
         const weeks = [];
@@ -3837,16 +4131,20 @@
         fillEl.style.width = `${stats.percent}%`;
     }
 
-    window.openCalendarModal = function(mode) {
+    window.openCalendarModal = async function(mode) {
         currentCalMode = mode;
         currentCalDate = new Date();
         setCalMonthAlcoholCompareCollapsed(true);
         setCalMonthToDateAlcoholCompareCollapsed(true);
+        setCalMedicationAlcoholCompareCollapsed(true);
+        initCalMedicationNonMedStartDate();
+        if (userId) await ensureAllChallengesLoaded(true);
         renderCalendar(currentCalDate.getFullYear(), currentCalDate.getMonth(), mode);
         openModal('calendarModal');
         setTimeout(() => {
             updateCalendarMonthAlcoholCompareUI(currentCalDate.getFullYear(), currentCalDate.getMonth());
             updateCalendarMonthToDateAlcoholCompareUI();
+            updateCalendarMedicationAlcoholCompareUI();
         }, 60);
     };
 
@@ -3860,6 +4158,7 @@
         updateCalendarMonthSuccessUI(year, month);
         updateCalendarMonthAlcoholCompareUI(year, month);
         updateCalendarMonthToDateAlcoholCompareUI();
+        updateCalendarMedicationAlcoholCompareUI();
         
         const legendContainer = document.getElementById('calLegendContainer');
         const alcoholLegendHtml = `
