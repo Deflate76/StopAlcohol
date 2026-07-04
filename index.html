@@ -117,6 +117,9 @@
         .craving-split-row .craving-btn { flex: 1; width: auto; margin: 0; padding: 15px 8px; }
         
         .time-unit { font-size: 3rem; font-weight: 800; color: var(--danger-color); line-height: 1.1; margin-bottom: 5px; text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 8px; transition: color 0.2s; }
+        .time-unit-row { align-items: center; display: inline-flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+        .streak-record-badge { background: #fff5f5; border: 1px solid #fecaca; border-radius: 999px; color: #c0392b; display: inline-flex; font-size: 0.75rem; font-weight: 950; line-height: 1.25; padding: 5px 9px; text-decoration: none; white-space: nowrap; box-shadow: 0 2px 8px rgba(231, 76, 60, 0.10); }
+        #displaySettingDate { color: var(--text-dark); font-weight: 950; background: #fff; border: 1px solid #cbd5e0; border-radius: 999px; padding: 2px 8px; box-shadow: 0 1px 4px rgba(45, 55, 72, 0.08); }
         .sub-time-clickable { font-size: 1.1rem; color: #718096; font-weight: 700; text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 4px; transition: color 0.2s; }
         
         .clickable-time-box:hover .time-unit { color: #c0392b; }
@@ -1822,19 +1825,54 @@
         return index >= 0 ? index + 1 : ordered.length;
     }
 
-    function getChallengeLabel(challenge) {
+    function formatDateMonthDayKo(dateValue) {
+        const d = dateValue instanceof Date ? new Date(dateValue.getTime()) : new Date(dateValue);
+        if (isNaN(d.getTime())) return '-';
+        return `${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    function formatChallengeCompactStartDate(dateValue, showYear = false) {
+        const d = dateValue instanceof Date ? new Date(dateValue.getTime()) : new Date(dateValue);
+        if (isNaN(d.getTime())) return '-';
+        const monthDay = formatDateMonthDayKo(d);
+        return showYear ? `${d.getFullYear()}.${monthDay}` : monthDay;
+    }
+
+    function getChallengeLabel(challenge, options = {}) {
         if (!challenge) return '도전 선택';
         const attempt = getChallengeAttemptNumber(challenge.id);
+        if (options.compactYear) {
+            const startDate = challenge.startDate instanceof Date ? challenge.startDate : new Date(challenge.startDate);
+            const endDate = challenge.endDate instanceof Date ? challenge.endDate : new Date(challenge.endDate);
+            const hasValidStart = !isNaN(startDate.getTime());
+            const hasValidEnd = !isNaN(endDate.getTime());
+            const crossesYear = challenge.status !== 'active' && hasValidStart && hasValidEnd && startDate.getFullYear() !== endDate.getFullYear();
+            const startText = formatChallengeCompactStartDate(startDate, !!options.showStartYear || crossesYear);
+            const endText = challenge.status === 'active' ? '진행 중' : formatDateMonthDayKo(endDate);
+            return `${attempt}차 · ${startText} ~ ${endText}`;
+        }
         const startText = formatDateShortKo(challenge.startDate);
         const endText = challenge.status === 'active' ? '진행 중' : formatDateShortKo(challenge.endDate);
         return `${attempt}차 · ${startText} ~ ${endText}`;
     }
 
-    function populateChallengeSelector(selectId, preferredChallengeId = currentChallengeId) {
+    function populateChallengeSelector(selectId, preferredChallengeId = currentChallengeId, options = {}) {
         const select = document.getElementById(selectId);
         if (!select) return null;
         const ordered = getChallengesInAttemptOrder();
-        select.innerHTML = ordered.map(challenge => `<option value="${challenge.id}">${getChallengeLabel(challenge)}</option>`).join('');
+        const startYears = new Set(ordered.map(challenge => {
+            const startDate = challenge.startDate instanceof Date ? challenge.startDate : new Date(challenge.startDate);
+            return !isNaN(startDate.getTime()) ? startDate.getFullYear() : null;
+        }).filter(year => year !== null));
+        const hasMultipleStartYears = startYears.size > 1;
+        let lastStartYear = null;
+        select.innerHTML = ordered.map(challenge => {
+            const startDate = challenge.startDate instanceof Date ? challenge.startDate : new Date(challenge.startDate);
+            const startYear = !isNaN(startDate.getTime()) ? startDate.getFullYear() : null;
+            const showStartYear = options.compactYear && hasMultipleStartYears && startYear !== null && startYear !== lastStartYear;
+            if (startYear !== null) lastStartYear = startYear;
+            return `<option value="${challenge.id}">${getChallengeLabel(challenge, { ...options, showStartYear })}</option>`;
+        }).join('');
         const preferredExists = preferredChallengeId && ordered.some(challenge => challenge.id === preferredChallengeId);
         if (preferredExists) select.value = preferredChallengeId;
         else if (ordered.length > 0) select.value = ordered[ordered.length - 1].id;
@@ -2130,10 +2168,58 @@
         `;
     }
 
+    function getChallengeDurationDays(challenge, currentDays = 0) {
+        if (!challenge || !challenge.startDate) return 0;
+        if (challenge.id === currentChallengeId && challenge.status === 'active') {
+            return Math.max(0, Math.floor(currentDays || 0));
+        }
+        const start = challenge.startDate instanceof Date ? challenge.startDate : new Date(challenge.startDate);
+        const end = challenge.endDate ? (challenge.endDate instanceof Date ? challenge.endDate : new Date(challenge.endDate)) : new Date();
+        if (isNaN(start.getTime()) || isNaN(end.getTime()) || end < start) return 0;
+        return Math.max(0, Math.floor((end - start) / 86400000));
+    }
+
+    function getCurrentStreakRecordInfo(currentDays) {
+        const targetDays = Math.floor(currentDays || 0);
+        if (targetDays < 3 || !currentChallengeId) return null;
+
+        const ordered = getChallengesInAttemptOrder();
+        if (!ordered.some(challenge => challenge.id === currentChallengeId) && userQuitDate) {
+            ordered.push({
+                id: currentChallengeId,
+                startDate: new Date(userQuitDate),
+                endDate: new Date(),
+                status: 'active',
+                cravings: cravingData || []
+            });
+            ordered.sort((a, b) => a.startDate - b.startDate);
+        }
+
+        let ordinal = 0;
+        let totalQualified = 0;
+        ordered.forEach(challenge => {
+            const durationDays = getChallengeDurationDays(challenge, targetDays);
+            if (durationDays >= targetDays) {
+                totalQualified++;
+                if (challenge.id === currentChallengeId) ordinal = totalQualified;
+            }
+        });
+
+        if (!ordinal) return null;
+        return { targetDays, ordinal, totalQualified };
+    }
+
+    function buildStreakRecordBadgeHtml(currentDays) {
+        const recordInfo = getCurrentStreakRecordInfo(currentDays);
+        if (!recordInfo) return '';
+        return `<span class="streak-record-badge" title="내 단주 기록 중 연속 ${recordInfo.targetDays}일 이상을 달성한 순서입니다.">${recordInfo.ordinal}번째 기록</span>`;
+    }
+
     function buildMainDaysRenderKey(currentDays, totalCumul, successRate) {
         const dementiaRisk = calculateAlcoholDementiaRisk(getLatestAlcoholDementiaRiskProfile());
         const diseaseRisk = calculateAlcoholDiseaseRisks(getLatestAlcoholDiseaseRiskProfile());
         const diseaseRepresentativeKey = diseaseRisk.conditions.map(condition => `${condition.key}:${condition.representative}`).join(',');
+        const streakRecordInfo = getCurrentStreakRecordInfo(currentDays);
         return [
             currentDays,
             totalCumul,
@@ -2146,7 +2232,9 @@
             diseaseRisk.hasData ? 'disease-data' : 'disease-empty',
             diseaseRisk.monthlyDrinkCount,
             diseaseRisk.averageAlcoholAmount,
-            diseaseRepresentativeKey
+            diseaseRepresentativeKey,
+            streakRecordInfo ? `${streakRecordInfo.targetDays}:${streakRecordInfo.ordinal}:${streakRecordInfo.totalQualified}` : 'streak-none',
+            (allChallengesData || []).length
         ].join('|');
     }
 
@@ -2156,7 +2244,7 @@
         return `
                 <div class="cal-hint">👇 클릭하여 달력 보기</div>
                 <div class="clickable-time-box" onclick="openCalendarModal('current')">
-                    <div class="time-unit">${currentDays}일</div>
+                    <div class="time-unit-row"><div class="time-unit">${currentDays}일</div>${buildStreakRecordBadgeHtml(currentDays)}</div>
                 </div>
                 <div class="clickable-time-box" onclick="openCalendarModal('accumulated')" style="margin-top: -10px; padding: 5px 15px;">
                     <div class="cumulative-success-row">
@@ -3965,7 +4053,7 @@
         if (toggleSubEl) {
             toggleSubEl.innerHTML = `분석범위 ${stats.startKey}~${stats.endKey} · 약물기간 ${stats.med.totalDays}일 · 비복용기간 ${stats.nonMed.totalDays}일`;
         }
-        summaryEl.innerHTML = `약물기간: ${stats.med.totalDays}일 중 음주 ${stats.med.drinkCount}회 · 평균 ${stats.med.averageAmount} · 주당 ${stats.med.weeklyDrinkCount}회<br>비복용기간: ${stats.nonMed.totalDays}일 중 음주 ${stats.nonMed.drinkCount}회 · 평균 ${stats.nonMed.averageAmount} · 주당 ${stats.nonMed.weeklyDrinkCount}회`;
+        summaryEl.innerHTML = `비복용기간: ${stats.nonMed.totalDays}일 중 음주 ${stats.nonMed.drinkCount}회 · 평균 ${stats.nonMed.averageAmount} · 주당 ${stats.nonMed.weeklyDrinkCount}회<br>약물기간: ${stats.med.totalDays}일 중 음주 ${stats.med.drinkCount}회 · 평균 ${stats.med.averageAmount} · 주당 ${stats.med.weeklyDrinkCount}회`;
         if (averageDeltaEl) averageDeltaEl.innerHTML = avgDeltaHtml;
         if (frequencyDeltaEl) frequencyDeltaEl.innerHTML = freqDeltaHtml;
         if (descEl) {
@@ -3982,21 +4070,21 @@
             'calMedicationAlcoholAverageCompareChart',
             calMedicationAlcoholAverageCompareChart,
             '평균 음주량',
-            '약물기간',
             '비복용기간',
-            stats.med.averageAmount,
+            '약물기간',
             stats.nonMed.averageAmount,
-            ['rgba(142, 68, 173, 0.68)', 'rgba(231, 76, 60, 0.62)']
+            stats.med.averageAmount,
+            ['rgba(231, 76, 60, 0.62)', 'rgba(142, 68, 173, 0.68)']
         );
         calMedicationAlcoholFrequencyCompareChart = renderTwoRangeCompareChart(
             'calMedicationAlcoholFrequencyCompareChart',
             calMedicationAlcoholFrequencyCompareChart,
             '주당 평균 음주횟수',
-            '약물기간',
             '비복용기간',
-            stats.med.weeklyDrinkCount,
+            '약물기간',
             stats.nonMed.weeklyDrinkCount,
-            ['rgba(142, 68, 173, 0.68)', 'rgba(231, 76, 60, 0.62)']
+            stats.med.weeklyDrinkCount,
+            ['rgba(231, 76, 60, 0.62)', 'rgba(142, 68, 173, 0.68)']
         );
     }
 
@@ -5435,7 +5523,7 @@
     window.openMedListModal = async function() {
         if (!userId) return alert("로그인이 필요합니다.");
         await ensureAllChallengesLoaded(true);
-        populateChallengeSelector('medChallengeSelect', currentChallengeId);
+        populateChallengeSelector('medChallengeSelect', currentChallengeId, { compactYear: true });
         populatePeriodSelector('medPeriodSelect', 'all');
         renderMedListFiltered();
         openModal('medListModal');
@@ -5804,7 +5892,7 @@
     window.openStateStats = async function() {
         if (!userId) return alert("로그인이 필요합니다.");
         await ensureAllChallengesLoaded(true);
-        populateChallengeSelector('stateChallengeSelect', currentChallengeId);
+        populateChallengeSelector('stateChallengeSelect', currentChallengeId, { compactYear: true });
         populatePeriodSelector('statePeriodSelect', 'all');
         openModal('stateStatsModal');
         setTimeout(() => renderStateStatsFiltered(), 120);
