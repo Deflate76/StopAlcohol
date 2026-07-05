@@ -270,9 +270,10 @@
         
         .med-list-item { background: #f8f9fa; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; text-align: left; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
         .filter-control-box { background: #f8fafc; border: 1px dashed #cbd5e0; border-radius: 14px; padding: 10px; margin: 10px 0 14px; text-align: left; }
-        .filter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; align-items: end; }
+        .filter-grid { display: grid; grid-template-columns: 1fr; gap: 10px; align-items: stretch; }
+        .filter-grid > div { min-width: 0; width: 100%; }
         .filter-grid label { color: #475569; display: block; font-size: 0.75rem; font-weight: 900; margin-bottom: 4px; }
-        .filter-grid select { margin-top: 0; padding: 9px 10px; font-size: 0.86rem; }
+        .filter-grid select { margin-top: 0; padding: 10px 12px; font-size: 0.9rem; width: 100%; min-width: 0; max-width: 100%; white-space: normal; text-overflow: clip; }
         .filter-desc { color: #64748b; font-size: 0.76rem; font-weight: 750; line-height: 1.45; margin-top: 8px; text-align: center; word-break: keep-all; }
         .med-profile-mini-btn { appearance: none; background: linear-gradient(135deg, #ffffff, #f5f3ff); border: 1px solid #c4b5fd; border-radius: 12px; color: #6d28d9; cursor: pointer; font-family: inherit; font-size: 0.84rem; font-weight: 900; padding: 10px 12px; width: 100%; box-shadow: 0 4px 10px rgba(109, 40, 217, 0.08); }
         .med-profile-mini-btn:active { transform: scale(0.98); }
@@ -286,6 +287,15 @@
         .cal-month-success-label { color: #2f855a; font-size: 0.8rem; font-weight: 900; margin-bottom: 6px; word-break: keep-all; }
         .cal-month-success-progress { background: #e2e8f0; border-radius: 999px; height: 10px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.08); }
         .cal-month-success-fill { background: linear-gradient(90deg, #2ecc71, #27ae60); height: 100%; width: 0%; transition: width 0.35s ease; }
+        .cal-alcohol-change-compare-box { margin-top: 12px; background: linear-gradient(135deg, #fff7ed, #ffffff); border: 1px solid #fdba74; border-radius: 16px; padding: 11px; text-align: left; box-shadow: 0 4px 14px rgba(234, 88, 12, 0.10); }
+        .cal-alcohol-change-compare-toggle { appearance: none; align-items: center; background: transparent; border: none; color: #9a3412; cursor: pointer; display: flex; font-family: inherit; font-size: 0.9rem; font-weight: 950; justify-content: space-between; gap: 8px; line-height: 1.35; padding: 0; text-align: left; width: 100%; }
+        .cal-alcohol-change-compare-toggle::after { content: '＋'; color: #c2410c; flex-shrink: 0; font-size: 1.25rem; font-weight: 950; line-height: 1; }
+        .cal-alcohol-change-compare-box[data-collapsed="false"] .cal-alcohol-change-compare-toggle::after { content: '－'; color: var(--danger-color); }
+        .cal-alcohol-change-compare-toggle-sub { color: #64748b; display: block; font-size: 0.72rem; font-weight: 800; margin-top: 2px; word-break: keep-all; }
+        .cal-alcohol-change-compare-content { margin-top: 10px; }
+        .cal-alcohol-change-compare-box[data-collapsed="true"] .cal-alcohol-change-compare-content { display: none; }
+        .cal-alcohol-change-compare-content .cal-month-alcohol-box { margin-top: 10px; }
+        .cal-alcohol-change-compare-content .cal-month-alcohol-box:first-child { margin-top: 0; }
         .cal-month-alcohol-box { margin-top: 12px; background: linear-gradient(135deg, #fff7ed, #ffffff); border: 1px solid #fed7aa; border-radius: 14px; padding: 10px; text-align: left; box-shadow: 0 3px 10px rgba(234, 88, 12, 0.08); }
         .cal-month-alcohol-toggle { appearance: none; align-items: center; background: transparent; border: none; color: #9a3412; cursor: pointer; display: flex; font-family: inherit; font-size: 0.82rem; font-weight: 950; justify-content: space-between; gap: 8px; line-height: 1.35; padding: 0; text-align: left; width: 100%; }
         .cal-month-alcohol-toggle::after { content: '＋'; color: #c2410c; flex-shrink: 0; font-size: 1.1rem; font-weight: 950; line-height: 1; }
@@ -664,47 +674,54 @@
         <div id="calMonthSuccessContainer" class="cal-month-success-container">
             <div id="calMonthSuccessText" class="cal-month-success-label">금주 성공률 계산 중</div>
             <div class="cal-month-success-progress"><div id="calMonthSuccessFill" class="cal-month-success-fill"></div></div>
-            <div id="calMonthAlcoholCompareBox" class="cal-month-alcohol-box" data-collapsed="true">
-                <button type="button" id="calMonthAlcoholToggleBtn" class="cal-month-alcohol-toggle" onclick="toggleCalMonthAlcoholCompareBox()" aria-expanded="false">
-                    <span>🍷 월간 음주량 비교<span id="calMonthAlcoholToggleSub" class="cal-month-alcohol-toggle-sub">펼쳐서 지난달과 이번달을 비교해 보세요.</span></span>
+            <div id="calAlcoholChangeCompareBox" class="cal-alcohol-change-compare-box" data-collapsed="true">
+                <button type="button" id="calAlcoholChangeCompareToggleBtn" class="cal-alcohol-change-compare-toggle" onclick="toggleCalAlcoholChangeCompareBox()" aria-expanded="false">
+                    <span>🍷 음주량 변화 비교<span id="calAlcoholChangeCompareToggleSub" class="cal-alcohol-change-compare-toggle-sub">펼쳐서 월간·오늘 기준 동기간·약물 복용기간 비교를 확인하세요.</span></span>
                 </button>
-                <div id="calMonthAlcoholCompareContent" class="cal-month-alcohol-content">
-                    <div id="calMonthAlcoholSummary" class="cal-month-alcohol-summary">음주량 추이를 계산 중입니다.</div>
-                    <div class="cal-month-alcohol-chart-title"><span>전체 음주량</span><span id="calMonthAlcoholTotalDeltaText"></span></div>
-                    <div class="cal-month-alcohol-chart-wrap"><canvas id="calMonthAlcoholTotalCompareChart"></canvas></div>
-                    <div class="cal-month-alcohol-chart-title"><span>평균 음주량</span><span id="calMonthAlcoholAverageDeltaText"></span></div>
-                    <div class="cal-month-alcohol-chart-wrap"><canvas id="calMonthAlcoholAverageCompareChart"></canvas></div>
-                    <button type="button" class="cal-weekly-trend-btn" onclick="openWeeklyAlcoholTrendModal()">📊 이번 달 음주량·음주 횟수 주차별 추이</button>
-                </div>
-            </div>
-            <div id="calMonthToDateAlcoholCompareBox" class="cal-month-alcohol-box" data-collapsed="true">
-                <button type="button" id="calMonthToDateAlcoholToggleBtn" class="cal-month-alcohol-toggle" onclick="toggleCalMonthToDateAlcoholCompareBox()" aria-expanded="false">
-                    <span>🍷 오늘 기준 동기간 음주량 비교<span id="calMonthToDateAlcoholToggleSub" class="cal-month-alcohol-toggle-sub">펼쳐서 지난달 같은 날짜까지와 이번달 오늘까지를 비교해 보세요.</span></span>
-                </button>
-                <div id="calMonthToDateAlcoholCompareContent" class="cal-month-alcohol-content">
-                    <div id="calMonthToDateAlcoholSummary" class="cal-month-alcohol-summary">오늘 기준 음주량 추이를 계산 중입니다.</div>
-                    <div class="cal-month-alcohol-chart-title"><span>동기간 전체 음주량</span><span id="calMonthToDateAlcoholTotalDeltaText"></span></div>
-                    <div class="cal-month-alcohol-chart-wrap"><canvas id="calMonthToDateAlcoholTotalCompareChart"></canvas></div>
-                    <div class="cal-month-alcohol-chart-title"><span>동기간 평균 음주량</span><span id="calMonthToDateAlcoholAverageDeltaText"></span></div>
-                    <div class="cal-month-alcohol-chart-wrap"><canvas id="calMonthToDateAlcoholAverageCompareChart"></canvas></div>
-                </div>
-            </div>
-            <div id="calMedicationAlcoholCompareBox" class="cal-month-alcohol-box" data-collapsed="true">
-                <button type="button" id="calMedicationAlcoholToggleBtn" class="cal-month-alcohol-toggle" onclick="toggleCalMedicationAlcoholCompareBox()" aria-expanded="false">
-                    <span>💊 약물 복용기간 음주 비교<span id="calMedicationAlcoholToggleSub" class="cal-month-alcohol-toggle-sub">아캄프로세이트/날트렉손 복용기간과 비복용기간을 비교합니다.</span></span>
-                </button>
-                <div id="calMedicationAlcoholCompareContent" class="cal-month-alcohol-content">
-                    <div class="cal-med-compare-control">
-                        <label for="calMedicationNonMedStartDate">비복용기간 시작일</label>
-                        <input type="date" id="calMedicationNonMedStartDate" onchange="saveCalMedicationNonMedStartDateAndRender()">
-                        <div class="filter-desc">선택한 날짜부터 오늘까지를 분석 범위로 삼고, 그 안에서 약물 복용기간과 비복용기간을 나눠 비교합니다.</div>
+                <div id="calAlcoholChangeCompareContent" class="cal-alcohol-change-compare-content">
+                <div id="calMonthAlcoholCompareBox" class="cal-month-alcohol-box" data-collapsed="true">
+                    <button type="button" id="calMonthAlcoholToggleBtn" class="cal-month-alcohol-toggle" onclick="toggleCalMonthAlcoholCompareBox()" aria-expanded="false">
+                        <span>🍷 월간 음주량 비교<span id="calMonthAlcoholToggleSub" class="cal-month-alcohol-toggle-sub">펼쳐서 지난달과 이번달을 비교해 보세요.</span></span>
+                    </button>
+                    <div id="calMonthAlcoholCompareContent" class="cal-month-alcohol-content">
+                        <div id="calMonthAlcoholSummary" class="cal-month-alcohol-summary">음주량 추이를 계산 중입니다.</div>
+                        <div class="cal-month-alcohol-chart-title"><span>전체 음주량</span><span id="calMonthAlcoholTotalDeltaText"></span></div>
+                        <div class="cal-month-alcohol-chart-wrap"><canvas id="calMonthAlcoholTotalCompareChart"></canvas></div>
+                        <div class="cal-month-alcohol-chart-title"><span>평균 음주량</span><span id="calMonthAlcoholAverageDeltaText"></span></div>
+                        <div class="cal-month-alcohol-chart-wrap"><canvas id="calMonthAlcoholAverageCompareChart"></canvas></div>
+                        <button type="button" class="cal-weekly-trend-btn" onclick="openWeeklyAlcoholTrendModal()">📊 이번 달 음주량·음주 횟수 주차별 추이</button>
                     </div>
-                    <div id="calMedicationAlcoholSummary" class="cal-month-alcohol-summary">약물 복용기간 음주 비교를 계산 중입니다.</div>
-                    <div class="cal-month-alcohol-chart-title"><span>평균 음주량</span><span id="calMedicationAlcoholAverageDeltaText"></span></div>
-                    <div class="cal-month-alcohol-chart-wrap"><canvas id="calMedicationAlcoholAverageCompareChart"></canvas></div>
-                    <div class="cal-month-alcohol-chart-title"><span>주당 평균 음주횟수</span><span id="calMedicationAlcoholFrequencyDeltaText"></span></div>
-                    <div class="cal-month-alcohol-chart-wrap"><canvas id="calMedicationAlcoholFrequencyCompareChart"></canvas></div>
-                    <div id="calMedicationAlcoholPeriodDesc" class="cal-med-period-desc"></div>
+                </div>
+                <div id="calMonthToDateAlcoholCompareBox" class="cal-month-alcohol-box" data-collapsed="true">
+                    <button type="button" id="calMonthToDateAlcoholToggleBtn" class="cal-month-alcohol-toggle" onclick="toggleCalMonthToDateAlcoholCompareBox()" aria-expanded="false">
+                        <span>🍷 오늘 기준 동기간 음주량 비교<span id="calMonthToDateAlcoholToggleSub" class="cal-month-alcohol-toggle-sub">펼쳐서 지난달 같은 날짜까지와 이번달 오늘까지를 비교해 보세요.</span></span>
+                    </button>
+                    <div id="calMonthToDateAlcoholCompareContent" class="cal-month-alcohol-content">
+                        <div id="calMonthToDateAlcoholSummary" class="cal-month-alcohol-summary">오늘 기준 음주량 추이를 계산 중입니다.</div>
+                        <div class="cal-month-alcohol-chart-title"><span>동기간 전체 음주량</span><span id="calMonthToDateAlcoholTotalDeltaText"></span></div>
+                        <div class="cal-month-alcohol-chart-wrap"><canvas id="calMonthToDateAlcoholTotalCompareChart"></canvas></div>
+                        <div class="cal-month-alcohol-chart-title"><span>동기간 평균 음주량</span><span id="calMonthToDateAlcoholAverageDeltaText"></span></div>
+                        <div class="cal-month-alcohol-chart-wrap"><canvas id="calMonthToDateAlcoholAverageCompareChart"></canvas></div>
+                    </div>
+                </div>
+                <div id="calMedicationAlcoholCompareBox" class="cal-month-alcohol-box" data-collapsed="true">
+                    <button type="button" id="calMedicationAlcoholToggleBtn" class="cal-month-alcohol-toggle" onclick="toggleCalMedicationAlcoholCompareBox()" aria-expanded="false">
+                        <span>💊 약물 복용기간 음주 비교<span id="calMedicationAlcoholToggleSub" class="cal-month-alcohol-toggle-sub">아캄프로세이트/날트렉손 복용기간과 비복용기간을 비교합니다.</span></span>
+                    </button>
+                    <div id="calMedicationAlcoholCompareContent" class="cal-month-alcohol-content">
+                        <div class="cal-med-compare-control">
+                            <label for="calMedicationNonMedStartDate">비복용기간 시작일</label>
+                            <input type="date" id="calMedicationNonMedStartDate" onchange="saveCalMedicationNonMedStartDateAndRender()">
+                            <div class="filter-desc">선택한 날짜부터 오늘까지를 분석 범위로 삼고, 그 안에서 약물 복용기간과 비복용기간을 나눠 비교합니다.</div>
+                        </div>
+                        <div id="calMedicationAlcoholSummary" class="cal-month-alcohol-summary">약물 복용기간 음주 비교를 계산 중입니다.</div>
+                        <div class="cal-month-alcohol-chart-title"><span>평균 음주량</span><span id="calMedicationAlcoholAverageDeltaText"></span></div>
+                        <div class="cal-month-alcohol-chart-wrap"><canvas id="calMedicationAlcoholAverageCompareChart"></canvas></div>
+                        <div class="cal-month-alcohol-chart-title"><span>주당 평균 음주횟수</span><span id="calMedicationAlcoholFrequencyDeltaText"></span></div>
+                        <div class="cal-month-alcohol-chart-wrap"><canvas id="calMedicationAlcoholFrequencyCompareChart"></canvas></div>
+                        <div id="calMedicationAlcoholPeriodDesc" class="cal-med-period-desc"></div>
+                    </div>
+                </div>
                 </div>
             </div>
         </div>
@@ -3569,9 +3586,44 @@
         return `<span style="color:#64748b;">변화 없음</span>`;
     }
 
+    function isCalAlcoholChangeCompareExpanded() {
+        const box = document.getElementById('calAlcoholChangeCompareBox');
+        return box && box.getAttribute('data-collapsed') !== 'true';
+    }
+
+    function updateCalAlcoholChangeCompareToggleState() {
+        const box = document.getElementById('calAlcoholChangeCompareBox');
+        const button = document.getElementById('calAlcoholChangeCompareToggleBtn');
+        if (!box || !button) return;
+        const expanded = box.getAttribute('data-collapsed') !== 'true';
+        button.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    }
+
+    function setCalAlcoholChangeCompareCollapsed(collapsed = true) {
+        const box = document.getElementById('calAlcoholChangeCompareBox');
+        if (!box) return;
+        box.setAttribute('data-collapsed', collapsed ? 'true' : 'false');
+        updateCalAlcoholChangeCompareToggleState();
+    }
+
+    window.toggleCalAlcoholChangeCompareBox = function() {
+        const box = document.getElementById('calAlcoholChangeCompareBox');
+        if (!box) return;
+        const nextExpanded = box.getAttribute('data-collapsed') === 'true';
+        setCalAlcoholChangeCompareCollapsed(!nextExpanded);
+        if (nextExpanded) {
+            setTimeout(() => {
+                updateCalendarMonthAlcoholCompareUI(currentCalDate.getFullYear(), currentCalDate.getMonth());
+                updateCalendarMonthToDateAlcoholCompareUI();
+                initCalMedicationNonMedStartDate();
+                updateCalendarMedicationAlcoholCompareUI();
+            }, 60);
+        }
+    };
+
     function isCalMonthAlcoholCompareExpanded() {
         const box = document.getElementById('calMonthAlcoholCompareBox');
-        return box && box.getAttribute('data-collapsed') !== 'true';
+        return isCalAlcoholChangeCompareExpanded() && box && box.getAttribute('data-collapsed') !== 'true';
     }
 
     function updateCalMonthAlcoholToggleState() {
@@ -3717,7 +3769,7 @@
 
     function isCalMonthToDateAlcoholCompareExpanded() {
         const box = document.getElementById('calMonthToDateAlcoholCompareBox');
-        return box && box.getAttribute('data-collapsed') !== 'true';
+        return isCalAlcoholChangeCompareExpanded() && box && box.getAttribute('data-collapsed') !== 'true';
     }
 
     function updateCalMonthToDateAlcoholToggleState() {
@@ -3991,7 +4043,7 @@
 
     function isCalMedicationAlcoholCompareExpanded() {
         const box = document.getElementById('calMedicationAlcoholCompareBox');
-        return box && box.getAttribute('data-collapsed') !== 'true';
+        return isCalAlcoholChangeCompareExpanded() && box && box.getAttribute('data-collapsed') !== 'true';
     }
 
     function updateCalMedicationAlcoholToggleState() {
@@ -4222,6 +4274,7 @@
     window.openCalendarModal = async function(mode) {
         currentCalMode = mode;
         currentCalDate = new Date();
+        setCalAlcoholChangeCompareCollapsed(true);
         setCalMonthAlcoholCompareCollapsed(true);
         setCalMonthToDateAlcoholCompareCollapsed(true);
         setCalMedicationAlcoholCompareCollapsed(true);
