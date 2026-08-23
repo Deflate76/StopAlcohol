@@ -1,0 +1,724 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<title>PIK MAN — SPC-1500 리메이크</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #080d1b;
+    --panel: #111a31;
+    --line: #33466f;
+    --text: #f5f7ff;
+    --muted: #aebad5;
+    --accent: #ffe45f;
+    --danger: #ff6978;
+    --ok: #68f2c2;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; background: radial-gradient(circle at 50% 0%, #18274a 0%, var(--bg) 52%, #040711 100%); color: var(--text); font-family: "Courier New", monospace; }
+  body { display: flex; justify-content: center; padding: 12px; overscroll-behavior: none; }
+  .app { width: min(1100px, 100%); }
+  .titlebar { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px; }
+  .titlebar h1 { margin:0; font-size:clamp(18px,4vw,30px); letter-spacing:.08em; }
+  .badge { font-size:12px; color:var(--muted); border:1px solid var(--line); border-radius:999px; padding:5px 9px; white-space:nowrap; }
+  .screen-wrap { position:relative; width:100%; aspect-ratio:16 / 9; border:2px solid #50689c; border-radius:14px; overflow:hidden; background:#030610; box-shadow:0 18px 70px rgba(0,0,0,.45), inset 0 0 28px rgba(71,111,190,.25); }
+  canvas { width:100%; height:100%; display:block; image-rendering:pixelated; touch-action:none; }
+  .scanlines { pointer-events:none; position:absolute; inset:0; opacity:.16; background:repeating-linear-gradient(to bottom, rgba(255,255,255,.04), rgba(255,255,255,.04) 1px, transparent 1px, transparent 4px); mix-blend-mode:screen; }
+  .toolbar { display:flex; flex-wrap:wrap; gap:8px; margin:10px 0; }
+  button { font:inherit; color:var(--text); background:linear-gradient(#1d2a4a,#10172c); border:1px solid #4d6597; border-radius:10px; min-height:44px; padding:8px 12px; cursor:pointer; box-shadow:inset 0 1px rgba(255,255,255,.08); }
+  button:active { transform:translateY(1px); filter:brightness(1.2); }
+  button.primary { border-color:#d9c344; color:#fff6a4; }
+  button.secondary { border-color:#497b6f; color:#a8ffe3; }
+  button.danger { border-color:#8d4450; color:#ffb3bd; }
+  button[hidden] { display:none; }
+  .mobile-controls { display:grid; grid-template-columns:repeat(5, minmax(52px,1fr)); gap:8px; user-select:none; -webkit-user-select:none; }
+  .mobile-controls button { min-height:58px; font-size:22px; touch-action:none; }
+  .mobile-controls .fire { grid-column:span 2; color:#fff6a4; border-color:#c8a82f; }
+  .help { color:var(--muted); font-size:13px; line-height:1.55; margin:10px 2px 0; }
+  .shop { position:absolute; inset:5%; border:2px solid #6580b8; border-radius:14px; background:rgba(7,11,25,.97); padding:clamp(12px,2vw,22px); overflow:auto; display:none; z-index:4; box-shadow:0 20px 70px rgba(0,0,0,.7); }
+  .shop.open { display:block; }
+  .shop h2 { margin:0 0 8px; color:var(--accent); }
+  .shop-head { display:flex; justify-content:space-between; gap:10px; align-items:center; margin-bottom:10px; }
+  .shop-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+  .shop-item { text-align:left; min-height:82px; }
+  .shop-item strong { display:block; color:#fff; margin-bottom:4px; }
+  .shop-item small { display:block; color:var(--muted); line-height:1.35; }
+  .shop-item .cost { color:var(--accent); }
+  .shop-msg { min-height:24px; margin:9px 0 0; color:var(--ok); }
+  @media (max-width:720px) {
+    body { padding:6px; }
+    .badge { display:none; }
+    .shop { inset:2%; }
+    .shop-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .mobile-controls { grid-template-columns:repeat(5,1fr); }
+    .mobile-controls button { min-height:54px; padding:4px; }
+  }
+  @media (min-width:900px) and (hover:hover) {
+    .mobile-controls { max-width:720px; margin-inline:auto; }
+  }
+</style>
+</head>
+<body>
+<main class="app">
+  <div class="titlebar">
+    <h1>PIK MAN <span style="color:#ffe45f">픽맨</span></h1>
+    <span class="badge">SPC-1500(A) 1989 게임의 현대식 재구현</span>
+  </div>
+
+  <section class="screen-wrap" aria-label="게임 화면">
+    <canvas id="game" width="960" height="540"></canvas>
+    <div class="scanlines"></div>
+    <div id="shop" class="shop" aria-live="polite">
+      <div class="shop-head">
+        <h2>ITEM SHOP</h2>
+        <div>GOLD <strong id="shopGold">0</strong></div>
+      </div>
+      <div id="shopGrid" class="shop-grid"></div>
+      <div id="shopMsg" class="shop-msg"></div>
+      <button id="leaveShop" class="secondary">ENTER / 상점 나가기</button>
+    </div>
+  </section>
+
+  <div class="toolbar">
+    <button id="actionButton" class="primary">SPACE / 게임 시작</button>
+    <button id="shopButton" class="secondary" hidden>Y / 아이템 상점</button>
+    <button id="pauseButton">P / 일시정지</button>
+    <button id="soundButton">소리: 켬</button>
+    <button id="fullButton">전체화면</button>
+  </div>
+
+  <div class="mobile-controls" aria-label="터치 조작">
+    <button data-action="left" aria-label="왼쪽">◀</button>
+    <button data-action="up" aria-label="위">▲</button>
+    <button data-action="down" aria-label="아래">▼</button>
+    <button data-action="right" aria-label="오른쪽">▶</button>
+    <button data-action="fire" class="fire" aria-label="공격">FIRE</button>
+  </div>
+
+  <p class="help">키보드: 방향키 이동 · SPACE 공격 · P 일시정지 · M 소리 · R 제목 화면. 라운드 클리어 뒤 Y는 상점, N 또는 ENTER는 다음 라운드입니다. 휴대폰에서는 아래 터치 버튼을 사용하세요.</p>
+</main>
+
+<script>
+(() => {
+  'use strict';
+
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const actionButton = document.getElementById('actionButton');
+  const shopButton = document.getElementById('shopButton');
+  const pauseButton = document.getElementById('pauseButton');
+  const soundButton = document.getElementById('soundButton');
+  const fullButton = document.getElementById('fullButton');
+  const shopEl = document.getElementById('shop');
+  const shopGrid = document.getElementById('shopGrid');
+  const shopGold = document.getElementById('shopGold');
+  const shopMsg = document.getElementById('shopMsg');
+  const leaveShop = document.getElementById('leaveShop');
+
+  const W = 960;
+  const H = 540;
+  const FIELD = { left: 58, right: 735, top: 82, bottom: 486, cols: 26, lanes: 4 };
+  const CELL = (FIELD.right - FIELD.left) / (FIELD.cols - 1);
+  const laneY = [132, 233, 334, 435];
+
+  const palette = {
+    bg: '#050914', panel: '#0d1730', grid: '#26375e', wall: '#6075a8',
+    text: '#eef3ff', muted: '#9aacd0', player: '#ffe45f', player2: '#55d9ff',
+    enemy: '#ff6478', enemy2: '#ffb35c', shot: '#7fffe2', enemyShot: '#ff6f9c',
+    good: '#64f0bd', warning: '#ffd16a', bad: '#ff6c7d', white: '#ffffff'
+  };
+
+  const originalLikeData = [
+    [150,12,5,'*---',4], [150,12,5,'*<--------',10], [100,3,5,'*----',5],
+    [90,5,3,'-v-',2], [100,3,5,'*----',6], [60,2,2,'>>>>>>>',5],
+    [90,7,0,'>>>>>>>',5], [90,6,4,'<-------',7], [90,3,3,'o-------',7],
+    [90,5,0,'========',9], [100,8,0,'========',14], [100,1,0,'()()()',6],
+    [30,1,0,'()()()()',8], [20,1,0,'()()()()()',10], [100,3,0,'++++++++++',11],
+    [100,4,0,'############',15], [100,4,0,'<--------',7], [150,2,7,'<----------',7],
+    [200,1,0,'<---MMMMMM',10], [200,4,0,'<---MMMMMM',11], [20,1,0,'o------------',13],
+    [10,5,20,'o-------------',14], [15,1,20,'o--------------',15], [20,3,5,'o--------------',15],
+    [40,3,5,'================',15], [50,3,0,'ooooooooooooooooo',17],
+    [50,1,0,'ooooooooooo',11], [80,1,0,'MMMMMMMMMMMMM',13], [120,2,2,'MMMMMMMMMMMMM',13],
+    [150,2,2,'################',15], [150,1,2,'◆ ◆ ◆ ◆ ◆ ◆ ◆',15],
+    [150,4,0,'====================',20], [50,1,0,'================',16],
+    [50,3,5,'o------------------',20], [50,3,0,'====================',20],
+    [50,1,0,'M M M M M M M M M',19], [10,2,30,'M M M M M M M M M',19],
+    [10,3,20,'-------------------',21], [1000,1,0,'---------------------',21],
+    [500,1,0,'----------------------',22], [200,6,0,'----------------------',22],
+    [200,2,100,'-----------------------',23], [200,7,0,'#######################',23],
+    [200,1,0,'#######################',23], [100,3,0,'<><><><><><><><><><><>',24]
+  ];
+
+  const shopItems = [
+    { key:'1', name:'LONG SHOT', cost:5000, detail:'사거리 12칸', apply:g => { g.weaponRange = 12; g.weaponName = 'LONG'; g.weaponGlyph = '-------->'; } },
+    { key:'2', name:'M-BEAM', cost:10000, detail:'사거리 20칸', apply:g => { g.weaponRange = 20; g.weaponName = 'M-BEAM'; g.weaponGlyph = 'MMMMM---->'; } },
+    { key:'3', name:'SOLID BEAM', cost:3000, detail:'사거리 10칸', apply:g => { g.weaponRange = 10; g.weaponName = 'SOLID'; g.weaponGlyph = '========>'; } },
+    { key:'4', name:'PLASMA', cost:8000, detail:'사거리 17칸', apply:g => { g.weaponRange = 17; g.weaponName = 'PLASMA'; g.weaponGlyph = '~~~~~~~~>'; } },
+    { key:'5', name:'MAX RAY', cost:12000, detail:'사거리 22칸', apply:g => { g.weaponRange = 22; g.weaponName = 'MAX RAY'; g.weaponGlyph = 'MMMMM======>'; } },
+    { key:'6', name:'BONUS LIFE', cost:5000, detail:'목숨 +5', apply:g => { g.lives += 5; } },
+    { key:'7', name:'SPEED UP', cost:2000, detail:'좌우 이동 2칸', apply:g => { g.moveStep = 2; } },
+    { key:'8', name:'OMEGA', cost:30000, detail:'전 화면 사거리 26칸', apply:g => { g.weaponRange = 26; g.weaponName = 'OMEGA'; g.weaponGlyph = '[]================>'; } },
+    { key:'9', name:'ENEMY INFO', cost:2000, detail:'적 탄환·속도 정보 표시', apply:g => { g.intel = true; } }
+  ];
+
+  const game = {
+    state: 'title',
+    previousState: 'title',
+    round: 1,
+    score: 0,
+    gold: 1000,
+    lives: 5,
+    energy: 0,
+    killsRemaining: 4,
+    playerX: 0,
+    playerLane: 0,
+    moveStep: 1,
+    weaponRange: 2,
+    weaponName: 'NORMAL',
+    weaponGlyph: '-->',
+    intel: false,
+    enemies: [],
+    moveClock: 0,
+    moveCursor: 0,
+    playerBeam: null,
+    enemyBeams: [],
+    explosions: [],
+    flashText: '',
+    flashUntil: 0,
+    invulnerableUntil: 0,
+    attackReadyAt: 0,
+    sound: true,
+    cfg: null,
+    roundStartEnergy: 0,
+    lastTime: performance.now(),
+    titleStars: Array.from({length:120}, () => ({x:Math.random()*W,y:Math.random()*H,s:Math.random()*2+0.5,a:Math.random()*0.6+0.25}))
+  };
+
+  let audioContext = null;
+  function tone(freq = 440, duration = 0.06, type = 'square', volume = 0.035) {
+    if (!game.sound) return;
+    try {
+      audioContext ??= new (window.AudioContext || window.webkitAudioContext)();
+      if (audioContext.state === 'suspended') audioContext.resume();
+      const osc = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+      osc.type = type;
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(volume, audioContext.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + duration);
+      osc.connect(gain).connect(audioContext.destination);
+      osc.start();
+      osc.stop(audioContext.currentTime + duration);
+    } catch (_) { /* 오디오를 지원하지 않는 브라우저에서는 조용히 진행 */ }
+  }
+
+  function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+  function cellX(col) { return FIELD.left + col * CELL; }
+  function nowMs() { return performance.now(); }
+
+  function roundConfig(round) {
+    const base = originalLikeData[(round - 1) % originalLikeData.length];
+    const cycle = Math.floor((round - 1) / originalLikeData.length);
+    const energy = Math.max(10, base[0] - cycle * 8);
+    const fireDenom = Math.max(1, base[1] - Math.floor(cycle / 2));
+    const ti = Math.max(0, base[2] - cycle);
+    const range = clamp(base[4] + cycle, 2, 25);
+    return {
+      energy,
+      fireDenom,
+      ti,
+      bulletGlyph: base[3],
+      bulletRange: range,
+      moveInterval: clamp(0.13 + ti * 0.045 - cycle * 0.012, 0.12, 1.55),
+      fireInterval: clamp(0.36 + fireDenom * 0.16 - cycle * 0.03, 0.34, 3.2)
+    };
+  }
+
+  function setFlash(text, ms = 1000) {
+    game.flashText = text;
+    game.flashUntil = nowMs() + ms;
+  }
+
+  function newGame() {
+    Object.assign(game, {
+      state: 'playing', round: 1, score: 0, gold: 1000, lives: 5,
+      playerX: 0, playerLane: 0, moveStep: 1, weaponRange: 2,
+      weaponName: 'NORMAL', weaponGlyph: '-->', intel: false,
+      invulnerableUntil: 0, attackReadyAt: 0
+    });
+    closeShop(false);
+    startRound();
+    tone(520, .08); setTimeout(() => tone(760, .08), 90);
+    updateButtons();
+  }
+
+  function startRound() {
+    game.cfg = roundConfig(game.round);
+    game.energy = game.cfg.energy;
+    game.roundStartEnergy = game.energy;
+    game.killsRemaining = 4;
+    game.playerX = 0;
+    game.playerLane = 0;
+    game.moveClock = 0;
+    game.moveCursor = 0;
+    game.playerBeam = null;
+    game.enemyBeams = [];
+    game.explosions = [];
+    game.enemies = laneY.map((_, i) => ({ lane:i, x:25, alive:true, fireClock:0.4 + Math.random() * game.cfg.fireInterval }));
+    game.state = 'playing';
+    if (game.intel) {
+      setFlash(`ROUND ${game.round}  적 탄환 ${game.cfg.bulletRange}칸 / 이동 ${game.cfg.moveInterval.toFixed(2)}초`, 1800);
+    } else {
+      setFlash(`ROUND ${game.round}`, 950);
+    }
+    updateButtons();
+  }
+
+  function resetActiveEnemies() {
+    game.playerX = 0;
+    game.playerLane = 0;
+    game.enemies.forEach((e, i) => {
+      if (e.alive) {
+        e.x = 25;
+        e.fireClock = 0.7 + Math.random() * game.cfg.fireInterval;
+      }
+    });
+    game.enemyBeams.length = 0;
+    game.playerBeam = null;
+  }
+
+  function loseLife(reason) {
+    const t = nowMs();
+    if (t < game.invulnerableUntil || game.state !== 'playing') return;
+    game.lives -= 1;
+    game.invulnerableUntil = t + 1200;
+    setFlash(reason, 1000);
+    tone(110, .28, 'sawtooth', .055);
+    if (game.lives <= 0) {
+      game.state = 'gameOver';
+      updateButtons();
+      return;
+    }
+    resetActiveEnemies();
+  }
+
+  function finishRound() {
+    if (game.state !== 'playing') return;
+    const bonus = Math.max(0, game.energy) * 10;
+    game.gold += bonus;
+    game.state = game.round >= 99 ? 'victory' : 'roundClear';
+    game.playerBeam = null;
+    game.enemyBeams.length = 0;
+    setFlash(`남은 에너지 보너스 +${bonus} GOLD`, 2200);
+    tone(660, .08); setTimeout(() => tone(880, .08), 100); setTimeout(() => tone(1100, .12), 205);
+    updateButtons();
+  }
+
+  function nextRound() {
+    if (game.round >= 99) {
+      returnToTitle();
+      return;
+    }
+    game.round += 1;
+    startRound();
+  }
+
+  function continueGame() {
+    game.lives = 5;
+    game.energy = game.cfg.energy;
+    game.killsRemaining = 4;
+    game.enemies.forEach((e, i) => { e.alive = true; e.x = 25; e.fireClock = 0.5 + Math.random() * game.cfg.fireInterval; });
+    game.state = 'playing';
+    game.invulnerableUntil = nowMs() + 800;
+    resetActiveEnemies();
+    setFlash(`ROUND ${game.round} CONTINUE`, 1100);
+    updateButtons();
+  }
+
+  function returnToTitle() {
+    game.state = 'title';
+    closeShop(false);
+    updateButtons();
+  }
+
+  function movePlayer(dx, dy) {
+    if (game.state !== 'playing') return;
+    if (dy !== 0) game.playerLane = clamp(game.playerLane + dy, 0, 3);
+    if (dx !== 0) game.playerX = clamp(game.playerX + dx * game.moveStep, 0, 23);
+    const collision = game.enemies.some(e => e.alive && e.lane === game.playerLane && e.x <= game.playerX + .35);
+    if (collision) loseLife('적과 충돌했습니다');
+    else tone(180 + game.playerLane * 30, .025, 'square', .012);
+  }
+
+  function attack() {
+    const t = nowMs();
+    if (game.state !== 'playing' || t < game.attackReadyAt) return;
+    game.attackReadyAt = t + 145;
+    if (game.energy > 0) game.energy -= 1;
+    const end = Math.min(25.6, game.playerX + game.weaponRange);
+    game.playerBeam = { lane:game.playerLane, start:game.playerX + .55, end, until:t + 105 };
+    tone(380 + game.weaponRange * 13, .055, game.weaponRange >= 20 ? 'sawtooth' : 'square', .025);
+
+    let target = null;
+    for (const e of game.enemies) {
+      if (e.alive && e.lane === game.playerLane && e.x >= game.playerX && e.x <= end + .35) {
+        if (!target || e.x < target.x) target = e;
+      }
+    }
+    if (target) {
+      target.alive = false;
+      game.killsRemaining -= 1;
+      game.score += 100;
+      game.explosions.push({x:target.x,lane:target.lane,until:t+430});
+      tone(940, .07, 'square', .04);
+      if (game.killsRemaining <= 0) setTimeout(finishRound, 180);
+    }
+  }
+
+  function enemyFire(enemy) {
+    if (!enemy.alive || game.state !== 'playing') return;
+    const t = nowMs();
+    const end = Math.max(0, enemy.x - game.cfg.bulletRange);
+    game.enemyBeams.push({ lane:enemy.lane, start:enemy.x-.4, end, until:t+150, glyph:game.cfg.bulletGlyph });
+    tone(145 + enemy.lane * 22, .065, 'square', .02);
+    if (enemy.lane === game.playerLane && game.playerX >= end - .2 && game.playerX <= enemy.x + .2) {
+      loseLife('적의 탄환에 맞았습니다');
+    }
+  }
+
+  function update(dt) {
+    if (game.state !== 'playing') return;
+    const t = nowMs();
+    game.moveClock += dt;
+    if (game.moveClock >= game.cfg.moveInterval) {
+      game.moveClock -= game.cfg.moveInterval;
+      const alive = game.enemies.filter(e => e.alive);
+      if (alive.length) {
+        game.moveCursor %= alive.length;
+        const e = alive[game.moveCursor++];
+        e.x -= 1;
+        if (e.x <= .75) {
+          loseLife('적이 방어선을 돌파했습니다');
+        } else if (e.lane === game.playerLane && e.x <= game.playerX + .35) {
+          loseLife('적과 충돌했습니다');
+        }
+      }
+    }
+
+    for (const e of game.enemies) {
+      if (!e.alive) continue;
+      e.fireClock -= dt;
+      if (e.fireClock <= 0) {
+        e.fireClock = game.cfg.fireInterval * (0.65 + Math.random() * .85);
+        if (Math.random() < Math.min(.92, 1.65 / Math.max(1, game.cfg.fireDenom))) enemyFire(e);
+      }
+    }
+
+    game.enemyBeams = game.enemyBeams.filter(b => b.until > t);
+    game.explosions = game.explosions.filter(e => e.until > t);
+    if (game.playerBeam && game.playerBeam.until <= t) game.playerBeam = null;
+  }
+
+  function drawText(text, x, y, size=18, color=palette.text, align='left', weight='normal') {
+    ctx.save();
+    ctx.font = `${weight} ${size}px "Courier New", monospace`;
+    ctx.fillStyle = color;
+    ctx.textAlign = align;
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, x, y);
+    ctx.restore();
+  }
+
+  function drawBackground() {
+    ctx.fillStyle = palette.bg;
+    ctx.fillRect(0,0,W,H);
+    for (const s of game.titleStars) {
+      ctx.globalAlpha = s.a;
+      ctx.fillStyle = '#dbe8ff';
+      ctx.fillRect(s.x,s.y,s.s,s.s);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function drawField() {
+    ctx.fillStyle = 'rgba(9,18,40,.94)';
+    ctx.fillRect(FIELD.left-18, FIELD.top-28, FIELD.right-FIELD.left+36, FIELD.bottom-FIELD.top+56);
+    ctx.strokeStyle = palette.wall;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(FIELD.left-18, FIELD.top-28, FIELD.right-FIELD.left+36, FIELD.bottom-FIELD.top+56);
+
+    ctx.strokeStyle = palette.grid;
+    ctx.lineWidth = 1;
+    for (let c=0;c<FIELD.cols;c++) {
+      const x=cellX(c);
+      ctx.beginPath(); ctx.moveTo(x,FIELD.top-15); ctx.lineTo(x,FIELD.bottom+15); ctx.stroke();
+    }
+    for (let i=0;i<3;i++) {
+      const y=(laneY[i]+laneY[i+1])/2;
+      ctx.strokeStyle = palette.wall;
+      ctx.setLineDash([5,7]);
+      ctx.beginPath(); ctx.moveTo(FIELD.left-8,y); ctx.lineTo(FIELD.right+8,y); ctx.stroke();
+      ctx.setLineDash([]);
+      drawText('* * * * * * * * * * * * * * * * * * * * * * *', FIELD.left, y-6, 12, '#526b9e');
+    }
+    drawText('방어선', FIELD.left-6, FIELD.top-40, 13, palette.muted);
+    drawText('POK 기지', FIELD.right+6, FIELD.top-40, 13, palette.enemy2, 'right');
+  }
+
+  function drawPlayer() {
+    const x=cellX(game.playerX), y=laneY[game.playerLane];
+    const blink = nowMs() < game.invulnerableUntil && Math.floor(nowMs()/90)%2===0;
+    if (blink) return;
+    ctx.save(); ctx.translate(x,y);
+    ctx.strokeStyle=palette.player2; ctx.fillStyle=palette.player; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.ellipse(-5,-18,4,12,-.3,0,Math.PI*2); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(4,-19,4,13,.25,0,Math.PI*2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle=palette.player2; ctx.fillRect(-9,-8,18,18);
+    ctx.strokeRect(-9,-8,18,18);
+    ctx.fillStyle='#07111f'; ctx.fillRect(-4,-4,3,3); ctx.fillRect(3,-4,3,3);
+    ctx.strokeStyle=palette.player; ctx.beginPath(); ctx.moveTo(-5,11);ctx.lineTo(-9,18);ctx.moveTo(5,11);ctx.lineTo(9,18);ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawEnemy(e) {
+    if (!e.alive) return;
+    const x=cellX(e.x), y=laneY[e.lane];
+    ctx.save(); ctx.translate(x,y);
+    ctx.fillStyle=palette.enemy; ctx.strokeStyle=palette.enemy2; ctx.lineWidth=2;
+    ctx.fillRect(-10,-11,20,22); ctx.strokeRect(-10,-11,20,22);
+    ctx.fillStyle=palette.enemy2; ctx.fillRect(-7,-5,4,4); ctx.fillRect(3,-5,4,4);
+    ctx.strokeStyle=palette.enemy; ctx.beginPath(); ctx.moveTo(-7,12);ctx.lineTo(-12,18);ctx.moveTo(7,12);ctx.lineTo(12,18);ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawBeams() {
+    if (game.playerBeam) {
+      const b=game.playerBeam, y=laneY[b.lane];
+      ctx.strokeStyle=palette.shot; ctx.lineWidth=5; ctx.shadowBlur=12; ctx.shadowColor=palette.shot;
+      ctx.beginPath(); ctx.moveTo(cellX(b.start),y); ctx.lineTo(cellX(b.end),y); ctx.stroke();
+      ctx.shadowBlur=0;
+      drawText(game.weaponGlyph, cellX((b.start+b.end)/2), y-12, 13, palette.shot, 'center');
+    }
+    for (const b of game.enemyBeams) {
+      const y=laneY[b.lane];
+      ctx.strokeStyle=palette.enemyShot; ctx.lineWidth=4; ctx.shadowBlur=10; ctx.shadowColor=palette.enemyShot;
+      ctx.beginPath(); ctx.moveTo(cellX(b.start),y); ctx.lineTo(cellX(b.end),y); ctx.stroke();
+      ctx.shadowBlur=0;
+      const glyph = (b.glyph || '<').slice(0,18);
+      drawText(glyph, cellX((b.start+b.end)/2), y+13, 12, palette.enemyShot, 'center');
+    }
+  }
+
+  function drawExplosions() {
+    const t=nowMs();
+    for (const e of game.explosions) {
+      const p=1-(e.until-t)/430;
+      const x=cellX(e.x), y=laneY[e.lane];
+      ctx.strokeStyle=p<.5?palette.warning:palette.bad;
+      ctx.lineWidth=3;
+      for(let i=0;i<8;i++){
+        const a=i*Math.PI/4;
+        ctx.beginPath();ctx.moveTo(x+Math.cos(a)*5,y+Math.sin(a)*5);ctx.lineTo(x+Math.cos(a)*(12+p*18),y+Math.sin(a)*(12+p*18));ctx.stroke();
+      }
+    }
+  }
+
+  function drawHud() {
+    const x=765;
+    ctx.fillStyle='rgba(13,23,48,.96)'; ctx.fillRect(750,54,190,432);
+    ctx.strokeStyle=palette.wall; ctx.strokeRect(750,54,190,432);
+    drawText('SPC-1500', x+80, 76, 21, palette.player, 'center','bold');
+    const rows=[
+      ['SCORE',game.score], ['PLAYER',game.lives], ['ENERGY',game.energy],
+      ['ROUND',`${game.round}/99`], ['GOLD',game.gold], ['WEAPON',game.weaponName],
+      ['RANGE',game.weaponRange], ['TARGET',game.killsRemaining]
+    ];
+    let y=116;
+    for(const [label,value] of rows){
+      drawText(label,x,y,13,palette.muted);
+      drawText(String(value),925,y,17,label==='PLAYER'&&game.lives<=1?palette.bad:palette.text,'right','bold');
+      y+=39;
+    }
+    if(game.intel&&game.cfg){
+      drawText('ENEMY INFO',x,435,13,palette.good,'left','bold');
+      drawText(`SHOT ${game.cfg.bulletRange}`,x,456,13,palette.muted);
+      drawText(`MOVE ${game.cfg.moveInterval.toFixed(2)}s`,x,475,13,palette.muted);
+    }
+  }
+
+  function drawOverlay(title, lines, accent=palette.player) {
+    ctx.fillStyle='rgba(2,5,13,.78)'; ctx.fillRect(70,95,820,350);
+    ctx.strokeStyle=accent; ctx.lineWidth=2; ctx.strokeRect(70,95,820,350);
+    drawText(title,480,150,38,accent,'center','bold');
+    let y=210;
+    for(const line of lines){ drawText(line,480,y,18,line.startsWith('>')?palette.good:palette.text,'center'); y+=38; }
+  }
+
+  function drawTitle() {
+    drawBackground();
+    ctx.fillStyle='rgba(4,9,22,.70)'; ctx.fillRect(55,55,850,430);
+    ctx.strokeStyle=palette.wall; ctx.lineWidth=2; ctx.strokeRect(55,55,850,430);
+    drawText('PIK MAN',480,120,58,palette.player,'center','bold');
+    drawText('픽맨의 우주 대작전',480,169,25,palette.player2,'center','bold');
+    drawText('POK 군단의 기지에서 잃어버린 컴퓨터 자료를 되찾아라.',480,230,18,palette.text,'center');
+    drawText('4개 층을 오가며 적을 쓰러뜨리고, 남은 에너지를 GOLD로 바꿔',480,268,17,palette.muted,'center');
+    drawText('강력한 아이템을 구입하는 1989년식 액션 게임입니다.',480,301,17,palette.muted,'center');
+    drawText('이동: 방향키   공격: SPACE',480,360,21,palette.good,'center','bold');
+    drawText('SPACE 또는 아래 게임 시작 버튼',480,411,20,palette.player,'center','bold');
+    drawText('현대 브라우저용 재구현 · 원본 전용 명령(POKE/INIT/PLAY)은 Canvas/WebAudio로 대체',480,463,12,palette.muted,'center');
+  }
+
+  function drawGame() {
+    drawBackground(); drawField();
+    for(const e of game.enemies) drawEnemy(e);
+    drawPlayer(); drawBeams(); drawExplosions(); drawHud();
+    if (game.state === 'paused') drawOverlay('PAUSE',['P 또는 버튼을 눌러 계속합니다.'],palette.player2);
+    if (game.state === 'roundClear') {
+      const bonus=Math.max(0,game.energy)*10;
+      drawOverlay(`ROUND ${game.round} CLEAR!`,[`남은 에너지 ${game.energy} × 10 = ${bonus} GOLD`,`Y: 아이템 상점   N/ENTER: 다음 라운드`],palette.good);
+    }
+    if (game.state === 'gameOver') drawOverlay('GAME OVER',[`SCORE ${game.score}   ROUND ${game.round}`,'Y: 같은 라운드에서 계속   N: 제목 화면'],palette.bad);
+    if (game.state === 'victory') drawOverlay('MISSION COMPLETE!',[`99 ROUND 정복 · SCORE ${game.score}`,`GOLD ${game.gold}`,'ENTER: 제목 화면'],palette.player);
+    if (game.flashText && game.flashUntil > nowMs()) {
+      ctx.fillStyle='rgba(0,0,0,.75)'; ctx.fillRect(150,18,660,38);
+      drawText(game.flashText,480,37,16,palette.warning,'center','bold');
+    }
+  }
+
+  function render() {
+    if (game.state === 'title') drawTitle(); else drawGame();
+  }
+
+  function frame(ts) {
+    const dt=Math.min(.05,(ts-game.lastTime)/1000 || 0);
+    game.lastTime=ts;
+    if(game.state==='playing') update(dt);
+    render();
+    requestAnimationFrame(frame);
+  }
+
+  function updateButtons() {
+    shopButton.hidden = game.state !== 'roundClear';
+    pauseButton.textContent = game.state === 'paused' ? 'P / 계속' : 'P / 일시정지';
+    const map={
+      title:'SPACE / 게임 시작', playing:'SPACE / 공격', paused:'P / 계속',
+      roundClear:'N / 다음 라운드', shop:'ENTER / 상점 나가기',
+      gameOver:'Y / 계속하기', victory:'ENTER / 제목 화면'
+    };
+    actionButton.textContent=map[game.state] || '진행';
+  }
+
+  function togglePause() {
+    if (game.state === 'playing') { game.previousState='playing'; game.state='paused'; }
+    else if (game.state === 'paused') game.state='playing';
+    updateButtons();
+  }
+
+  function openShop() {
+    if (game.state !== 'roundClear') return;
+    game.state='shop';
+    shopEl.classList.add('open');
+    shopGold.textContent=game.gold;
+    shopMsg.textContent='숫자키 또는 항목을 눌러 구입하세요.';
+    updateButtons();
+  }
+
+  function closeShop(goNext=true) {
+    shopEl.classList.remove('open');
+    shopMsg.textContent='';
+    if(goNext && game.state==='shop') nextRound();
+  }
+
+  function buyItem(index) {
+    if(game.state!=='shop') return;
+    const item=shopItems[index];
+    if(!item) return;
+    if(game.gold < item.cost){
+      shopMsg.textContent=`GOLD가 부족합니다. ${item.cost-game.gold} 더 필요합니다.`;
+      shopMsg.style.color=palette.bad;
+      tone(90,.13,'square',.03);
+      return;
+    }
+    game.gold-=item.cost;
+    item.apply(game);
+    shopGold.textContent=game.gold;
+    shopMsg.textContent=`${item.name} 구입 완료!`;
+    shopMsg.style.color=palette.good;
+    tone(720,.06); setTimeout(()=>tone(980,.08),70);
+  }
+
+  function buildShop() {
+    shopGrid.innerHTML='';
+    shopItems.forEach((item,i)=>{
+      const b=document.createElement('button');
+      b.className='shop-item';
+      b.innerHTML=`<strong>${item.key}. ${item.name}</strong><small>${item.detail}</small><small class="cost">GD ${item.cost.toLocaleString()}</small>`;
+      b.addEventListener('click',()=>buyItem(i));
+      shopGrid.appendChild(b);
+    });
+  }
+
+  function mainAction() {
+    switch(game.state){
+      case 'title': newGame(); break;
+      case 'playing': attack(); break;
+      case 'paused': togglePause(); break;
+      case 'roundClear': nextRound(); break;
+      case 'shop': closeShop(true); break;
+      case 'gameOver': continueGame(); break;
+      case 'victory': returnToTitle(); break;
+    }
+  }
+
+  function handleAction(action) {
+    if(action==='left') movePlayer(-1,0);
+    else if(action==='right') movePlayer(1,0);
+    else if(action==='up') movePlayer(0,-1);
+    else if(action==='down') movePlayer(0,1);
+    else if(action==='fire') mainAction();
+  }
+
+  window.addEventListener('keydown',e=>{
+    const key=e.key;
+    if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' '].includes(key)) e.preventDefault();
+    if(game.state==='shop'){
+      if(/^[1-9]$/.test(key)) buyItem(Number(key)-1);
+      else if(key==='Enter'||key==='Escape'||key.toLowerCase()==='n') closeShop(true);
+      return;
+    }
+    if(key==='ArrowLeft') movePlayer(-1,0);
+    else if(key==='ArrowRight') movePlayer(1,0);
+    else if(key==='ArrowUp') movePlayer(0,-1);
+    else if(key==='ArrowDown') movePlayer(0,1);
+    else if(key===' '||key==='Enter') mainAction();
+    else if(key.toLowerCase()==='p') togglePause();
+    else if(key.toLowerCase()==='m') { game.sound=!game.sound; soundButton.textContent=`소리: ${game.sound?'켬':'끔'}`; }
+    else if(key.toLowerCase()==='r') returnToTitle();
+    else if(game.state==='roundClear'&&key.toLowerCase()==='y') openShop();
+    else if(game.state==='roundClear'&&key.toLowerCase()==='n') nextRound();
+    else if(game.state==='gameOver'&&key.toLowerCase()==='y') continueGame();
+    else if(game.state==='gameOver'&&key.toLowerCase()==='n') returnToTitle();
+  },{passive:false});
+
+  document.querySelectorAll('[data-action]').forEach(btn=>{
+    btn.addEventListener('pointerdown',e=>{e.preventDefault();handleAction(btn.dataset.action);});
+  });
+  actionButton.addEventListener('click',mainAction);
+  shopButton.addEventListener('click',openShop);
+  pauseButton.addEventListener('click',togglePause);
+  soundButton.addEventListener('click',()=>{game.sound=!game.sound;soundButton.textContent=`소리: ${game.sound?'켬':'끔'}`;});
+  fullButton.addEventListener('click',async()=>{
+    try {
+      if(!document.fullscreenElement) await document.querySelector('.screen-wrap').requestFullscreen();
+      else await document.exitFullscreen();
+    } catch(_) { setFlash('이 브라우저에서는 전체화면을 사용할 수 없습니다.',1200); }
+  });
+  leaveShop.addEventListener('click',()=>closeShop(true));
+
+  buildShop(); updateButtons(); requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
