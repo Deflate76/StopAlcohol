@@ -65,6 +65,9 @@
         .dependency-btn, .header-nav-btn { background: #fff; border: 1px solid var(--primary-color); color: var(--primary-color); padding: 7px 8px; border-radius: 9px; font-weight: 900; cursor: pointer; font-size: 0.78rem; white-space: nowrap; }
         .daily-english-btn { border-color: #14b8a6; color: #0f766e; background: linear-gradient(135deg, #ffffff, #f0fdfa); }
         .dementia-check-btn { border-color: #f97316; color: #c2410c; background: linear-gradient(135deg, #ffffff, #fff7ed); }
+        .fun-game-btn { border-color: #8b5cf6; color: #6d28d9; background: linear-gradient(135deg, #ffffff, #f5f3ff); box-shadow: 0 3px 9px rgba(109, 40, 217, 0.08); }
+        .header-actions .fun-game-btn { flex: 1 0 calc(100% - 92px); min-width: calc(100% - 92px); }
+        .header-actions .logout-btn { flex: 0 0 86px; min-width: 86px; }
         .dependency-btn:active, .logout-btn:active, .header-nav-btn:active { transform: scale(0.98); }
 
         /* 타이머 & 차트 */
@@ -408,9 +411,187 @@
             min-width: 0;
         }
 
+
+        /* 메인 섹션 일괄 제어 */
+        details.main-section { scroll-margin-top: 18px; }
+        .section-bulk-toolbar {
+            align-items: center;
+            background: linear-gradient(135deg, #f8fafc, #ffffff);
+            border: 1px solid #dbe3ee;
+            border-radius: 14px;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+            justify-content: flex-end;
+            margin: 4px 0 10px;
+            padding: 9px 10px;
+            position: sticky;
+            top: 6px;
+            z-index: 40;
+        }
+        .section-bulk-title {
+            color: #475569;
+            flex: 1 1 145px;
+            font-size: 0.76rem;
+            font-weight: 900;
+            text-align: left;
+            white-space: nowrap;
+        }
+        .section-bulk-state { color: var(--primary-color); }
+        .section-bulk-btn {
+            appearance: none;
+            background: #fff;
+            border: 1px solid #cbd5e0;
+            border-radius: 999px;
+            color: #475569;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.74rem;
+            font-weight: 900;
+            padding: 7px 10px;
+            transition: transform 0.18s ease, border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+            white-space: nowrap;
+        }
+        .section-bulk-btn:hover { border-color: var(--primary-color); color: var(--primary-color); box-shadow: 0 4px 10px rgba(52, 152, 219, 0.12); }
+        .section-bulk-btn:active { transform: scale(0.97); }
+        .section-bulk-btn[aria-pressed="true"] { background: #eff6ff; border-color: #60a5fa; color: #1d4ed8; }
+
+        /* 긴 화면용 플로팅 빠른 이동 메뉴 */
+        .page-scroll-anchor { height: 0; pointer-events: none; position: relative; width: 100%; }
+        .floating-quick-nav {
+            --nav-progress: 0%;
+            align-items: flex-end;
+            bottom: calc(18px + env(safe-area-inset-bottom));
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            position: fixed;
+            right: calc(14px + env(safe-area-inset-right));
+            z-index: 1500;
+        }
+        .floating-quick-nav.is-visible { display: flex; }
+        .floating-nav-menu {
+            background: rgba(255, 255, 255, 0.98);
+            border: 1px solid #dbe3ee;
+            border-radius: 20px;
+            box-shadow: 0 18px 48px rgba(15, 23, 42, 0.22);
+            box-sizing: border-box;
+            max-height: min(72vh, 560px);
+            opacity: 0;
+            overflow-y: auto;
+            padding: 14px;
+            pointer-events: none;
+            transform: translateY(12px) scale(0.97);
+            transform-origin: bottom right;
+            transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+            visibility: hidden;
+            width: min(318px, calc(100vw - 28px));
+        }
+        .floating-quick-nav.is-open .floating-nav-menu {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0) scale(1);
+            visibility: visible;
+        }
+        .floating-nav-menu-head { align-items: center; display: flex; justify-content: space-between; margin-bottom: 8px; }
+        .floating-nav-menu-title { color: var(--text-dark); font-size: 0.9rem; font-weight: 950; letter-spacing: 0.02em; }
+        .floating-nav-progress-text { color: var(--primary-color); font-size: 0.75rem; font-weight: 950; }
+        .floating-nav-progress-track { background: #e2e8f0; border-radius: 999px; height: 6px; margin-bottom: 12px; overflow: hidden; }
+        .floating-nav-progress-fill { background: linear-gradient(90deg, #3498db, #8b5cf6); height: 100%; transition: width 0.15s linear; width: 0%; }
+        .floating-nav-items { display: grid; gap: 6px; }
+        .floating-nav-item {
+            align-items: center;
+            appearance: none;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            color: #334155;
+            cursor: pointer;
+            display: flex;
+            font-family: inherit;
+            font-size: 0.82rem;
+            font-weight: 900;
+            gap: 9px;
+            justify-content: flex-start;
+            padding: 10px 11px;
+            text-align: left;
+            transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+            width: 100%;
+        }
+        .floating-nav-item:hover { background: #f8fbff; border-color: #93c5fd; color: #1d4ed8; transform: translateX(-2px); }
+        .floating-nav-item.is-active { background: #eff6ff; border-color: #60a5fa; color: #1d4ed8; }
+        .floating-nav-number {
+            align-items: center;
+            background: #eff6ff;
+            border-radius: 999px;
+            color: #2563eb;
+            display: inline-flex;
+            flex: 0 0 28px;
+            font-size: 0.68rem;
+            height: 22px;
+            justify-content: center;
+        }
+        .floating-nav-item.game-link { background: linear-gradient(135deg, #ffffff, #f5f3ff); border-color: #c4b5fd; color: #6d28d9; }
+        .floating-nav-divider { border-top: 1px dashed #cbd5e0; margin: 10px 0; }
+        .floating-nav-actions { display: grid; gap: 7px; grid-template-columns: 1fr 1fr; }
+        .floating-nav-action {
+            appearance: none;
+            background: #f8fafc;
+            border: 1px solid #cbd5e0;
+            border-radius: 11px;
+            color: #475569;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.76rem;
+            font-weight: 900;
+            padding: 9px 7px;
+        }
+        .floating-nav-action:active { transform: scale(0.97); }
+        .floating-nav-toggle {
+            appearance: none;
+            background: conic-gradient(var(--primary-color) var(--nav-progress), #dbeafe 0);
+            border: none;
+            border-radius: 50%;
+            box-shadow: 0 12px 28px rgba(30, 64, 175, 0.28);
+            cursor: pointer;
+            height: 62px;
+            padding: 3px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            width: 62px;
+        }
+        .floating-nav-toggle:hover { box-shadow: 0 15px 34px rgba(30, 64, 175, 0.36); transform: translateY(-2px); }
+        .floating-nav-toggle:active { transform: scale(0.96); }
+        .floating-nav-toggle-inner {
+            align-items: center;
+            background: linear-gradient(145deg, #1e3a8a, #2563eb);
+            border: 2px solid rgba(255,255,255,0.86);
+            border-radius: 50%;
+            box-sizing: border-box;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            justify-content: center;
+            line-height: 1;
+            width: 100%;
+        }
+        .floating-nav-toggle-number { font-size: 0.88rem; font-weight: 950; letter-spacing: 0.04em; }
+        .floating-nav-toggle-label { font-size: 0.62rem; font-weight: 900; margin-top: 4px; }
+        .floating-quick-nav.is-open .floating-nav-toggle-inner { background: linear-gradient(145deg, #475569, #1e293b); }
+
+        @media (max-width: 420px) {
+            .section-bulk-toolbar { position: static; }
+            .section-bulk-title { flex-basis: 100%; text-align: center; }
+            .section-bulk-btn { flex: 1 1 0; }
+            .floating-quick-nav { bottom: calc(12px + env(safe-area-inset-bottom)); right: calc(10px + env(safe-area-inset-right)); }
+            .floating-nav-toggle { height: 58px; width: 58px; }
+        }
+
     </style>
 </head>
 <body>
+<div id="pageTopAnchor" class="page-scroll-anchor" aria-hidden="true"></div>
 
 <div class="container">
     <h1>🚫 금주 서바이벌 리포트</h1>
@@ -441,6 +622,7 @@
                 <button class="dependency-btn" onclick="goToDependencyCheck()">의존성검사</button>
                 <button class="header-nav-btn daily-english-btn" onclick="goToDailyEnglish()">일일영어</button>
                 <button class="header-nav-btn dementia-check-btn" onclick="goToDementiaCheck()">치매검사</button>
+                <button class="header-nav-btn fun-game-btn" onclick="goToFunGame()">🎮 즐거운 게임</button>
                 <button class="logout-btn" onclick="logout()">로그아웃</button>
             </div>
         </div>
@@ -477,8 +659,16 @@
                 <button class="dependency-btn" onclick="goToDependencyCheck()">의존성검사</button>
                 <button class="header-nav-btn daily-english-btn" onclick="goToDailyEnglish()">일일영어</button>
                 <button class="header-nav-btn dementia-check-btn" onclick="goToDementiaCheck()">치매검사</button>
+                <button class="header-nav-btn fun-game-btn" onclick="goToFunGame()">🎮 즐거운 게임</button>
                 <button class="logout-btn" onclick="logout()">로그아웃</button>
             </div>
+        </div>
+
+
+        <div class="section-bulk-toolbar" aria-label="메인 섹션 일괄 제어">
+            <span class="section-bulk-title">📚 메인 섹션 <span id="mainSectionStateText" class="section-bulk-state">3/3 열림</span></span>
+            <button id="expandAllMainSectionsBtn" type="button" class="section-bulk-btn" onclick="setAllMainSections(true)">전체 펼치기</button>
+            <button id="collapseAllMainSectionsBtn" type="button" class="section-bulk-btn" onclick="setAllMainSections(false)">전체 접기</button>
         </div>
 
         <div class="timer-display inline-collapsible-section" id="timerDisplaySection" data-collapsed="false">
@@ -530,7 +720,7 @@
         <div id="activeMotivationalSummary" style="display: none; width: 100%; margin-bottom: 15px;"></div>
 
         <!-- Section 1: 고비 관리 -->
-        <details class="main-section highlight" open>
+        <details id="sectionCraving" class="main-section highlight" open>
             <summary>🔥 고비 관리 및 기록</summary>
             <div class="section-content">
                 <div style="display: flex; gap: 8px; margin-bottom: 12px;">
@@ -562,7 +752,7 @@
         </details>
 
         <!-- Section 2: 통계 (차트) -->
-        <details class="main-section" open>
+        <details id="sectionStats" class="main-section" open>
             <summary>📈 생존 현황 및 통계</summary>
             <div class="section-content">
                 <div class="chart-container">
@@ -588,7 +778,7 @@
         </details>
 
         <!-- Section 3: 신체 회복 및 커뮤니티 -->
-        <details class="main-section" open>
+        <details id="sectionRecovery" class="main-section" open>
             <summary>🌱 신체 회복 및 생존자 통신</summary>
             <div class="section-content">
                 <div class="tab-container">
@@ -616,6 +806,35 @@
         <button class="craving-btn" style="background: linear-gradient(135deg, #a18ad4, #7662b8); margin-top: 15px; font-size: 0.95rem; box-shadow: 0 7px 16px rgba(118, 98, 184, 0.18);" onclick="goToControlMode()">🍷 금주 실패... 음주 조절 모드로 전환</button>
     </div>
 </div>
+
+
+<div id="pageBottomAnchor" class="page-scroll-anchor" aria-hidden="true"></div>
+<nav id="floatingQuickNav" class="floating-quick-nav" aria-label="페이지 빠른 이동">
+    <div id="floatingNavMenu" class="floating-nav-menu" aria-hidden="true">
+        <div class="floating-nav-menu-head">
+            <span class="floating-nav-menu-title">빠른 이동</span>
+            <span id="floatingNavProgressText" class="floating-nav-progress-text">0%</span>
+        </div>
+        <div class="floating-nav-progress-track" aria-hidden="true"><div id="floatingNavProgressFill" class="floating-nav-progress-fill"></div></div>
+        <div class="floating-nav-items">
+            <button type="button" class="floating-nav-item" data-nav-target="pageTopAnchor" data-nav-number="01" onclick="scrollToPageTarget('pageTopAnchor')"><span class="floating-nav-number">01</span><span>맨 위로</span></button>
+            <button type="button" class="floating-nav-item" data-nav-target="timerDisplaySection" data-nav-number="02" onclick="scrollToPageTarget('timerDisplaySection')"><span class="floating-nav-number">02</span><span>현재 도전 타이머</span></button>
+            <button type="button" class="floating-nav-item" data-nav-target="sectionCraving" data-nav-number="03" onclick="scrollToPageTarget('sectionCraving')"><span class="floating-nav-number">03</span><span>고비 관리 및 기록</span></button>
+            <button type="button" class="floating-nav-item" data-nav-target="sectionStats" data-nav-number="04" onclick="scrollToPageTarget('sectionStats')"><span class="floating-nav-number">04</span><span>생존 현황 및 통계</span></button>
+            <button type="button" class="floating-nav-item" data-nav-target="sectionRecovery" data-nav-number="05" onclick="scrollToPageTarget('sectionRecovery')"><span class="floating-nav-number">05</span><span>신체 회복 및 통신</span></button>
+            <button type="button" class="floating-nav-item" data-nav-target="pageBottomAnchor" data-nav-number="06" onclick="scrollToPageTarget('pageBottomAnchor')"><span class="floating-nav-number">06</span><span>맨 아래로</span></button>
+            <button type="button" class="floating-nav-item game-link" onclick="goToFunGame()"><span class="floating-nav-number">🎮</span><span>즐거운 게임 열기</span></button>
+        </div>
+        <div class="floating-nav-divider"></div>
+        <div class="floating-nav-actions">
+            <button type="button" class="floating-nav-action" onclick="setAllMainSections(true)">＋ 전체 펼치기</button>
+            <button type="button" class="floating-nav-action" onclick="setAllMainSections(false)">－ 전체 접기</button>
+        </div>
+    </div>
+    <button id="floatingNavToggle" type="button" class="floating-nav-toggle" onclick="toggleFloatingQuickNav(event)" aria-expanded="false" aria-controls="floatingNavMenu" aria-label="빠른 이동 메뉴 열기">
+        <span class="floating-nav-toggle-inner"><span id="floatingNavCurrentNumber" class="floating-nav-toggle-number">01</span><span class="floating-nav-toggle-label">이동</span></span>
+    </button>
+</nav>
 
 <footer>
     &copy; 2026 Alcoholaway.com All rights reserved.
@@ -1621,6 +1840,201 @@
     window.goToDementiaCheck = function() {
         window.location.href = 'dementiaCheck.html';
     };
+
+    window.goToFunGame = function() {
+        if (!userId || !auth.currentUser) {
+            alert('즐거운 게임은 로그인 후 이용할 수 있습니다.');
+            return;
+        }
+        window.location.href = 'games/pickman.html';
+    };
+
+    function getMainSections() {
+        return Array.from(document.querySelectorAll('details.main-section'));
+    }
+
+    function resizeVisibleChartsAfterSectionChange() {
+        window.setTimeout(() => {
+            [
+                mainChart, distChart, statsChart, pastStatsChart, stateStatsChart,
+                medChartInstance, medAcamprosateProfileChart, medNaltrexoneProfileChart,
+                mealWeightChartInstance, calMonthAlcoholTotalCompareChart,
+                calMonthAlcoholAverageCompareChart, calMonthToDateAlcoholTotalCompareChart,
+                calMonthToDateAlcoholAverageCompareChart, calMedicationAlcoholAverageCompareChart,
+                calMedicationAlcoholFrequencyCompareChart, calWeeklyAlcoholTrendChart
+            ].forEach(chart => {
+                if (chart && typeof chart.resize === 'function') chart.resize();
+            });
+            window.dispatchEvent(new Event('resize'));
+        }, 80);
+    }
+
+    function updateMainSectionControlState() {
+        const sections = getMainSections();
+        const openCount = sections.filter(section => section.open).length;
+        const stateText = document.getElementById('mainSectionStateText');
+        const expandBtn = document.getElementById('expandAllMainSectionsBtn');
+        const collapseBtn = document.getElementById('collapseAllMainSectionsBtn');
+        if (stateText) stateText.innerText = `${openCount}/${sections.length} 열림`;
+        if (expandBtn) expandBtn.setAttribute('aria-pressed', sections.length > 0 && openCount === sections.length ? 'true' : 'false');
+        if (collapseBtn) collapseBtn.setAttribute('aria-pressed', sections.length > 0 && openCount === 0 ? 'true' : 'false');
+    }
+
+    window.setAllMainSections = function(openState, persist = true) {
+        const shouldOpen = openState === true;
+        getMainSections().forEach(section => { section.open = shouldOpen; });
+        if (persist) {
+            try { localStorage.setItem('alcoholawayMainSectionsOpen', shouldOpen ? 'true' : 'false'); } catch (e) {}
+        }
+        updateMainSectionControlState();
+        resizeVisibleChartsAfterSectionChange();
+    };
+
+    window.closeFloatingQuickNav = function() {
+        const nav = document.getElementById('floatingQuickNav');
+        const menu = document.getElementById('floatingNavMenu');
+        const toggle = document.getElementById('floatingNavToggle');
+        if (!nav) return;
+        nav.classList.remove('is-open');
+        if (menu) menu.setAttribute('aria-hidden', 'true');
+        if (toggle) {
+            toggle.setAttribute('aria-expanded', 'false');
+            toggle.setAttribute('aria-label', '빠른 이동 메뉴 열기');
+        }
+    };
+
+    window.toggleFloatingQuickNav = function(event) {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        const nav = document.getElementById('floatingQuickNav');
+        const menu = document.getElementById('floatingNavMenu');
+        const toggle = document.getElementById('floatingNavToggle');
+        if (!nav) return;
+        const nextOpen = !nav.classList.contains('is-open');
+        nav.classList.toggle('is-open', nextOpen);
+        if (menu) menu.setAttribute('aria-hidden', nextOpen ? 'false' : 'true');
+        if (toggle) {
+            toggle.setAttribute('aria-expanded', nextOpen ? 'true' : 'false');
+            toggle.setAttribute('aria-label', nextOpen ? '빠른 이동 메뉴 닫기' : '빠른 이동 메뉴 열기');
+        }
+    };
+
+    window.scrollToPageTarget = function(targetId) {
+        if (targetId === 'pageTopAnchor') {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            closeFloatingQuickNav();
+            return;
+        }
+        if (targetId === 'pageBottomAnchor') {
+            window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+            closeFloatingQuickNav();
+            return;
+        }
+
+        const target = document.getElementById(targetId);
+        if (!target) return;
+        if (target.matches('details.main-section')) target.open = true;
+        if (target.classList.contains('inline-collapsible-section')) target.setAttribute('data-collapsed', 'false');
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        updateMainSectionControlState();
+        resizeVisibleChartsAfterSectionChange();
+        closeFloatingQuickNav();
+    };
+
+    function updateFloatingNavVisibility() {
+        const nav = document.getElementById('floatingQuickNav');
+        const displayArea = document.getElementById('displayArea');
+        if (!nav || !displayArea) return;
+        const isDisplayVisible = window.getComputedStyle(displayArea).display !== 'none';
+        const shouldShow = !!(userId && auth.currentUser && isDisplayVisible);
+        nav.classList.toggle('is-visible', shouldShow);
+        if (!shouldShow) closeFloatingQuickNav();
+    }
+
+    function updateFloatingNavScrollState() {
+        const nav = document.getElementById('floatingQuickNav');
+        if (!nav) return;
+        const scrollMax = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+        const progress = Math.max(0, Math.min(100, Math.round((window.scrollY / scrollMax) * 100)));
+        nav.style.setProperty('--nav-progress', `${progress}%`);
+        const progressText = document.getElementById('floatingNavProgressText');
+        const progressFill = document.getElementById('floatingNavProgressFill');
+        if (progressText) progressText.innerText = `${progress}%`;
+        if (progressFill) progressFill.style.width = `${progress}%`;
+
+        const targetButtons = Array.from(document.querySelectorAll('.floating-nav-item[data-nav-target]'));
+        const sectionIds = ['pageTopAnchor', 'timerDisplaySection', 'sectionCraving', 'sectionStats', 'sectionRecovery', 'pageBottomAnchor'];
+        let activeId = 'pageTopAnchor';
+        const threshold = Math.max(90, window.innerHeight * 0.32);
+        sectionIds.forEach(id => {
+            const element = document.getElementById(id);
+            if (element && element.getBoundingClientRect().top <= threshold) activeId = id;
+        });
+        if (window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 12) activeId = 'pageBottomAnchor';
+
+        let activeNumber = '01';
+        targetButtons.forEach(button => {
+            const active = button.dataset.navTarget === activeId;
+            button.classList.toggle('is-active', active);
+            if (active) activeNumber = button.dataset.navNumber || activeNumber;
+        });
+        const currentNumber = document.getElementById('floatingNavCurrentNumber');
+        if (currentNumber) currentNumber.innerText = activeNumber;
+    }
+
+    function showGameLoginRequiredNotice() {
+        try {
+            const url = new URL(window.location.href);
+            if (url.searchParams.get('gameLoginRequired') !== '1') return;
+            url.searchParams.delete('gameLoginRequired');
+            window.history.replaceState({}, document.title, url.pathname + url.search + url.hash);
+            alert('즐거운 게임은 Google 로그인 후 이용할 수 있습니다. 로그인한 뒤 “즐거운 게임” 버튼을 눌러 주세요.');
+        } catch (e) {}
+    }
+
+    function initFloatingQuickNav() {
+        const displayArea = document.getElementById('displayArea');
+        getMainSections().forEach(section => {
+            section.addEventListener('toggle', () => {
+                updateMainSectionControlState();
+                if (section.open) resizeVisibleChartsAfterSectionChange();
+            });
+        });
+
+        try {
+            const savedOpenState = localStorage.getItem('alcoholawayMainSectionsOpen');
+            if (savedOpenState === 'true' || savedOpenState === 'false') {
+                window.setAllMainSections(savedOpenState === 'true', false);
+            }
+        } catch (e) {}
+
+        if (displayArea && 'MutationObserver' in window) {
+            new MutationObserver(() => {
+                updateFloatingNavVisibility();
+                updateFloatingNavScrollState();
+            }).observe(displayArea, { attributes: true, attributeFilter: ['style', 'class'] });
+        }
+
+        window.addEventListener('scroll', updateFloatingNavScrollState, { passive: true });
+        window.addEventListener('resize', updateFloatingNavScrollState, { passive: true });
+        document.addEventListener('click', event => {
+            const nav = document.getElementById('floatingQuickNav');
+            if (nav && nav.classList.contains('is-open') && !nav.contains(event.target)) closeFloatingQuickNav();
+        });
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape') closeFloatingQuickNav();
+        });
+
+        showGameLoginRequiredNotice();
+        updateMainSectionControlState();
+        updateFloatingNavVisibility();
+        updateFloatingNavScrollState();
+    }
+
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initFloatingQuickNav, { once: true });
+    else initFloatingQuickNav();
 
     async function enablePush() {
         if (!userId || !auth.currentUser) {
