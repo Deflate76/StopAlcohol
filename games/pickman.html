@@ -58,10 +58,59 @@
   @media (min-width:900px) and (hover:hover) {
     .mobile-controls { max-width:720px; margin-inline:auto; }
   }
+
+  [hidden] { display:none !important; }
+  .auth-gate { position:fixed; inset:0; z-index:1000; display:flex; align-items:center; justify-content:center; padding:20px; background:radial-gradient(circle at 50% 0%, #18274a 0%, #080d1b 55%, #040711 100%); }
+  .auth-gate.is-hidden { display:none; }
+  .auth-card { width:min(420px,100%); border:1px solid #4d6597; border-radius:18px; background:rgba(13,23,48,.97); box-shadow:0 24px 80px rgba(0,0,0,.55); padding:26px 22px; text-align:center; }
+  .auth-card h2 { margin:12px 0 8px; color:var(--accent); font-size:22px; }
+  .auth-card p { margin:0; color:var(--muted); line-height:1.55; font-size:14px; }
+  .auth-spinner { width:34px; height:34px; margin:0 auto; border:3px solid rgba(255,255,255,.18); border-top-color:var(--accent); border-radius:50%; animation:authSpin .8s linear infinite; }
+  @keyframes authSpin { to { transform:rotate(360deg); } }
+  .utility-bar { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; }
+  .utility-bar button { min-height:38px; padding:6px 10px; }
+  .user-chip { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:62%; font-size:12px; color:var(--ok); border:1px solid #497b6f; border-radius:999px; padding:6px 10px; background:rgba(17,26,49,.78); }
+  .score-history { margin-top:12px; border:1px solid #33466f; border-radius:14px; background:rgba(13,23,48,.9); padding:14px; box-shadow:inset 0 1px rgba(255,255,255,.04); }
+  .score-history-head { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+  .score-history h2 { margin:0; font-size:18px; color:var(--accent); }
+  .score-history-desc { margin:4px 0 0; color:var(--muted); font-size:12px; line-height:1.45; }
+  .score-history-head button { min-height:36px; padding:6px 10px; font-size:12px; flex:0 0 auto; }
+  .score-history-summary { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin:12px 0; }
+  .score-summary-card { border:1px solid #2f426c; border-radius:10px; background:#0a1227; padding:9px 7px; text-align:center; }
+  .score-summary-card span { display:block; color:var(--muted); font-size:11px; }
+  .score-summary-card strong { display:block; color:var(--text); margin-top:3px; font-size:16px; }
+  .score-history-status { min-height:20px; color:var(--ok); font-size:12px; margin-bottom:7px; }
+  .score-history-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+  .score-history-item { border:1px solid #293b63; border-radius:11px; background:#091124; padding:10px; min-width:0; }
+  .score-history-item-top { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .score-history-score { color:#fff6a4; font-size:17px; font-weight:bold; }
+  .score-outcome { border:1px solid #4d6597; border-radius:999px; color:var(--muted); font-size:10px; padding:3px 6px; white-space:nowrap; }
+  .score-outcome.victory { border-color:#497b6f; color:#a8ffe3; }
+  .score-outcome.game-over { border-color:#8d4450; color:#ffb3bd; }
+  .score-history-meta { color:var(--muted); font-size:11px; line-height:1.5; margin-top:7px; }
+  .score-history-empty { grid-column:1 / -1; color:var(--muted); font-size:13px; padding:16px 8px; text-align:center; }
+  @media (max-width:620px) {
+    .utility-bar { align-items:stretch; flex-direction:column-reverse; }
+    .utility-bar button, .user-chip { max-width:none; width:100%; text-align:center; }
+    .score-history-summary { grid-template-columns:1fr 1fr 1fr; }
+    .score-history-list { grid-template-columns:1fr; }
+  }
+
 </style>
 </head>
 <body>
-<main class="app">
+<div id="authGate" class="auth-gate" role="status" aria-live="polite">
+  <div class="auth-card">
+    <div class="auth-spinner" aria-hidden="true"></div>
+    <h2 id="authGateTitle">로그인 확인 중</h2>
+    <p id="authGateMessage">금주 서바이벌 리포트의 로그인 상태를 확인하고 있습니다.</p>
+  </div>
+</div>
+<main id="gameApp" class="app" hidden>
+  <div class="utility-bar">
+    <button id="backButton" class="secondary" type="button">← 금주 리포트로 돌아가기</button>
+    <span id="gameUserBadge" class="user-chip">로그인 사용자</span>
+  </div>
   <div class="titlebar">
     <h1>PIK MAN <span style="color:#ffe45f">픽맨</span></h1>
     <span class="badge">SPC-1500(A) 1989 게임의 현대식 재구현</span>
@@ -97,10 +146,49 @@
     <button data-action="fire" class="fire" aria-label="공격">FIRE</button>
   </div>
 
-  <p class="help">키보드: 방향키 이동 · SPACE 공격 · P 일시정지 · M 소리 · R 제목 화면. 라운드 클리어 뒤 Y는 상점, N 또는 ENTER는 다음 라운드입니다. 휴대폰에서는 아래 터치 버튼을 사용하세요.</p>
+
+
+  <section class="score-history" aria-labelledby="scoreHistoryTitle">
+    <div class="score-history-head">
+      <div>
+        <h2 id="scoreHistoryTitle">🏆 내 점수 히스토리</h2>
+        <p class="score-history-desc">게임 오버, 미션 완료, 제목 화면으로 종료한 점수를 로그인 계정에 저장합니다.</p>
+      </div>
+      <button id="refreshHistoryButton" class="secondary" type="button">새로고침</button>
+    </div>
+    <div id="scoreHistorySummary" class="score-history-summary">
+      <div class="score-summary-card"><span>기록 수</span><strong>-</strong></div>
+      <div class="score-summary-card"><span>최고 점수</span><strong>-</strong></div>
+      <div class="score-summary-card"><span>최고 라운드</span><strong>-</strong></div>
+    </div>
+    <div id="scoreHistoryStatus" class="score-history-status" aria-live="polite"></div>
+    <div id="scoreHistoryList" class="score-history-list">
+      <div class="score-history-empty">로그인 기록을 불러오는 중입니다.</div>
+    </div>
+  </section>
+
+  <p class="help">키보드: 방향키 이동 · SPACE 공격 · P 일시정지 · M 소리 · R 제목 화면. 라운드 클리어 뒤 Y는 상점, N 또는 ENTER는 다음 라운드입니다. 휴대폰에서는 아래 터치 버튼을 사용하세요. 게임 오버·미션 완료·R 종료 시 점수가 자동 저장됩니다.</p>
 </main>
 
-<script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
+import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBWDwueP3a0atxCqFIgqd96sgXc0EqYbEY",
+  authDomain: "alcoholaway.firebaseapp.com",
+  projectId: "alcoholaway",
+  storageBucket: "alcoholaway.firebasestorage.app",
+  messagingSenderId: "1001199235857",
+  appId: "1:1001199235857:web:362c4aae36b44c7eae12b0",
+  measurementId: "G-JBE26PCZMF"
+};
+
+const firebaseApp = initializeApp(firebaseConfig);
+const auth = getAuth(firebaseApp);
+const db = getFirestore(firebaseApp);
+
 (() => {
   'use strict';
 
@@ -116,6 +204,16 @@
   const shopGold = document.getElementById('shopGold');
   const shopMsg = document.getElementById('shopMsg');
   const leaveShop = document.getElementById('leaveShop');
+  const authGate = document.getElementById('authGate');
+  const authGateTitle = document.getElementById('authGateTitle');
+  const authGateMessage = document.getElementById('authGateMessage');
+  const gameApp = document.getElementById('gameApp');
+  const gameUserBadge = document.getElementById('gameUserBadge');
+  const backButton = document.getElementById('backButton');
+  const refreshHistoryButton = document.getElementById('refreshHistoryButton');
+  const scoreHistorySummary = document.getElementById('scoreHistorySummary');
+  const scoreHistoryStatus = document.getElementById('scoreHistoryStatus');
+  const scoreHistoryList = document.getElementById('scoreHistoryList');
 
   const W = 960;
   const H = 540;
@@ -196,6 +294,176 @@
     titleStars: Array.from({length:120}, () => ({x:Math.random()*W,y:Math.random()*H,s:Math.random()*2+0.5,a:Math.random()*0.6+0.25}))
   };
 
+
+  let currentUser = null;
+  let runtimeStarted = false;
+  let currentRunId = '';
+  let scoreCheckpoint = 0;
+  let pendingScoreSavePromise = null;
+  const savedScoreKeys = new Set();
+
+  function setAuthGateText(title, message) {
+    if (authGateTitle) authGateTitle.textContent = title;
+    if (authGateMessage) authGateMessage.textContent = message;
+  }
+
+  function makeRunId() {
+    if (window.crypto && typeof window.crypto.randomUUID === 'function') return window.crypto.randomUUID();
+    return `${Date.now()}-${Math.random().toString(36).slice(2, 12)}`;
+  }
+
+  function beginNewRun() {
+    currentRunId = makeRunId();
+    scoreCheckpoint = 0;
+    savedScoreKeys.clear();
+    if (scoreHistoryStatus) scoreHistoryStatus.textContent = '새 게임을 시작했습니다.';
+  }
+
+  function outcomeLabel(outcome) {
+    const labels = {
+      game_over: '게임 오버',
+      victory: '미션 완료',
+      retired: '제목 화면 종료',
+      report_return: '리포트 복귀'
+    };
+    return labels[outcome] || outcome;
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, char => ({
+      '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+    }[char]));
+  }
+
+  function formatHistoryDate(value) {
+    const date = value && typeof value.toDate === 'function' ? value.toDate() : new Date(value || 0);
+    if (Number.isNaN(date.getTime())) return '-';
+    return date.toLocaleString('ko-KR', {
+      year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'
+    });
+  }
+
+  function setHistoryStatus(message, isError = false) {
+    if (!scoreHistoryStatus) return;
+    scoreHistoryStatus.textContent = message || '';
+    scoreHistoryStatus.style.color = isError ? 'var(--danger)' : 'var(--ok)';
+  }
+
+  function renderScoreHistory(records) {
+    const safeRecords = Array.isArray(records) ? records : [];
+    const bestScore = safeRecords.reduce((max, item) => Math.max(max, Number(item.score) || 0), 0);
+    const bestRound = safeRecords.reduce((max, item) => Math.max(max, Number(item.round) || 0), 0);
+    if (scoreHistorySummary) {
+      scoreHistorySummary.innerHTML = `
+        <div class="score-summary-card"><span>최근 기록</span><strong>${safeRecords.length}</strong></div>
+        <div class="score-summary-card"><span>최고 점수</span><strong>${bestScore.toLocaleString()}</strong></div>
+        <div class="score-summary-card"><span>최고 라운드</span><strong>${bestRound || '-'}</strong></div>
+      `;
+    }
+
+    if (!scoreHistoryList) return;
+    if (safeRecords.length === 0) {
+      scoreHistoryList.innerHTML = '<div class="score-history-empty">아직 저장된 점수가 없습니다. 첫 게임에 도전해 보세요.</div>';
+      return;
+    }
+
+    scoreHistoryList.innerHTML = safeRecords.map(record => {
+      const outcome = record.outcome || 'game_over';
+      const outcomeClass = outcome === 'victory' ? 'victory' : (outcome === 'game_over' ? 'game-over' : '');
+      const playedAt = record.playedAt || record.createdAt || 0;
+      return `
+        <article class="score-history-item">
+          <div class="score-history-item-top">
+            <span class="score-history-score">${(Number(record.score) || 0).toLocaleString()}점</span>
+            <span class="score-outcome ${outcomeClass}">${escapeHtml(outcomeLabel(outcome))}</span>
+          </div>
+          <div class="score-history-meta">
+            ROUND ${Number(record.round) || 1} · GOLD ${(Number(record.gold) || 0).toLocaleString()}<br>
+            무기 ${escapeHtml(record.weaponName || 'NORMAL')} · ${escapeHtml(formatHistoryDate(playedAt))}
+          </div>
+        </article>
+      `;
+    }).join('');
+  }
+
+  async function loadScoreHistory() {
+    if (!currentUser) return;
+    if (refreshHistoryButton) refreshHistoryButton.disabled = true;
+    setHistoryStatus('점수 기록을 불러오는 중입니다.');
+    try {
+      const historyQuery = query(
+        collection(db, 'users', currentUser.uid, 'game_scores'),
+        orderBy('playedAt', 'desc'),
+        limit(20)
+      );
+      const snapshot = await getDocs(historyQuery);
+      const records = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+      renderScoreHistory(records);
+      setHistoryStatus(records.length ? '최근 점수 기록을 불러왔습니다.' : '첫 점수를 기다리고 있습니다.');
+    } catch (error) {
+      console.error('점수 히스토리 불러오기 실패:', error);
+      renderScoreHistory([]);
+      setHistoryStatus(`점수 기록을 불러오지 못했습니다: ${error.message}`, true);
+    } finally {
+      if (refreshHistoryButton) refreshHistoryButton.disabled = false;
+    }
+  }
+
+  async function saveScoreSnapshot(outcome, checkpoint) {
+    if (!currentUser || !currentRunId) return false;
+    const saveKey = `${currentRunId}|${outcome}|${checkpoint}|${game.score}|${game.round}|${game.gold}`;
+    if (savedScoreKeys.has(saveKey)) return true;
+    savedScoreKeys.add(saveKey);
+    setHistoryStatus(`${outcomeLabel(outcome)} 점수를 저장하는 중입니다.`);
+
+    try {
+      await addDoc(collection(db, 'users', currentUser.uid, 'game_scores'), {
+        gameId: 'pickman',
+        gameTitle: 'PIK MAN',
+        runId: currentRunId,
+        checkpoint,
+        outcome,
+        score: Number(game.score) || 0,
+        round: Number(game.round) || 1,
+        gold: Number(game.gold) || 0,
+        lives: Number(game.lives) || 0,
+        energy: Number(game.energy) || 0,
+        weaponName: game.weaponName || 'NORMAL',
+        weaponRange: Number(game.weaponRange) || 2,
+        playedAt: Date.now(),
+        createdAt: serverTimestamp()
+      });
+      setHistoryStatus(`${outcomeLabel(outcome)} 점수가 저장되었습니다.`);
+      await loadScoreHistory();
+      return true;
+    } catch (error) {
+      savedScoreKeys.delete(saveKey);
+      console.error('점수 저장 실패:', error);
+      setHistoryStatus(`점수 저장에 실패했습니다: ${error.message}`, true);
+      return false;
+    }
+  }
+
+  function queueScoreSnapshot(outcome) {
+    scoreCheckpoint += 1;
+    pendingScoreSavePromise = saveScoreSnapshot(outcome, scoreCheckpoint);
+    void pendingScoreSavePromise;
+  }
+
+  function hasActiveUnsavedRun() {
+    return !!currentRunId && ['playing', 'paused', 'roundClear', 'shop'].includes(game.state) && (game.score > 0 || game.round > 1);
+  }
+
+  function startRuntimeOnce() {
+    if (runtimeStarted) return;
+    runtimeStarted = true;
+    game.lastTime = performance.now();
+    buildShop();
+    updateButtons();
+    requestAnimationFrame(frame);
+  }
+
+
   let audioContext = null;
   function tone(freq = 440, duration = 0.06, type = 'square', volume = 0.035) {
     if (!game.sound) return;
@@ -242,6 +510,8 @@
   }
 
   function newGame() {
+    if (!currentUser) return;
+    beginNewRun();
     Object.assign(game, {
       state: 'playing', round: 1, score: 0, gold: 1000, lives: 5,
       playerX: 0, playerLane: 0, moveStep: 1, weaponRange: 2,
@@ -299,6 +569,7 @@
     if (game.lives <= 0) {
       game.state = 'gameOver';
       updateButtons();
+      queueScoreSnapshot('game_over');
       return;
     }
     resetActiveEnemies();
@@ -314,6 +585,7 @@
     setFlash(`남은 에너지 보너스 +${bonus} GOLD`, 2200);
     tone(660, .08); setTimeout(() => tone(880, .08), 100); setTimeout(() => tone(1100, .12), 205);
     updateButtons();
+    if (game.state === 'victory') queueScoreSnapshot('victory');
   }
 
   function nextRound() {
@@ -338,6 +610,7 @@
   }
 
   function returnToTitle() {
+    if (hasActiveUnsavedRun()) queueScoreSnapshot('retired');
     game.state = 'title';
     closeShop(false);
     updateButtons();
@@ -661,6 +934,7 @@
   }
 
   function mainAction() {
+    if (!currentUser) return;
     switch(game.state){
       case 'title': newGame(); break;
       case 'playing': attack(); break;
@@ -673,6 +947,7 @@
   }
 
   function handleAction(action) {
+    if (!currentUser) return;
     if(action==='left') movePlayer(-1,0);
     else if(action==='right') movePlayer(1,0);
     else if(action==='up') movePlayer(0,-1);
@@ -681,6 +956,7 @@
   }
 
   window.addEventListener('keydown',e=>{
+    if (!currentUser) return;
     const key=e.key;
     if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' '].includes(key)) e.preventDefault();
     if(game.state==='shop'){
@@ -716,8 +992,35 @@
     } catch(_) { setFlash('이 브라우저에서는 전체화면을 사용할 수 없습니다.',1200); }
   });
   leaveShop.addEventListener('click',()=>closeShop(true));
+  refreshHistoryButton.addEventListener('click', loadScoreHistory);
+  backButton.addEventListener('click', async () => {
+    try {
+      if (hasActiveUnsavedRun()) {
+        scoreCheckpoint += 1;
+        pendingScoreSavePromise = saveScoreSnapshot('report_return', scoreCheckpoint);
+      }
+      if (pendingScoreSavePromise) await pendingScoreSavePromise;
+    } finally {
+      window.location.href = '../index.html';
+    }
+  });
 
-  buildShop(); updateButtons(); requestAnimationFrame(frame);
+  onAuthStateChanged(auth, async user => {
+    if (!user) {
+      currentUser = null;
+      setAuthGateText('로그인이 필요합니다', '즐거운 게임은 금주 서바이벌 리포트에 로그인한 사용자만 이용할 수 있습니다. 로그인 화면으로 이동합니다.');
+      window.setTimeout(() => window.location.replace('../index.html?gameLoginRequired=1'), 450);
+      return;
+    }
+
+    currentUser = user;
+    const userLabel = user.displayName || user.email || '로그인 사용자';
+    if (gameUserBadge) gameUserBadge.textContent = `👤 ${userLabel}`;
+    if (gameApp) gameApp.hidden = false;
+    if (authGate) authGate.classList.add('is-hidden');
+    startRuntimeOnce();
+    await loadScoreHistory();
+  });
 })();
 </script>
 </body>
