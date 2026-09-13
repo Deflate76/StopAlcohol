@@ -122,7 +122,9 @@
         .time-unit { font-size: 3rem; font-weight: 800; color: var(--danger-color); line-height: 1.1; margin-bottom: 5px; text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 8px; transition: color 0.2s; }
         .time-unit-row { align-items: center; display: inline-flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
         .streak-record-badge { background: #fff5f5; border: 1px solid #fecaca; border-radius: 999px; color: #c0392b; display: inline-flex; font-size: 0.75rem; font-weight: 950; line-height: 1.25; padding: 5px 9px; text-decoration: none; white-space: nowrap; box-shadow: 0 2px 8px rgba(231, 76, 60, 0.10); }
-        #displaySettingDate { color: var(--text-dark); font-weight: 950; background: #fff; border: 1px solid #cbd5e0; border-radius: 999px; padding: 2px 8px; box-shadow: 0 1px 4px rgba(45, 55, 72, 0.08); }
+        #displaySettingDate { appearance: none; color: var(--text-dark); font-family: inherit; font-size: inherit; font-weight: 950; line-height: inherit; background: #fff; border: 1px solid #cbd5e0; border-radius: 999px; padding: 2px 8px; box-shadow: 0 1px 4px rgba(45, 55, 72, 0.08); cursor: pointer; transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, color 0.18s ease; }
+        #displaySettingDate:hover, #displaySettingDate:focus-visible { color: var(--primary-color); border-color: var(--primary-color); box-shadow: 0 3px 10px rgba(52, 152, 219, 0.18); outline: none; transform: translateY(-1px); }
+        #displaySettingDate:active { transform: scale(0.98); }
         .sub-time-clickable { font-size: 1.1rem; color: #718096; font-weight: 700; text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 4px; transition: color 0.2s; }
         
         .clickable-time-box:hover .time-unit { color: #c0392b; }
@@ -679,13 +681,13 @@
 
 
         <div class="section-bulk-toolbar" aria-label="메인 섹션 일괄 제어">
-            <span class="section-bulk-title">📚 메인 섹션 <span id="mainSectionStateText" class="section-bulk-state">3/3 열림</span></span>
+            <span class="section-bulk-title">📚 전체 섹션 <span id="mainSectionStateText" class="section-bulk-state">4/4 열림</span></span>
             <button id="expandAllMainSectionsBtn" type="button" class="section-bulk-btn" onclick="setAllMainSections(true)">전체 펼치기</button>
             <button id="collapseAllMainSectionsBtn" type="button" class="section-bulk-btn" onclick="setAllMainSections(false)">전체 접기</button>
         </div>
 
         <div class="timer-display inline-collapsible-section" id="timerDisplaySection" data-collapsed="false">
-            <button type="button" class="inline-collapsible-summary" onclick="toggleInlineCollapsible('timerDisplaySection')" aria-label="현재 도전 타이머 접기 또는 펼치기"><span>⏱️ 현재 도전 타이머</span></button>
+            <button type="button" class="inline-collapsible-summary" onclick="toggleInlineCollapsible('timerDisplaySection')" aria-expanded="true" aria-label="현재 도전 타이머 접기 또는 펼치기"><span>⏱️ 현재 도전 타이머</span></button>
             <div class="inline-collapsible-content timer-display-content">
             <div id="mainDaysContainer" style="width: 100%;">
                 <!-- JS에서 동적으로 달력 호버 UI를 생성합니다 -->
@@ -725,7 +727,7 @@
                     </div>
                 </div>
                 
-                <div style="font-size: 0.8rem; color: #999; margin-top: 15px;">도전 시작 일시: <span id="displaySettingDate">-</span></div>
+                <div style="font-size: 0.8rem; color: #999; margin-top: 15px;">도전 시작 일시: <button type="button" id="displaySettingDate" onclick="openHistoryList()" title="현재 진행 중인 단주 기록 보기" aria-label="도전 시작 일시, 단주 기록 열기">-</button></div>
             </div>
             </div>
         </div>
@@ -1618,6 +1620,7 @@
     let globalBestEndDate = null;
     let editingChallengeId = null;
     let evalPromptedFor = null;
+    let allSectionsOpenPreference = null;
 
     let allChallengesData = []; 
     let currentCalDate = new Date();
@@ -1866,6 +1869,17 @@
         return Array.from(document.querySelectorAll('details.main-section'));
     }
 
+    function getInlineCollapsibleSections() {
+        return Array.from(document.querySelectorAll('.inline-collapsible-section'));
+    }
+
+    function setInlineCollapsibleOpen(section, shouldOpen) {
+        if (!section) return;
+        section.setAttribute('data-collapsed', shouldOpen ? 'false' : 'true');
+        const summary = section.querySelector(':scope > .inline-collapsible-summary');
+        if (summary) summary.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
+    }
+
     function resizeVisibleChartsAfterSectionChange() {
         window.setTimeout(() => {
             [
@@ -1883,19 +1897,24 @@
     }
 
     function updateMainSectionControlState() {
-        const sections = getMainSections();
-        const openCount = sections.filter(section => section.open).length;
+        const mainSections = getMainSections();
+        const inlineSections = getInlineCollapsibleSections();
+        const openCount = mainSections.filter(section => section.open).length
+            + inlineSections.filter(section => section.getAttribute('data-collapsed') !== 'true').length;
+        const sectionCount = mainSections.length + inlineSections.length;
         const stateText = document.getElementById('mainSectionStateText');
         const expandBtn = document.getElementById('expandAllMainSectionsBtn');
         const collapseBtn = document.getElementById('collapseAllMainSectionsBtn');
-        if (stateText) stateText.innerText = `${openCount}/${sections.length} 열림`;
-        if (expandBtn) expandBtn.setAttribute('aria-pressed', sections.length > 0 && openCount === sections.length ? 'true' : 'false');
-        if (collapseBtn) collapseBtn.setAttribute('aria-pressed', sections.length > 0 && openCount === 0 ? 'true' : 'false');
+        if (stateText) stateText.innerText = `${openCount}/${sectionCount} 열림`;
+        if (expandBtn) expandBtn.setAttribute('aria-pressed', sectionCount > 0 && openCount === sectionCount ? 'true' : 'false');
+        if (collapseBtn) collapseBtn.setAttribute('aria-pressed', sectionCount > 0 && openCount === 0 ? 'true' : 'false');
     }
 
     window.setAllMainSections = function(openState, persist = true) {
         const shouldOpen = openState === true;
+        allSectionsOpenPreference = shouldOpen;
         getMainSections().forEach(section => { section.open = shouldOpen; });
+        getInlineCollapsibleSections().forEach(section => setInlineCollapsibleOpen(section, shouldOpen));
         if (persist) {
             try { localStorage.setItem('alcoholawayMainSectionsOpen', shouldOpen ? 'true' : 'false'); } catch (e) {}
         }
@@ -1955,7 +1974,7 @@
         const target = document.getElementById(targetId);
         if (!target) return;
         if (target.matches('details.main-section')) target.open = true;
-        if (target.classList.contains('inline-collapsible-section')) target.setAttribute('data-collapsed', 'false');
+        if (target.classList.contains('inline-collapsible-section')) setInlineCollapsibleOpen(target, true);
         target.scrollIntoView({ behavior: 'smooth', block: 'start' });
         updateMainSectionControlState();
         resizeVisibleChartsAfterSectionChange();
@@ -3197,12 +3216,18 @@
                 document.getElementById('motivationalSummary').innerHTML = htmlContent;
                 document.getElementById('motivationalSummary').style.display = 'block';
                 const activeSummarySection = document.getElementById('activeRecoverySummary');
-                const activeSummaryWasCollapsed = activeSummarySection && activeSummarySection.getAttribute('data-collapsed') === 'true';
+                const activeSummaryWasCollapsed = activeSummarySection
+                    ? activeSummarySection.getAttribute('data-collapsed') === 'true'
+                    : allSectionsOpenPreference === false;
                 document.getElementById('activeMotivationalSummary').innerHTML = buildInlineCollapsibleHtml('activeRecoverySummary', '🌱 누적 단주 내공 요약', htmlContent, !!activeSummaryWasCollapsed);
                 document.getElementById('activeMotivationalSummary').style.display = 'block';
+                updateMainSectionControlState();
             } else {
                 document.getElementById('motivationalSummary').style.display = 'none';
-                document.getElementById('activeMotivationalSummary').style.display = 'none';
+                const activeSummaryContainer = document.getElementById('activeMotivationalSummary');
+                activeSummaryContainer.style.display = 'none';
+                activeSummaryContainer.innerHTML = '';
+                updateMainSectionControlState();
             }
         } catch(e) { console.error(e); }
     }
@@ -3210,7 +3235,7 @@
     function buildInlineCollapsibleHtml(id, title, bodyHtml, collapsed = false) {
         return `
             <div class="inline-collapsible-section active-summary-collapsible" id="${id}" data-collapsed="${collapsed ? 'true' : 'false'}">
-                <button type="button" class="inline-collapsible-summary" onclick="toggleInlineCollapsible('${id}')" aria-label="${title} 접기 또는 펼치기"><span>${title}</span></button>
+                <button type="button" class="inline-collapsible-summary" onclick="toggleInlineCollapsible('${id}')" aria-expanded="${collapsed ? 'false' : 'true'}" aria-label="${title} 접기 또는 펼치기"><span>${title}</span></button>
                 <div class="inline-collapsible-content">${bodyHtml}</div>
             </div>
         `;
@@ -3220,7 +3245,9 @@
         const section = typeof target === 'string' ? document.getElementById(target) : target;
         if (!section) return;
         const nextCollapsed = section.getAttribute('data-collapsed') !== 'true';
-        section.setAttribute('data-collapsed', nextCollapsed ? 'true' : 'false');
+        setInlineCollapsibleOpen(section, !nextCollapsed);
+        updateMainSectionControlState();
+        if (!nextCollapsed) resizeVisibleChartsAfterSectionChange();
     };
 
     window.toggleAlcoholRiskStack = function(event) {
@@ -5866,7 +5893,8 @@
                         annotations: { 
                             line1: { type: 'line', xMin: 0, xMax: 0, borderColor: '#2d3748', borderWidth: 2, borderDash: [4, 4], label: { display: true, content: '현재 경과', position: 'center', rotation: 90, backgroundColor: '#2d3748', color: '#fff', font: { size: 10 }, padding: { top: 4, bottom: 4, left: 6, right: 6 }, borderRadius: 4 } },
                             line2: { type: 'line', yMin: 0, yMax: 0, borderColor: '#e74c3c', borderWidth: 1.5, borderDash: [4, 4], label: { display: true, content: '생존', position: 'start', backgroundColor: '#e74c3c', font: { size: 10 } } },
-                            line3: { type: 'line', xMin: 0, xMax: 0, borderColor: '#f39c12', borderWidth: 1.5, borderDash: [2, 2], label: { display: true, content: '최장 기록', position: 'center', backgroundColor: '#f39c12', font: { size: 10 } } }
+                            line3: { type: 'line', xMin: 0, xMax: 0, borderColor: '#f39c12', borderWidth: 1.5, borderDash: [2, 2], label: { display: true, content: '최장 기록', position: 'center', backgroundColor: '#f39c12', font: { size: 10 } } },
+                            goalGap: { type: 'box', xMin: 0, xMax: 0, display: false, drawTime: 'beforeDatasetsDraw', backgroundColor: 'rgba(243, 156, 18, 0.06)', borderColor: 'rgba(243, 156, 18, 0.65)', borderWidth: 1.5, borderDash: [5, 4], label: { display: true, content: '', position: 'center', backgroundColor: 'rgba(217, 119, 6, 0.92)', color: '#fff', font: { size: 10, weight: 'bold' }, padding: { top: 4, bottom: 4, left: 7, right: 7 }, borderRadius: 999 } }
                         } 
                     } 
                 } 
@@ -5921,7 +5949,8 @@
                     annotation: { 
                         annotations: { 
                             myPosition: { type: 'line', xMin: 0, xMax: 0, borderColor: '#e74c3c', borderWidth: 2, label: { display: true, content: '나의 위치', position: 'top', backgroundColor: '#e74c3c', font: { size: 10 } } },
-                            maxPosition: { type: 'line', xMin: 0, xMax: 0, borderColor: '#f39c12', borderWidth: 2, borderDash: [2, 2], label: { display: true, content: '최장 기록', position: 'center', backgroundColor: '#f39c12', font: { size: 10 } } }
+                            maxPosition: { type: 'line', xMin: 0, xMax: 0, borderColor: '#f39c12', borderWidth: 2, borderDash: [2, 2], label: { display: true, content: '최장 기록', position: 'center', backgroundColor: '#f39c12', font: { size: 10 } } },
+                            goalGap: { type: 'box', xMin: 0, xMax: 0, display: false, drawTime: 'beforeDatasetsDraw', backgroundColor: 'rgba(155, 89, 182, 0.05)', borderColor: 'rgba(155, 89, 182, 0.62)', borderWidth: 1.5, borderDash: [5, 4], label: { display: true, content: '', position: 'center', backgroundColor: 'rgba(126, 34, 206, 0.90)', color: '#fff', font: { size: 10, weight: 'bold' }, padding: { top: 4, bottom: 4, left: 7, right: 7 }, borderRadius: 999 } }
                         } 
                     } 
                 } 
@@ -5931,15 +5960,21 @@
 
     function updateChart(days, survivors) {
         if (!mainChart) return;
+        const chartDays = Math.max(0, days);
+        const chartMaxDays = Math.max(0, globalMaxDays);
+        const axisMaxDays = Math.max(100, Math.ceil(Math.max(chartDays, chartMaxDays) * 1.08));
+        const sampleStep = Math.max(1, Math.ceil(axisMaxDays / 180));
         const past = []; const future = [];
-        for (let i = 0; i <= days; i++) past.push({x: i, y: 1000 * Math.exp(-0.04 * i)});
-        past.push({x: days, y: 1000 * Math.exp(-0.04 * days)});
-        for (let i = Math.ceil(days); i <= 100; i++) future.push({x: i, y: 1000 * Math.exp(-0.04 * i)});
+        for (let i = 0; i < chartDays; i += sampleStep) past.push({x: i, y: 1000 * Math.exp(-0.04 * i)});
+        past.push({x: chartDays, y: 1000 * Math.exp(-0.04 * chartDays)});
+        future.push({x: chartDays, y: 1000 * Math.exp(-0.04 * chartDays)});
+        for (let i = Math.max(Math.ceil(chartDays), sampleStep); i <= axisMaxDays; i += sampleStep) {
+            if (i > chartDays) future.push({x: i, y: 1000 * Math.exp(-0.04 * i)});
+        }
         
         mainChart.data.datasets[0].data = past;
         mainChart.data.datasets[1].data = future;
-
-        const chartDays = Math.min(days, 100);
+        mainChart.options.scales.x.max = axisMaxDays;
 
         mainChart.options.plugins.annotation.annotations.line1.xMin = chartDays;
         mainChart.options.plugins.annotation.annotations.line1.xMax = chartDays;
@@ -5947,16 +5982,27 @@
         mainChart.options.plugins.annotation.annotations.line2.yMax = survivors;
         mainChart.options.plugins.annotation.annotations.line2.label.content = survivors.toLocaleString() + '명';
 
-        let isOverlapping = (Math.floor(days) >= globalMaxDays);
+        const isOverlapping = Math.floor(days) >= globalMaxDays;
+        const remainingDays = Math.max(0, Math.ceil(globalMaxDays - days));
+        const pulseOn = Math.floor(Date.now() / 850) % 2 === 0;
 
         if (globalMaxDays > 0 && !isOverlapping) {
-            const chartMaxDays = Math.min(globalMaxDays, 100);
             mainChart.options.plugins.annotation.annotations.line3.xMin = chartMaxDays;
             mainChart.options.plugins.annotation.annotations.line3.xMax = chartMaxDays;
             mainChart.options.plugins.annotation.annotations.line3.label.content = `최장 ${globalMaxDays}일`;
             mainChart.options.plugins.annotation.annotations.line3.display = true;
+
+            const gapAnnotation = mainChart.options.plugins.annotation.annotations.goalGap;
+            gapAnnotation.xMin = chartDays;
+            gapAnnotation.xMax = chartMaxDays;
+            gapAnnotation.label.content = `✨ 최장까지 ${remainingDays}일 남음`;
+            gapAnnotation.backgroundColor = pulseOn ? 'rgba(243, 156, 18, 0.11)' : 'rgba(243, 156, 18, 0.045)';
+            gapAnnotation.borderColor = pulseOn ? 'rgba(243, 156, 18, 0.95)' : 'rgba(243, 156, 18, 0.52)';
+            gapAnnotation.label.backgroundColor = pulseOn ? 'rgba(217, 119, 6, 0.98)' : 'rgba(217, 119, 6, 0.82)';
+            gapAnnotation.display = true;
         } else if (mainChart.options.plugins.annotation.annotations.line3) {
             mainChart.options.plugins.annotation.annotations.line3.display = false;
+            mainChart.options.plugins.annotation.annotations.goalGap.display = false;
         }
 
         mainChart.update('none');
@@ -5964,7 +6010,8 @@
         if (distChart) {
             const distPast = []; 
             const distFuture = [];
-            for(let i = 0; i <= 100; i+=2) {
+            const distStep = Math.max(2, sampleStep);
+            for(let i = 0; i <= axisMaxDays; i += distStep) {
                 const y = (1 / (i + 5)) * Math.exp(-Math.pow(Math.log((i+1)/15), 2) / (2 * Math.pow(0.8, 2))) * 1000;
                 if (i <= chartDays) distPast.push({x: i, y: y});
                 else distFuture.push({x: i, y: y});
@@ -5979,18 +6026,28 @@
 
             distChart.data.datasets[0].data = distPast; 
             distChart.data.datasets[1].data = distFuture; 
+            distChart.options.scales.x.max = axisMaxDays;
 
             distChart.options.plugins.annotation.annotations.myPosition.xMin = chartDays;
             distChart.options.plugins.annotation.annotations.myPosition.xMax = chartDays;
             
             if (globalMaxDays > 0 && !isOverlapping) {
-                const displayMax = Math.min(globalMaxDays, 100);
-                distChart.options.plugins.annotation.annotations.maxPosition.xMin = displayMax;
-                distChart.options.plugins.annotation.annotations.maxPosition.xMax = displayMax;
+                distChart.options.plugins.annotation.annotations.maxPosition.xMin = chartMaxDays;
+                distChart.options.plugins.annotation.annotations.maxPosition.xMax = chartMaxDays;
                 distChart.options.plugins.annotation.annotations.maxPosition.label.content = `최장 ${globalMaxDays}일`;
                 distChart.options.plugins.annotation.annotations.maxPosition.display = true;
+
+                const gapAnnotation = distChart.options.plugins.annotation.annotations.goalGap;
+                gapAnnotation.xMin = chartDays;
+                gapAnnotation.xMax = chartMaxDays;
+                gapAnnotation.label.content = `✨ 최장까지 ${remainingDays}일 남음`;
+                gapAnnotation.backgroundColor = pulseOn ? 'rgba(155, 89, 182, 0.10)' : 'rgba(155, 89, 182, 0.035)';
+                gapAnnotation.borderColor = pulseOn ? 'rgba(155, 89, 182, 0.92)' : 'rgba(155, 89, 182, 0.48)';
+                gapAnnotation.label.backgroundColor = pulseOn ? 'rgba(126, 34, 206, 0.96)' : 'rgba(126, 34, 206, 0.80)';
+                gapAnnotation.display = true;
             } else if (distChart.options.plugins.annotation.annotations.maxPosition) {
                 distChart.options.plugins.annotation.annotations.maxPosition.display = false;
+                distChart.options.plugins.annotation.annotations.goalGap.display = false;
             }
             distChart.update('none');
         }
