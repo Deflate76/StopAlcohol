@@ -10,6 +10,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>금주 서바이벌 리포트</title>
+    <meta name="app-build" content="chart-gap-html-badge-v3">
     
     <meta name="description" content="1,000명의 도전자와 함께하는 금주 서바이벌 레이스" />
     <meta name="theme-color" content="#ffffff" />
@@ -189,6 +190,28 @@
         .push-link-btn:active, .push-info-btn:active { transform: scale(0.98); }
         
         .chart-container { position: relative; height: 250px; width: 100%; margin: 10px 0; }
+        /* 남은 일수 v3: 캔버스 라벨 대신 실제 HTML 배지로 색상과 blink를 적용합니다. */
+        #sectionStats .chart-container > .goal-gap-badge {
+            position: absolute; z-index: 5; box-sizing: border-box;
+            display: block; width: max-content; max-width: calc(100% - 8px);
+            padding: 6px 10px; border: 2px solid #d97706; border-radius: 10px;
+            color: #111827 !important; -webkit-text-fill-color: #111827 !important;
+            background: #fef08a !important; background-image: none !important;
+            font: 900 13px/1.4 'Pretendard', -apple-system, sans-serif;
+            text-align: center; text-shadow: none !important;
+            white-space: normal; word-break: keep-all; overflow-wrap: anywhere;
+            box-shadow: 0 0 12px rgba(245, 158, 11, 0.65);
+            pointer-events: none; user-select: none;
+            animation: alcoholawayGoalGapBlinkV3 2s step-end infinite;
+        }
+        #sectionStats .chart-container > .goal-gap-badge[hidden] { display: none !important; }
+        @keyframes alcoholawayGoalGapBlinkV3 {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            #sectionStats .chart-container > .goal-gap-badge { animation: none; opacity: 1; }
+        }
         
         .tab-container { display: flex; justify-content: space-around; margin-top: 5px; border-bottom: 2px solid #e2e8f0; margin-bottom: 20px; }
         .tab-btn { padding: 8px 5px; border: none; background: none; font-size: 0.95rem; font-weight: 700; color: #718096; cursor: pointer; transition: all 0.3s; border-bottom: 3px solid transparent; margin-bottom: -2px; line-height: 1.3; }
@@ -5867,11 +5890,94 @@
         }, 200);
     };
 
+    // 구간 음영만 annotation으로 그리고, 글씨/배경/blink는 별도 HTML 배지가 담당합니다.
+    function createGoalGapAnnotations(isDistribution = false) {
+        return {
+            goalGap: {
+                type: 'box', xMin: 0, xMax: 0, display: false,
+                adjustScaleRange: false, drawTime: 'beforeDatasetsDraw',
+                backgroundColor: isDistribution ? 'rgba(155, 89, 182, 0.07)' : 'rgba(243, 156, 18, 0.09)',
+                borderColor: isDistribution ? '#9333ea' : '#d97706',
+                borderWidth: 1.5, borderDash: [5, 4], label: { display: false }
+            }
+        };
+    }
+
+    function syncGoalGapBadge(chart) {
+        const canvas = chart.canvas;
+        const container = canvas && canvas.parentElement;
+        if (!container) return;
+        const state = chart.$goalGapBadgeState;
+        let badge = chart.$goalGapBadge;
+        const area = chart.chartArea;
+        const scale = chart.scales.x;
+        if (!state || !state.visible || !area || !scale || !chart.width || !chart.height
+                || !canvas.clientWidth || !canvas.clientHeight) {
+            if (badge) badge.hidden = true;
+            return;
+        }
+        if (!badge || badge.parentElement !== container) {
+            badge = document.createElement('div');
+            badge.className = 'goal-gap-badge';
+            badge.setAttribute('role', 'note');
+            badge.setAttribute('data-render-version', 'html-badge-v3');
+            // 기존 테마의 글자색/배경 규칙이 덮어쓰지 못하도록 배지 자체에도 명시합니다.
+            badge.style.setProperty('color', '#111827', 'important');
+            badge.style.setProperty('-webkit-text-fill-color', '#111827', 'important');
+            badge.style.setProperty('background', '#fef08a', 'important');
+            badge.style.setProperty('text-shadow', 'none', 'important');
+            container.appendChild(badge);
+            chart.$goalGapBadge = badge;
+        }
+        const labelText = `✨ 최장까지 ${state.remainingDays}일 남음`;
+        if (badge.textContent !== labelText) badge.textContent = labelText;
+        badge.hidden = false;
+
+        // 리사이즈/모바일에서도 차트의 실제 현재·최장 위치 가운데에 배치합니다.
+        const ratioX = canvas.clientWidth / chart.width;
+        const ratioY = canvas.clientHeight / chart.height;
+        const plotLeft = canvas.offsetLeft + area.left * ratioX;
+        const plotRight = canvas.offsetLeft + area.right * ratioX;
+        const plotTop = canvas.offsetTop + area.top * ratioY;
+        const plotBottom = canvas.offsetTop + area.bottom * ratioY;
+        badge.style.maxWidth = `${Math.max(1, plotRight - plotLeft - 8)}px`;
+        const badgeWidth = badge.offsetWidth;
+        const badgeHeight = badge.offsetHeight;
+        const middleX = canvas.offsetLeft
+            + scale.getPixelForValue((state.currentDays + state.maxDays) / 2) * ratioX;
+        const left = Math.max(plotLeft + 4, Math.min(plotRight - badgeWidth - 4, middleX - badgeWidth / 2));
+        const top = Math.max(plotTop + 4, Math.min(plotBottom - badgeHeight - 4,
+            (plotTop + plotBottom) / 2 - badgeHeight / 2 - 30));
+        badge.style.left = `${left}px`;
+        badge.style.top = `${top}px`;
+    }
+
+    const goalGapBadgePlugin = {
+        id: 'goal-gap-html-badge',
+        afterDraw: syncGoalGapBadge,
+        afterDestroy(chart) {
+            if (chart.$goalGapBadge) chart.$goalGapBadge.remove();
+            delete chart.$goalGapBadge;
+            delete chart.$goalGapBadgeState;
+        }
+    };
+
+    function updateGoalGapAnnotations(chart, currentDays, maxDays, remainingDays) {
+        const annotations = chart.options.plugins.annotation.annotations;
+        const showGap = maxDays > 0 && remainingDays > 0;
+        annotations.goalGap.xMin = currentDays;
+        annotations.goalGap.xMax = maxDays;
+        annotations.goalGap.display = showGap;
+        annotations.goalGap.label.display = false;
+        chart.$goalGapBadgeState = { currentDays, maxDays, remainingDays, visible: showGap };
+    }
+
     function initSurvivalChart() {
         if (mainChart) mainChart.destroy();
         const ctx = document.getElementById('survivalChart').getContext('2d');
         mainChart = new Chart(ctx, {
             type: 'line',
+            plugins: [goalGapBadgePlugin],
             data: { datasets: [
                 { label: '탈락 영역 (과거)', data: [], borderColor: '#e74c3c', backgroundColor: 'rgba(231, 76, 60, 0.4)', fill: true, pointRadius: 0, tension: 0.3 },
                 { label: '생존 영역 (잠재)', data: [], borderColor: '#2ecc71', backgroundColor: 'rgba(46, 204, 113, 0.4)', fill: true, pointRadius: 0, tension: 0.3 }
@@ -5894,7 +6000,7 @@
                             line1: { type: 'line', xMin: 0, xMax: 0, borderColor: '#2d3748', borderWidth: 2, borderDash: [4, 4], label: { display: true, content: '현재 경과', position: 'center', rotation: 90, backgroundColor: '#2d3748', color: '#fff', font: { size: 10 }, padding: { top: 4, bottom: 4, left: 6, right: 6 }, borderRadius: 4 } },
                             line2: { type: 'line', yMin: 0, yMax: 0, borderColor: '#e74c3c', borderWidth: 1.5, borderDash: [4, 4], label: { display: true, content: '생존', position: 'start', backgroundColor: '#e74c3c', font: { size: 10 } } },
                             line3: { type: 'line', xMin: 0, xMax: 0, borderColor: '#f39c12', borderWidth: 1.5, borderDash: [2, 2], label: { display: true, content: '최장 기록', position: 'center', backgroundColor: '#f39c12', font: { size: 10 } } },
-                            goalGap: { type: 'box', xMin: 0, xMax: 0, display: false, drawTime: 'beforeDatasetsDraw', backgroundColor: 'rgba(243, 156, 18, 0.06)', borderColor: 'rgba(243, 156, 18, 0.65)', borderWidth: 1.5, borderDash: [5, 4], label: { display: true, content: '', position: 'center', backgroundColor: 'rgba(217, 119, 6, 0.92)', color: '#fff', font: { size: 10, weight: 'bold' }, padding: { top: 4, bottom: 4, left: 7, right: 7 }, borderRadius: 999 } }
+                            ...createGoalGapAnnotations()
                         } 
                     } 
                 } 
@@ -5908,6 +6014,7 @@
         
         distChart = new Chart(ctx, {
             type: 'line',
+            plugins: [goalGapBadgePlugin],
             data: { 
                 datasets: [
                     { 
@@ -5950,7 +6057,7 @@
                         annotations: { 
                             myPosition: { type: 'line', xMin: 0, xMax: 0, borderColor: '#e74c3c', borderWidth: 2, label: { display: true, content: '나의 위치', position: 'top', backgroundColor: '#e74c3c', font: { size: 10 } } },
                             maxPosition: { type: 'line', xMin: 0, xMax: 0, borderColor: '#f39c12', borderWidth: 2, borderDash: [2, 2], label: { display: true, content: '최장 기록', position: 'center', backgroundColor: '#f39c12', font: { size: 10 } } },
-                            goalGap: { type: 'box', xMin: 0, xMax: 0, display: false, drawTime: 'beforeDatasetsDraw', backgroundColor: 'rgba(155, 89, 182, 0.05)', borderColor: 'rgba(155, 89, 182, 0.62)', borderWidth: 1.5, borderDash: [5, 4], label: { display: true, content: '', position: 'center', backgroundColor: 'rgba(126, 34, 206, 0.90)', color: '#fff', font: { size: 10, weight: 'bold' }, padding: { top: 4, bottom: 4, left: 7, right: 7 }, borderRadius: 999 } }
+                            ...createGoalGapAnnotations(true)
                         } 
                     } 
                 } 
@@ -5984,7 +6091,6 @@
 
         const isOverlapping = Math.floor(days) >= globalMaxDays;
         const remainingDays = Math.max(0, Math.ceil(globalMaxDays - days));
-        const pulseOn = Math.floor(Date.now() / 850) % 2 === 0;
 
         if (globalMaxDays > 0 && !isOverlapping) {
             mainChart.options.plugins.annotation.annotations.line3.xMin = chartMaxDays;
@@ -5992,18 +6098,10 @@
             mainChart.options.plugins.annotation.annotations.line3.label.content = `최장 ${globalMaxDays}일`;
             mainChart.options.plugins.annotation.annotations.line3.display = true;
 
-            const gapAnnotation = mainChart.options.plugins.annotation.annotations.goalGap;
-            gapAnnotation.xMin = chartDays;
-            gapAnnotation.xMax = chartMaxDays;
-            gapAnnotation.label.content = `✨ 최장까지 ${remainingDays}일 남음`;
-            gapAnnotation.backgroundColor = pulseOn ? 'rgba(243, 156, 18, 0.11)' : 'rgba(243, 156, 18, 0.045)';
-            gapAnnotation.borderColor = pulseOn ? 'rgba(243, 156, 18, 0.95)' : 'rgba(243, 156, 18, 0.52)';
-            gapAnnotation.label.backgroundColor = pulseOn ? 'rgba(217, 119, 6, 0.98)' : 'rgba(217, 119, 6, 0.82)';
-            gapAnnotation.display = true;
         } else if (mainChart.options.plugins.annotation.annotations.line3) {
             mainChart.options.plugins.annotation.annotations.line3.display = false;
-            mainChart.options.plugins.annotation.annotations.goalGap.display = false;
         }
+        updateGoalGapAnnotations(mainChart, chartDays, chartMaxDays, remainingDays);
 
         mainChart.update('none');
 
@@ -6037,18 +6135,10 @@
                 distChart.options.plugins.annotation.annotations.maxPosition.label.content = `최장 ${globalMaxDays}일`;
                 distChart.options.plugins.annotation.annotations.maxPosition.display = true;
 
-                const gapAnnotation = distChart.options.plugins.annotation.annotations.goalGap;
-                gapAnnotation.xMin = chartDays;
-                gapAnnotation.xMax = chartMaxDays;
-                gapAnnotation.label.content = `✨ 최장까지 ${remainingDays}일 남음`;
-                gapAnnotation.backgroundColor = pulseOn ? 'rgba(155, 89, 182, 0.10)' : 'rgba(155, 89, 182, 0.035)';
-                gapAnnotation.borderColor = pulseOn ? 'rgba(155, 89, 182, 0.92)' : 'rgba(155, 89, 182, 0.48)';
-                gapAnnotation.label.backgroundColor = pulseOn ? 'rgba(126, 34, 206, 0.96)' : 'rgba(126, 34, 206, 0.80)';
-                gapAnnotation.display = true;
             } else if (distChart.options.plugins.annotation.annotations.maxPosition) {
                 distChart.options.plugins.annotation.annotations.maxPosition.display = false;
-                distChart.options.plugins.annotation.annotations.goalGap.display = false;
             }
+            updateGoalGapAnnotations(distChart, chartDays, chartMaxDays, remainingDays);
             distChart.update('none');
         }
     }
