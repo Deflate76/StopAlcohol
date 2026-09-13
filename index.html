@@ -10,7 +10,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>금주 서바이벌 리포트</title>
-    <meta name="app-build" content="chart-gap-html-badge-v3">
+    <meta name="app-build" content="records-calendar-v4">
     
     <meta name="description" content="1,000명의 도전자와 함께하는 금주 서바이벌 레이스" />
     <meta name="theme-color" content="#ffffff" />
@@ -190,19 +190,22 @@
         .push-link-btn:active, .push-info-btn:active { transform: scale(0.98); }
         
         .chart-container { position: relative; height: 250px; width: 100%; margin: 10px 0; }
-        /* 남은 일수 v3: 캔버스 라벨 대신 실제 HTML 배지로 색상과 blink를 적용합니다. */
-        #sectionStats .chart-container > .goal-gap-badge {
-            position: absolute; z-index: 5; box-sizing: border-box;
-            display: block; width: max-content; max-width: calc(100% - 8px);
-            padding: 6px 10px; border: 2px solid #d97706; border-radius: 10px;
+        /* 배지 크기는 기존 대비 70%: 글씨·여백·테두리를 함께 축소합니다. */
+        #sectionStats .chart-container > .goal-gap-badge,
+        #calendarModal .cal-best-start-badge {
+            box-sizing: border-box; display: block; width: max-content;
+            padding: 4.2px 7px; border: 1.4px solid #d97706; border-radius: 7px;
             color: #111827 !important; -webkit-text-fill-color: #111827 !important;
             background: #fef08a !important; background-image: none !important;
-            font: 900 13px/1.4 'Pretendard', -apple-system, sans-serif;
+            font: 900 9.1px/1.4 'Pretendard', -apple-system, sans-serif;
             text-align: center; text-shadow: none !important;
             white-space: normal; word-break: keep-all; overflow-wrap: anywhere;
-            box-shadow: 0 0 12px rgba(245, 158, 11, 0.65);
+            box-shadow: 0 0 8.4px rgba(245, 158, 11, 0.65);
             pointer-events: none; user-select: none;
             animation: alcoholawayGoalGapBlinkV3 2s step-end infinite;
+        }
+        #sectionStats .chart-container > .goal-gap-badge {
+            position: absolute; z-index: 5; max-width: calc(100% - 8px);
         }
         #sectionStats .chart-container > .goal-gap-badge[hidden] { display: none !important; }
         @keyframes alcoholawayGoalGapBlinkV3 {
@@ -210,7 +213,9 @@
             50% { opacity: 0; }
         }
         @media (prefers-reduced-motion: reduce) {
-            #sectionStats .chart-container > .goal-gap-badge { animation: none; opacity: 1; }
+            #sectionStats .chart-container > .goal-gap-badge,
+            #calendarModal .cal-best-start-badge,
+            #calendarModal .cal-day.cal-best-start-focus { animation: none !important; opacity: 1; }
         }
         
         .tab-container { display: flex; justify-content: space-around; margin-top: 5px; border-bottom: 2px solid #e2e8f0; margin-bottom: 20px; }
@@ -288,6 +293,23 @@
         .history-status { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; vertical-align: middle; }
         .status-active { background: #e3f2fd; color: #1976d2; }
         .status-failed { background: #ffe3e3; color: #e74c3c; }
+
+        .accumulated-records-summary { color: #475569; font-size: 0.85rem; line-height: 1.5; margin: 8px 0 12px; }
+        .accumulated-records-help { color: #64748b; font-size: 0.75rem; line-height: 1.5; word-break: keep-all; margin: 10px 0; }
+        .accumulated-records-table-wrap { max-height: 55vh; overflow: auto; border: 1px solid #dbe3ee; border-radius: 12px; }
+        .accumulated-records-table { width: 100%; min-width: 270px; border-collapse: collapse; table-layout: fixed; font-size: 0.78rem; text-align: center; }
+        .accumulated-records-table th { position: sticky; top: 0; z-index: 1; background: #eff6ff; border-bottom: 1px solid #cbd5e0; }
+        .accumulated-records-table th button { appearance: none; width: 100%; border: 0; background: transparent; padding: 11px 3px; color: #334155; cursor: pointer; font-family: inherit; font-size: 0.78rem; font-weight: 850; line-height: 1.4; white-space: nowrap; }
+        .accumulated-records-table th[aria-sort="ascending"] button,
+        .accumulated-records-table th[aria-sort="descending"] button { color: #1d4ed8; background: #dbeafe; }
+        .accumulated-records-table th button:focus-visible { outline: 2px solid #2563eb; outline-offset: -3px; }
+        .accumulated-records-table td { padding: 11px 5px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; color: #334155; }
+        .accumulated-records-table tbody tr:nth-child(even) { background: #f8fafc; }
+        .accumulated-records-table tbody tr:last-child td { border-bottom: 0; }
+        .accumulated-record-date { display: block; font-weight: 800; white-space: nowrap; }
+        .accumulated-record-time { display: block; color: #64748b; font-size: 0.7rem; margin-top: 2px; }
+        .accumulated-record-duration { color: #0f766e; font-weight: 900; }
+        .accumulated-record-active { display: inline-block; padding: 2px 5px; border-radius: 6px; color: #1d4ed8; background: #dbeafe; font-size: 0.73rem; font-weight: 800; white-space: nowrap; }
 
         footer { margin-top: 30px; padding: 15px 0; text-align: center; font-size: 0.75rem; color: #9ca3af; border-top: 1px solid #e2e8f0; width: 100%; max-width: 550px; align-self: center; }
         .chart-divider { border-top: 1px dashed #e2e8f0; margin: 20px 0; }
@@ -389,6 +411,22 @@
 
         .cal-day.fail-mark { cursor: pointer; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .cal-day.fail-mark:hover { transform: scale(1.15); z-index: 25; box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3); }
+
+        #calendarModal .cal-day.cal-best-start-focus {
+            z-index: 25; padding-bottom: 32px; border-radius: 8px;
+            outline: 2px solid #f59e0b; outline-offset: -1px;
+            box-shadow: 0 0 12px rgba(245, 158, 11, 0.8);
+            animation: longestStartCellGlow 2s ease-in-out infinite;
+        }
+        #calendarModal .cal-best-start-badge {
+            position: absolute; left: 50%; bottom: 11px; transform: translateX(-50%);
+            z-index: 30; max-width: calc(100% - 4px); padding: 2px 3px; white-space: nowrap;
+        }
+        .cal-best-record-note { flex-basis: 100%; color: #92400e; font-size: 0.75rem; font-weight: 800; text-align: center; }
+        @keyframes longestStartCellGlow {
+            0%, 100% { outline-color: #f59e0b; box-shadow: 0 0 12px rgba(245, 158, 11, 0.8); }
+            50% { outline-color: #fcd34d; box-shadow: 0 0 2px rgba(245, 158, 11, 0.25); }
+        }
 
 
         /* 접힘 섹션 높이/버튼 좌표 통일: details.main-section 기준 */
@@ -1422,6 +1460,30 @@
     </div>
 </div>
 
+<!-- 누적 단주 기간 조회·정렬 모달 -->
+<div id="accumulatedRecordsModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="accumulatedRecordsTitle">
+    <div class="modal-content" style="max-width: 540px;">
+        <button type="button" class="close-btn-top" onclick="closeModal('accumulatedRecordsModal')" aria-label="닫기">&times;</button>
+        <h3 id="accumulatedRecordsTitle" style="margin-top: 0; padding-right: 20px;">📚 내 인생 누적 단주</h3>
+        <p id="accumulatedRecordsSummary" class="accumulated-records-summary" role="status" aria-live="polite"></p>
+        <p class="accumulated-records-help">열 제목을 누르면 정렬 순서가 바뀝니다. ↑ 오름차순 · ↓ 내림차순</p>
+        <div id="accumulatedRecordsTableWrap" class="accumulated-records-table-wrap" hidden>
+            <table class="accumulated-records-table" aria-label="단주 기록별 시작날짜, 종료날짜, 유지기간">
+                <thead>
+                    <tr>
+                        <th scope="col" data-sort-key="start" aria-sort="descending"><button type="button" onclick="sortAccumulatedRecords('start')">시작날짜 <span data-sort-indicator aria-hidden="true">↓</span></button></th>
+                        <th scope="col" data-sort-key="end" aria-sort="none"><button type="button" onclick="sortAccumulatedRecords('end')">종료날짜 <span data-sort-indicator aria-hidden="true">↕</span></button></th>
+                        <th scope="col" data-sort-key="duration" aria-sort="none"><button type="button" onclick="sortAccumulatedRecords('duration')">유지기간 <span data-sort-indicator aria-hidden="true">↕</span></button></th>
+                    </tr>
+                </thead>
+                <tbody id="accumulatedRecordsBody"></tbody>
+            </table>
+        </div>
+        <p class="accumulated-records-help">진행 중인 기록의 유지기간은 팝업을 연 시각까지 계산합니다. 종료날짜가 없는 기록은 종료날짜 정렬 시 맨 아래에 표시됩니다.</p>
+        <button type="button" class="stat-btn" style="margin-top: 12px;" onclick="closeModal('accumulatedRecordsModal')">닫기</button>
+    </div>
+</div>
+
 <!-- 단주 기록 리스트 모달 -->
 <div id="historyListModal" class="modal">
     <div class="modal-content" style="max-width: 500px;">
@@ -1648,6 +1710,9 @@
     let allChallengesData = []; 
     let currentCalDate = new Date();
     let currentCalMode = 'current';
+    let accumulatedRecordsRows = [];
+    let accumulatedRecordsSort = { key: 'start', direction: 'desc' };
+    let accumulatedRecordsRequestId = 0;
     
     let allCravingsList = [];
     let cravingsCurrentPage = 0;
@@ -2287,12 +2352,14 @@
     ];
 
     function normalizeChallengeDoc(docId, data) {
-        const start = new Date(data.startDate);
+        const start = data.startDate === null || data.startDate === undefined || data.startDate === ''
+            ? new Date(NaN) : new Date(data.startDate);
         const end = data.endDate ? new Date(data.endDate) : new Date();
         return {
             id: docId,
             startDate: start,
             endDate: end,
+            hasRecordedEndDate: !!data.endDate,
             status: data.status,
             startReason: data.startReason || '',
             failReason: data.failReason,
@@ -2300,6 +2367,41 @@
             cravings: data.cravings || [],
             createdAt: data.createdAt || (isNaN(start.getTime()) ? 0 : start.getTime())
         };
+    }
+
+    function getChallengeRecordRange(challenge, nowMs = Date.now()) {
+        const parseTime = value => {
+            if (value === null || value === undefined || value === '') return null;
+            const time = new Date(value).getTime();
+            return Number.isFinite(time) ? time : null;
+        };
+        const startMs = parseTime(challenge.startDate);
+        const isActive = challenge.status === 'active';
+        const endMs = isActive || challenge.hasRecordedEndDate === false ? null : parseTime(challenge.endDate);
+        const effectiveEndMs = isActive ? nowMs : endMs;
+        const durationMs = startMs !== null && effectiveEndMs !== null && effectiveEndMs >= startMs
+            ? effectiveEndMs - startMs : null;
+        return { startMs, endMs, effectiveEndMs, durationMs, isActive };
+    }
+
+    function getLongestChallengeRecord(challenges = allChallengesData, nowMs = Date.now()) {
+        return challenges.reduce((best, challenge) => {
+            const range = getChallengeRecordRange(challenge, nowMs);
+            if (range.durationMs === null) return best;
+            if (!best || range.durationMs > best.durationMs
+                    || (range.durationMs === best.durationMs && range.startMs < best.startMs)) {
+                return { ...range, id: challenge.id };
+            }
+            return best;
+        }, null);
+    }
+
+    function refreshLongestChallengeRecord(nowMs = Date.now()) {
+        const best = getLongestChallengeRecord(allChallengesData, nowMs);
+        globalMaxDays = best ? Math.floor(best.durationMs / 86400000) : 0;
+        globalBestStartDate = best ? new Date(best.startMs).toISOString() : null;
+        globalBestEndDate = best ? new Date(best.effectiveEndMs).toISOString() : null;
+        return best;
     }
 
     async function ensureAllChallengesLoaded(force = false) {
@@ -3166,26 +3268,26 @@
                 document.getElementById('activeMotivationalSummary').style.display = 'none';
                 allChallengesData = [];
                 globalFailedDayCount = 0;
+                totalPastDays = 0;
+                refreshLongestChallengeRecord();
                 return;
             }
 
             let totalDays = 0;
-            let maxDays = 0;
-            let bestStartDate = null;
-            let bestEndDate = null;
             let totalCravings = 0;
             let challengeCount = 0;
+            const statsNowMs = Date.now();
             const failedDateKeys = new Set();
             totalPastDays = 0;
             allChallengesData = [];
 
             snapshot.forEach(docSnap => {
                 const data = docSnap.data();
-                const start = new Date(data.startDate);
-                const end = data.endDate ? new Date(data.endDate) : new Date();
-                const diffDays = Math.max(0, Math.floor((end - start) / 86400000));
-                
-                allChallengesData.push(normalizeChallengeDoc(docSnap.id, data));
+                const challenge = normalizeChallengeDoc(docSnap.id, data);
+                const range = getChallengeRecordRange(challenge, statsNowMs);
+                const diffDays = range.durationMs === null ? 0 : Math.floor(range.durationMs / 86400000);
+
+                allChallengesData.push(challenge);
                 
                 totalDays += diffDays;
                 
@@ -3193,11 +3295,6 @@
                     totalPastDays += diffDays;
                 }
 
-                if (diffDays > maxDays) {
-                    maxDays = diffDays;
-                    bestStartDate = data.startDate;
-                    bestEndDate = data.endDate ? data.endDate : new Date().toISOString();
-                }
                 if (data.status === 'failed' && data.endDate) {
                     const failedDateKey = dateToKey(data.endDate);
                     if (failedDateKey) failedDateKeys.add(failedDateKey);
@@ -3206,9 +3303,8 @@
                 challengeCount++;
             });
 
-            globalMaxDays = maxDays;
-            globalBestStartDate = bestStartDate;
-            globalBestEndDate = bestEndDate;
+            refreshLongestChallengeRecord(statsNowMs);
+            const maxDays = globalMaxDays;
             globalFailedDayCount = failedDateKeys.size;
 
             if (challengeCount > 0 && totalDays > 0) {
@@ -3234,6 +3330,7 @@
                                 <div style="font-size: 1.1rem; font-weight: 800; color: var(--warning-color); margin-top: 2px;">${totalCravings}번</div>
                             </div>
                         </div>
+                        <button type="button" class="stat-btn" style="margin-top: 12px;" onclick="openHistoryList()">📚 단주기록</button>
                     </div>
                 `;
                 document.getElementById('motivationalSummary').innerHTML = htmlContent;
@@ -4759,15 +4856,123 @@
         fillEl.style.width = `${stats.percent}%`;
     }
 
+    function formatAccumulatedRecordDate(timestamp) {
+        if (timestamp === null) return '<span class="accumulated-record-date">—</span>';
+        const date = new Date(timestamp);
+        const timeText = `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+        return `<span class="accumulated-record-date">${formatDateShortKo(date)}</span><span class="accumulated-record-time">${timeText}</span>`;
+    }
+
+    function formatAccumulatedDuration(durationMs) {
+        if (durationMs === null) return '—';
+        const totalMinutes = Math.floor(durationMs / 60000);
+        if (totalMinutes === 0) return durationMs > 0 ? '1분 미만' : '0분';
+        const days = Math.floor(totalMinutes / 1440);
+        const hours = Math.floor((totalMinutes % 1440) / 60);
+        const minutes = totalMinutes % 60;
+        return [days ? `${days}일` : '', hours ? `${hours}시간` : '', minutes ? `${minutes}분` : ''].filter(Boolean).join(' ');
+    }
+
+    function getSortedAccumulatedRecords(rows, key, direction) {
+        const field = { start: 'startMs', end: 'endMs', duration: 'durationMs' }[key] || 'startMs';
+        const multiplier = direction === 'asc' ? 1 : -1;
+        return [...rows].sort((a, b) => {
+            const aValue = a[field];
+            const bValue = b[field];
+            // 진행 중인 기록의 종료일, 누락된 날짜는 어느 정렬 방향에서도 맨 아래에 둡니다.
+            if (aValue === null && bValue === null) return a.originalIndex - b.originalIndex;
+            if (aValue === null) return 1;
+            if (bValue === null) return -1;
+            return (aValue - bValue) * multiplier || a.originalIndex - b.originalIndex;
+        });
+    }
+
+    function renderAccumulatedRecords() {
+        const rows = getSortedAccumulatedRecords(accumulatedRecordsRows, accumulatedRecordsSort.key, accumulatedRecordsSort.direction);
+        const body = document.getElementById('accumulatedRecordsBody');
+        const summary = document.getElementById('accumulatedRecordsSummary');
+        const activeCount = rows.filter(row => row.isActive).length;
+        document.getElementById('accumulatedRecordsTableWrap').hidden = rows.length === 0;
+        summary.textContent = rows.length
+            ? `총 ${rows.length}개 기록 · 종료 ${rows.length - activeCount}개 · 진행 중 ${activeCount}개`
+            : '아직 생성된 단주 기록이 없습니다.';
+        body.innerHTML = rows.map(row => `
+            <tr>
+                <td>${formatAccumulatedRecordDate(row.startMs)}</td>
+                <td>${row.isActive ? '<span class="accumulated-record-active">진행 중</span>' : formatAccumulatedRecordDate(row.endMs)}</td>
+                <td><span class="accumulated-record-duration">${formatAccumulatedDuration(row.durationMs)}</span></td>
+            </tr>
+        `).join('');
+        const labels = { start: '시작날짜', end: '종료날짜', duration: '유지기간' };
+        document.querySelectorAll('#accumulatedRecordsModal th[data-sort-key]').forEach(header => {
+            const key = header.dataset.sortKey;
+            const selected = key === accumulatedRecordsSort.key;
+            const ascending = accumulatedRecordsSort.direction === 'asc';
+            header.setAttribute('aria-sort', selected ? (ascending ? 'ascending' : 'descending') : 'none');
+            header.querySelector('[data-sort-indicator]').textContent = selected ? (ascending ? '↑' : '↓') : '↕';
+            const nextOrder = selected && !ascending ? '오름차순' : '내림차순';
+            header.querySelector('button').setAttribute('aria-label', `${labels[key]} ${nextOrder}으로 정렬`);
+        });
+    }
+
+    window.sortAccumulatedRecords = function(key) {
+        if (!['start', 'end', 'duration'].includes(key)) return;
+        accumulatedRecordsSort = {
+            key,
+            direction: accumulatedRecordsSort.key === key && accumulatedRecordsSort.direction === 'desc' ? 'asc' : 'desc'
+        };
+        renderAccumulatedRecords();
+    };
+
+    window.openAccumulatedRecordsModal = async function() {
+        if (!userId) return alert('로그인이 필요합니다.');
+        const requestId = ++accumulatedRecordsRequestId;
+        accumulatedRecordsRows = [];
+        accumulatedRecordsSort = { key: 'start', direction: 'desc' };
+        document.getElementById('accumulatedRecordsBody').innerHTML = '';
+        document.getElementById('accumulatedRecordsTableWrap').hidden = true;
+        document.getElementById('accumulatedRecordsSummary').textContent = '단주 기록을 불러오는 중입니다…';
+        closeModal('calendarModal');
+        openModal('accumulatedRecordsModal');
+        try {
+            const challenges = await ensureAllChallengesLoaded(true);
+            if (requestId !== accumulatedRecordsRequestId) return;
+            const nowMs = Date.now();
+            accumulatedRecordsRows = challenges.map((challenge, originalIndex) => ({
+                ...getChallengeRecordRange(challenge, nowMs), originalIndex
+            }));
+            renderAccumulatedRecords();
+        } catch (e) {
+            if (requestId !== accumulatedRecordsRequestId) return;
+            document.getElementById('accumulatedRecordsSummary').textContent = '기록을 불러오지 못했습니다. 잠시 후 다시 열어 주세요.';
+            console.error(e);
+        }
+    };
+
     window.openCalendarModal = async function(mode) {
+        if (mode === 'accumulated') return openAccumulatedRecordsModal();
         currentCalMode = mode;
-        currentCalDate = new Date();
+        const today = new Date();
+        currentCalDate = new Date(today.getFullYear(), today.getMonth(), 1);
         setCalAlcoholChangeCompareCollapsed(true);
         setCalMonthAlcoholCompareCollapsed(true);
         setCalMonthToDateAlcoholCompareCollapsed(true);
         setCalMedicationAlcoholCompareCollapsed(true);
         initCalMedicationNonMedStartDate();
-        if (userId) await ensureAllChallengesLoaded(true);
+        try {
+            if (userId) await ensureAllChallengesLoaded(true);
+        } catch (e) {
+            console.error(e);
+            alert('달력에 표시할 기록을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.');
+            return;
+        }
+        if (mode === 'longest') {
+            const best = refreshLongestChallengeRecord();
+            if (best) {
+                const startDate = new Date(best.startMs);
+                currentCalDate = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+            }
+        }
         renderCalendar(currentCalDate.getFullYear(), currentCalDate.getMonth(), mode);
         openModal('calendarModal');
         setTimeout(() => {
@@ -4778,7 +4983,7 @@
     };
 
     window.changeCalMonth = function(offset) {
-        currentCalDate.setMonth(currentCalDate.getMonth() + offset);
+        currentCalDate = new Date(currentCalDate.getFullYear(), currentCalDate.getMonth() + offset, 1);
         renderCalendar(currentCalDate.getFullYear(), currentCalDate.getMonth(), currentCalMode);
     };
 
@@ -4805,6 +5010,9 @@
             legendContainer.innerHTML = `
                 <div><span style="display:inline-block; width:10px; height:10px; background:var(--warning-color); border-radius:2px;"></span> 최장 금주 구간</div>
                 ${alcoholLegendHtml}
+                <div class="cal-best-record-note">${globalBestStartDate
+                    ? `${formatDateShortKo(globalBestStartDate)} ~ ${formatDateShortKo(globalBestEndDate)} · 시작일을 반짝이는 배지로 표시합니다.`
+                    : '표시할 최장 단주 기록이 없습니다.'}</div>
             `;
         } else {
             legendContainer.innerHTML = `
@@ -4870,7 +5078,9 @@
             }
 
             let customStyle = ""; 
-            let onClickEvent = ""; 
+            let onClickEvent = "";
+            let longestStartBadge = '';
+            let longestStartAttributes = '';
             const iterDateStrCal = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
             const failedChallengeForDay = findFailedChallengeByDate(iterDateStrCal);
             const alcoholRecordForDay = getAlcoholRecordForDate(iterDateStrCal);
@@ -4897,6 +5107,11 @@
                     const isStart = iterTime === sd.getTime();
                     const isEnd = iterTime === ed.getTime();
 
+                    if (isStart) {
+                        classList.push('cal-best-start-focus');
+                        longestStartBadge = '<span class="cal-best-start-badge" aria-hidden="true">시작</span>';
+                        longestStartAttributes = `aria-label="${formatDateShortKo(sd)}, 최장 단주 기록 시작일" title="최장 단주 기록 시작일"`;
+                    }
                     if (iterTime >= sd.getTime() && iterTime <= ed.getTime()) {
                         if (isStart && isEnd) classList.push('range-best-single');
                         else if (isStart) classList.push('range-best-start');
@@ -4986,7 +5201,7 @@
                 onClickEvent = `onclick="openCalendarDayContentFromClick(event, '${iterDateStrCal}')"`;
             }
 
-            grid.innerHTML += `<div class="${classList.join(' ')}" ${customStyle} ${onClickEvent} data-date="${iterDateStrCal}" onmousedown="startPress(event, this)" onmouseup="cancelPress()" onmouseleave="cancelPress()" ontouchstart="startPress(event, this)" ontouchend="cancelPress()">${day}${cravingBadge}${cBadge}${logBadge}</div>`;
+            grid.innerHTML += `<div class="${classList.join(' ')}" ${customStyle} ${onClickEvent} ${longestStartAttributes} data-date="${iterDateStrCal}" onmousedown="startPress(event, this)" onmouseup="cancelPress()" onmouseleave="cancelPress()" ontouchstart="startPress(event, this)" ontouchend="cancelPress()">${day}${cravingBadge}${cBadge}${logBadge}${longestStartBadge}</div>`;
         }
     }
 
