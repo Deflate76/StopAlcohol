@@ -9,15 +9,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>금주 서바이벌 리포트</title>
-    <meta name="app-build" content="records-calendar-v5-health-compact-buttons">
+    <title>하루건강 기록 | 금주·건강관리</title>
+    <meta name="app-build" content="records-calendar-v6-haru-health">
     
-    <meta name="description" content="1,000명의 도전자와 함께하는 금주 서바이벌 레이스" />
+    <meta name="description" content="금주부터 건강 상태, 진단과 처방전까지. 나의 건강을 하루씩 기록하는 하루건강 기록." />
     <meta name="theme-color" content="#ffffff" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="금주서바이벌" />
+    <meta name="apple-mobile-web-app-title" content="하루건강 기록" />
 
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
@@ -284,9 +284,21 @@
         .comment-section { margin-top: 15px; padding-top: 12px; border-top: 1px dashed #e2e8f0; }
         .comment-item { font-size: 0.85rem; padding: 6px 0; border-bottom: 1px solid #f8f9fa; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
         .comment-item:last-child { border-bottom: none; }
-        .comment-input-area { display: flex; gap: 8px; margin-top: 10px; }
-        .comment-input { flex: 1; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.85rem; background: #f8f9fa; }
-        .comment-btn { background: var(--text-dark); color: white; border: none; padding: 8px 14px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; cursor: pointer; }
+        .comment-input-area { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+        .comment-input-area .comment-input { box-sizing: border-box; flex: 1 1 0; min-width: 0; height: 40px; margin: 0; padding: 0 10px; border: 1px solid #e2e8f0; border-radius: 8px; font-family: inherit; font-size: .85rem; line-height: 1.2; background: #f8f9fa; }
+        .comment-input-area .comment-btn { box-sizing: border-box; flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; height: 40px; margin: 0; background: var(--text-dark); color: white; border: none; padding: 0 14px; border-radius: 8px; font-family: inherit; font-size: .85rem; line-height: 1.2; font-weight: bold; cursor: pointer; }
+        .comment-item .day-badge { font-size: .65rem; padding: 1px 4px; }
+        .comment-text { margin-left: 5px; color: #4a5568; overflow-wrap: anywhere; }
+        .comment-reaction { display: inline-flex; align-items: center; font-size: 1.3rem; line-height: 1.25; }
+        .comment-reaction-hint { margin: 8px 0 5px; font-size: .71rem; line-height: 1.4; color: #64748b; }
+        .comment-reactions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+        .comment-reaction-btn { appearance: none; box-sizing: border-box; flex: 0 0 34px; display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; padding: 0; border: 1px solid #e2e8f0; border-radius: 10px; background: #f8fafc; font-size: 1.1rem; line-height: 1; cursor: pointer; touch-action: manipulation; transition: background .15s ease, border-color .15s ease; }
+        .comment-reaction-btn:hover { background: #f0fdfa; border-color: #5eead4; }
+        .comment-reaction-btn:focus-visible, .comment-btn:focus-visible { outline: 2px solid #0d9488; outline-offset: 2px; }
+        .comment-reaction-btn:disabled, .comment-btn:disabled { opacity: .55; cursor: wait; }
+        .comment-status { margin: 6px 0 0; color: #0f766e; font-size: .74rem; line-height: 1.4; }
+        .comment-status:empty { display: none; }
+        .comment-status.is-error { color: #b91c1c; }
 
         .history-item { background: #f8f9fa; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; margin-bottom: 10px; cursor: pointer; transition: background 0.2s; display: flex; flex-direction: column; gap: 5px; position: relative; }
         .history-item:hover { background: #edf2f7; border-color: #cbd5e0; }
@@ -665,15 +677,17 @@
         }
 
             /* 건강기록 · 처방전 기록 (2026-09-19) */
-        .section-bulk-toolbar { width: fit-content; margin: 0 0 2px auto; padding: 2px; gap: 1px; flex-wrap: nowrap; border: 1px solid #e2e8f0; border-radius: 9px; box-shadow: none; background: #f8fafc; position: static; }
+        .section-bulk-toolbar { width: fit-content; margin: 0; padding: 0; gap: 0; flex-wrap: nowrap; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: none; background: #f8fafc; position: static; }
         .section-bulk-btn { flex: 0 0 28px; box-sizing: border-box; width: 28px; height: 26px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 6px; background: transparent; color: #64748b; box-shadow: none; transition: background .16s ease, color .16s ease, transform .16s ease; }
-        .section-bulk-btn svg { width: 17px; height: 17px; flex: none; pointer-events: none; }
+        .section-bulk-btn svg { width: 15px; height: 15px; flex: none; pointer-events: none; }
         .section-bulk-btn:hover { background: #eaf0f7; color: #2563eb; box-shadow: none; }
         .section-bulk-btn:active { transform: scale(.94); }
         .section-bulk-btn[aria-pressed="true"] { background: #e5edf8; color: #2563eb; box-shadow: none; }
         .section-bulk-btn:focus-visible { outline: 2px solid #60a5fa; outline-offset: 2px; }
         .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
         .header-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) auto; gap: 5px; }
+        .header-actions > .section-bulk-toolbar { grid-column: 4; grid-row: 2; order: 2; align-self: center; justify-self: end; }
+        .header-actions .section-bulk-btn { flex: 0 0 24px; min-width: 24px; width: 24px; height: 24px; padding: 0; }
         .header-actions > button, .header-actions > .logout-btn { min-width: 0; padding: 7px 5px; font-size: .72rem; }
         .header-actions .header-record-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; width: 100%; grid-column: 1 / 4; order: 2; }
         .header-actions .header-record-actions button { box-sizing: border-box; min-width: 0; width: 100%; padding: 7px 5px; font-size: .72rem; line-height: 1.45; white-space: nowrap; overflow-wrap: normal; }
@@ -755,7 +769,7 @@
         .prescription-card .health-btn { padding: 5px 8px; font-size: .72rem; }
         #prescriptionImageFull { display: block; width: 100%; height: auto; object-fit: contain; }
         #prescriptionImageModal .modal-content { max-width: 880px; }
-        @media (max-width: 360px) { .health-diagnosis-input { grid-template-columns: minmax(0, 1fr) 117px 27px; } .header-actions > button, .header-actions .header-record-actions button { padding: 7px 2px; font-size: .65rem; letter-spacing: -.025em; } }
+        @media (max-width: 360px) { .health-diagnosis-input { grid-template-columns: minmax(0, 1fr) 117px 27px; } .header-actions, .header-actions .header-record-actions { gap: 4px; } .header-actions > button, .header-actions .header-record-actions button { padding: 7px 2px; font-size: .65rem; letter-spacing: -.025em; } }
 
     </style>
 </head>
@@ -763,7 +777,7 @@
 <div id="pageTopAnchor" class="page-scroll-anchor" aria-hidden="true"></div>
 
 <div class="container">
-    <h1>🚫 금주 서바이벌 리포트</h1>
+    <h1>🌿 하루건강 기록</h1>
     <button id="enablePushBtn" class="stat-btn" style="display:none; margin-bottom: 18px; border-color: var(--primary-color); color: var(--primary-color);">🔔 푸시 알림 허용</button>
     <div id="pushTestLinkRow" class="push-test-link-row">
         <button id="sendTestPushBtn" class="push-link-btn" type="button">푸시 알람 상태 체크</button>
@@ -837,20 +851,21 @@
                     <button type="button" class="header-nav-btn prescription-record-btn" onclick="startPrescriptionRecord()">처방전기록</button>
                     <button type="button" class="header-nav-btn prescription-view-btn" onclick="openPrescriptionGallery()">처방전보기</button>
                 </div>
+                <div class="section-bulk-toolbar" role="group" aria-label="메인 섹션 일괄 제어">
+                    <span id="mainSectionStateText" class="sr-only" aria-live="polite"></span>
+                    <button id="expandAllMainSectionsBtn" type="button" class="section-bulk-btn" onclick="setAllMainSections(true)" title="전체 펼치기" aria-label="전체 펼치기">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 7 4-4 4 4M8 17l4 4 4-4M5 12h14"/></svg>
+                    </button>
+                    <button id="collapseAllMainSectionsBtn" type="button" class="section-bulk-btn" onclick="setAllMainSections(false)" title="전체 접기" aria-label="전체 접기">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 3 4 4 4-4M8 21l4-4 4 4M5 12h14"/></svg>
+                    </button>
+                </div>
                 <button type="button" class="logout-btn" onclick="logout()">로그아웃</button>
             </div>
         </div>
 
 
-        <div class="section-bulk-toolbar" aria-label="메인 섹션 일괄 제어">
-            <span id="mainSectionStateText" class="sr-only" aria-live="polite"></span>
-            <button id="expandAllMainSectionsBtn" type="button" class="section-bulk-btn" onclick="setAllMainSections(true)" title="전체 펼치기" aria-label="전체 펼치기">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 7 4-4 4 4M8 17l4 4 4-4M5 12h14"/></svg>
-            </button>
-            <button id="collapseAllMainSectionsBtn" type="button" class="section-bulk-btn" onclick="setAllMainSections(false)" title="전체 접기" aria-label="전체 접기">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 3 4 4 4-4M8 21l4-4 4 4M5 12h14"/></svg>
-            </button>
-        </div>
+
 
         <div class="timer-display inline-collapsible-section" id="timerDisplaySection" data-collapsed="false">
             <button type="button" class="inline-collapsible-summary" onclick="toggleInlineCollapsible('timerDisplaySection')" aria-expanded="true" aria-label="현재 도전 타이머 접기 또는 펼치기"><span>⏱️ 현재 도전 타이머</span></button>
@@ -6398,103 +6413,156 @@
         });
     }
 
-    function calcDday(quitISO) {
-        if(!quitISO) return "?";
-        const diff = new Date() - new Date(quitISO);
-        if(diff < 0) return "0";
-        return Math.floor(diff / 86400000) + 1;
+    const COMMUNITY_CHEERS = [
+        { id: 'strength', emoji: '💪', label: '힘내요' },
+        { id: 'applause', emoji: '👏', label: '잘하고 있어요' },
+        { id: 'heart', emoji: '💚', label: '응원해요' },
+        { id: 'together', emoji: '🤗', label: '함께할게요' },
+        { id: 'growth', emoji: '🌱', label: '하루씩 성장해요' }
+    ];
+    const pendingCommunityComments = new Set();
+    function communityTimeMs(value) {
+        if (value === null || value === undefined || value === '' || typeof value === 'boolean') return NaN;
+        if (typeof value?.toMillis === 'function') return value.toMillis();
+        if (typeof value === 'object' && Number.isFinite(value.seconds)) {
+            return value.seconds * 1000 + (Number.isFinite(value.nanoseconds) ? value.nanoseconds / 1000000 : 0);
+        }
+        return new Date(value).getTime();
+    }
+    function calcDday(quitISO, writtenAt) {
+        const start = communityTimeMs(quitISO), end = communityTimeMs(writtenAt);
+        if (!Number.isFinite(start) || !Number.isFinite(end)) return null;
+        // Keep the app's inclusive day count, measured at creation, never at viewing time.
+        return end < start ? 0 : Math.floor((end - start) / 86400000) + 1;
+    }
+    function communityDayAtWrite(record) {
+        if (Number.isSafeInteger(record?.authorDayAtWrite) && record.authorDayAtWrite >= 0) return record.authorDayAtWrite;
+        // Older records already contain the original start date and creation time.
+        return calcDday(record?.authorQuitDate, record?.createdAt);
+    }
+    function communityDayBadge(record) {
+        const day = communityDayAtWrite(record);
+        const label = day === null ? '작성 당시 도전 일수 미상' : `작성 당시 도전 ${day}일째`;
+        return `<span class="day-badge" title="${label}" aria-label="${label}">D+${day ?? '?'}</span>`;
+    }
+    function communityCommentKey(uid, postId) { return JSON.stringify([uid, postId]); }
+    function setCommunityCommentPending(postId, pending) {
+        document.getElementById(`cmtComposer_${postId}`)?.querySelectorAll('button').forEach(button => { button.disabled = pending; });
     }
 
     window.submitPost = async function() {
-        if (!userId) return alert("로그인이 필요합니다.");
-        const content = document.getElementById('postContent').value.trim();
-        if (!content) return alert("내용을 입력해 주세요.");
-
+        if (!userId) return alert('로그인이 필요합니다.');
+        const input = document.getElementById('postContent'), content = input.value.trim();
+        if (!content) return alert('내용을 입력해 주세요.');
+        const uid = userId, createdAt = Date.now(), authorQuitDate = userQuitDate || null;
         try {
-            await addDoc(collection(db, "posts"), {
-                uid: userId,
-                author: userProfile.nickname || auth.currentUser.displayName || "익명의 생존자",
-                authorQuitDate: userQuitDate || null,
-                content: content,
-                createdAt: new Date().getTime(),
+            await addDoc(collection(db, 'posts'), {
+                uid,
+                author: userProfile.nickname || auth.currentUser?.displayName || '익명의 생존자',
+                authorQuitDate,
+                authorDayAtWrite: calcDday(authorQuitDate, createdAt),
+                content,
+                createdAt,
                 comments: []
             });
-            document.getElementById('postContent').value = '';
-        } catch (error) { alert("작성에 실패했습니다: " + error.message); }
+            if (userId === uid && input.value.trim() === content) input.value = '';
+        } catch (error) { if (userId === uid) alert('작성에 실패했습니다: ' + error.message); }
     };
 
     window.loadPosts = function() {
-        const q = query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(50));
-        
-        unsubscribePosts = onSnapshot(q, (snapshot) => {
+        if (unsubscribePosts) unsubscribePosts();
+        const viewerUid = userId;
+        let hasRendered = false;
+        const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(50));
+        unsubscribePosts = onSnapshot(q, snapshot => {
+            if (userId !== viewerUid) return;
             const postList = document.getElementById('postList');
-            postList.innerHTML = ''; 
-            
+            const drafts = new Map();
+            const focused = document.activeElement;
+            const focusState = hasRendered && postList.contains(focused) && focused?.classList.contains('comment-input')
+                ? { id: focused.id, start: focused.selectionStart, end: focused.selectionEnd } : null;
+            if (hasRendered) postList.querySelectorAll('.comment-input').forEach(input => drafts.set(input.id, input.value));
+            hasRendered = true;
+            postList.innerHTML = '';
             if (snapshot.empty) {
                 postList.innerHTML = '<div style="text-align:center; padding:20px; color:#999; font-size:0.9rem;">아직 발송된 통신이 없습니다.<br>첫 생존 신고를 남겨보세요!</div>';
                 return;
             }
-
-            snapshot.forEach((docSnap) => {
-                const id = docSnap.id;
-                const data = docSnap.data();
-                const dateStr = new Date(data.createdAt).toLocaleString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-                
-                const authorDays = calcDday(data.authorQuitDate);
-                const dayBadge = `<span class="day-badge">D+${authorDays}</span>`;
-
+            snapshot.forEach(docSnap => {
+                const id = docSnap.id, data = docSnap.data(), idAttr = escapeHtml(id);
+                const actionId = encodeURIComponent(id).replace(/'/g, '%27');
+                const actionRef = `decodeURIComponent('${actionId}')`;
+                const createdMs = communityTimeMs(data.createdAt);
+                const dateStr = Number.isFinite(createdMs) ? new Date(createdMs).toLocaleString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '작성일 미상';
+                const dayBadge = communityDayBadge(data);
                 const isMe = data.uid === userId;
-                const authorText = isMe ? `${data.author} <span style="color:var(--primary-color);">(나)</span>` : data.author;
+                const author = escapeHtml(data.author || '익명의 생존자');
+                const authorText = isMe ? `${author} <span style="color:var(--primary-color);">(나)</span>` : author;
                 const borderStyle = isMe ? 'border-left: 4px solid var(--primary-color);' : '';
-
-                const encodedContent = encodeURIComponent(data.content);
+                const content = String(data.content ?? '');
+                const encodedContent = encodeURIComponent(content).replace(/'/g, '%27');
                 const actionHTML = isMe ? `
                     <div class="post-actions">
-                        <button class="action-btn" onclick="editPost('${id}', '${encodedContent}')">수정</button>
-                        <button class="action-btn" style="color:var(--danger-color);" onclick="deletePost('${id}')">삭제</button>
+                        <button type="button" class="action-btn" onclick="editPost(${actionRef}, '${encodedContent}')">수정</button>
+                        <button type="button" class="action-btn" style="color:var(--danger-color);" onclick="deletePost(${actionRef})">삭제</button>
                     </div>
                 ` : '';
-
-                let commentsHTML = '';
-                if(data.comments && data.comments.length > 0) {
-                    commentsHTML = data.comments.map((c, cIdx) => {
-                        const cDay = calcDday(c.authorQuitDate);
-                        const isCMe = c.uid === userId;
-                        const delBtn = isCMe ? `<button class="action-btn" style="font-size:0.75rem; color:var(--danger-color); margin-left:8px;" onclick="deleteComment('${id}', ${cIdx})">지우기</button>` : '';
-                        
-                        return `
-                            <div class="comment-item">
-                                <strong style="color:#2d3748">${c.author}</strong>
-                                <span class="day-badge" style="font-size:0.65rem; padding:1px 4px;">D+${cDay}</span>
-                                <span style="margin-left:5px; color:#4a5568;">${c.text}</span>
-                                ${delBtn}
-                            </div>
-                        `;
-                    }).join('');
-                }
-
-                const postHTML = `
+                const commentsHTML = (Array.isArray(data.comments) ? data.comments : []).map((comment, index) => {
+                    if (!comment || typeof comment !== 'object') return '';
+                    const reaction = COMMUNITY_CHEERS.find(item => item.emoji === comment.text);
+                    const commentText = reaction
+                        ? `<span class="comment-reaction" role="img" aria-label="${reaction.label}">${reaction.emoji}</span>`
+                        : escapeHtml(comment.text);
+                    const deleteButton = comment.uid === userId ? `<button type="button" class="action-btn" style="font-size:0.75rem; color:var(--danger-color); margin-left:8px;" onclick="deleteComment(${actionRef}, ${index})">지우기</button>` : '';
+                    return `
+                        <div class="comment-item">
+                            <strong style="color:#2d3748">${escapeHtml(comment.author || '익명의 생존자')}</strong>
+                            ${communityDayBadge(comment)}
+                            <span class="comment-text">${commentText}</span>
+                            ${deleteButton}
+                        </div>
+                    `;
+                }).join('');
+                const pending = pendingCommunityComments.has(communityCommentKey(userId, id));
+                const disabled = pending ? ' disabled' : '';
+                const cheersHTML = COMMUNITY_CHEERS.map(item => `
+                    <button type="button" class="comment-reaction-btn" title="${item.label}" aria-label="${item.label} 응원 댓글 보내기" onclick="addComment(${actionRef}, '${item.id}')"${disabled}><span aria-hidden="true">${item.emoji}</span></button>
+                `).join('');
+                postList.insertAdjacentHTML('beforeend', `
                     <div class="post-card" style="${borderStyle}">
                         <div class="post-header">
                             <div><span class="post-author">${authorText}</span>${dayBadge}</div>
                             <span class="post-date">${dateStr}</span>
                         </div>
                         <div class="post-body">
-                            ${data.content.replace(/\n/g, '<br>')}
+                            ${escapeHtml(content).replace(/\n/g, '<br>')}
                             ${data.editedAt ? '<span style="font-size:0.75rem; color:#a0aec0;"> (수정됨)</span>' : ''}
                         </div>
                         ${actionHTML}
                         <div class="comment-section">
                             ${commentsHTML}
-                            <div class="comment-input-area">
-                                <input type="text" id="cmtInput_${id}" class="comment-input" placeholder="응원의 댓글 달기...">
-                                <button class="comment-btn" onclick="addComment('${id}')">등록</button>
+                            <div class="comment-composer" id="cmtComposer_${idAttr}">
+                                <div class="comment-input-area">
+                                    <input type="text" id="cmtInput_${idAttr}" class="comment-input" placeholder="응원의 댓글 달기..." aria-label="응원의 댓글">
+                                    <button type="button" class="comment-btn" onclick="addComment(${actionRef})"${disabled}>등록</button>
+                                </div>
+                                <p class="comment-reaction-hint">아이콘을 누르면 응원 댓글이 등록돼요.</p>
+                                <div class="comment-reactions" role="group" aria-label="아이콘으로 응원 댓글 보내기">${cheersHTML}</div>
+                                <p class="comment-status" id="cmtStatus_${idAttr}" role="status" aria-live="polite">${pending ? '등록 중…' : ''}</p>
                             </div>
                         </div>
                     </div>
-                `;
-                postList.insertAdjacentHTML('beforeend', postHTML);
+                `);
+                const input = document.getElementById(`cmtInput_${id}`);
+                if (input && drafts.has(input.id)) input.value = drafts.get(input.id);
             });
+            if (focusState) {
+                const input = document.getElementById(focusState.id);
+                if (input) {
+                    input.focus({ preventScroll: true });
+                    if (Number.isInteger(focusState.start) && Number.isInteger(focusState.end)) input.setSelectionRange(focusState.start, focusState.end);
+                }
+            }
         });
     };
 
@@ -6525,28 +6593,43 @@
         }
     };
 
-    window.addComment = async function(postId) {
-        if (!userId) return alert("로그인이 필요합니다.");
-        const inputEl = document.getElementById(`cmtInput_${postId}`);
-        const text = inputEl.value.trim();
-        if(!text) return;
-
+    window.addComment = async function(postId, reactionId = null) {
+        if (!userId) return alert('로그인이 필요합니다.');
+        const reaction = reactionId === null ? null : COMMUNITY_CHEERS.find(item => item.id === reactionId);
+        if (reactionId !== null && !reaction) return;
+        const input = document.getElementById(`cmtInput_${postId}`);
+        const originalDraft = input?.value || '';
+        const text = reaction ? reaction.emoji : originalDraft.trim();
+        if (!text) return;
+        const uid = userId, key = communityCommentKey(uid, postId);
+        if (pendingCommunityComments.has(key)) return;
+        pendingCommunityComments.add(key); setCommunityCommentPending(postId, true);
+        const createdAt = Date.now(), authorQuitDate = userQuitDate || null;
         const newComment = {
-            uid: userId,
-            author: userProfile.nickname || auth.currentUser.displayName || "익명의 생존자",
-            authorQuitDate: userQuitDate || null,
-            text: text,
-            createdAt: new Date().getTime()
+            uid,
+            author: userProfile.nickname || auth.currentUser?.displayName || '익명의 생존자',
+            authorQuitDate,
+            authorDayAtWrite: calcDday(authorQuitDate, createdAt),
+            text,
+            createdAt
         };
-
+        const setStatus = (message, error = false) => {
+            if (userId !== uid) return;
+            const status = document.getElementById(`cmtStatus_${postId}`);
+            if (status) { status.textContent = message; status.classList.toggle('is-error', error); }
+        };
+        setStatus(reaction ? '응원을 보내고 있어요…' : '댓글을 등록하고 있어요…');
         try {
-            await updateDoc(doc(db, "posts", postId), {
-                comments: arrayUnion(newComment)
-            });
-            inputEl.value = '';
-        } catch(e) { 
-            console.error("댓글 등록 에러:", e);
-            alert("댓글 등록 실패: " + e.message); 
+            await updateDoc(doc(db, 'posts', postId), { comments: arrayUnion(newComment) });
+            if (userId !== uid) return;
+            const currentInput = document.getElementById(`cmtInput_${postId}`);
+            if (!reaction && currentInput?.value === originalDraft) currentInput.value = '';
+            setStatus(reaction ? '응원을 보냈어요.' : '댓글을 등록했습니다.');
+        } catch (error) {
+            setStatus('등록하지 못했습니다. 연결이나 로그인 상태를 확인하고 다시 시도해 주세요.', true);
+        } finally {
+            pendingCommunityComments.delete(key);
+            if (userId === uid) setCommunityCommentPending(postId, false);
         }
     };
 
