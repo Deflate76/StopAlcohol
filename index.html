@@ -9,15 +9,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>하루건강 기록 | 금주·건강관리</title>
-    <meta name="app-build" content="records-calendar-v6-haru-health">
+    <title>금주도전/건강기록</title>
+    <meta name="app-build" content="records-calendar-v7-streak-history-logout">
     
-    <meta name="description" content="금주부터 건강 상태, 진단과 처방전까지. 나의 건강을 하루씩 기록하는 하루건강 기록." />
+    <meta name="description" content="금주 도전부터 건강 상태, 진단과 처방전까지. 나의 건강을 하루씩 기록하는 금주도전/건강기록." />
     <meta name="theme-color" content="#ffffff" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="하루건강 기록" />
+    <meta name="apple-mobile-web-app-title" content="금주도전/건강기록" />
 
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
@@ -122,7 +122,9 @@
         
         .time-unit { font-size: 3rem; font-weight: 800; color: var(--danger-color); line-height: 1.1; margin-bottom: 5px; text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 8px; transition: color 0.2s; }
         .time-unit-row { align-items: center; display: inline-flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
-        .streak-record-badge { background: #fff5f5; border: 1px solid #fecaca; border-radius: 999px; color: #c0392b; display: inline-flex; font-size: 0.75rem; font-weight: 950; line-height: 1.25; padding: 5px 9px; text-decoration: none; white-space: nowrap; box-shadow: 0 2px 8px rgba(231, 76, 60, 0.10); }
+        .streak-record-badge { appearance: none; font-family: inherit; cursor: pointer; transition: background .15s ease, border-color .15s ease; background: #fff5f5; border: 1px solid #fecaca; border-radius: 999px; color: #c0392b; display: inline-flex; font-size: 0.75rem; font-weight: 950; line-height: 1.25; padding: 5px 9px; text-decoration: none; white-space: nowrap; box-shadow: 0 2px 8px rgba(231, 76, 60, 0.10); }
+        .streak-record-badge:hover { background: #ffe4e6; border-color: #fda4af; }
+        .streak-record-badge:focus-visible { outline: 2px solid #e11d48; outline-offset: 3px; }
         #displaySettingDate { appearance: none; color: var(--text-dark); font-family: inherit; font-size: inherit; font-weight: 950; line-height: inherit; background: #fff; border: 1px solid #cbd5e0; border-radius: 999px; padding: 2px 8px; box-shadow: 0 1px 4px rgba(45, 55, 72, 0.08); cursor: pointer; transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, color 0.18s ease; }
         #displaySettingDate:hover, #displaySettingDate:focus-visible { color: var(--primary-color); border-color: var(--primary-color); box-shadow: 0 3px 10px rgba(52, 152, 219, 0.18); outline: none; transform: translateY(-1px); }
         #displaySettingDate:active { transform: scale(0.98); }
@@ -305,6 +307,28 @@
         .history-status { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; vertical-align: middle; }
         .status-active { background: #e3f2fd; color: #1976d2; }
         .status-failed { background: #ffe3e3; color: #e74c3c; }
+
+        .history-list-header { display: flex; flex-wrap: wrap; justify-content: flex-start; align-items: center; gap: 8px 10px; padding-right: 32px; margin-bottom: 15px; min-height: 30px; }
+        .history-list-header h3 { margin: 0; font-size: clamp(.9rem, 3.6vw, 1.05rem); line-height: 1.5; }
+        .history-create-btn { appearance: none; flex: 0 0 auto; border: 1px solid #c7e8d4; border-radius: 7px; background: #e8f5ed; color: #18794e; padding: 5px 7px; font-family: inherit; font-size: .72rem; font-weight: 800; line-height: 1.4; white-space: nowrap; cursor: pointer; }
+        .history-create-btn:hover { background: #d9efdf; }
+        .history-create-btn:focus-visible { outline: 2px solid #15803d; outline-offset: 2px; }
+        #streakRecordsModal { z-index: 2400; }
+        #streakRecordsModal[hidden], #logoutConfirmModal[hidden] { display: none !important; }
+        .streak-records-table { min-width: 340px; }
+        .streak-record-number { display: block; font-weight: 850; white-space: nowrap; margin-bottom: 3px; }
+        #streakRecordsModal tr.is-current { background: #eff6ff; }
+        #logoutConfirmModal { z-index: 3000; }
+        .account-confirm-modal h3 { margin: 0 30px 12px 0; color: #334155; }
+        .account-confirm-modal p { color: #475569; font-size: .9rem; line-height: 1.6; }
+        #logoutConfirmStatus { font-size: .8rem; }
+        #logoutConfirmStatus:empty { display: none; }
+        #logoutConfirmStatus.is-error { color: #b91c1c; }
+        .logout-confirm-actions { display: flex; gap: 10px; margin-top: 20px; }
+        .logout-confirm-actions button { flex: 1; min-height: 42px; border: 1px solid #cbd5e1; border-radius: 10px; background: #f8fafc; color: #334155; padding: 10px; font-family: inherit; font-size: .9rem; font-weight: 800; cursor: pointer; }
+        #logoutConfirmAccept { border-color: #dc2626; background: #dc2626; color: #fff; }
+        .logout-confirm-actions button:focus-visible { outline: 2px solid #2563eb; outline-offset: 3px; }
+        .account-confirm-modal button:disabled { opacity: .55; cursor: wait; }
 
         .accumulated-records-summary { color: #475569; font-size: 0.85rem; line-height: 1.5; margin: 8px 0 12px; }
         .accumulated-records-help { color: #64748b; font-size: 0.75rem; line-height: 1.5; word-break: keep-all; margin: 10px 0; }
@@ -777,7 +801,7 @@
 <div id="pageTopAnchor" class="page-scroll-anchor" aria-hidden="true"></div>
 
 <div class="container">
-    <h1>🌿 하루건강 기록</h1>
+    <h1>금주도전/건강기록</h1>
     <button id="enablePushBtn" class="stat-btn" style="display:none; margin-bottom: 18px; border-color: var(--primary-color); color: var(--primary-color);">🔔 푸시 알림 허용</button>
     <div id="pushTestLinkRow" class="push-test-link-row">
         <button id="sendTestPushBtn" class="push-link-btn" type="button">푸시 알람 상태 체크</button>
@@ -1613,13 +1637,53 @@
     </div>
 </div>
 
+<!-- 현재 연속 단주 일수를 달성한 1번째~n번째 기록 -->
+<div id="streakRecordsModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="streakRecordsTitle" hidden>
+    <div class="modal-content" style="max-width: 540px;">
+        <button type="button" class="close-btn-top" onclick="closeHealthDialog('streakRecordsModal')" aria-label="달성 기록 닫기">&times;</button>
+        <h3 id="streakRecordsTitle" style="margin-top: 0; padding-right: 30px;">🏅 연속 단주 달성 기록</h3>
+        <p id="streakRecordsSummary" class="accumulated-records-summary" role="status" aria-live="polite"></p>
+        <p class="accumulated-records-help">열 제목을 누르면 정렬 순서가 바뀝니다. ↑ 오름차순 · ↓ 내림차순</p>
+        <div id="streakRecordsTableWrap" class="accumulated-records-table-wrap" hidden>
+            <table class="accumulated-records-table streak-records-table" aria-label="달성 순번별 시작일, 종료일, 유지기간">
+                <colgroup><col style="width: 58px;"><col><col><col></colgroup>
+                <thead>
+                    <tr>
+                        <th scope="col" data-sort-key="ordinal" aria-sort="ascending"><button type="button" onclick="sortStreakRecords('ordinal')">기록 <span data-sort-indicator aria-hidden="true">↑</span></button></th>
+                        <th scope="col" data-sort-key="start" aria-sort="none"><button type="button" onclick="sortStreakRecords('start')">시작일 <span data-sort-indicator aria-hidden="true">↕</span></button></th>
+                        <th scope="col" data-sort-key="end" aria-sort="none"><button type="button" onclick="sortStreakRecords('end')">종료일 <span data-sort-indicator aria-hidden="true">↕</span></button></th>
+                        <th scope="col" data-sort-key="duration" aria-sort="none"><button type="button" onclick="sortStreakRecords('duration')">유지기간 <span data-sort-indicator aria-hidden="true">↕</span></button></th>
+                    </tr>
+                </thead>
+                <tbody id="streakRecordsBody"></tbody>
+            </table>
+        </div>
+        <p class="accumulated-records-help">현재 도전 일수 이상을 유지한 기록을 첫 번째부터 현재 기록까지 표시합니다. 진행 중인 기록의 유지기간은 팝업을 연 시각 기준입니다.</p>
+        <button type="button" class="stat-btn" style="margin-top: 12px;" onclick="closeHealthDialog('streakRecordsModal')">닫기</button>
+    </div>
+</div>
+
+<!-- 명시적인 확인 후에만 로그아웃 -->
+<div id="logoutConfirmModal" class="modal account-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="logoutConfirmTitle" aria-describedby="logoutConfirmMessage" hidden>
+    <div class="modal-content">
+        <button type="button" class="close-btn-top" onclick="closeHealthDialog('logoutConfirmModal')" aria-label="로그아웃 취소">&times;</button>
+        <h3 id="logoutConfirmTitle">로그아웃 확인</h3>
+        <p id="logoutConfirmMessage">정말 로그아웃할까요?</p>
+        <p id="logoutConfirmStatus" role="status" aria-live="polite"></p>
+        <div class="logout-confirm-actions">
+            <button type="button" id="logoutConfirmCancel" onclick="closeHealthDialog('logoutConfirmModal')">취소</button>
+            <button type="button" id="logoutConfirmAccept" onclick="confirmLogout()">로그아웃</button>
+        </div>
+    </div>
+</div>
+
 <!-- 단주 기록 리스트 모달 -->
 <div id="historyListModal" class="modal">
     <div class="modal-content" style="max-width: 500px;">
         <button class="close-btn-top" onclick="closeModal('historyListModal')">&times;</button>
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding-right: 20px;">
-            <h3 style="margin:0;">나의 전체 단주 기록</h3>
-            <button class="action-btn" style="background:var(--success-color); color:white; padding:6px 10px; border-radius:8px; font-weight:bold; font-size:0.8rem;" onclick="openCreateHistoryModal()">+ 기록 강제 생성</button>
+        <div class="history-list-header">
+            <h3>나의 전체 단주 기록</h3>
+            <button type="button" class="history-create-btn" onclick="openCreateHistoryModal()">+ 기록 강제 생성</button>
         </div>
         <div id="historyListContainer" style="margin-top: 10px; max-height: 60vh; overflow-y: auto;"></div>
     </div>
@@ -1977,6 +2041,12 @@
     let accumulatedRecordsRows = [];
     let accumulatedRecordsSort = { key: 'start', direction: 'desc' };
     let accumulatedRecordsRequestId = 0;
+    let streakRecordsRows = [];
+    let streakRecordsSort = { key: 'ordinal', direction: 'asc' };
+    let streakRecordsTargetDays = 0;
+    let streakRecordsRequestId = 0;
+    let logoutConfirmUid = null;
+    let logoutInProgress = false;
     
     let allCravingsList = [];
     let cravingsCurrentPage = 0;
@@ -3031,51 +3101,36 @@
         `;
     }
 
-    function getChallengeDurationDays(challenge, currentDays = 0) {
-        if (!challenge || !challenge.startDate) return 0;
-        if (challenge.id === currentChallengeId && challenge.status === 'active') {
-            return Math.max(0, Math.floor(currentDays || 0));
+    function getStreakRecordInfo(currentDays, challenges, currentId, currentStart, nowMs = Date.now()) {
+        const targetDays = Math.floor(Number(currentDays));
+        if (!Number.isFinite(targetDays) || targetDays < 3 || !currentId) return null;
+        const source = [...(challenges || [])];
+        // The live timer may be available before the initial history read finishes.
+        if (!source.some(challenge => challenge.id === currentId) && currentStart) {
+            source.push({ id: currentId, startDate: currentStart, status: 'active', hasRecordedEndDate: false });
         }
-        const start = challenge.startDate instanceof Date ? challenge.startDate : new Date(challenge.startDate);
-        const end = challenge.endDate ? (challenge.endDate instanceof Date ? challenge.endDate : new Date(challenge.endDate)) : new Date();
-        if (isNaN(start.getTime()) || isNaN(end.getTime()) || end < start) return 0;
-        return Math.max(0, Math.floor((end - start) / 86400000));
+        const qualified = source.map(challenge => ({
+            id: challenge.id, ...getChallengeRecordRange(challenge, nowMs)
+        })).filter(row => row.durationMs !== null && row.durationMs >= targetDays * 86400000)
+            .sort((a, b) => a.startMs - b.startMs || String(a.id).localeCompare(String(b.id)));
+        const ordinal = qualified.findIndex(row => row.id === currentId) + 1;
+        if (!ordinal) return null;
+        return {
+            targetDays, ordinal, totalQualified: qualified.length,
+            records: qualified.slice(0, ordinal).map((row, originalIndex) => ({
+                ...row, originalIndex, ordinal: originalIndex + 1, isCurrent: row.id === currentId
+            }))
+        };
     }
 
     function getCurrentStreakRecordInfo(currentDays) {
-        const targetDays = Math.floor(currentDays || 0);
-        if (targetDays < 3 || !currentChallengeId) return null;
-
-        const ordered = getChallengesInAttemptOrder();
-        if (!ordered.some(challenge => challenge.id === currentChallengeId) && userQuitDate) {
-            ordered.push({
-                id: currentChallengeId,
-                startDate: new Date(userQuitDate),
-                endDate: new Date(),
-                status: 'active',
-                cravings: cravingData || []
-            });
-            ordered.sort((a, b) => a.startDate - b.startDate);
-        }
-
-        let ordinal = 0;
-        let totalQualified = 0;
-        ordered.forEach(challenge => {
-            const durationDays = getChallengeDurationDays(challenge, targetDays);
-            if (durationDays >= targetDays) {
-                totalQualified++;
-                if (challenge.id === currentChallengeId) ordinal = totalQualified;
-            }
-        });
-
-        if (!ordinal) return null;
-        return { targetDays, ordinal, totalQualified };
+        return getStreakRecordInfo(currentDays, allChallengesData, currentChallengeId, userQuitDate);
     }
 
     function buildStreakRecordBadgeHtml(currentDays) {
         const recordInfo = getCurrentStreakRecordInfo(currentDays);
         if (!recordInfo) return '';
-        return `<span class="streak-record-badge" title="내 단주 기록 중 연속 ${recordInfo.targetDays}일 이상을 달성한 순서입니다.">${recordInfo.ordinal}번째 기록</span>`;
+        return `<button type="button" class="streak-record-badge" onclick="openStreakRecordsModal(${recordInfo.targetDays}, event)" aria-haspopup="dialog" aria-controls="streakRecordsModal" aria-label="연속 ${recordInfo.targetDays}일 이상 달성한 1번째부터 ${recordInfo.ordinal}번째 기록 보기" title="연속 ${recordInfo.targetDays}일 이상 달성한 기록 보기">${recordInfo.ordinal}번째 기록</button>`;
     }
 
     function buildMainDaysRenderKey(currentDays, totalCumul, successRate) {
@@ -3455,6 +3510,18 @@
         card.tabIndex = -1; card.focus({ preventScroll: true });
     }
     window.closeHealthDialog = function(id, force = false) {
+        if (id === 'logoutConfirmModal') {
+            if (logoutInProgress && !force) return;
+            logoutConfirmUid = null;
+        }
+        if (id === 'streakRecordsModal') {
+            streakRecordsRequestId++;
+            streakRecordsRows = [];
+            streakRecordsTargetDays = 0;
+            hrEl('streakRecordsBody').replaceChildren();
+            hrEl('streakRecordsSummary').textContent = '';
+            hrEl('streakRecordsTableWrap').hidden = true;
+        }
         if (!force && (hr.busy || hr.photoProcessing) && ['healthDayModal', 'healthPrivacyModal', 'prescriptionCaptureModal'].includes(id)) return;
         if (id === 'healthConsentModal') {
             if (!force && hrEl('healthConsentAccept').dataset.saving === 'true') return;
@@ -5798,6 +5865,80 @@
         }
     };
 
+    function renderStreakRecords() {
+        const { key, direction } = streakRecordsSort;
+        const rows = key === 'ordinal'
+            ? [...streakRecordsRows].sort((a, b) => (a.ordinal - b.ordinal) * (direction === 'asc' ? 1 : -1))
+            : getSortedAccumulatedRecords(streakRecordsRows, key, direction);
+        hrEl('streakRecordsTableWrap').hidden = rows.length === 0;
+        hrEl('streakRecordsSummary').textContent = rows.length
+            ? `연속 ${streakRecordsTargetDays}일 이상 유지 · 1번째부터 ${rows.length}번째까지, 총 ${rows.length}개 기록`
+            : '현재 도전에 해당하는 달성 기록이 없습니다. 도전 기록을 확인해 주세요.';
+        hrEl('streakRecordsBody').innerHTML = rows.map(row => `
+            <tr${row.isCurrent ? ' class="is-current"' : ''}>
+                <td><span class="streak-record-number">${row.ordinal}번째</span>${row.isCurrent ? '<span class="accumulated-record-active">현재</span>' : ''}</td>
+                <td>${formatAccumulatedRecordDate(row.startMs)}</td>
+                <td>${row.isActive ? '<span class="accumulated-record-active">진행 중</span>' : formatAccumulatedRecordDate(row.endMs)}</td>
+                <td><span class="accumulated-record-duration">${formatAccumulatedDuration(row.durationMs)}</span></td>
+            </tr>
+        `).join('');
+        const labels = { ordinal: '기록 순서', start: '시작일', end: '종료일', duration: '유지기간' };
+        hrEl('streakRecordsModal').querySelectorAll('th[data-sort-key]').forEach(header => {
+            const selected = header.dataset.sortKey === key;
+            const ascending = direction === 'asc';
+            header.setAttribute('aria-sort', selected ? (ascending ? 'ascending' : 'descending') : 'none');
+            header.querySelector('[data-sort-indicator]').textContent = selected ? (ascending ? '↑' : '↓') : '↕';
+            const nextOrder = selected && ascending ? '내림차순' : '오름차순';
+            header.querySelector('button').setAttribute('aria-label', `${labels[header.dataset.sortKey]} ${nextOrder}으로 정렬`);
+        });
+    }
+
+    window.sortStreakRecords = function(key) {
+        if (!['ordinal', 'start', 'end', 'duration'].includes(key)) return;
+        streakRecordsSort = {
+            key, direction: streakRecordsSort.key === key && streakRecordsSort.direction === 'asc' ? 'desc' : 'asc'
+        };
+        renderStreakRecords();
+    };
+
+    window.openStreakRecordsModal = async function(currentDays, event) {
+        // This badge sits inside the calendar opener; consume the click before awaiting a read.
+        event?.preventDefault();
+        event?.stopPropagation();
+        const uid = userId;
+        const challengeId = currentChallengeId;
+        const targetDays = Math.floor(Number(currentDays));
+        if (!hrSameUser(uid) || !challengeId || !Number.isFinite(targetDays) || targetDays < 3) return;
+        const requestId = ++streakRecordsRequestId;
+        const accountGeneration = hr.generation;
+        const openedAtMs = Date.now();
+        const isCurrentRequest = () => requestId === streakRecordsRequestId && hrSameUser(uid)
+            && accountGeneration === hr.generation && challengeId === currentChallengeId
+            && !hrEl('streakRecordsModal').hidden;
+        streakRecordsRows = [];
+        streakRecordsTargetDays = targetDays;
+        streakRecordsSort = { key: 'ordinal', direction: 'asc' };
+        hrEl('streakRecordsBody').replaceChildren();
+        hrEl('streakRecordsTableWrap').hidden = true;
+        hrEl('streakRecordsTitle').textContent = `🏅 연속 ${targetDays}일 달성 기록`;
+        hrEl('streakRecordsSummary').textContent = '단주 기록을 불러오는 중입니다…';
+        hrOpen('streakRecordsModal');
+        try {
+            const snapshot = await getDocs(collection(db, 'users', uid, 'challenges'));
+            if (!isCurrentRequest()) return;
+            const challenges = [];
+            snapshot.forEach(docSnap => challenges.push(normalizeChallengeDoc(docSnap.id, docSnap.data())));
+            // A deleted challenge must not be recreated from the timer's cached start date.
+            const info = getStreakRecordInfo(targetDays, challenges, challengeId, null, openedAtMs);
+            streakRecordsRows = info?.records || [];
+            renderStreakRecords();
+        } catch (error) {
+            if (!isCurrentRequest()) return;
+            hrEl('streakRecordsSummary').textContent = '기록을 불러오지 못했습니다. 잠시 후 다시 열어 주세요.';
+            console.error('달성 기록 조회 실패:', error?.code || 'unknown');
+        }
+    };
+
     window.openCalendarModal = async function(mode) {
         if (mode === 'accumulated') return openAccumulatedRecordsModal();
         currentCalMode = mode;
@@ -6237,18 +6378,51 @@
         catch (error) { alert(`로그인 실패!\n에러 메시지: ${error.message}`); }
     };
 
-    window.logout = async function() {
-        if (!auth.currentUser) return;
+    window.logout = function() {
+        const uid = auth.currentUser?.uid;
+        if (!hrSameUser(uid) || logoutInProgress) return;
+        logoutConfirmUid = uid;
+        hrEl('logoutConfirmStatus').textContent = '';
+        hrEl('logoutConfirmStatus').classList.remove('is-error');
+        hrOpen('logoutConfirmModal');
+        hrEl('logoutConfirmCancel').focus({ preventScroll: true });
+    };
 
+    window.confirmLogout = async function() {
+        const uid = logoutConfirmUid;
+        if (logoutInProgress || !uid) return;
+        if (!hrSameUser(uid)) { closeHealthDialog('logoutConfirmModal', true); return; }
+        logoutInProgress = true;
+        const accountGeneration = hr.generation;
+        const modal = hrEl('logoutConfirmModal');
+        const status = hrEl('logoutConfirmStatus');
+        modal.setAttribute('aria-busy', 'true');
+        modal.querySelectorAll('button').forEach(button => { button.disabled = true; });
+        status.classList.remove('is-error');
+        status.textContent = '로그아웃 중입니다…';
         try {
-            // 명시적으로 로그아웃할 때 다음 로그인은 금주 모드에서 시작하도록 초기화합니다.
+            // Keep the existing behavior: the next login starts in abstinence mode.
             await saveActiveMode(APP_MODE.ABSTINENCE);
-            localStorage.removeItem('quitDrinkingDateTime_server');
-            sessionStorage.removeItem('session_visited');
+            if (!hrSameUser(uid) || hr.generation !== accountGeneration || logoutConfirmUid !== uid) {
+                closeHealthDialog('logoutConfirmModal', true);
+                return;
+            }
             await signOut(auth);
+            if (!auth.currentUser) {
+                localStorage.removeItem('quitDrinkingDateTime_server');
+                sessionStorage.removeItem('session_visited');
+            }
+            closeHealthDialog('logoutConfirmModal', true);
         } catch (error) {
-            console.error("로그아웃 실패:", error);
-            alert("로그아웃 실패: " + error.message);
+            if (hrSameUser(uid) && logoutConfirmUid === uid) {
+                status.textContent = '로그아웃하지 못했습니다. 인터넷 연결을 확인하고 다시 시도해 주세요.';
+                status.classList.add('is-error');
+            }
+            console.error('로그아웃 실패:', error?.code || 'unknown');
+        } finally {
+            logoutInProgress = false;
+            modal.removeAttribute('aria-busy');
+            modal.querySelectorAll('button').forEach(button => { button.disabled = false; });
         }
     };
 
