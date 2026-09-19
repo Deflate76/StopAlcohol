@@ -10,7 +10,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>금주 서바이벌 리포트</title>
-    <meta name="app-build" content="records-calendar-v4">
+    <meta name="app-build" content="records-calendar-v5-health">
     
     <meta name="description" content="1,000명의 도전자와 함께하는 금주 서바이벌 레이스" />
     <meta name="theme-color" content="#ffffff" />
@@ -664,6 +664,95 @@
             .floating-nav-toggle { height: 58px; width: 58px; }
         }
 
+            /* 건강기록 · 처방전 기록 (2026-09-19) */
+        .section-bulk-toolbar { width: fit-content; margin: 0 0 4px auto; padding: 0; gap: 5px; border: 0; box-shadow: none; background: transparent; position: static; }
+        .section-bulk-btn { width: 36px; height: 36px; padding: 7px; display: inline-flex; align-items: center; justify-content: center; border-radius: 9px; }
+        .section-bulk-btn svg { width: 20px; height: 20px; pointer-events: none; }
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+        .header-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) auto; gap: 5px; }
+        .header-actions > button, .header-actions > .logout-btn { min-width: 0; padding: 7px 5px; font-size: .72rem; }
+        .header-actions .header-record-actions { display: grid; grid-template-columns: .78fr 1.15fr 1.15fr; gap: 5px; width: 100%; grid-column: 1 / -1; order: 2; }
+        .header-actions .header-record-actions button { min-width: 0; width: 100%; padding: 7px 3px; font-size: .7rem; line-height: 1.45; white-space: normal; overflow-wrap: anywhere; }
+        .header-actions .header-record-actions .fun-game-btn { min-width: 0; }
+        .prescription-record-btn { border-color: #0d9488; color: #0f766e; background: #f0fdfa; }
+        .prescription-view-btn { border-color: #0284c7; color: #0369a1; background: #f0f9ff; }
+        #calendarModal { padding-bottom: min(16px, 3vh); box-sizing: border-box; }
+        #calendarModal .modal-content { max-width: 400px; padding: 14px 16px 16px; max-height: 92vh; max-height: 92dvh; }
+        #calendarModal .close-btn-top { top: 4px; right: 6px; }
+        #calendarModal .cal-header { margin: 12px 0 9px; padding: 0 21px 0 0; }
+        #calendarModal .cal-month-success-container { margin: 0 0 8px; }
+        #calendarModal .cal-alcohol-change-compare-box { margin-top: 8px; padding: 9px; }
+        #calendarModal #calLegendContainer { margin-bottom: 8px !important; gap: 6px !important; }
+        #calendarModal .cal-interaction-hint { margin: 4px 0 8px; color: #64748b; text-align: center; font-size: .72rem; line-height: 1.45; }
+        #calendarModal .cal-week { margin-bottom: 7px; }
+        #calendarModal .calendar-close-btn { margin-top: 10px; padding: 10px; max-width: none; width: 100%; font-size: 1rem; background: #e2e8f0; color: #4a5568; box-shadow: none; }
+        #calendarModal .cal-day:not(.empty) { cursor: pointer; touch-action: pan-y; }
+        #calendarModal .cal-day:focus-visible { outline: 2px solid #0f766e; outline-offset: 1px; z-index: 26; }
+        .cal-health-dot { position: absolute; bottom: 5px; left: 50%; width: 5px; height: 5px; border-radius: 50%; background: #0f766e; pointer-events: none; }
+        .diagnosis-section { background: #f0fdfa; border: 1px solid #99f6e4; }
+        .diagnosis-list { max-height: 255px; overflow-y: auto; overscroll-behavior: contain; display: grid; gap: 8px; }
+        .diagnosis-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; padding: 11px; border: 1px solid #ccfbf1; border-radius: 12px; background: #fff; text-align: left; font: inherit; cursor: pointer; }
+        .diagnosis-row strong { display: block; color: #134e4a; font-size: .88rem; overflow-wrap: anywhere; }
+        .diagnosis-row small { display: block; color: #64748b; font-size: .72rem; }
+        .diagnosis-day-count { flex-shrink: 0; color: #0f766e; font-size: .82rem; font-weight: 900; white-space: nowrap; }
+        .health-modal { z-index: 2350; }
+        .health-modal[hidden] { display: none !important; }
+        .health-modal .modal-content { width: 94%; max-width: 500px; max-height: 92vh; max-height: 92dvh; padding: 20px 17px; overscroll-behavior: contain; }
+        .health-modal h3 { margin: 0 25px 12px 0; color: #134e4a; font-size: 1.1rem; }
+        .health-modal h4 { margin: 14px 0 8px; font-size: .9rem; }
+        .health-modal p { margin: 8px 0; }
+        .health-modal button, .health-link { font-family: inherit; cursor: pointer; }
+        .health-modal button:disabled { opacity: .5; cursor: wait; }
+        .health-modal input:not([type=checkbox]):not([type=range]), .health-modal textarea { width: 100%; min-width: 0; max-width: 100%; margin: 4px 0 0; padding: 10px; box-sizing: border-box; border: 1px solid #cbd5e1; border-radius: 10px; font: inherit; font-size: .9rem; background: #fff; color: #334155; }
+        .health-modal textarea { min-height: 90px; resize: vertical; }
+        .health-label { display: block; margin-top: 12px; color: #334155; font-size: .83rem; font-weight: 800; }
+        .health-muted { color: #64748b; font-size: .76rem; line-height: 1.6; overflow-wrap: anywhere; }
+        .health-status { color: #0f766e; font-size: .8rem; min-height: 1.5em; margin: 8px 0; overflow-wrap: anywhere; }
+        .health-status.is-error { color: #b91c1c; }
+        .health-actions { display: flex; gap: 7px; margin-top: 10px; flex-wrap: wrap; }
+        .health-btn { border: 1px solid #cbd5e1; border-radius: 10px; padding: 9px 11px; font-size: .8rem; font-weight: 800; background: #fff; color: #475569; }
+        .health-btn.primary { background: #0f766e; color: #fff; border-color: #0f766e; }
+        .health-btn.danger { color: #b91c1c; border-color: #fecaca; }
+        .health-btn.wide { flex: 1; }
+        .health-link { appearance: none; background: none; border: 0; padding: 5px 0; color: #0f766e; font-size: .73rem; text-decoration: underline; text-underline-offset: 3px; }
+        .health-slider { margin: 12px 0; padding: 10px; background: #f8fafc; border-radius: 12px; }
+        .health-slider label { display: flex; justify-content: space-between; color: #334155; font-size: .84rem; font-weight: 800; }
+        .health-slider input[type=range] { width: 100%; margin: 12px 0 4px; accent-color: #0f766e; touch-action: pan-y; }
+        .health-slider output { color: #0f766e; }
+        .health-slider-ends { display: flex; justify-content: space-between; font-size: .68rem; color: #64748b; }
+        .health-diagnosis-input { display: grid; grid-template-columns: minmax(0, 1fr) minmax(115px, .85fr) 30px; gap: 5px; align-items: end; margin-top: 6px; }
+        .health-diagnosis-input label { min-width: 0; font-size: .7rem; color: #64748b; }
+        .health-diagnosis-input .health-btn { padding: 0; height: 39px; }
+        .health-entry { padding: 12px; border: 1px solid #e2e8f0; border-radius: 12px; margin: 8px 0; background: #f8fafc; }
+        .health-entry time { color: #0f766e; font-size: .8rem; font-weight: 800; }
+        .health-entry-note { white-space: pre-wrap; overflow-wrap: anywhere; font-size: .88rem; margin: 8px 0; }
+        .health-chip { display: inline-block; padding: 3px 7px; margin: 3px 4px 0 0; border-radius: 8px; background: #e0f2fe; color: #075985; font-size: .73rem; overflow-wrap: anywhere; }
+        .health-entry .health-btn { padding: 5px 9px; font-size: .73rem; }
+        .health-consent-label { display: flex; align-items: flex-start; gap: 8px; margin: 13px 0; font-size: .84rem; font-weight: 700; color: #334155; }
+        .health-consent-label input { width: 18px; height: 18px; margin: 3px 0 0; flex: 0 0 18px; accent-color: #0f766e; }
+        .health-policy { border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; background: #f8fafc; font-size: .79rem; line-height: 1.65; overflow-wrap: anywhere; }
+        .health-policy dl { margin: 0; }
+        .health-policy dt { margin-top: 9px; font-weight: 900; color: #334155; }
+        .health-policy dt:first-child { margin-top: 0; }
+        .health-policy dd { margin: 3px 0 0; color: #475569; }
+        #healthConsentModal { z-index: 2700; }
+        #healthPrivacyModal { z-index: 2800; }
+        #prescriptionGalleryModal { z-index: 2450; }
+        #prescriptionCaptureModal { z-index: 2500; }
+        #prescriptionImageModal { z-index: 2600; }
+        #prescriptionVideo { width: 100%; max-height: 50vh; background: #0f172a; border-radius: 12px; object-fit: contain; }
+        #prescriptionCanvas { width: 100%; height: auto; display: block; border-radius: 10px; background: #f1f5f9; }
+        #prescriptionCanvas.is-redacting { touch-action: none; cursor: crosshair; }
+        .prescription-gallery { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
+        .prescription-card { min-width: 0; padding: 9px; border: 1px solid #e2e8f0; border-radius: 12px; background: #f8fafc; }
+        .prescription-thumb-button { width: 100%; border: none; padding: 0; background: #e2e8f0; border-radius: 8px; overflow: hidden; }
+        .prescription-thumb-button img { width: 100%; height: 160px; object-fit: contain; display: block; }
+        .prescription-card strong { display: block; margin-top: 7px; font-size: .78rem; overflow-wrap: anywhere; }
+        .prescription-card .health-btn { padding: 5px 8px; font-size: .72rem; }
+        #prescriptionImageFull { display: block; width: 100%; height: auto; object-fit: contain; }
+        #prescriptionImageModal .modal-content { max-width: 880px; }
+        @media (max-width: 360px) { .health-diagnosis-input { grid-template-columns: minmax(0, 1fr) 117px 27px; } .header-actions .header-record-actions button { font-size: .65rem; } }
+
     </style>
 </head>
 <body>
@@ -698,7 +787,11 @@
                 <button type="button" class="dependency-btn" onclick="goToDependencyCheck()">의존성검사</button>
                 <button type="button" class="header-nav-btn daily-english-btn" onclick="goToDailyEnglish()">일일영어</button>
                 <button type="button" class="header-nav-btn dementia-check-btn" onclick="goToDementiaCheck()">치매검사</button>
-                <button type="button" class="header-nav-btn fun-game-btn" onclick="goToFunGame()">🎮 즐거운 게임</button>
+                <div class="header-record-actions">
+                    <button type="button" class="header-nav-btn fun-game-btn" onclick="goToFunGame()">🎮 즐거운 게임</button>
+                    <button type="button" class="header-nav-btn prescription-record-btn" onclick="startPrescriptionRecord()">📷 처방전/약봉투 기록</button>
+                    <button type="button" class="header-nav-btn prescription-view-btn" onclick="openPrescriptionGallery()">🗂 처방전/약봉투 보기</button>
+                </div>
                 <button type="button" class="logout-btn" onclick="logout()">로그아웃</button>
             </div>
         </div>
@@ -735,16 +828,24 @@
                 <button type="button" class="dependency-btn" onclick="goToDependencyCheck()">의존성검사</button>
                 <button type="button" class="header-nav-btn daily-english-btn" onclick="goToDailyEnglish()">일일영어</button>
                 <button type="button" class="header-nav-btn dementia-check-btn" onclick="goToDementiaCheck()">치매검사</button>
-                <button type="button" class="header-nav-btn fun-game-btn" onclick="goToFunGame()">🎮 즐거운 게임</button>
+                <div class="header-record-actions">
+                    <button type="button" class="header-nav-btn fun-game-btn" onclick="goToFunGame()">🎮 즐거운 게임</button>
+                    <button type="button" class="header-nav-btn prescription-record-btn" onclick="startPrescriptionRecord()">📷 처방전/약봉투 기록</button>
+                    <button type="button" class="header-nav-btn prescription-view-btn" onclick="openPrescriptionGallery()">🗂 처방전/약봉투 보기</button>
+                </div>
                 <button type="button" class="logout-btn" onclick="logout()">로그아웃</button>
             </div>
         </div>
 
 
         <div class="section-bulk-toolbar" aria-label="메인 섹션 일괄 제어">
-            <span class="section-bulk-title">📚 전체 섹션 <span id="mainSectionStateText" class="section-bulk-state">4/4 열림</span></span>
-            <button id="expandAllMainSectionsBtn" type="button" class="section-bulk-btn" onclick="setAllMainSections(true)">전체 펼치기</button>
-            <button id="collapseAllMainSectionsBtn" type="button" class="section-bulk-btn" onclick="setAllMainSections(false)">전체 접기</button>
+            <span id="mainSectionStateText" class="sr-only" aria-live="polite"></span>
+            <button id="expandAllMainSectionsBtn" type="button" class="section-bulk-btn" onclick="setAllMainSections(true)" title="전체 펼치기" aria-label="전체 펼치기">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9l7-6 7 6M5 15l7 6 7-6M12 3v7m0 4v7"/></svg>
+            </button>
+            <button id="collapseAllMainSectionsBtn" type="button" class="section-bulk-btn" onclick="setAllMainSections(false)" title="전체 접기" aria-label="전체 접기">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3l7 6 7-6M5 21l7-6 7 6M12 2v7m0 6v7"/></svg>
+            </button>
         </div>
 
         <div class="timer-display inline-collapsible-section" id="timerDisplaySection" data-collapsed="false">
@@ -792,6 +893,15 @@
             </div>
             </div>
         </div>
+
+        <section id="diagnosisRecordSection" class="inline-collapsible-section active-summary-collapsible diagnosis-section" data-collapsed="false">
+            <button type="button" class="inline-collapsible-summary" onclick="toggleInlineCollapsible('diagnosisRecordSection')" aria-expanded="true" aria-controls="diagnosisRecordContent"><span>🩺 질환진단 기록 <small id="diagnosisRecordCount" class="health-muted"></small></span></button>
+            <div id="diagnosisRecordContent" class="inline-collapsible-content">
+                <div id="diagnosisRecordList" class="diagnosis-list health-muted" role="region" aria-label="질환 진단 기록 목록" tabindex="0">달력 날짜를 눌러 진단명을 추가해 보세요.</div>
+                <p class="health-muted" style="margin:8px 0 0;">진단 당일은 +0일 · 1일째로 표시합니다.</p>
+                <div class="health-actions"><button type="button" class="health-link" onclick="openHealthDay(dateToKeyForHealthToday())">＋ 오늘 건강기록</button><button type="button" class="health-link" onclick="openHealthPrivacy('health')">개인정보 처리 안내 · 동의 관리</button></div>
+            </div>
+        </section>
 
         <div id="activeMotivationalSummary" style="display: none; width: 100%; margin-bottom: 15px;"></div>
 
@@ -958,10 +1068,10 @@
 
 <!-- 시각적 피드백 캘린더 모달 -->
 <div id="calendarModal" class="modal">
-    <div class="modal-content" style="max-width: 400px; padding: 25px 20px;">
+    <div class="modal-content">
         <button class="close-btn-top" onclick="closeModal('calendarModal')">&times;</button>
         
-        <div class="cal-header" style="margin-top: 25px;">
+        <div class="cal-header">
             <button class="cal-btn" onclick="changeCalMonth(-1)">&#10094;</button>
             <div class="cal-title" id="calMonthTitle">2026년 5월</div>
             <button class="cal-btn" onclick="changeCalMonth(1)">&#10095;</button>
@@ -1024,7 +1134,7 @@
         <div id="calLegendContainer" style="margin-bottom: 15px; font-size: 0.8rem; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
             <!-- 모드에 따라 범례 동적 변경 -->
         </div>
-        <p style="text-align: center; font-size: 0.75rem; color: #9b59b6; margin-top: -5px; margin-bottom: 15px;">💡 날짜를 <strong>길게 누르면(Long-click)</strong> 식사량, 음주량, 블랙아웃 정도, 흡연량을 기록할 수 있습니다.</p>
+        <p class="cal-interaction-hint">날짜 <strong>짧게 누르기: 건강·진단 기록</strong><br>길게 누르기: 식사·음주·흡연 기록 · <span style="color:#0f766e;">●</span> 건강기록 있음</p>
 
         <div class="cal-week">
             <div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div>
@@ -1033,7 +1143,7 @@
             <!-- JS 동적 생성 -->
         </div>
         
-        <button class="start-btn" style="width: 100%; margin-top: 20px; padding: 12px; font-size: 1rem; background: #e2e8f0; color: #4a5568;" onclick="closeModal('calendarModal')">닫기</button>
+        <button type="button" class="start-btn calendar-close-btn" onclick="closeModal('calendarModal')">닫기</button>
     </div>
 </div>
 
@@ -1579,6 +1689,140 @@
     </div>
 </div>
 
+<!-- 건강정보는 별도 동의 후 로그인 계정의 비공개 경로에 저장합니다. -->
+<div id="healthDayModal" class="modal health-modal" role="dialog" aria-modal="true" aria-labelledby="healthDayTitle" hidden>
+    <div class="modal-content">
+        <button type="button" class="close-btn-top" aria-label="건강기록 닫기" onclick="closeHealthDialog('healthDayModal')">&times;</button>
+        <h3 id="healthDayTitle">📔 날짜별 건강기록</h3>
+        <p class="health-muted">한 날짜에 여러 기록을 남길 수 있습니다. 진단명은 실제 진단받은 내용만 입력해 주세요.</p>
+        <div class="health-actions">
+            <button type="button" class="health-btn" onclick="openLegacyDayRecords()">식사·음주 등 기존 기록 보기</button>
+            <button type="button" class="health-btn" onclick="openHealthPrivacy('health')">개인정보 처리 안내</button>
+        </div>
+        <form id="healthEntryForm" onsubmit="event.preventDefault(); saveHealthEntry()">
+            <fieldset id="healthEntryFields" style="border:0; padding:0; margin:0; min-width:0;">
+                <label class="health-label" for="healthEntryTime">기록 시간</label>
+                <input type="time" id="healthEntryTime" required>
+                <label class="health-label" for="healthEntryNote">자유 기록</label>
+                <textarea id="healthEntryNote" maxlength="4000" placeholder="오늘의 몸 상태, 증상, 진료 내용 등을 자유롭게 남겨보세요."></textarea>
+                <div class="health-slider">
+                    <label for="healthCondition">컨디션 <output id="healthConditionValue">선택 안 함</output></label>
+                    <input type="range" id="healthCondition" min="0" max="10" step="1" value="5" oninput="touchHealthRange('healthCondition')">
+                    <div class="health-slider-ends"><span>0 매우 나쁨</span><span>10 매우 좋음</span></div>
+                </div>
+                <div class="health-slider">
+                    <label for="healthStress">스트레스 <output id="healthStressValue">선택 안 함</output></label>
+                    <input type="range" id="healthStress" min="0" max="10" step="1" value="5" oninput="touchHealthRange('healthStress')">
+                    <div class="health-slider-ends"><span>0 전혀 없음</span><span>10 매우 높음</span></div>
+                </div>
+                <h4>질환 진단명 <span class="health-muted">선택 · 여러 개 추가 가능</span></h4>
+                <div id="healthDiagnosisInputs"></div>
+                <button type="button" class="health-link" onclick="addHealthDiagnosisInput()">＋ 진단명 추가</button>
+                <div class="health-actions">
+                    <button type="submit" id="healthEntrySave" class="health-btn primary wide">＋ 기록 추가</button>
+                    <button type="button" id="healthEntryCancelEdit" class="health-btn" hidden onclick="resetHealthEntryForm()">수정 취소</button>
+                </div>
+            </fieldset>
+        </form>
+        <p id="healthDayStatus" class="health-status" role="status" aria-live="polite"></p>
+        <h4>이날 남긴 기록 <span id="healthDayEntryCount" class="health-muted"></span></h4>
+        <div id="healthDayEntries"></div>
+        <div class="health-actions"><button type="button" class="health-btn wide" onclick="closeHealthDialog('healthDayModal')">닫기</button></div>
+    </div>
+</div>
+
+<div id="healthConsentModal" class="modal health-modal" role="dialog" aria-modal="true" aria-labelledby="healthConsentTitle" hidden>
+    <div class="modal-content">
+        <button type="button" class="close-btn-top" aria-label="동의하지 않고 닫기" onclick="closeHealthDialog('healthConsentModal')">&times;</button>
+        <h3 id="healthConsentTitle">개인정보 수집·이용 동의</h3>
+        <p class="health-muted">선택 기능입니다. 아래 내용을 확인하고 각각 동의해 주세요.</p>
+        <div id="healthConsentPolicy" class="health-policy"></div>
+        <label class="health-consent-label"><input type="checkbox" id="healthConsentPersonal" onchange="updateHealthConsentButton()"><span>위 개인정보 수집·이용에 동의합니다.</span></label>
+        <label class="health-consent-label"><input type="checkbox" id="healthConsentSensitive" onchange="updateHealthConsentButton()"><span><strong>건강·진단·처방 등 민감정보 처리에 별도로 동의합니다.</strong></span></label>
+        <div class="health-actions">
+            <button type="button" id="healthConsentAccept" class="health-btn primary wide" disabled onclick="acceptHealthConsent()">동의하고 계속</button>
+            <button type="button" class="health-btn" onclick="closeHealthDialog('healthConsentModal')">동의하지 않음</button>
+        </div>
+        <p id="healthConsentStatus" class="health-status" role="status"></p>
+    </div>
+</div>
+
+<div id="healthPrivacyModal" class="modal health-modal" role="dialog" aria-modal="true" aria-labelledby="healthPrivacyTitle" hidden>
+    <div class="modal-content">
+        <button type="button" class="close-btn-top" aria-label="개인정보 처리 안내 닫기" onclick="closeHealthDialog('healthPrivacyModal')">&times;</button>
+        <h3 id="healthPrivacyTitle">개인정보 처리 안내</h3>
+        <div class="health-actions" style="margin-bottom:12px;">
+            <button type="button" class="health-btn" onclick="openHealthPrivacy('health')">건강·진단 기록</button>
+            <button type="button" class="health-btn" onclick="openHealthPrivacy('photos')">처방전·약봉투</button>
+        </div>
+        <div id="healthPrivacyContent" class="health-policy"></div>
+        <p id="healthPrivacyConsentState" class="health-muted"></p>
+        <p id="healthPrivacyStatus" class="health-status" role="status"></p>
+        <div class="health-actions">
+            <button type="button" id="healthPrivacyRevoke" class="health-btn danger" onclick="revokeHealthConsent()">이 기능의 동의 철회 및 기록 삭제</button>
+            <button type="button" class="health-btn wide" onclick="closeHealthDialog('healthPrivacyModal')">닫기</button>
+        </div>
+    </div>
+</div>
+
+<input type="file" id="prescriptionCameraInput" accept="image/*" capture="environment" hidden onchange="handlePrescriptionFile(this)">
+<input type="file" id="prescriptionFileInput" accept="image/*" hidden onchange="handlePrescriptionFile(this)">
+<div id="prescriptionCaptureModal" class="modal health-modal" role="dialog" aria-modal="true" aria-labelledby="prescriptionCaptureTitle" hidden>
+    <div class="modal-content">
+        <button type="button" class="close-btn-top" aria-label="사진 기록 닫기" onclick="closeHealthDialog('prescriptionCaptureModal')">&times;</button>
+        <h3 id="prescriptionCaptureTitle">📷 처방전/약봉투 기록</h3>
+        <p class="health-muted">본인의 처방전·약봉투만 등록하세요. 주민등록번호, 주소, 연락처 등 불필요한 정보는 가려 주세요.</p>
+        <div class="health-actions">
+            <button type="button" class="health-btn primary" onclick="startPrescriptionCamera()">카메라 열기</button>
+            <button type="button" class="health-btn" onclick="choosePrescriptionFile()">사진 선택</button>
+        </div>
+        <div id="prescriptionLiveCamera" hidden>
+            <video id="prescriptionVideo" autoplay muted playsinline></video>
+            <button type="button" class="health-btn primary" onclick="takePrescriptionPhoto()">촬영</button>
+        </div>
+        <div id="prescriptionPreview" hidden>
+            <h4>저장 전 미리보기</h4>
+            <canvas id="prescriptionCanvas" aria-label="촬영한 처방전 미리보기"></canvas>
+            <div class="health-actions">
+                <button type="button" id="prescriptionRedactButton" class="health-btn" aria-pressed="false" onclick="togglePrescriptionRedaction()">개인정보 가리기</button>
+                <button type="button" class="health-btn" onclick="undoPrescriptionRedaction()">가리기 되돌리기</button>
+            </div>
+            <p class="health-muted">가리기를 켜고 사진 위에서 손가락이나 마우스로 영역을 그리세요. 검게 가린 사진만 저장됩니다.</p>
+            <label class="health-label" for="prescriptionDate">기록 날짜</label>
+            <input type="date" id="prescriptionDate" required>
+            <label class="health-label" for="prescriptionLabel">제목 / 메모 (선택)</label>
+            <input type="text" id="prescriptionLabel" maxlength="100" placeholder="예: 9월 내과 처방전">
+            <label class="health-consent-label"><input type="checkbox" id="prescriptionRedactionConfirm"><span>주민등록번호 등 고유식별정보와 불필요한 개인정보를 가렸음을 확인합니다.</span></label>
+            <button type="button" id="prescriptionSave" class="health-btn primary" onclick="savePrescriptionPhoto()">사진 저장</button>
+        </div>
+        <p id="prescriptionCaptureStatus" class="health-status" role="status" aria-live="polite"></p>
+        <button type="button" class="health-link" onclick="openHealthPrivacy('photos')">개인정보 처리 안내 · 동의 관리</button>
+    </div>
+</div>
+
+<div id="prescriptionGalleryModal" class="modal health-modal" role="dialog" aria-modal="true" aria-labelledby="prescriptionGalleryTitle" hidden>
+    <div class="modal-content">
+        <button type="button" class="close-btn-top" aria-label="사진 목록 닫기" onclick="closeHealthDialog('prescriptionGalleryModal')">&times;</button>
+        <h3 id="prescriptionGalleryTitle">🗂 처방전/약봉투 보기</h3>
+        <p class="health-muted">사진을 누르면 크게 볼 수 있습니다.</p>
+        <div class="health-actions">
+            <button type="button" class="health-btn" onclick="startPrescriptionRecord()">＋ 새 사진 기록</button>
+            <button type="button" class="health-btn" onclick="openHealthPrivacy('photos')">개인정보 처리 안내 · 동의 관리</button>
+            <button type="button" class="health-btn" onclick="refreshPrescriptionGallery()">새로고침</button>
+        </div>
+        <p id="prescriptionGalleryStatus" class="health-status" role="status"></p>
+        <div id="prescriptionGallery" class="prescription-gallery"></div>
+    </div>
+</div>
+<div id="prescriptionImageModal" class="modal health-modal" role="dialog" aria-modal="true" aria-labelledby="prescriptionImageTitle" hidden>
+    <div class="modal-content">
+        <button type="button" class="close-btn-top" aria-label="확대 사진 닫기" onclick="closeHealthDialog('prescriptionImageModal')">&times;</button>
+        <h3 id="prescriptionImageTitle">처방전/약봉투</h3>
+        <img id="prescriptionImageFull" alt="저장한 처방전 또는 약봉투">
+        <div class="health-actions"><button type="button" class="health-btn wide" onclick="closeHealthDialog('prescriptionImageModal')">닫기</button></div>
+    </div>
+</div>
+
 <script type="module">
 
 
@@ -1589,10 +1833,11 @@
 
     
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
-    import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, deleteDoc, collection, addDoc, query, orderBy, limit, onSnapshot, getDocs, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, deleteDoc, collection, addDoc, query, orderBy, limit, onSnapshot, getDocs, where, serverTimestamp, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
     import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-messaging.js";
     import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-functions.js";
+    import { getStorage, ref as storageRef, uploadBytesResumable, getBlob, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-storage.js";
 
     const stages = [ { d: 1, t: "1일: 알코올 완전 배출", desc: "혈중 알코올이 0이 되며, 몸이 본격적인 해독 스위치를 켭니다." }, { d: 2, t: "2일: 숙취 및 갈증 해소", desc: "체내 수분 밸런스가 정상화되고 극심한 피로감과 두통이 사라집니다." }, { d: 3, t: "3일: 금단 증상 완화", desc: "초기 불안감과 손떨림이 잦아들며, 신체가 알코올 없는 상태에 적응하기 시작합니다." }, { d: 5, t: "5일: 피부 톤 및 탄력 개선", desc: "탈수 증상이 회복되어 푸석했던 피부가 맑아지고 생기가 돕니다." }, { d: 7, t: "1주: 깊은 수면(REM) 회복", desc: "수면의 질이 극적으로 향상되어 아침에 일어날 때 진짜 '개운함'을 느낍니다." }, { d: 10, t: "10일: 브레인 포그 걷힘", desc: "머릿속 안개가 걷힌 듯 인지 능력이 맑아지고 집중력이 상승합니다." }, { d: 14, t: "2주: 위장 및 소화력 회복", desc: "위점막이 재생되어 속쓰림, 역류성 식도염, 더부룩함이 크게 개선됩니다." }, { d: 21, t: "3주: 혈압 및 심박수 안정화", desc: "고혈압 수치가 제자리를 찾기 시작하며 심혈관계의 부담이 확 줄어듭니다." }, { d: 30, t: "1개월: 간 지방 수치 대폭 감소", desc: "지방간이 최대 15~20% 감소하며, 간 수치 정상화로 피로회복력이 급증합니다." }, { d: 60, t: "2개월: 강력한 면역력 형성", desc: "백혈구 기능이 완전히 회복되어 감기 등 외부 바이러스에 대한 저항력이 강해집니다." }, { d: 90, t: "3개월: 도파민 시스템 정상화", desc: "술 없이도 일상에서 자연스러운 행복과 스트레스 해소를 온전히 느낄 수 있게 됩니다." }, { d: 180, t: "6개월: 눈에 띄는 체형 변화", desc: "불필요한 '빈 칼로리' 섭취가 사라져 뱃살이 줄어들고 얼굴선이 뚜렷해집니다." }, { d: 365, t: "1년: 중증 질환 위험 급감", desc: "간경화, 유방암, 구강암 등 알코올 관련 치명적 질환의 위험이 비약적으로 떨어집니다." }, { d: 730, t: "2년: 뇌세포 용적 회복", desc: "알코올로 인해 위축되었던 뇌의 회백질이 건강한 비음주자 수준으로 재생됩니다." }, { d: 1825, t: "5년: 소화기계 완벽한 리셋", desc: "식도암, 위암 등의 발생 확률이 금주 전의 절반 수준으로 대폭 낮아집니다." }, { d: 3650, t: "10년: 완전한 리셋 및 자유", desc: "신체의 거의 모든 지표가 평생 술을 마시지 않은 사람과 유사한 수준으로 건강해집니다." } ];
     const liverStages = [ { d: 1, t: "1일: 해독 공장 가동", desc: "간이 알코올 분해 업무를 끝내고, 쌓여있던 독소를 처리하는 본래 업무에 집중합니다." }, { d: 7, t: "1주: 염증 수치 하락", desc: "알코올로 인한 간의 미세한 염증들이 가라앉으며 혈액 검사상 간 수치가 하락하기 시작합니다." }, { d: 14, t: "2주: 지방 대사 재개", desc: "알코올 대신 지방을 연소하기 시작하여 간에 끼어있던 기름기가 빠져나가기 시작합니다." }, { d: 30, t: "1개월: 지방간 20% 감소", desc: "지방간 수치가 급격히 떨어지며, 간의 크기가 정상으로 돌아오고 혈색이 좋아집니다." }, { d: 90, t: "3개월: 단백질 합성 최적화", desc: "알부민 등 필수 단백질 합성이 원활해져 만성 피로가 사라지고 근육 성장이 효율적으로 변합니다." }, { d: 180, t: "6개월: 간 섬유화 억제", desc: "딱딱하게 굳으려던 간 조직의 손상이 멈추고, 건강한 간 세포가 그 자리를 대체합니다." }, { d: 365, t: "1년: 해독 능력 극대화", desc: "간의 정화 능력이 정점에 도달하여 약물 대사나 독소 배출 속도가 비약적으로 빨라집니다." }, { d: 1825, t: "5년: 간암 발생률 급감", desc: "간세포의 변이 가능성이 차단되어, 간암 및 간경변 위험이 일반인 수준에 근접합니다." }, { d: 3650, t: "10년: 완벽한 재생 완료", desc: "오랜 기간 손상받았던 간 조직이 완전히 새것처럼 리모델링되어 최상의 상태를 유지합니다." } ];
@@ -3145,9 +3390,549 @@
         }
     };
 
+    // Private health records. Never write health data into the public user profile.
+    // See the included rules/CORS instructions before enabling this feature in production.
+    const HR_POLICY_VERSION = '2026-09-19-v1';
+    const hrStorage = getStorage(app);
+    const hr = {
+        uid: null, generation: 0, unsubs: [], entries: [], photos: [], consents: {},
+        loaded: { health: false, photos: false, consents: false }, errors: {},
+        day: null, editingId: null, busy: false, consentPending: null, privacyScope: 'health',
+        dialogs: [], returnFocus: new Map(), urls: new Map(), galleryGeneration: 0,
+        stream: null, cameraGeneration: 0, hasPreview: false, redact: false, redactOrigin: null,
+        redactBackup: null, uploadTask: null, photoProcessing: false, fileGeneration: 0
+    };
+    const hrEl = id => document.getElementById(id);
+    const hrSameUser = uid => !!uid && hr.uid === uid && userId === uid && auth.currentUser?.uid === uid;
+    const hrToday = () => dateToKey(new Date());
+    const hrScopes = { health: '건강·질환진단 기록', photos: '처방전/약봉투 사진 기록' };
+    function hrValidDate(value) {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(value || '')) return false;
+        const [y, m, d] = value.split('-').map(Number);
+        const check = new Date(y, m - 1, d, 12);
+        return check.getFullYear() === y && check.getMonth() === m - 1 && check.getDate() === d;
+    }
+    function hrDayNumber(value) {
+        if (!hrValidDate(value)) return NaN;
+        const [y, m, d] = value.split('-').map(Number);
+        return Math.floor(Date.UTC(y, m - 1, d) / 86400000);
+    }
+    function hrSetStatus(id, message = '', error = false) {
+        const node = hrEl(id); if (!node) return;
+        node.textContent = message; node.classList.toggle('is-error', error);
+    }
+    function hrErrorMessage(error, action = '저장') {
+        const code = String(error?.code || '');
+        if (/permission-denied|unauthorized/.test(code)) return `${action} 권한을 확인할 수 없습니다. 다시 로그인하거나 운영자에게 문의해 주세요.`;
+        if (/quota|resource-exhausted/.test(code)) return '저장 공간 또는 이용 한도를 초과했습니다. 운영자에게 문의해 주세요.';
+        if (/canceled/.test(code)) return '작업이 취소되었습니다.';
+        return `${action}하지 못했습니다. 인터넷 연결을 확인하고 다시 시도해 주세요.`;
+    }
+    function hrOpen(id) {
+        const modal = hrEl(id); if (!modal) return;
+        if (!hr.dialogs.includes(id)) { hr.returnFocus.set(id, document.activeElement); hr.dialogs.push(id); }
+        modal.hidden = false; modal.style.display = 'flex';
+        const card = modal.querySelector('.modal-content');
+        card.tabIndex = -1; card.focus({ preventScroll: true });
+    }
+    window.closeHealthDialog = function(id, force = false) {
+        if (!force && (hr.busy || hr.photoProcessing) && ['healthDayModal', 'healthPrivacyModal', 'prescriptionCaptureModal'].includes(id)) return;
+        if (id === 'healthConsentModal') {
+            if (!force && hrEl('healthConsentAccept').dataset.saving === 'true') return;
+            if (hr.consentPending) { const pending = hr.consentPending; hr.consentPending = null; pending.resolve(false); }
+        }
+        if (id === 'prescriptionCaptureModal') hrClearCapture();
+        if (id === 'prescriptionImageModal') hrEl('prescriptionImageFull').removeAttribute('src');
+        if (id === 'prescriptionGalleryModal') {
+            closeHealthDialog('prescriptionImageModal', true); hrReleasePhotoUrls();
+            hrEl('prescriptionGallery').replaceChildren();
+        }
+        const modal = hrEl(id); if (modal) { modal.hidden = true; modal.style.display = 'none'; }
+        hr.dialogs = hr.dialogs.filter(value => value !== id);
+        const previous = hr.returnFocus.get(id); hr.returnFocus.delete(id);
+        if (previous?.isConnected && previous.getClientRects().length) previous.focus({ preventScroll: true });
+    };
+    document.addEventListener('keydown', event => {
+        const id = hr.dialogs.at(-1); if (!id) return;
+        const modal = hrEl(id);
+        if (event.key === 'Escape') { event.preventDefault(); closeHealthDialog(id); return; }
+        if (event.key !== 'Tab') return;
+        const focusable = [...modal.querySelectorAll('button, input, textarea, a[href], [tabindex="0"]')].filter(el => !el.disabled && el.getClientRects().length);
+        if (!focusable.length) { event.preventDefault(); return; }
+        const index = focusable.indexOf(document.activeElement);
+        if (event.shiftKey && index <= 0) { event.preventDefault(); focusable.at(-1).focus(); }
+        else if (!event.shiftKey && (index < 0 || index === focusable.length - 1)) { event.preventDefault(); focusable[0].focus(); }
+    });
+    function hrPolicyHtml(scope) {
+        const photo = scope === 'photos';
+        return `<dl>
+            <dt>처리 주체</dt><dd>Alcoholaway.com 운영자</dd>
+            <dt>수집·이용 목적</dt><dd>본인의 ${photo ? '처방전·약봉투 사진을 보관하고 날짜별로 조회·삭제' : '일상 건강기록을 보관하고 질환 진단일과 경과일을 조회·관리'}하기 위해 사용합니다.</dd>
+            <dt>개인정보 항목</dt><dd>로그인 계정 식별자, 기록 날짜·시간, ${photo ? '직접 입력한 제목·메모와 사진에 남아 있는 성명 등 개인정보' : '직접 작성한 자유 기록'}, 동의 여부·시각·안내문 버전.</dd>
+            <dt>별도 동의를 받는 민감정보</dt><dd><strong>${photo ? '사진에 포함된 질환명, 처방약, 투약법, 진료·조제 내용 등 건강정보' : '컨디션, 스트레스, 질환명, 진단일, 자유 기록에 포함된 증상·진료 등 건강정보'}.</strong></dd>
+            <dt>보유·이용 기간</dt><dd>직접 삭제하거나 이 기능의 동의를 철회할 때까지 보관합니다. 동의 철회 시 해당 기록 삭제를 함께 실행합니다. 삭제가 실패하면 화면에 알리고 재시도할 수 있습니다. 동의 이력은 해당 기능의 철회·삭제 완료 시 함께 삭제됩니다.</dd>
+            <dt>저장·열람 방식</dt><dd>로그인한 계정에 연결하여 Google Firebase에 보관합니다. 이 기능에는 커뮤니티 공개·광고 활용·외부 분석 전송 기능이 없습니다. 사진은 저장 전에 확인하고 가릴 수 있습니다.</dd>
+            <dt>동의를 거부할 권리</dt><dd>동의하지 않을 수 있습니다. 거부하면 이 ${photo ? '사진 기록' : '건강·진단 기록'} 기능의 신규 저장만 이용할 수 없으며 기존 금주 기능은 계속 이용할 수 있습니다.</dd>
+            <dt>열람·정정·삭제·철회</dt><dd>${photo ? '사진 목록에서 열람·삭제하고, 수정한 사진을 다시 등록할 수 있습니다.' : '달력 날짜를 눌러 열람·수정·삭제할 수 있습니다.'} 이 안내 화면의 ‘동의 철회 및 기록 삭제’로 해당 기능의 전체 기록을 삭제할 수 있습니다.</dd>
+            <dt>사진·기록 입력 시 주의</dt><dd>본인 정보만 입력하세요. 주민등록번호 등 고유식별정보, 불필요한 주소·연락처, 다른 사람의 정보는 입력하거나 저장하지 마세요. 사진 가리기는 저장본에 적용되며 기기에 이미 있는 원본에는 적용되지 않습니다.</dd>
+            <dt>안내 버전</dt><dd>${HR_POLICY_VERSION}</dd>
+        </dl>`;
+    }
+    function hrHasConsent(scope) {
+        const c = hr.consents[scope];
+        return hrSameUser(hr.uid) && c?.status === 'granted' && c.version === HR_POLICY_VERSION && c.personal === true && c.sensitive === true;
+    }
+    async function hrRequireConsent(scope) {
+        if (!hrSameUser(hr.uid)) { alert('로그인 후 이용해 주세요.'); return false; }
+        const uid = hr.uid;
+        // Re-read before each write: a different tab may have withdrawn consent.
+        try {
+            const snap = await getDoc(doc(db, 'users', uid, 'health_consents', scope));
+            if (!hrSameUser(uid)) return false;
+            hr.consents[scope] = snap.exists() ? snap.data() : null;
+        } catch (error) { alert(hrErrorMessage(error, '동의 상태를 확인')); return false; }
+        if (hrHasConsent(scope)) return true;
+        if (hr.consents[scope]?.deletionPending) { alert('이전에 요청한 기록 삭제를 먼저 완료해 주세요. 개인정보 처리 안내에서 다시 삭제할 수 있습니다.'); return false; }
+        if (hr.consentPending) return false;
+        hrEl('healthConsentTitle').textContent = `${hrScopes[scope]} 동의`;
+        hrEl('healthConsentPolicy').innerHTML = hrPolicyHtml(scope);
+        hrEl('healthConsentPersonal').checked = false; hrEl('healthConsentSensitive').checked = false;
+        hrEl('healthConsentAccept').dataset.saving = 'false'; updateHealthConsentButton();
+        hrSetStatus('healthConsentStatus'); hrOpen('healthConsentModal');
+        return new Promise(resolve => { hr.consentPending = { scope, uid, resolve }; });
+    }
+    window.updateHealthConsentButton = function() {
+        hrEl('healthConsentAccept').disabled = hrEl('healthConsentAccept').dataset.saving === 'true' || !hrEl('healthConsentPersonal').checked || !hrEl('healthConsentSensitive').checked;
+    };
+    window.acceptHealthConsent = async function() {
+        const pending = hr.consentPending;
+        if (!pending || !hrSameUser(pending.uid) || hrEl('healthConsentAccept').disabled) return;
+        const button = hrEl('healthConsentAccept'); button.dataset.saving = 'true'; updateHealthConsentButton();
+        hrSetStatus('healthConsentStatus', '동의 내용을 저장하고 있습니다…');
+        const record = { version: HR_POLICY_VERSION, scope: pending.scope, status: 'granted', personal: true, sensitive: true, grantedAt: serverTimestamp(), grantedAtClient: new Date().toISOString(), deletionPending: false, noticeText: hrEl('healthConsentPolicy').textContent, personalLabel: '개인정보 수집·이용 동의', sensitiveLabel: '건강·진단·처방 등 민감정보 별도 동의' };
+        try {
+            await setDoc(doc(db, 'users', pending.uid, 'health_consents', pending.scope), record);
+            if (!hrSameUser(pending.uid) || hr.consentPending !== pending) return;
+            hr.consents[pending.scope] = record; hr.consentPending = null;
+            closeHealthDialog('healthConsentModal', true); pending.resolve(true);
+        } catch (error) { if (hrSameUser(pending.uid)) hrSetStatus('healthConsentStatus', hrErrorMessage(error, '동의 내용을 저장'), true); }
+        finally { button.dataset.saving = 'false'; updateHealthConsentButton(); }
+    };
+    window.openHealthPrivacy = function(scope = 'health') {
+        if (!hrScopes[scope] || hr.busy) return;
+        hr.privacyScope = scope; hrEl('healthPrivacyTitle').textContent = `${hrScopes[scope]} 개인정보 처리 안내`;
+        hrEl('healthPrivacyContent').innerHTML = hrPolicyHtml(scope);
+        hrEl('healthPrivacyConsentState').textContent = hrHasConsent(scope) ? `현재 ${HR_POLICY_VERSION} 안내에 동의한 상태입니다.` : '현재 버전의 동의가 없거나 철회된 상태입니다.';
+        hrEl('healthPrivacyRevoke').disabled = !hrSameUser(hr.uid);
+        hrSetStatus('healthPrivacyStatus'); hrOpen('healthPrivacyModal');
+    };
+    function hrBindAccount(uid) {
+        if (hr.uid === uid) return;
+        hr.generation++;
+        hr.unsubs.forEach(fn => fn()); hr.unsubs = [];
+        hr.uploadTask?.cancel(); hr.uploadTask = null;
+        hr.dialogs.slice().reverse().forEach(id => closeHealthDialog(id, true));
+        hrEl('calendarModal').style.display = 'none';
+        hrClearCapture(); hrReleasePhotoUrls();
+        hr.uid = uid; hr.entries = []; hr.photos = []; hr.consents = {}; hr.errors = {};
+        hr.day = null; hr.editingId = null; hr.busy = false;
+        hr.loaded = { health: false, photos: false, consents: false };
+        hrEl('healthDayEntries').replaceChildren(); hrEl('prescriptionGallery').replaceChildren();
+        hrEl('healthEntryNote').value = ''; hrEl('healthDiagnosisInputs').replaceChildren();
+        hrEl('healthPrivacyConsentState').textContent = ''; hrEl('healthEntryFields').disabled = false;
+        hrEl('healthConsentAccept').dataset.saving = 'false';
+        hrRenderDiagnoses();
+        if (!uid) return;
+        const generation = hr.generation;
+        [['health', 'health_entries'], ['photos', 'prescription_photos'], ['consents', 'health_consents']].forEach(([kind, path]) => {
+            const unsub = onSnapshot(collection(db, 'users', uid, path), snap => {
+                if (hr.uid !== uid || generation !== hr.generation) return;
+                const rows = snap.docs.map(item => ({ ...item.data(), id: item.id }));
+                hr.loaded[kind] = true; delete hr.errors[kind];
+                if (kind === 'health') { hr.entries = rows; hrRefreshHealthUI(); }
+                if (kind === 'photos') { hr.photos = rows; if (!hrEl('prescriptionGalleryModal').hidden) hrRenderGallery(); }
+                if (kind === 'consents') hr.consents = Object.fromEntries(rows.map(row => [row.id, row]));
+            }, error => {
+                if (hr.uid !== uid || generation !== hr.generation) return;
+                hr.loaded[kind] = true; hr.errors[kind] = hrErrorMessage(error, '기록을 불러오');
+                if (kind === 'health') hrRefreshHealthUI();
+                if (kind === 'photos' && !hrEl('prescriptionGalleryModal').hidden) hrRenderGallery();
+            });
+            hr.unsubs.push(unsub);
+        });
+    }
+    function hrRefreshHealthUI() {
+        hrRenderDiagnoses(); if (hr.day) hrRenderDayEntries();
+        if (hrEl('calendarModal').style.display === 'flex') renderCalendar(currentCalDate.getFullYear(), currentCalDate.getMonth(), currentCalMode);
+    }
+    function hrRenderDiagnoses() {
+        const list = hrEl('diagnosisRecordList'); if (!list) return;
+        list.replaceChildren();
+        if (hr.errors.health) { list.textContent = hr.errors.health; return; }
+        const records = hr.entries.flatMap(entry => (Array.isArray(entry.diagnoses) ? entry.diagnoses : []).filter(d => hrValidDate(d.date)).map(d => ({ ...d, entry })));
+        records.sort((a, b) => b.date.localeCompare(a.date) || String(a.name).localeCompare(String(b.name), 'ko'));
+        hrEl('diagnosisRecordCount').textContent = records.length ? `${records.length}개` : '';
+        if (!records.length) { list.textContent = hr.uid && !hr.loaded.health ? '진단 기록을 불러오는 중입니다…' : '달력 날짜를 눌러 진단명을 추가해 보세요.'; return; }
+        for (const record of records) {
+            const elapsed = hrDayNumber(hrToday()) - hrDayNumber(record.date);
+            const button = document.createElement('button'); button.type = 'button'; button.className = 'diagnosis-row';
+            button.innerHTML = `<span><strong>${escapeHtml(record.name)}</strong><small>${escapeHtml(record.date)} 진단</small></span><span class="diagnosis-day-count">${elapsed >= 0 ? `+${elapsed}일 · ${elapsed + 1}일째` : '진단일 확인'}</span>`;
+            button.addEventListener('click', () => { openHealthDay(record.entry.date); editHealthEntry(record.entry.id); });
+            list.append(button);
+        }
+    }
+    window.openHealthDay = function(date) {
+        if (!hrSameUser(hr.uid)) return alert('로그인 후 이용해 주세요.');
+        if (!hrValidDate(date) || hr.busy) return;
+        hr.day = date; hrEl('healthDayTitle').textContent = `📔 ${date} 건강기록`;
+        resetHealthEntryForm(); hrRenderDayEntries(); hrSetStatus('healthDayStatus');
+        const future = date > hrToday(); hrEl('healthEntryFields').disabled = future;
+        if (future) hrSetStatus('healthDayStatus', '건강기록은 오늘 또는 지난 날짜에 남길 수 있습니다.');
+        hrOpen('healthDayModal'); hrEl('healthDayModal').querySelector('.modal-content').scrollTop = 0;
+    };
+    window.resetHealthEntryForm = function() {
+        hr.editingId = null; hrEl('healthEntryNote').value = '';
+        const now = new Date(); hrEl('healthEntryTime').value = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+        for (const id of ['healthCondition', 'healthStress']) { hrEl(id).value = 5; hrEl(id).dataset.touched = 'false'; hrEl(`${id}Value`).textContent = '선택 안 함'; }
+        hrEl('healthDiagnosisInputs').replaceChildren(); addHealthDiagnosisInput();
+        hrEl('healthEntrySave').textContent = '＋ 기록 추가'; hrEl('healthEntryCancelEdit').hidden = true;
+    };
+    window.touchHealthRange = id => { hrEl(id).dataset.touched = 'true'; hrEl(`${id}Value`).textContent = `${hrEl(id).value}/10`; };
+    window.addHealthDiagnosisInput = function(name = '', date = hr.day || hrToday()) {
+        const container = hrEl('healthDiagnosisInputs');
+        if (container.children.length >= 20) return hrSetStatus('healthDayStatus', '한 기록에는 진단명을 20개까지 입력할 수 있습니다. 새 기록을 추가해 주세요.', true);
+        const row = document.createElement('div'); row.className = 'health-diagnosis-input';
+        row.innerHTML = '<label>진단명<input type="text" data-diagnosis-name maxlength="80" placeholder="진단명"></label><label>진단일<input type="date" data-diagnosis-date></label><button type="button" class="health-btn" aria-label="이 진단명 입력란 삭제">×</button>';
+        row.querySelector('[data-diagnosis-name]').value = name;
+        const dateInput = row.querySelector('[data-diagnosis-date]'); dateInput.value = date; dateInput.max = hrToday();
+        row.querySelector('button').addEventListener('click', () => row.remove()); container.append(row);
+    };
+    function hrReadHealthForm() {
+        if (!hrValidDate(hr.day) || hr.day > hrToday()) throw new Error('기록 날짜를 확인해 주세요.');
+        const time = hrEl('healthEntryTime').value;
+        if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) throw new Error('기록 시간을 입력해 주세요.');
+        const diagnoses = [];
+        for (const row of hrEl('healthDiagnosisInputs').children) {
+            const name = row.querySelector('[data-diagnosis-name]').value.trim(); if (!name) continue;
+            const date = row.querySelector('[data-diagnosis-date]').value;
+            if (name.length > 80 || !hrValidDate(date) || date > hrToday()) throw new Error('진단명과 진단일을 확인해 주세요. 미래 진단일은 입력할 수 없습니다.');
+            if (!diagnoses.some(d => d.name === name && d.date === date)) diagnoses.push({ name, date });
+        }
+        const note = hrEl('healthEntryNote').value.trim();
+        const condition = hrEl('healthCondition').dataset.touched === 'true' ? Number(hrEl('healthCondition').value) : null;
+        const stress = hrEl('healthStress').dataset.touched === 'true' ? Number(hrEl('healthStress').value) : null;
+        if (!note && condition === null && stress === null && !diagnoses.length) throw new Error('자유 기록, 컨디션, 스트레스, 진단명 중 하나 이상 입력해 주세요.');
+        return { date: hr.day, time, note, condition, stress, diagnoses, recordedLocal: `${hr.day}T${time}`, policyVersion: HR_POLICY_VERSION };
+    }
+    window.saveHealthEntry = async function() {
+        if (hr.busy || !hrSameUser(hr.uid)) return;
+        let data; try { data = hrReadHealthForm(); } catch (error) { return hrSetStatus('healthDayStatus', error.message, true); }
+        const uid = hr.uid, editingId = hr.editingId; hr.busy = true; hrEl('healthEntryFields').disabled = true;
+        try {
+            if (!await hrRequireConsent('health') || !hrSameUser(uid)) return;
+            hrSetStatus('healthDayStatus', '기록을 저장하고 있습니다…');
+            const target = editingId ? doc(db, 'users', uid, 'health_entries', editingId) : doc(collection(db, 'users', uid, 'health_entries'));
+            const payload = { ...data, updatedAt: serverTimestamp() };
+            if (!editingId) { payload.createdAt = serverTimestamp(); payload.createdAtClient = new Date().toISOString(); }
+            await setDoc(target, payload, { merge: !!editingId });
+            if (!hrSameUser(uid)) return;
+            resetHealthEntryForm(); hrSetStatus('healthDayStatus', editingId ? '기록을 수정했습니다.' : '기록을 추가했습니다. 이어서 새 기록을 남길 수 있습니다.');
+        } catch (error) { if (hrSameUser(uid)) hrSetStatus('healthDayStatus', hrErrorMessage(error), true); }
+        finally { if (hrSameUser(uid)) { hr.busy = false; hrEl('healthEntryFields').disabled = false; } }
+    };
+    function hrRenderDayEntries() {
+        const list = hrEl('healthDayEntries'); list.replaceChildren();
+        const entries = hr.entries.filter(e => e.date === hr.day).sort((a, b) => (b.recordedLocal || '').localeCompare(a.recordedLocal || '') || (b.createdAtClient || '').localeCompare(a.createdAtClient || ''));
+        hrEl('healthDayEntryCount').textContent = `${entries.length}개`;
+        if (hr.errors.health) { list.textContent = hr.errors.health; return; }
+        if (!entries.length) { const empty = document.createElement('p'); empty.className = 'health-muted'; empty.textContent = hr.loaded.health ? '아직 기록이 없습니다. 첫 기록을 남겨보세요.' : '기록을 불러오는 중입니다…'; list.append(empty); return; }
+        for (const entry of entries) {
+            const card = document.createElement('article'); card.className = 'health-entry';
+            card.innerHTML = `<time datetime="${escapeHtml(entry.recordedLocal)}">${escapeHtml(entry.date)} ${escapeHtml(entry.time || '')}</time><div class="health-entry-note">${escapeHtml(entry.note)}</div>`;
+            const chips = document.createElement('div');
+            const values = [];
+            if (entry.condition !== null && entry.condition !== undefined) values.push(`컨디션 ${entry.condition}/10`);
+            if (entry.stress !== null && entry.stress !== undefined) values.push(`스트레스 ${entry.stress}/10`);
+            (Array.isArray(entry.diagnoses) ? entry.diagnoses : []).forEach(d => values.push(`${d.name} · ${d.date} 진단`));
+            values.forEach(value => { const chip = document.createElement('span'); chip.className = 'health-chip'; chip.textContent = value; chips.append(chip); }); card.append(chips);
+            const created = entry.createdAt?.toDate ? entry.createdAt.toDate() : new Date(entry.createdAtClient || '');
+            if (!isNaN(created)) { const meta = document.createElement('p'); meta.className = 'health-muted'; meta.textContent = `저장 시각 ${created.toLocaleString('ko-KR')}`; card.append(meta); }
+            const actions = document.createElement('div'); actions.className = 'health-actions';
+            [['수정', () => editHealthEntry(entry.id)], ['삭제', () => deleteHealthEntry(entry.id)]].forEach(([label, handler]) => { const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'health-btn'; btn.textContent = label; btn.addEventListener('click', handler); actions.append(btn); });
+            card.append(actions); list.append(card);
+        }
+    }
+    window.editHealthEntry = function(id) {
+        if (hr.busy) return; const entry = hr.entries.find(e => e.id === id); if (!entry) return;
+        hr.editingId = id; hrEl('healthEntryNote').value = entry.note || ''; hrEl('healthEntryTime').value = entry.time || '12:00';
+        for (const [id, key] of [['healthCondition', 'condition'], ['healthStress', 'stress']]) {
+            const value = entry[key]; hrEl(id).dataset.touched = value != null ? 'true' : 'false'; hrEl(id).value = value ?? 5;
+            hrEl(`${id}Value`).textContent = value != null ? `${value}/10` : '선택 안 함';
+        }
+        hrEl('healthDiagnosisInputs').replaceChildren(); (entry.diagnoses || []).forEach(d => addHealthDiagnosisInput(d.name, d.date));
+        if (!hrEl('healthDiagnosisInputs').children.length) addHealthDiagnosisInput();
+        hrEl('healthEntrySave').textContent = '수정 저장'; hrEl('healthEntryCancelEdit').hidden = false;
+        hrSetStatus('healthDayStatus', '기록을 수정 중입니다.'); hrEl('healthDayModal').querySelector('.modal-content').scrollTop = 0;
+    };
+    window.deleteHealthEntry = async function(id) {
+        if (hr.busy || !hrSameUser(hr.uid) || !hr.entries.some(e => e.id === id)) return;
+        if (!confirm('이 기록과 이 기록에 입력한 진단명을 삭제할까요?')) return;
+        const uid = hr.uid; hr.busy = true;
+        try { await deleteDoc(doc(db, 'users', uid, 'health_entries', id)); if (hrSameUser(uid)) { if (hr.editingId === id) resetHealthEntryForm(); hrSetStatus('healthDayStatus', '기록을 삭제했습니다.'); } }
+        catch (error) { if (hrSameUser(uid)) hrSetStatus('healthDayStatus', hrErrorMessage(error, '삭제'), true); }
+        finally { if (hrSameUser(uid)) hr.busy = false; }
+    };
+    window.openLegacyDayRecords = function() { if (hr.busy) return; const date = hr.day; closeHealthDialog('healthDayModal'); if (date) openCalendarDayDetailModal(date); };
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) hrRenderDiagnoses(); else hrStopCamera(); });
+    window.addEventListener('pagehide', () => { hrStopCamera(); hrReleasePhotoUrls(); });
+    setInterval(hrRenderDiagnoses, 60000);
+
+    function hrStopCamera() {
+        hr.cameraGeneration++;
+        hr.stream?.getTracks().forEach(track => track.stop()); hr.stream = null;
+        hrEl('prescriptionVideo').srcObject = null; hrEl('prescriptionLiveCamera').hidden = true;
+    }
+    function hrClearCapture() {
+        hrStopCamera(); hr.fileGeneration++; hr.photoProcessing = false;
+        hr.hasPreview = false; hr.redact = false; hr.redactOrigin = null; hr.redactBackup = null;
+        const canvas = hrEl('prescriptionCanvas'); canvas.width = 1; canvas.height = 1; canvas.classList.remove('is-redacting');
+        hrEl('prescriptionPreview').hidden = true; hrEl('prescriptionRedactButton').setAttribute('aria-pressed', 'false');
+        hrEl('prescriptionRedactionConfirm').checked = false; hrEl('prescriptionLabel').value = '';
+        hrEl('prescriptionCameraInput').value = ''; hrEl('prescriptionFileInput').value = '';
+        hrEl('prescriptionSave').disabled = false;
+    }
+    window.startPrescriptionRecord = async function() {
+        if (hr.busy || !hrSameUser(hr.uid)) { if (!hrSameUser(hr.uid)) alert('로그인 후 이용해 주세요.'); return; }
+        const hadConsent = hrHasConsent('photos');
+        if (!hadConsent && !await hrRequireConsent('photos')) return;
+        if (!hrSameUser(hr.uid)) return;
+        hrClearCapture(); hrSetStatus('prescriptionCaptureStatus'); hrOpen('prescriptionCaptureModal');
+        if (hadConsent) startPrescriptionCamera();
+        else hrSetStatus('prescriptionCaptureStatus', '동의가 저장되었습니다. ‘카메라 열기’를 눌러 촬영해 주세요.');
+    };
+    window.startPrescriptionCamera = async function() {
+        if (!hrHasConsent('photos') || hr.busy || hr.photoProcessing) return;
+        hrStopCamera(); const generation = hr.cameraGeneration, uid = hr.uid;
+        // Native camera capture on phones; desktop uses a live camera and offers a file fallback.
+        if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) { hrEl('prescriptionCameraInput').value = ''; hrEl('prescriptionCameraInput').click(); return; }
+        if (!navigator.mediaDevices?.getUserMedia || !window.isSecureContext) {
+            hrSetStatus('prescriptionCaptureStatus', '이 환경에서는 카메라를 바로 열 수 없습니다. ‘사진 선택’으로 촬영한 사진을 등록해 주세요.'); return;
+        }
+        hrSetStatus('prescriptionCaptureStatus', '카메라를 여는 중입니다…');
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 2200 }, height: { ideal: 1600 } }, audio: false });
+            if (generation !== hr.cameraGeneration || !hrSameUser(uid) || hrEl('prescriptionCaptureModal').hidden) { stream.getTracks().forEach(track => track.stop()); return; }
+            hr.stream = stream; const video = hrEl('prescriptionVideo'); video.srcObject = stream;
+            hrEl('prescriptionLiveCamera').hidden = false; await video.play();
+            hrSetStatus('prescriptionCaptureStatus', '글자가 선명하게 보이도록 맞춘 뒤 촬영해 주세요.');
+        } catch (error) {
+            if (!hrSameUser(uid) || generation !== hr.cameraGeneration) return;
+            hrStopCamera(); hrSetStatus('prescriptionCaptureStatus', '카메라를 열지 못했습니다. 브라우저 카메라 권한을 확인하거나 ‘사진 선택’을 이용해 주세요.', true);
+        }
+    };
+    window.choosePrescriptionFile = function() {
+        if (!hrHasConsent('photos') || hr.busy || hr.photoProcessing) return;
+        hrStopCamera(); hrEl('prescriptionFileInput').value = ''; hrEl('prescriptionFileInput').click();
+    };
+    function hrSetPhotoPreview(source, width, height) {
+        const scale = Math.min(1, 2200 / Math.max(width, height));
+        const canvas = hrEl('prescriptionCanvas'); canvas.width = Math.max(1, Math.round(width * scale)); canvas.height = Math.max(1, Math.round(height * scale));
+        const context = canvas.getContext('2d'); context.fillStyle = '#fff'; context.fillRect(0, 0, canvas.width, canvas.height); context.drawImage(source, 0, 0, canvas.width, canvas.height);
+        hr.hasPreview = true; hr.redactBackup = null; hr.redactOrigin = null; hr.redact = false;
+        canvas.classList.remove('is-redacting'); hrEl('prescriptionRedactButton').setAttribute('aria-pressed', 'false');
+        hrEl('prescriptionPreview').hidden = false; hrEl('prescriptionRedactionConfirm').checked = false;
+        hrEl('prescriptionDate').value = hrToday(); hrEl('prescriptionDate').max = hrToday();
+        hrSetStatus('prescriptionCaptureStatus', '사진의 글자와 개인정보 가림 상태를 확인한 뒤 저장해 주세요.');
+    }
+    window.takePrescriptionPhoto = function() {
+        const video = hrEl('prescriptionVideo');
+        if (!hrHasConsent('photos') || hr.busy || !video.videoWidth) return;
+        hrSetPhotoPreview(video, video.videoWidth, video.videoHeight); hrStopCamera();
+    };
+    window.handlePrescriptionFile = async function(input) {
+        const file = input.files?.[0]; input.value = '';
+        if (!file || hr.busy || !hrHasConsent('photos')) return;
+        if (!/^image\/(jpeg|png|webp|gif|bmp|heic|heif)$/i.test(file.type) || file.size > 25 * 1024 * 1024) return hrSetStatus('prescriptionCaptureStatus', '25MB 이하의 사진 파일을 선택해 주세요. 지원되지 않는 사진은 JPG로 변환해 주세요.', true);
+        const uid = hr.uid, generation = ++hr.fileGeneration; hr.photoProcessing = true;
+        const url = URL.createObjectURL(file);
+        try {
+            const photo = new Image(); photo.src = url; await photo.decode();
+            if (!hrSameUser(uid) || generation !== hr.fileGeneration || hrEl('prescriptionCaptureModal').hidden) return;
+            if (!photo.naturalWidth || !photo.naturalHeight || photo.naturalWidth * photo.naturalHeight > 100000000) throw new Error('Image too large');
+            hrSetPhotoPreview(photo, photo.naturalWidth, photo.naturalHeight);
+        } catch (error) { if (hrSameUser(uid) && generation === hr.fileGeneration) hrSetStatus('prescriptionCaptureStatus', '사진을 읽지 못했습니다. JPG 또는 PNG 사진으로 다시 선택해 주세요.', true); }
+        finally { URL.revokeObjectURL(url); if (generation === hr.fileGeneration) hr.photoProcessing = false; }
+    };
+    window.togglePrescriptionRedaction = function() {
+        if (!hr.hasPreview || hr.busy) return;
+        hr.redact = !hr.redact; hrEl('prescriptionCanvas').classList.toggle('is-redacting', hr.redact);
+        hrEl('prescriptionRedactButton').setAttribute('aria-pressed', String(hr.redact));
+    };
+    window.undoPrescriptionRedaction = function() {
+        if (!hr.redactBackup || hr.busy) return;
+        hrEl('prescriptionCanvas').getContext('2d').putImageData(hr.redactBackup, 0, 0); hr.redactBackup = null; hrEl('prescriptionRedactionConfirm').checked = false;
+    };
+    const hrCanvas = hrEl('prescriptionCanvas');
+    function hrCanvasPoint(event) { const rect = hrCanvas.getBoundingClientRect(); return { x: Math.max(0, Math.min(hrCanvas.width, (event.clientX - rect.left) * hrCanvas.width / rect.width)), y: Math.max(0, Math.min(hrCanvas.height, (event.clientY - rect.top) * hrCanvas.height / rect.height)) }; }
+    hrCanvas.addEventListener('pointerdown', event => {
+        if (!hr.redact || hr.busy || event.button !== 0) return;
+        event.preventDefault(); hrCanvas.setPointerCapture(event.pointerId);
+        hr.redactOrigin = hrCanvasPoint(event); hr.redactBackup = hrCanvas.getContext('2d').getImageData(0, 0, hrCanvas.width, hrCanvas.height);
+        hrEl('prescriptionRedactionConfirm').checked = false;
+    });
+    function hrDrawRedaction(event) {
+        if (!hr.redactOrigin || hr.busy) return;
+        event.preventDefault(); const point = hrCanvasPoint(event), context = hrCanvas.getContext('2d');
+        context.putImageData(hr.redactBackup, 0, 0); context.fillStyle = '#000';
+        context.fillRect(Math.min(point.x, hr.redactOrigin.x), Math.min(point.y, hr.redactOrigin.y), Math.max(4, Math.abs(point.x - hr.redactOrigin.x)), Math.max(4, Math.abs(point.y - hr.redactOrigin.y)));
+    }
+    hrCanvas.addEventListener('pointermove', hrDrawRedaction);
+    hrCanvas.addEventListener('pointerup', event => { hrDrawRedaction(event); hr.redactOrigin = null; });
+    hrCanvas.addEventListener('pointercancel', () => { if (hr.redactOrigin && hr.redactBackup) hrCanvas.getContext('2d').putImageData(hr.redactBackup, 0, 0); hr.redactOrigin = null; });
+    function hrPhotoPath(uid, id) { if (!/^[A-Za-z0-9_-]+$/.test(id)) throw new Error('Invalid photo id'); return `health_records/${uid}/${id}.jpg`; }
+    async function hrPhotoBlob() {
+        for (const quality of [.9, .8, .7]) {
+            const blob = await new Promise(resolve => hrCanvas.toBlob(resolve, 'image/jpeg', quality));
+            if (blob && blob.size <= 4 * 1024 * 1024) return blob;
+        }
+        throw new Error('Photo conversion failed');
+    }
+    async function hrDeletePhotoObject(uid, id) {
+        try { await deleteObject(storageRef(hrStorage, hrPhotoPath(uid, id))); }
+        catch (error) { if (error.code !== 'storage/object-not-found') throw error; }
+    }
+    window.savePrescriptionPhoto = async function() {
+        if (hr.busy || hr.photoProcessing || !hr.hasPreview || !hrSameUser(hr.uid)) return;
+        if (!hrEl('prescriptionRedactionConfirm').checked) return hrSetStatus('prescriptionCaptureStatus', '불필요한 개인정보를 가린 뒤 확인란에 체크해 주세요.', true);
+        const date = hrEl('prescriptionDate').value;
+        if (!hrValidDate(date) || date > hrToday()) return hrSetStatus('prescriptionCaptureStatus', '오늘 또는 지난 날짜를 선택해 주세요.', true);
+        const label = hrEl('prescriptionLabel').value.trim().slice(0, 100) || '처방전/약봉투';
+        const uid = hr.uid; hr.busy = true; hrEl('prescriptionSave').disabled = true;
+        let target = null;
+        try {
+            if (!await hrRequireConsent('photos') || !hrSameUser(uid)) return;
+            hrStopCamera(); hrSetStatus('prescriptionCaptureStatus', '사진을 저장하고 있습니다…');
+            const blob = await hrPhotoBlob(); if (!hrSameUser(uid)) return;
+            target = doc(collection(db, 'users', uid, 'prescription_photos'));
+            const meta = { date, label, status: 'uploading', size: blob.size, contentType: 'image/jpeg', policyVersion: HR_POLICY_VERSION, redactionConfirmed: true, createdAt: serverTimestamp(), createdAtClient: new Date().toISOString() };
+            // Metadata comes first so an interrupted upload remains visible and can be deleted.
+            await setDoc(target, meta); if (!hrSameUser(uid)) return;
+            const task = uploadBytesResumable(storageRef(hrStorage, hrPhotoPath(uid, target.id)), blob, { contentType: 'image/jpeg', cacheControl: 'private, no-store, max-age=0', customMetadata: { policyVersion: HR_POLICY_VERSION } });
+            hr.uploadTask = task;
+            task.on('state_changed', snapshot => { if (hrSameUser(uid)) hrSetStatus('prescriptionCaptureStatus', `사진 저장 중 ${Math.round(snapshot.bytesTransferred / snapshot.totalBytes * 100)}%`); });
+            await task; if (!hrSameUser(uid)) return;
+            await updateDoc(target, { status: 'ready', updatedAt: serverTimestamp() });
+            if (!hrSameUser(uid)) return;
+            hrClearCapture(); hrSetStatus('prescriptionCaptureStatus', '사진을 저장했습니다. ‘처방전/약봉투 보기’에서 확인할 수 있습니다.');
+        } catch (error) {
+            if (!hrSameUser(uid)) return;
+            let cleaned = true;
+            if (target) {
+                try { await hrDeletePhotoObject(uid, target.id); await deleteDoc(target); } catch { cleaned = false; }
+            }
+            hrSetStatus('prescriptionCaptureStatus', `${hrErrorMessage(error)}${cleaned ? '' : ' 사진 목록에 남은 미완료 기록을 삭제한 뒤 다시 시도해 주세요.'}`, true);
+        } finally { if (hrSameUser(uid)) { hr.busy = false; hr.uploadTask = null; hrEl('prescriptionSave').disabled = false; } }
+    };
+    function hrReleasePhotoUrls() {
+        hr.galleryGeneration++; hr.urls.forEach(url => URL.revokeObjectURL(url)); hr.urls.clear(); hrEl('prescriptionImageFull').removeAttribute('src');
+    }
+    window.openPrescriptionGallery = function() {
+        if (!hrSameUser(hr.uid)) return alert('로그인 후 이용해 주세요.');
+        hr.galleryLimit = 12; hrOpen('prescriptionGalleryModal'); hrRenderGallery();
+    };
+    window.refreshPrescriptionGallery = async function() {
+        const uid = hr.uid; if (!hrSameUser(uid)) return;
+        hrSetStatus('prescriptionGalleryStatus', '사진 목록을 불러오는 중입니다…');
+        try { const snap = await getDocs(collection(db, 'users', uid, 'prescription_photos')); if (!hrSameUser(uid)) return; hr.photos = snap.docs.map(item => ({ ...item.data(), id: item.id })); hr.loaded.photos = true; delete hr.errors.photos; hrRenderGallery(); }
+        catch (error) { if (hrSameUser(uid)) hrSetStatus('prescriptionGalleryStatus', hrErrorMessage(error, '사진 목록을 불러오'), true); }
+    };
+    async function hrRenderGallery() {
+        const uid = hr.uid, generation = ++hr.galleryGeneration, list = hrEl('prescriptionGallery'); list.replaceChildren();
+        const rows = [...hr.photos].sort((a, b) => String(b.date).localeCompare(String(a.date)) || String(b.createdAtClient).localeCompare(String(a.createdAtClient)));
+        const ids = new Set(rows.map(row => row.id));
+        for (const [id, url] of hr.urls) if (!ids.has(id)) { URL.revokeObjectURL(url); hr.urls.delete(id); }
+        if (hr.errors.photos) { hrSetStatus('prescriptionGalleryStatus', hr.errors.photos, true); return; }
+        hrSetStatus('prescriptionGalleryStatus', !hr.loaded.photos ? '사진 목록을 불러오는 중입니다…' : rows.length ? `${rows.length}개 기록 · 최근 날짜 순` : '저장한 사진이 없습니다.');
+        const visible = rows.slice(0, hr.galleryLimit || 12);
+        const loadQueue = [];
+        for (const row of visible) {
+            const card = document.createElement('article'); card.className = 'prescription-card';
+            const title = document.createElement('strong'); title.textContent = row.label || '처방전/약봉투';
+            const date = document.createElement('p'); date.className = 'health-muted'; date.textContent = `${row.date || ''} · ${row.createdAtClient ? new Date(row.createdAtClient).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }) : ''}`;
+            const status = document.createElement('p'); status.className = 'health-muted';
+            if (row.status === 'ready') {
+                const thumb = document.createElement('button'); thumb.type = 'button'; thumb.className = 'prescription-thumb-button'; thumb.setAttribute('aria-label', `${row.label || '처방전/약봉투'} 크게 보기`);
+                const img = document.createElement('img'); img.alt = '저장한 처방전 또는 약봉투'; img.hidden = true; thumb.append(img);
+                thumb.addEventListener('click', () => { const url = hr.urls.get(row.id); if (!url || !hrSameUser(uid)) return; hrEl('prescriptionImageTitle').textContent = row.label || '처방전/약봉투'; hrEl('prescriptionImageFull').src = url; hrOpen('prescriptionImageModal'); });
+                card.append(thumb); status.textContent = '사진을 불러오는 중…';
+                loadQueue.push(async () => {
+                    if (generation !== hr.galleryGeneration || !hrSameUser(uid) || hrEl('prescriptionGalleryModal').hidden) return;
+                    try {
+                        let url = hr.urls.get(row.id);
+                        if (!url) {
+                            const blob = await getBlob(storageRef(hrStorage, hrPhotoPath(uid, row.id)), 4 * 1024 * 1024 + 1);
+                            if (generation !== hr.galleryGeneration || !hrSameUser(uid) || hrEl('prescriptionGalleryModal').hidden) return;
+                            if (!blob.type.startsWith('image/')) throw new Error('Invalid image');
+                            url = URL.createObjectURL(blob); hr.urls.set(row.id, url);
+                        }
+                        img.src = url; img.hidden = false; status.textContent = '';
+                    } catch (error) { if (generation === hr.galleryGeneration && hrSameUser(uid)) status.textContent = '사진을 불러오지 못했습니다. 새로고침해 주세요.'; }
+                });
+            } else status.textContent = '저장 미완료 · 삭제 후 다시 촬영할 수 있습니다.';
+            const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'health-btn danger'; remove.textContent = '삭제'; remove.addEventListener('click', () => deletePrescriptionPhoto(row.id));
+            card.append(title, date, status, remove); list.append(card);
+        }
+        if (visible.length < rows.length) { const more = document.createElement('button'); more.type = 'button'; more.className = 'health-btn'; more.textContent = `더 보기 (${rows.length - visible.length}개)`; more.addEventListener('click', () => { hr.galleryLimit = (hr.galleryLimit || 12) + 12; hrRenderGallery(); }); list.append(more); }
+        // Bound simultaneous image downloads to keep mobile memory/network use predictable.
+        const worker = async () => { while (loadQueue.length && generation === hr.galleryGeneration) { const next = loadQueue.shift(); await next(); } };
+        await Promise.all([worker(), worker(), worker()]);
+    }
+    window.deletePrescriptionPhoto = async function(id) {
+        const uid = hr.uid; if (hr.busy || !hrSameUser(uid) || !hr.photos.some(row => row.id === id)) return;
+        if (!confirm('이 처방전/약봉투 사진을 삭제할까요?')) return;
+        hr.busy = true; hrSetStatus('prescriptionGalleryStatus', '사진을 삭제하고 있습니다…');
+        try {
+            await hrDeletePhotoObject(uid, id); if (!hrSameUser(uid)) return;
+            await deleteDoc(doc(db, 'users', uid, 'prescription_photos', id));
+            if (hrSameUser(uid)) { closeHealthDialog('prescriptionImageModal', true); const url = hr.urls.get(id); if (url) URL.revokeObjectURL(url); hr.urls.delete(id); hrSetStatus('prescriptionGalleryStatus', '사진을 삭제했습니다.'); }
+        } catch (error) { if (hrSameUser(uid)) hrSetStatus('prescriptionGalleryStatus', hrErrorMessage(error, '삭제'), true); }
+        finally { if (hrSameUser(uid)) hr.busy = false; }
+    };
+    window.revokeHealthConsent = async function() {
+        const uid = hr.uid, scope = hr.privacyScope; if (hr.busy || !hrSameUser(uid)) return;
+        if (!confirm(`${hrScopes[scope]} 동의를 철회하고 이 기능의 모든 기록을 삭제할까요? 삭제한 기록은 복구할 수 없습니다.`)) return;
+        hr.busy = true; hrEl('healthPrivacyRevoke').disabled = true;
+        try {
+            hrClearCapture();
+            const consentRef = doc(db, 'users', uid, 'health_consents', scope);
+            await setDoc(consentRef, { scope, status: 'revoked', revokedAt: serverTimestamp(), deletionPending: true }, { merge: true });
+            if (!hrSameUser(uid)) return;
+            hr.consents[scope] = { status: 'revoked', deletionPending: true };
+            hrSetStatus('healthPrivacyStatus', '동의를 철회했습니다. 기록을 삭제하는 중입니다…');
+            const path = scope === 'photos' ? 'prescription_photos' : 'health_entries';
+            while (hrSameUser(uid)) {
+                const snap = await getDocs(query(collection(db, 'users', uid, path), limit(100)));
+                if (!hrSameUser(uid)) return;
+                if (snap.empty) break;
+                if (scope === 'photos') for (const item of snap.docs) { if (!hrSameUser(uid)) return; await hrDeletePhotoObject(uid, item.id); }
+                const batch = writeBatch(db); snap.docs.forEach(item => batch.delete(item.ref)); await batch.commit();
+            }
+            if (!hrSameUser(uid)) return;
+            await deleteDoc(consentRef); delete hr.consents[scope];
+            if (scope === 'photos') { hrReleasePhotoUrls(); closeHealthDialog('prescriptionImageModal', true); }
+            else resetHealthEntryForm();
+            hrEl('healthPrivacyConsentState').textContent = '동의 철회와 해당 기록 삭제를 완료했습니다.';
+            hrSetStatus('healthPrivacyStatus', '다시 이용하려면 새 동의가 필요합니다.');
+        } catch (error) { if (hrSameUser(uid)) hrSetStatus('healthPrivacyStatus', '동의 철회 또는 일부 기록 삭제를 완료하지 못했습니다. 인터넷 연결을 확인한 뒤 같은 버튼으로 다시 시도해 주세요.', true); }
+        finally { if (hrSameUser(uid)) { hr.busy = false; hrEl('healthPrivacyRevoke').disabled = false; } }
+    };
+
+    window.dateToKeyForHealthToday = hrToday;
+
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             userId = user.uid;
+            hrBindAccount(user.uid);
             document.getElementById('loginArea').style.display = 'none';
             
             try {
@@ -3243,6 +4028,7 @@
             } catch (e) { console.error("데이터 로드 에러:", e); }
         } else {
             userId = null;
+            hrBindAccount(null);
             userQuitDate = null;
             currentChallengeId = null;
             cautionDays = [];
@@ -3403,25 +4189,24 @@
         }
     };
 
-    // [달력 롱클릭 로직]
-    window.startPress = function(e, el) {
-        if (!userId) return;
-        const dateStr = el.getAttribute('data-date');
-        if (!dateStr) return;
+    // Pointer events prevent touch/mouse duplication and cancel long-press on scrolling.
+    let calendarPressPoint = null;
+    window.startPress = function(event, cell) {
+        cancelPress();
+        if (!userId || (event.button !== undefined && event.button !== 0)) return;
+        const date = cell.dataset.date; if (!date) return;
         didLongPress = false;
-        
-        pressTimer = window.setTimeout(() => {
-            didLongPress = true;
-            openDailyLogModal(dateStr);
-        }, 600); 
+        calendarPressPoint = { x: event.clientX, y: event.clientY };
+        pressTimer = window.setTimeout(() => { pressTimer = null; didLongPress = true; openDailyLogModal(date); }, 600);
     };
-
-    window.cancelPress = function() {
-        if (pressTimer !== null) {
-            clearTimeout(pressTimer);
-            pressTimer = null;
+    window.moveCalendarPress = function(event) {
+        if (calendarPressPoint && Math.hypot(event.clientX - calendarPressPoint.x, event.clientY - calendarPressPoint.y) > 10) {
+            didLongPress = true; cancelPress();
         }
     };
+    window.cancelPress = function() { if (pressTimer !== null) clearTimeout(pressTimer); pressTimer = null; calendarPressPoint = null; };
+    window.cancelCalendarGesture = function() { didLongPress = true; cancelPress(); };
+    window.handleHealthDayKey = function(event, date) { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); didLongPress = false; openCalendarDayContentFromClick(event, date); } };
 
     window.openDailyLogModal = async function(dateStr) {
         window.setDailyLogRangeEditMode(false);
@@ -4062,12 +4847,11 @@
                 event.preventDefault();
                 event.stopPropagation();
             }
-            setTimeout(() => { didLongPress = false; }, 0);
+            didLongPress = false;
             return;
         }
         if (event) event.stopPropagation();
-        if (!hasCalendarDayUserInput(dateStr)) return;
-        openCalendarDayDetailModal(dateStr);
+        openHealthDay(dateStr);
     };
 
     window.openCalendarDayDetailModal = function(dateStr) {
@@ -5201,7 +5985,11 @@
                 onClickEvent = `onclick="openCalendarDayContentFromClick(event, '${iterDateStrCal}')"`;
             }
 
-            grid.innerHTML += `<div class="${classList.join(' ')}" ${customStyle} ${onClickEvent} ${longestStartAttributes} data-date="${iterDateStrCal}" onmousedown="startPress(event, this)" onmouseup="cancelPress()" onmouseleave="cancelPress()" ontouchstart="startPress(event, this)" ontouchend="cancelPress()">${day}${cravingBadge}${cBadge}${logBadge}${longestStartBadge}</div>`;
+            onClickEvent = `onclick="openCalendarDayContentFromClick(event, '${iterDateStrCal}')"`;
+            const hasHealthEntry = hr.entries.some(entry => entry.date === iterDateStrCal);
+            const healthBadge = hasHealthEntry ? '<span class="cal-health-dot" aria-hidden="true"></span>' : '';
+            const dateLabel = longestStartAttributes || `aria-label="${iterDateStrCal} 건강기록${hasHealthEntry ? ' 있음' : ' 추가'}"`;
+            grid.innerHTML += `<div class="${classList.join(' ')}" ${customStyle} ${onClickEvent} ${dateLabel} role="button" tabindex="0" data-date="${iterDateStrCal}" onpointerdown="startPress(event, this)" onpointermove="moveCalendarPress(event)" onpointerup="cancelPress()" onpointerleave="cancelPress()" onpointercancel="cancelCalendarGesture()" onkeydown="handleHealthDayKey(event, '${iterDateStrCal}')" oncontextmenu="event.preventDefault()">${day}${cravingBadge}${cBadge}${logBadge}${longestStartBadge}${healthBadge}</div>`;
         }
     }
 
