@@ -10,7 +10,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>금주 서바이벌 리포트</title>
-    <meta name="app-build" content="records-calendar-v5-health-photo-mime-fix">
+    <meta name="app-build" content="records-calendar-v5-health-compact-buttons">
     
     <meta name="description" content="1,000명의 도전자와 함께하는 금주 서바이벌 레이스" />
     <meta name="theme-color" content="#ffffff" />
@@ -665,14 +665,18 @@
         }
 
             /* 건강기록 · 처방전 기록 (2026-09-19) */
-        .section-bulk-toolbar { width: fit-content; margin: 0 0 4px auto; padding: 0; gap: 5px; border: 0; box-shadow: none; background: transparent; position: static; }
-        .section-bulk-btn { width: 36px; height: 36px; padding: 7px; display: inline-flex; align-items: center; justify-content: center; border-radius: 9px; }
-        .section-bulk-btn svg { width: 20px; height: 20px; pointer-events: none; }
+        .section-bulk-toolbar { width: fit-content; margin: 0 0 2px auto; padding: 2px; gap: 1px; flex-wrap: nowrap; border: 1px solid #e2e8f0; border-radius: 9px; box-shadow: none; background: #f8fafc; position: static; }
+        .section-bulk-btn { flex: 0 0 28px; box-sizing: border-box; width: 28px; height: 26px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 6px; background: transparent; color: #64748b; box-shadow: none; transition: background .16s ease, color .16s ease, transform .16s ease; }
+        .section-bulk-btn svg { width: 17px; height: 17px; flex: none; pointer-events: none; }
+        .section-bulk-btn:hover { background: #eaf0f7; color: #2563eb; box-shadow: none; }
+        .section-bulk-btn:active { transform: scale(.94); }
+        .section-bulk-btn[aria-pressed="true"] { background: #e5edf8; color: #2563eb; box-shadow: none; }
+        .section-bulk-btn:focus-visible { outline: 2px solid #60a5fa; outline-offset: 2px; }
         .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
         .header-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) auto; gap: 5px; }
         .header-actions > button, .header-actions > .logout-btn { min-width: 0; padding: 7px 5px; font-size: .72rem; }
-        .header-actions .header-record-actions { display: grid; grid-template-columns: .78fr 1.15fr 1.15fr; gap: 5px; width: 100%; grid-column: 1 / -1; order: 2; }
-        .header-actions .header-record-actions button { min-width: 0; width: 100%; padding: 7px 3px; font-size: .7rem; line-height: 1.45; white-space: normal; overflow-wrap: anywhere; }
+        .header-actions .header-record-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; width: 100%; grid-column: 1 / 4; order: 2; }
+        .header-actions .header-record-actions button { box-sizing: border-box; min-width: 0; width: 100%; padding: 7px 5px; font-size: .72rem; line-height: 1.45; white-space: nowrap; overflow-wrap: normal; }
         .header-actions .header-record-actions .fun-game-btn { min-width: 0; }
         .prescription-record-btn { border-color: #0d9488; color: #0f766e; background: #f0fdfa; }
         .prescription-view-btn { border-color: #0284c7; color: #0369a1; background: #f0f9ff; }
@@ -751,7 +755,7 @@
         .prescription-card .health-btn { padding: 5px 8px; font-size: .72rem; }
         #prescriptionImageFull { display: block; width: 100%; height: auto; object-fit: contain; }
         #prescriptionImageModal .modal-content { max-width: 880px; }
-        @media (max-width: 360px) { .health-diagnosis-input { grid-template-columns: minmax(0, 1fr) 117px 27px; } .header-actions .header-record-actions button { font-size: .65rem; } }
+        @media (max-width: 360px) { .health-diagnosis-input { grid-template-columns: minmax(0, 1fr) 117px 27px; } .header-actions > button, .header-actions .header-record-actions button { padding: 7px 2px; font-size: .65rem; letter-spacing: -.025em; } }
 
     </style>
 </head>
@@ -788,9 +792,9 @@
                 <button type="button" class="header-nav-btn daily-english-btn" onclick="goToDailyEnglish()">일일영어</button>
                 <button type="button" class="header-nav-btn dementia-check-btn" onclick="goToDementiaCheck()">치매검사</button>
                 <div class="header-record-actions">
-                    <button type="button" class="header-nav-btn fun-game-btn" onclick="goToFunGame()">🎮 즐거운 게임</button>
-                    <button type="button" class="header-nav-btn prescription-record-btn" onclick="startPrescriptionRecord()">📷 처방전/약봉투 기록</button>
-                    <button type="button" class="header-nav-btn prescription-view-btn" onclick="openPrescriptionGallery()">🗂 처방전/약봉투 보기</button>
+                    <button type="button" class="header-nav-btn fun-game-btn" onclick="goToFunGame()">게임하기</button>
+                    <button type="button" class="header-nav-btn prescription-record-btn" onclick="startPrescriptionRecord()">처방전기록</button>
+                    <button type="button" class="header-nav-btn prescription-view-btn" onclick="openPrescriptionGallery()">처방전보기</button>
                 </div>
                 <button type="button" class="logout-btn" onclick="logout()">로그아웃</button>
             </div>
@@ -829,9 +833,9 @@
                 <button type="button" class="header-nav-btn daily-english-btn" onclick="goToDailyEnglish()">일일영어</button>
                 <button type="button" class="header-nav-btn dementia-check-btn" onclick="goToDementiaCheck()">치매검사</button>
                 <div class="header-record-actions">
-                    <button type="button" class="header-nav-btn fun-game-btn" onclick="goToFunGame()">🎮 즐거운 게임</button>
-                    <button type="button" class="header-nav-btn prescription-record-btn" onclick="startPrescriptionRecord()">📷 처방전/약봉투 기록</button>
-                    <button type="button" class="header-nav-btn prescription-view-btn" onclick="openPrescriptionGallery()">🗂 처방전/약봉투 보기</button>
+                    <button type="button" class="header-nav-btn fun-game-btn" onclick="goToFunGame()">게임하기</button>
+                    <button type="button" class="header-nav-btn prescription-record-btn" onclick="startPrescriptionRecord()">처방전기록</button>
+                    <button type="button" class="header-nav-btn prescription-view-btn" onclick="openPrescriptionGallery()">처방전보기</button>
                 </div>
                 <button type="button" class="logout-btn" onclick="logout()">로그아웃</button>
             </div>
@@ -841,10 +845,10 @@
         <div class="section-bulk-toolbar" aria-label="메인 섹션 일괄 제어">
             <span id="mainSectionStateText" class="sr-only" aria-live="polite"></span>
             <button id="expandAllMainSectionsBtn" type="button" class="section-bulk-btn" onclick="setAllMainSections(true)" title="전체 펼치기" aria-label="전체 펼치기">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9l7-6 7 6M5 15l7 6 7-6M12 3v7m0 4v7"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 7 4-4 4 4M8 17l4 4 4-4M5 12h14"/></svg>
             </button>
             <button id="collapseAllMainSectionsBtn" type="button" class="section-bulk-btn" onclick="setAllMainSections(false)" title="전체 접기" aria-label="전체 접기">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3l7 6 7-6M5 21l7-6 7 6M12 2v7m0 6v7"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 3 4 4 4-4M8 21l4-4 4 4M5 12h14"/></svg>
             </button>
         </div>
 
@@ -1009,7 +1013,7 @@
             <button type="button" class="floating-nav-item" data-nav-target="sectionStats" data-nav-number="04" onclick="scrollToPageTarget('sectionStats')"><span class="floating-nav-number">04</span><span>생존 현황 및 통계</span></button>
             <button type="button" class="floating-nav-item" data-nav-target="sectionRecovery" data-nav-number="05" onclick="scrollToPageTarget('sectionRecovery')"><span class="floating-nav-number">05</span><span>신체 회복 및 통신</span></button>
             <button type="button" class="floating-nav-item" data-nav-target="pageBottomAnchor" data-nav-number="06" onclick="scrollToPageTarget('pageBottomAnchor')"><span class="floating-nav-number">06</span><span>맨 아래로</span></button>
-            <button type="button" class="floating-nav-item game-link" onclick="goToFunGame()"><span class="floating-nav-number">🎮</span><span>즐거운 게임 열기</span></button>
+            <button type="button" class="floating-nav-item game-link" onclick="goToFunGame()"><span class="floating-nav-number">🎮</span><span>게임하기</span></button>
         </div>
         <div class="floating-nav-divider"></div>
         <div class="floating-nav-actions">
@@ -2192,7 +2196,7 @@
 
     window.goToFunGame = function() {
         if (!userId || !auth.currentUser) {
-            alert('즐거운 게임은 로그인 후 이용할 수 있습니다.');
+            alert('게임은 로그인 후 이용할 수 있습니다.');
             return;
         }
         window.location.href = 'games/pickman.html';
@@ -2361,7 +2365,7 @@
             if (url.searchParams.get('gameLoginRequired') !== '1') return;
             url.searchParams.delete('gameLoginRequired');
             window.history.replaceState({}, document.title, url.pathname + url.search + url.hash);
-            alert('즐거운 게임은 Google 로그인 후 이용할 수 있습니다. 로그인한 뒤 “즐거운 게임” 버튼을 눌러 주세요.');
+            alert('게임은 Google 로그인 후 이용할 수 있습니다. 로그인한 뒤 “게임하기” 버튼을 눌러 주세요.');
         } catch (e) {}
     }
 
@@ -3823,7 +3827,7 @@
             await task; if (!hrSameUser(uid)) return;
             await updateDoc(target, { status: 'ready', updatedAt: serverTimestamp() });
             if (!hrSameUser(uid)) return;
-            hrClearCapture(); hrSetStatus('prescriptionCaptureStatus', '사진을 저장했습니다. ‘처방전/약봉투 보기’에서 확인할 수 있습니다.');
+            hrClearCapture(); hrSetStatus('prescriptionCaptureStatus', '사진을 저장했습니다. ‘처방전보기’에서 확인할 수 있습니다.');
         } catch (error) {
             if (!hrSameUser(uid)) return;
             let cleaned = true;
