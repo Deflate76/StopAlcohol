@@ -10,7 +10,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>금주 서바이벌 리포트</title>
-    <meta name="app-build" content="records-calendar-v5-health">
+    <meta name="app-build" content="records-calendar-v5-health-photo-mime-fix">
     
     <meta name="description" content="1,000명의 도전자와 함께하는 금주 서바이벌 레이스" />
     <meta name="theme-color" content="#ffffff" />
@@ -3833,6 +3833,41 @@
             hrSetStatus('prescriptionCaptureStatus', `${hrErrorMessage(error)}${cleaned ? '' : ' 사진 목록에 남은 미완료 기록을 삭제한 뒤 다시 시도해 주세요.'}`, true);
         } finally { if (hrSameUser(uid)) { hr.busy = false; hr.uploadTask = null; hrEl('prescriptionSave').disabled = false; } }
     };
+    const HR_PHOTO_MAX_BYTES = 4 * 1024 * 1024;
+    function hrPhotoReadError(code) {
+        const error = new Error('Photo read failed'); error.code = code; return error;
+    }
+    async function hrNormalizePhotoBlob(blob) {
+        if (!blob.size) throw hrPhotoReadError('photo/empty');
+        if (blob.size > HR_PHOTO_MAX_BYTES) throw hrPhotoReadError('photo/too-large');
+        // Firebase 10.12.1 getBlob(ref, limit) uses Blob.slice without a MIME type.
+        // Check the JPEG bytes before restoring the type; this does not alter the image.
+        const header = new Uint8Array(await blob.slice(0, 3).arrayBuffer());
+        if (header.length !== 3 || header[0] !== 0xff || header[1] !== 0xd8 || header[2] !== 0xff) {
+            throw hrPhotoReadError('photo/invalid-image');
+        }
+        return blob.slice(0, blob.size, 'image/jpeg');
+    }
+    function hrPhotoReadFailure(error) {
+        const messages = {
+            'photo/empty': '사진 데이터가 비어 있습니다. 다시 불러와 주세요.',
+            'photo/too-large': '사진이 조회 가능한 크기인 4MB를 초과했습니다.',
+            'photo/invalid-image': '저장된 데이터를 JPEG 사진으로 확인할 수 없습니다.',
+            'photo/decode-failed': '사진을 내려받았지만 화면에 표시하지 못했습니다. 다시 불러와 주세요.',
+            'storage/object-not-found': '저장된 사진 파일을 찾을 수 없습니다.',
+            'storage/unauthenticated': '로그인이 만료되었습니다. 다시 로그인해 주세요.',
+            'storage/unauthorized': '사진을 읽을 권한이 없습니다. 다시 로그인하거나 운영자에게 문의해 주세요.',
+            'storage/retry-limit-exceeded': '사진 응답을 기다리는 시간이 초과되었습니다. 연결을 확인하고 다시 시도해 주세요.',
+            'storage/quota-exceeded': '사진 저장소의 이용 한도를 초과했습니다. 운영자에게 문의해 주세요.',
+            'storage/canceled': '사진 불러오기가 취소되었습니다. 다시 시도해 주세요.',
+            'storage/unknown': '사진 저장소가 오류를 반환했습니다. 다시 시도해 주세요.',
+            'photo/unexpected': '사진을 불러오지 못했습니다. 다시 시도해 주세요.'
+        };
+        const code = Object.prototype.hasOwnProperty.call(messages, error?.code) ? error.code : 'photo/unexpected';
+        // Log only a known error code, never the error object, URLs, or health data.
+        console.warn('[처방전/약봉투 사진 조회]', code);
+        return `${messages[code]} (${code})`;
+    }
     function hrReleasePhotoUrls() {
         hr.galleryGeneration++; hr.urls.forEach(url => URL.revokeObjectURL(url)); hr.urls.clear(); hrEl('prescriptionImageFull').removeAttribute('src');
     }
@@ -3863,6 +3898,17 @@
             if (row.status === 'ready') {
                 const thumb = document.createElement('button'); thumb.type = 'button'; thumb.className = 'prescription-thumb-button'; thumb.setAttribute('aria-label', `${row.label || '처방전/약봉투'} 크게 보기`);
                 const img = document.createElement('img'); img.alt = '저장한 처방전 또는 약봉투'; img.hidden = true; thumb.append(img);
+                const showFailure = error => {
+                    if (generation !== hr.galleryGeneration || !hrSameUser(uid) || hrEl('prescriptionGalleryModal').hidden) return;
+                    img.hidden = true;
+                    status.classList.add('is-error'); status.textContent = hrPhotoReadFailure(error);
+                };
+                img.addEventListener('error', () => {
+                    if (generation !== hr.galleryGeneration || !hrSameUser(uid) || hrEl('prescriptionGalleryModal').hidden) return;
+                    const url = hr.urls.get(row.id);
+                    if (url && img.src === url) { URL.revokeObjectURL(url); hr.urls.delete(row.id); }
+                    showFailure(hrPhotoReadError('photo/decode-failed'));
+                });
                 thumb.addEventListener('click', () => { const url = hr.urls.get(row.id); if (!url || !hrSameUser(uid)) return; hrEl('prescriptionImageTitle').textContent = row.label || '처방전/약봉투'; hrEl('prescriptionImageFull').src = url; hrOpen('prescriptionImageModal'); });
                 card.append(thumb); status.textContent = '사진을 불러오는 중…';
                 loadQueue.push(async () => {
@@ -3870,13 +3916,13 @@
                     try {
                         let url = hr.urls.get(row.id);
                         if (!url) {
-                            const blob = await getBlob(storageRef(hrStorage, hrPhotoPath(uid, row.id)), 4 * 1024 * 1024 + 1);
+                            const downloaded = await getBlob(storageRef(hrStorage, hrPhotoPath(uid, row.id)), HR_PHOTO_MAX_BYTES + 1);
+                            const blob = await hrNormalizePhotoBlob(downloaded);
                             if (generation !== hr.galleryGeneration || !hrSameUser(uid) || hrEl('prescriptionGalleryModal').hidden) return;
-                            if (!blob.type.startsWith('image/')) throw new Error('Invalid image');
                             url = URL.createObjectURL(blob); hr.urls.set(row.id, url);
                         }
                         img.src = url; img.hidden = false; status.textContent = '';
-                    } catch (error) { if (generation === hr.galleryGeneration && hrSameUser(uid)) status.textContent = '사진을 불러오지 못했습니다. 새로고침해 주세요.'; }
+                    } catch (error) { showFailure(error); }
                 });
             } else status.textContent = '저장 미완료 · 삭제 후 다시 촬영할 수 있습니다.';
             const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'health-btn danger'; remove.textContent = '삭제'; remove.addEventListener('click', () => deletePrescriptionPhoto(row.id));
