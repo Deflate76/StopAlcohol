@@ -10,7 +10,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>금주도전/건강기록</title>
-    <meta name="app-build" content="records-calendar-v8-tabs-recovery-rank">
+    <meta name="app-build" content="records-calendar-v9-pill-identification">
     
     <meta name="description" content="금주 도전부터 건강 상태, 진단과 처방전까지. 나의 건강을 하루씩 기록하는 금주도전/건강기록." />
     <meta name="theme-color" content="#ffffff" />
@@ -836,6 +836,29 @@
         .accumulated-record-rank { display: inline-block; border-radius: 7px; background: #f1f5f9; color: #475569; padding: 3px 5px; font-size: .72rem; font-weight: 850; white-space: nowrap; }
         .accumulated-record-rank.rank-first { background: #fef3c7; color: #92400e; }
     </style>
+<style>
+/* Private pill identification. Native dialog keeps the camera above existing app modals. */
+.pill-id-floating{position:fixed;z-index:1510;right:calc(14px + env(safe-area-inset-right,0px));bottom:calc(94px + env(safe-area-inset-bottom,0px));width:62px;height:62px;padding:3px;border:0;border-radius:50%;background:linear-gradient(145deg,#199c92,#195fa9);box-shadow:0 5px 18px #175d7f3b;cursor:pointer}
+.pill-id-floating-inner{width:100%;height:100%;box-sizing:border-box;gap:1px!important;background:linear-gradient(145deg,#faffff,#ecfbf9)!important;color:#176969!important;font-size:11px;font-weight:800}
+.pill-id-floating:focus-visible,.pill-id-dialog button:focus-visible{outline:3px solid #297ea3;outline-offset:3px}
+.pill-id-dialog{width:min(720px,calc(100vw - 24px));max-width:720px;max-height:calc(100dvh - 32px);padding:22px;border:1px solid #dce7ec;border-radius:22px;box-sizing:border-box;box-shadow:0 20px 80px #162f4250;overflow:auto;color:#223747;background:#fff;text-align:left;font-family:inherit}
+.pill-id-dialog::backdrop{background:#102b42a6;backdrop-filter:blur(3px)}
+.pill-id-dialog [hidden]{display:none!important}.pill-id-dialog *{box-sizing:border-box}
+.pill-id-dialog h2{margin:3px 0 0;font-size:21px;line-height:1.4;color:#1d414b}.pill-id-dialog h3{font-size:16px;margin:16px 0 10px}.pill-id-dialog h4{font-size:14px;margin:0 0 10px}
+.pi-heading,.pi-result-heading,.pi-row{display:flex;align-items:center;justify-content:space-between;gap:12px}.pi-eyebrow{font-size:10px;font-weight:800;letter-spacing:2px;color:#3a8d91}.pi-icon-close{width:34px;height:34px;flex:0 0 34px;padding:0;border:0;border-radius:50%;background:#f0f4f6;color:#5a6e78;font-size:25px;cursor:pointer}
+.pi-heading{position:sticky;top:0;z-index:3;background:#fff;padding:7px 0}
+.pi-tabs{display:flex;gap:6px;margin:18px 0 8px;border-bottom:1px solid #e4ecef;padding-bottom:10px}.pi-tab{border:0;background:#f2f6f8;border-radius:20px;color:#52717e;padding:8px 15px;font-weight:700;cursor:pointer}.pi-tab.is-active{background:#dff4f1;color:#146d67}
+.pi-status{font-size:13px;line-height:1.7;color:#276a78;white-space:pre-line;margin:8px 0}.pi-status.is-error{color:#b43c3c}.pi-status:empty{display:none}
+.pi-intro,.pi-notice{font-size:13px;line-height:1.8}.pi-notice{padding:14px;background:#f3f7f9;border-radius:12px;white-space:pre-line}.pi-check{display:flex;align-items:flex-start;gap:8px;margin:12px 0;font-size:13px;line-height:1.6}.pi-check input{margin-top:4px;flex-shrink:0}
+.pill-id-dialog button{font-family:inherit}.pill-id-dialog button:disabled{opacity:.5;cursor:wait}.pi-primary,.pi-secondary,.pi-danger{border:0;border-radius:11px;padding:11px 15px;font-size:13px;font-weight:750;cursor:pointer}.pi-primary{background:#177d79;color:#fff}.pi-secondary{background:#edf3f5;color:#3c6371}.pi-danger{background:#b64b4b;color:#fff}.pi-wide{width:100%;margin-top:12px}.pi-muted{color:#667f8b;font-size:11px;line-height:1.7}.pi-text-button{background:none;border:0;font-size:11px;color:#246e80;cursor:pointer;padding:6px}.pi-danger-link{background:none;border:0;color:#a53e3e;font-size:12px;cursor:pointer;margin-top:18px;padding:8px 0;text-align:left}
+.pi-photo-pair,.pi-feature-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.pi-photo-pair article{min-width:0}.pi-photo-pair h3{color:#409993;font-size:12px;letter-spacing:1px}.pi-photo-pair h3 span{color:#345766;font-size:14px;letter-spacing:0;margin-left:5px}.pi-photo-box{height:160px;border:1px dashed #b9cfd4;border-radius:14px;background:#f7fafb;display:flex;align-items:center;justify-content:center;overflow:hidden}.pi-photo-box img{width:100%;height:100%;object-fit:contain}.pi-photo-box span{font-size:11px;color:#7b929c;text-align:center;padding:8px}.pi-photo-actions{display:flex;gap:5px;margin-top:8px}.pi-photo-actions button{flex:1;border:1px solid #d6e4e8;background:#fff;border-radius:8px;padding:8px 3px;font-size:11px;color:#366671;cursor:pointer}
+.pi-camera{position:relative;border-radius:16px;overflow:hidden;background:#122833;min-height:200px;margin-bottom:16px}.pi-camera video{width:100%;max-height:380px;display:block;object-fit:contain}.pi-camera-guide{position:absolute;inset:16% 22% 25%;border:2px dashed #ffffffab;border-radius:30px;pointer-events:none}.pi-camera-label{position:absolute;top:10px;left:12px;color:#fff;background:#0007;padding:4px 9px;border-radius:8px;font-size:12px}.pi-shutter{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);border:4px solid #fff9;border-radius:50%;height:60px;width:60px;background:#fff;color:#195d64;font-weight:800;cursor:pointer}.pi-camera-stop{position:absolute;bottom:20px;right:10px;background:#0007;color:white;border:0;padding:8px;border-radius:8px;font-size:11px;cursor:pointer}
+.pi-feature-grid>section{padding:13px;background:#f7fafb;border:1px solid #e4ecef;border-radius:12px;min-width:0}.pill-id-dialog fieldset{border:0;padding:0;margin:14px 0}.pi-feature-grid label,.pi-shape{display:block;font-size:12px;font-weight:650;color:#4e6874;margin-bottom:12px}.pi-feature-grid input,.pi-feature-grid select,.pi-shape select{display:block;width:100%;margin-top:5px;padding:8px;border:1px solid #cedee3;border-radius:8px;background:#fff;color:#253f4d;font:inherit;min-height:35px}.pi-feature-grid select[multiple]{padding:4px;min-height:88px}.pi-shape{margin:12px 0}.pi-row{justify-content:flex-start;flex-wrap:wrap}.pi-safety{padding:13px;border-radius:12px;background:#fff8e9;color:#775b29;font-size:12px;line-height:1.7}.pi-candidates{display:grid;gap:12px}.pi-candidate{border:1px solid #deeaed;border-radius:15px;padding:14px}.pi-candidate-top{display:flex;gap:12px;align-items:flex-start}.pi-reference{flex:0 0 130px;min-height:92px;background:#f5f8fa;border-radius:9px;display:flex;align-items:center;justify-content:center;overflow:hidden}.pi-reference img{width:130px;max-height:110px;object-fit:contain}.pi-reference span{font-size:11px;color:#738a96;text-align:center;padding:8px}.pi-candidate h4{font-size:14px;line-height:1.6;margin:0 0 4px;overflow-wrap:anywhere}.pi-score{display:inline-block;padding:3px 8px;background:#e3f5f1;color:#187965;border-radius:14px;font-size:12px;font-weight:800;margin:6px 0}.pi-low{background:#fff1d9;color:#8b642a}.pi-specs{display:grid;grid-template-columns:75px 1fr;font-size:12px;line-height:1.7;gap:3px 8px;margin:12px 0}.pi-specs dt{color:#68828e}.pi-specs dd{margin:0;overflow-wrap:anywhere}.pi-candidate a{color:#247080;font-size:12px}.pi-candidate details{border-top:1px solid #edf2f4;margin-top:10px;padding-top:10px;font-size:12px}.pi-candidate summary,.pi-privacy-details summary,#piRawOCR summary{cursor:pointer;color:#46717d;font-size:12px}.pi-reasons{padding-left:17px;line-height:1.8;color:#546e7b}.pi-candidate details p{font-size:11px;color:#6e8390}.pi-result-heading{margin-top:15px}.pi-result-heading h3{margin:0}#piRawOCR pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f3f6f8;padding:10px;font-size:12px}
+.pi-history-list{display:grid;gap:9px;margin:14px 0}.pi-history-item{display:flex;justify-content:space-between;align-items:center;gap:10px;border:1px solid #e2ebee;border-radius:11px;padding:12px}.pi-history-item p{margin:4px 0}.pi-history-item strong{font-size:13px}.pi-history-item button{flex-shrink:0}.pi-privacy-details{margin-top:14px}.pi-confirm{border:1px solid #ebc9c9;background:#fff8f7;padding:16px;border-radius:14px;margin-top:12px;font-size:13px;line-height:1.7}
+@media(max-width:480px){.pill-id-dialog{padding:16px;max-height:calc(100dvh - 20px);border-radius:18px}.pi-photo-pair,.pi-feature-grid{gap:9px}.pi-photo-box{height:125px}.pi-feature-grid>section{padding:10px}.pi-reference{flex-basis:95px;min-height:80px}.pi-reference img{width:95px}.pi-candidate{padding:12px}.pi-candidate-top{gap:9px}.pi-candidate h4{font-size:13px}.pi-result-heading{align-items:flex-start}.pill-id-floating{right:calc(10px + env(safe-area-inset-right,0px));bottom:calc(86px + env(safe-area-inset-bottom,0px));width:56px;height:56px}}
+@media(prefers-reduced-motion:reduce){.pill-id-dialog *{scroll-behavior:auto!important}}
+
+</style>
 </head>
 <body>
 <div id="pageTopAnchor" class="page-scroll-anchor" aria-hidden="true"></div>
@@ -1083,6 +1106,7 @@
     </section>
     <section id="appPanelMedicines" class="app-tab-panel info-tab-panel" role="tabpanel" aria-labelledby="appTabMedicines" tabindex="0" hidden>
         <div class="info-tab-heading"><span class="info-tab-icon" aria-hidden="true">💊</span><h2>의약품 정보</h2><p>약에 대해 궁금할 때, 공식 정보를 확인해 보세요.</p></div>
+        <article class="info-resource-card"><span class="info-source-label">알약 앞·뒷면 촬영</span><h3>사진으로 약식별</h3><p>문자·색상·모양·분할선을 비교해 가까운 후보 10개를 찾아보세요.</p><button type="button" id="pillIdMedicineButton" class="pi-primary">💊 약식별 시작</button></article>
         <article class="info-resource-card">
             <span class="info-source-label">식품의약품안전처 · 의약품안전나라</span>
             <h3>의약품 제품정보 찾기</h3>
@@ -2043,6 +2067,61 @@
 })();
 </script>
 
+<button id="pillIdFloatingButton" class="pill-id-floating" type="button" aria-label="약식별: 알약 앞뒤 촬영" aria-haspopup="dialog">
+  <span class="floating-nav-toggle-inner pill-id-floating-inner"><svg aria-hidden="true" viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m9 5 10 10M5 19a6 6 0 0 1 0-8l6-6a6 6 0 0 1 8 8l-6 6a6 6 0 0 1-8 0Z"/><path d="m7 12 3-3" stroke-linecap="round"/></svg><span>약식별</span></span>
+</button>
+<dialog id="pillIdDialog" class="pill-id-dialog" aria-labelledby="pillIdTitle">
+  <div class="pi-heading"><div><span class="pi-eyebrow">PILL FINDER</span><h2 id="pillIdTitle">💊 사진으로 약식별</h2></div><button type="button" id="piClose" class="pi-icon-close" aria-label="약식별 닫기">×</button></div>
+  <div class="pi-tabs" role="group" aria-label="약식별 화면"><button type="button" id="piNew" class="pi-tab is-active" data-pi-busy>새로 촬영</button><button type="button" id="piHistory" class="pi-tab" data-pi-busy>촬영 기록</button></div>
+  <p id="piStatus" class="pi-status" role="status" aria-live="polite"></p>
+  <section id="piConsent" hidden aria-labelledby="piConsentTitle">
+    <h3 id="piConsentTitle">처음 이용 전 확인해 주세요</h3>
+    <p id="piNotice" class="pi-notice"></p>
+    <label class="pi-check"><input id="piPersonal" type="checkbox"> 사진·식별 정보의 수집 및 이용에 동의합니다.</label>
+    <label class="pi-check"><input id="piSensitive" type="checkbox"> 건강·복약 관련 민감정보 처리에 동의합니다.</label>
+    <label class="pi-check"><input id="piAIConsent" type="checkbox"> 사진을 Google Cloud 분석서비스로 전송하는 데 동의합니다(국외 처리 가능).</label>
+    <button type="button" id="piAccept" class="pi-primary" data-pi-busy>동의하고 촬영</button>
+  </section>
+  <section id="piCapture" hidden>
+    <p class="pi-intro">같은 알약 <strong>하나</strong>의 앞면과 뒷면을 촬영해 주세요. 밝은 단색 배경에서 알약의 문자와 가장자리가 크게 보이게 맞춰 주세요.</p>
+    <div id="piCamera" class="pi-camera" hidden><video id="piVideo" autoplay playsinline muted aria-label="알약 촬영 카메라"></video><span class="pi-camera-guide" aria-hidden="true"></span><span id="piCameraLabel" class="pi-camera-label">앞면 촬영</span><button type="button" id="piShutter" class="pi-shutter" data-pi-busy>촬영</button><button type="button" id="piStopCamera" class="pi-camera-stop">카메라 끄기</button></div>
+    <div class="pi-photo-pair">
+      <article><h3>01 <span>앞면</span></h3><div class="pi-photo-box"><img id="piFrontPreview" alt="촬영한 알약 앞면" hidden><span id="piFrontEmpty">문자에 초점을 맞춰 주세요</span></div><div class="pi-photo-actions"><button type="button" data-pi-camera="front" data-pi-busy>앞면 촬영</button><button type="button" data-pi-file="front" data-pi-busy>사진 선택</button></div></article>
+      <article><h3>02 <span>뒷면</span></h3><div class="pi-photo-box"><img id="piBackPreview" alt="촬영한 알약 뒷면" hidden><span id="piBackEmpty">같은 알약을 뒤집어 주세요</span></div><div class="pi-photo-actions"><button type="button" data-pi-camera="back" data-pi-busy>뒷면 촬영</button><button type="button" data-pi-file="back" data-pi-busy>사진 선택</button></div></article>
+    </div>
+    <input id="piFile" type="file" accept="image/*" hidden>
+    <input id="piNativeCamera" type="file" accept="image/*" capture="environment" hidden>
+    <p id="piSavedLabel" class="pi-muted"></p>
+    <button id="piAnalyze" type="button" class="pi-primary pi-wide" data-pi-busy>사진 저장하고 식별하기</button>
+    <p class="pi-muted">사진은 본인 계정에 저장됩니다. 분석 중 창을 닫아도 촬영 기록에서 결과를 확인할 수 있습니다.</p>
+  </section>
+  <section id="piResults" hidden aria-labelledby="piResultsTitle">
+    <h3 id="piResultsTitle">읽어낸 식별 정보</h3><p id="piAnalysisNotices" class="pi-notice" hidden></p>
+    <details id="piRawOCR"><summary>문자 OCR 원문 확인</summary><pre id="piRawOCRText"></pre></details>
+    <form id="piFeatureForm">
+      <fieldset id="piFeatureFields"><legend class="app-sr-only">촬영 사진의 식별 정보 확인 및 수정</legend>
+        <div class="pi-feature-grid">
+          <section><h4>촬영 앞면</h4><label>문자 상태<select id="piFrontTextState"><option value="readable">문자 판독</option><option value="unreadable">판독 불가</option><option value="none">문자 없음</option></select></label><label>인쇄·각인 문자<input id="piFrontText" maxlength="80" autocomplete="off" placeholder="예: TG DCT"></label><label>색상 <span class="pi-muted">최대 3개 선택</span><select id="piFrontColors" multiple size="4"></select></label><label>분할선<select id="piFrontLine"><option value="unknown">판독 불가</option><option value="none">없음</option><option value="-">한 줄 (−)</option><option value="+">십자 (+)</option><option value="other">기타</option></select></label></section>
+          <section><h4>촬영 뒷면</h4><label>문자 상태<select id="piBackTextState"><option value="readable">문자 판독</option><option value="unreadable">판독 불가</option><option value="none">문자 없음</option></select></label><label>인쇄·각인 문자<input id="piBackText" maxlength="80" autocomplete="off" placeholder="예: 10"></label><label>색상 <span class="pi-muted">최대 3개 선택</span><select id="piBackColors" multiple size="4"></select></label><label>분할선<select id="piBackLine"><option value="unknown">판독 불가</option><option value="none">없음</option><option value="-">한 줄 (−)</option><option value="+">십자 (+)</option><option value="other">기타</option></select></label></section>
+        </div>
+        <label class="pi-shape">알약 모양<select id="piShape"></select></label>
+        <div class="pi-row"><button type="submit" id="piSearch" class="pi-primary" data-pi-busy>수정한 정보로 다시 찾기</button><button type="button" id="piRetry" class="pi-secondary" data-pi-busy>AI 재분석</button></div>
+      </fieldset>
+    </form>
+    <p class="pi-safety">식별 후보입니다. 사진·유사도만으로 복용 여부를 판단하지 말고, 복용 전 약사에게 확인하세요.</p>
+    <div class="pi-result-heading"><h3>가까운 후보 <span id="piCandidateCount">0</span>개</h3><button type="button" id="piReloadImages" class="pi-text-button" data-pi-busy>참고 이미지 다시 불러오기</button></div>
+    <p class="pi-muted">문자 70점 · 색상 15점 · 모양 10점 · 분할선 5점. 미판독·미등록 항목은 0점입니다. 앞뒤를 바꾼 비교도 포함하며 점수는 정답 확률이 아닙니다.</p>
+    <p id="piImageStatus" class="pi-muted" role="status"></p><div id="piCandidates" class="pi-candidates"></div><p id="piDataset" class="pi-muted"></p>
+  </section>
+  <section id="piHistoryPanel" hidden aria-labelledby="piHistoryTitle">
+    <div class="pi-result-heading"><h3 id="piHistoryTitle">내 약식별 기록</h3><button type="button" id="piRefresh" class="pi-text-button" data-pi-busy>새로고침</button></div>
+    <div id="piHistoryList" class="pi-history-list"></div><button id="piMoreHistory" type="button" class="pi-secondary" data-pi-busy hidden>이전 기록 더 보기</button>
+    <button id="piRevoke" type="button" class="pi-danger-link" data-pi-busy>약식별 동의 철회 및 사진·결과 모두 삭제</button>
+    <details class="pi-privacy-details"><summary>사진 분석 개인정보 처리 안내</summary><p id="piHistoryNotice" class="pi-notice"></p></details>
+  </section>
+  <section id="piConfirm" class="pi-confirm" hidden aria-labelledby="piConfirmTitle"><h3 id="piConfirmTitle"></h3><p id="piConfirmText"></p><div class="pi-row"><button id="piConfirmCancel" type="button" class="pi-secondary">취소</button><button id="piConfirmAccept" type="button" class="pi-danger">삭제</button></div></section>
+</dialog>
+
 <script type="module">
 
 
@@ -2053,11 +2132,12 @@
 
     
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
-    import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, deleteDoc, collection, addDoc, query, orderBy, limit, onSnapshot, getDocs, where, serverTimestamp, writeBatch, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, deleteDoc, collection, addDoc, query, orderBy, limit, onSnapshot, getDocs, where, startAfter, serverTimestamp, writeBatch, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
     import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-messaging.js";
+    import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app-check.js";
     import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-functions.js";
-    import { getStorage, ref as storageRef, uploadBytesResumable, getBlob, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-storage.js";
+    import { getStorage, ref as storageRef, uploadBytesResumable, getBlob, getMetadata, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-storage.js";
 
     const stages = [ { d: 1, t: "1일: 알코올 완전 배출", desc: "혈중 알코올이 0이 되며, 몸이 본격적인 해독 스위치를 켭니다." }, { d: 2, t: "2일: 숙취 및 갈증 해소", desc: "체내 수분 밸런스가 정상화되고 극심한 피로감과 두통이 사라집니다." }, { d: 3, t: "3일: 금단 증상 완화", desc: "초기 불안감과 손떨림이 잦아들며, 신체가 알코올 없는 상태에 적응하기 시작합니다." }, { d: 5, t: "5일: 피부 톤 및 탄력 개선", desc: "탈수 증상이 회복되어 푸석했던 피부가 맑아지고 생기가 돕니다." }, { d: 7, t: "1주: 깊은 수면(REM) 회복", desc: "수면의 질이 극적으로 향상되어 아침에 일어날 때 진짜 '개운함'을 느낍니다." }, { d: 10, t: "10일: 브레인 포그 걷힘", desc: "머릿속 안개가 걷힌 듯 인지 능력이 맑아지고 집중력이 상승합니다." }, { d: 14, t: "2주: 위장 및 소화력 회복", desc: "위점막이 재생되어 속쓰림, 역류성 식도염, 더부룩함이 크게 개선됩니다." }, { d: 21, t: "3주: 혈압 및 심박수 안정화", desc: "고혈압 수치가 제자리를 찾기 시작하며 심혈관계의 부담이 확 줄어듭니다." }, { d: 30, t: "1개월: 간 지방 수치 대폭 감소", desc: "지방간이 최대 15~20% 감소하며, 간 수치 정상화로 피로회복력이 급증합니다." }, { d: 60, t: "2개월: 강력한 면역력 형성", desc: "백혈구 기능이 완전히 회복되어 감기 등 외부 바이러스에 대한 저항력이 강해집니다." }, { d: 90, t: "3개월: 도파민 시스템 정상화", desc: "술 없이도 일상에서 자연스러운 행복과 스트레스 해소를 온전히 느낄 수 있게 됩니다." }, { d: 180, t: "6개월: 눈에 띄는 체형 변화", desc: "불필요한 '빈 칼로리' 섭취가 사라져 뱃살이 줄어들고 얼굴선이 뚜렷해집니다." }, { d: 365, t: "1년: 중증 질환 위험 급감", desc: "간경화, 유방암, 구강암 등 알코올 관련 치명적 질환의 위험이 비약적으로 떨어집니다." }, { d: 730, t: "2년: 뇌세포 용적 회복", desc: "알코올로 인해 위축되었던 뇌의 회백질이 건강한 비음주자 수준으로 재생됩니다." }, { d: 1825, t: "5년: 소화기계 완벽한 리셋", desc: "식도암, 위암 등의 발생 확률이 금주 전의 절반 수준으로 대폭 낮아집니다." }, { d: 3650, t: "10년: 완전한 리셋 및 자유", desc: "신체의 거의 모든 지표가 평생 술을 마시지 않은 사람과 유사한 수준으로 건강해집니다." } ];
     const liverStages = [ { d: 1, t: "1일: 해독 공장 가동", desc: "간이 알코올 분해 업무를 끝내고, 쌓여있던 독소를 처리하는 본래 업무에 집중합니다." }, { d: 7, t: "1주: 염증 수치 하락", desc: "알코올로 인한 간의 미세한 염증들이 가라앉으며 혈액 검사상 간 수치가 하락하기 시작합니다." }, { d: 14, t: "2주: 지방 대사 재개", desc: "알코올 대신 지방을 연소하기 시작하여 간에 끼어있던 기름기가 빠져나가기 시작합니다." }, { d: 30, t: "1개월: 지방간 20% 감소", desc: "지방간 수치가 급격히 떨어지며, 간의 크기가 정상으로 돌아오고 혈색이 좋아집니다." }, { d: 90, t: "3개월: 단백질 합성 최적화", desc: "알부민 등 필수 단백질 합성이 원활해져 만성 피로가 사라지고 근육 성장이 효율적으로 변합니다." }, { d: 180, t: "6개월: 간 섬유화 억제", desc: "딱딱하게 굳으려던 간 조직의 손상이 멈추고, 건강한 간 세포가 그 자리를 대체합니다." }, { d: 365, t: "1년: 해독 능력 극대화", desc: "간의 정화 능력이 정점에 도달하여 약물 대사나 독소 배출 속도가 비약적으로 빨라집니다." }, { d: 1825, t: "5년: 간암 발생률 급감", desc: "간세포의 변이 가능성이 차단되어, 간암 및 간경변 위험이 일반인 수준에 근접합니다." }, { d: 3650, t: "10년: 완벽한 재생 완료", desc: "오랜 기간 손상받았던 간 조직이 완전히 새것처럼 리모델링되어 최상의 상태를 유지합니다." } ];
@@ -3690,6 +3770,7 @@
         if (previous?.isConnected && previous.getClientRects().length) previous.focus({ preventScroll: true });
     };
     document.addEventListener('keydown', event => {
+        if (document.getElementById('pillIdDialog')?.open) return;
         const id = hr.dialogs.at(-1); if (!id) return;
         const modal = hrEl(id);
         if (event.key === 'Escape') { event.preventDefault(); closeHealthDialog(id); return; }
@@ -4337,6 +4418,295 @@
     };
 
     window.dateToKeyForHealthToday = hrToday;
+
+// Front-end integration. Uses the same Firebase app, login and SDK version as the existing page.
+function initPillIdentification() {
+    const POLICY = '2026-09-20-pill-v1';
+    const NOTICE = "처리 주체: Alcoholaway.com 운영자. 목적: 알약 사진 보관, 문자·외형 분석 및 식별 후보 검색. 항목: 계정 식별자, 알약 앞·뒷면 사진, 촬영·저장 시각, 판독 문자·색상·모양·분할선, 검색 결과. 사진에는 건강·복약 관련 민감정보가 포함될 수 있습니다. 사진과 판독 결과는 직접 삭제하거나 동의를 철회할 때까지 본인 계정에 보관합니다. 사진은 Google Cloud의 Cloud Vision 및 Vertex AI로 전송되어 분석되며, 분석 처리가 국내로 한정되지 않습니다. 사진 배경에 얼굴, 이름, 처방전 등 개인정보가 들어가지 않도록 해 주세요. 동의를 거부해도 다른 기능을 사용할 수 있습니다. 약식별 기록 화면에서 기록 삭제 및 동의 철회가 가능합니다. 판독 결과와 유사도는 약품의 확정 식별이나 복용 판단을 대신하지 않습니다.";
+    // Fill in the public reCAPTCHA v3 site key registered for this Firebase web app before deployment.
+    const PILL_ID_CONFIG = { appCheckSiteKey: '6LfI28QtAAAAANzmGSBTvsJWCq4IKNmuxz8CqZ1D', region: 'asia-northeast3' };
+    if (PILL_ID_CONFIG.appCheckSiteKey) {
+        try { initializeAppCheck(app, { provider: new ReCaptchaV3Provider(PILL_ID_CONFIG.appCheckSiteKey), isTokenAutoRefreshEnabled: true }); }
+        catch (error) { console.warn('약식별 앱 검증 초기화 실패:', error.code || 'initialization'); }
+    }
+    const el = id => document.getElementById(id), dialog = el('pillIdDialog');
+    const storage = getStorage(app), callable = getFunctions(app, PILL_ID_CONFIG.region);
+    const colors = ['하양','노랑','주황','분홍','빨강','갈색','연두','초록','청록','파랑','남색','보라','자주','회색','검정','투명'];
+    const shapes = ['원형','타원형','장방형','반원형','삼각형','사각형','마름모형','오각형','육각형','팔각형','기타'];
+    const state = { uid:null, generation:0, stream:null, cameraSeq:0, side:'front', photos:{front:null,back:null}, urls:new Map(),
+        tasks:[], busy:false, id:null, record:null, cursor:null, fileToken:null, consent:null, confirmation:null, imageSeq:0, previousFocus:null };
+    const token = () => ({ uid:state.uid, generation:state.generation });
+    const same = t => !!t.uid && t.uid === state.uid && t.generation === state.generation && auth.currentUser?.uid === t.uid && dialog.open;
+    const call = async (name,data) => (await httpsCallable(callable,name,{timeout:175000})(data)).data;
+    const status = (message='',error=false) => { el('piStatus').textContent=message;el('piStatus').classList.toggle('is-error',error); };
+    const setBusy = value => {
+        state.busy=value;
+        dialog.querySelectorAll('[data-pi-busy], input, select').forEach(node=>node.disabled=value);
+        el('piFeatureFields').disabled=value||!!state.record?.analysis?.blocked;
+        for(const side of ['Front','Back']) el('pi'+side+'Text').disabled=value||el('pi'+side+'TextState').value!=='readable';
+        if(!value && state.record) dialog.querySelectorAll('[data-pi-camera],[data-pi-file]').forEach(node=>node.disabled=true);
+    };
+    const errorText = error => {
+        const code=String(error?.code||'');
+        if(/unauthenticated|unauthorized|permission-denied/.test(code))return '서비스 이용 권한을 확인하지 못했습니다. 다시 로그인해 주세요. 계속되면 운영자에게 문의해 주세요.';
+        if(/not-found/.test(code))return '기록을 찾을 수 없습니다. 촬영 기록을 새로고침해 주세요.';
+        if(/functions\//.test(code) && error.message && !['INTERNAL','UNAVAILABLE','internal','unauthenticated'].includes(error.message))return error.message;
+        if(/canceled/.test(code))return '사진 업로드가 취소되었습니다. 촬영 기록에서 상태를 확인할 수 있습니다.';
+        return '약식별 서비스에 연결하지 못했습니다. 인터넷 연결을 확인하고 다시 시도해 주세요.';
+    };
+    const option = (value,label=value) => { const o=document.createElement('option');o.value=value;o.textContent=label;return o; };
+    for(const side of ['Front','Back']) el('pi'+side+'Colors').append(...colors.map(c=>option(c)));
+    el('piShape').append(option('unknown','판독 불가'),...shapes.map(s=>option(s)));
+    el('piNotice').textContent=NOTICE;el('piHistoryNotice').textContent=NOTICE;
+    function stopCamera() {
+        state.cameraSeq++;state.stream?.getTracks().forEach(track=>track.stop());state.stream=null;
+        el('piVideo').srcObject=null;el('piCamera').hidden=true;
+    }
+    function releasePhotos() {
+        for(const url of state.urls.values())URL.revokeObjectURL(url);state.urls.clear();
+        for(const side of ['Front','Back']) {el('pi'+side+'Preview').removeAttribute('src');el('pi'+side+'Preview').hidden=true;el('pi'+side+'Empty').hidden=false;}
+        state.photos={front:null,back:null};
+    }
+    function invalidateView() {
+        state.generation++;state.imageSeq++;stopCamera();state.tasks.forEach(task=>task.cancel());state.tasks=[];releasePhotos();
+        state.id=null;state.record=null;state.fileToken=null;state.confirmation=null;state.busy=false;
+        el('piFeatureForm').reset();el('piCandidates').replaceChildren();el('piHistoryList').replaceChildren();
+        el('piRawOCRText').textContent='';el('piAnalysisNotices').textContent='';el('piImageStatus').textContent='';
+        el('piSavedLabel').textContent='';el('piFile').value='';el('piNativeCamera').value='';el('piConfirm').hidden=true;
+        ['piPersonal','piSensitive','piAIConsent'].forEach(id=>el(id).checked=false);setBusy(false);
+    }
+    function view(section) {
+        for(const id of ['piConsent','piCapture','piResults','piHistoryPanel'])el(id).hidden=!section.includes(id);
+        el('piNew').classList.toggle('is-active',!section.includes('piHistoryPanel'));
+        el('piHistory').classList.toggle('is-active',section.includes('piHistoryPanel'));
+    }
+    function hasConsent() {const c=state.consent;return c?.status==='granted'&&c.version===POLICY&&c.personal&&c.sensitive&&c.ai&&!c.deletionPending;}
+    async function newCapture(autoCamera=true) {
+        if(state.busy)return;invalidateView();state.cursor=null;status();
+        const t=token();view(['piCapture']);setBusy(true);
+        try {
+            const snap=await getDoc(doc(db,'users',t.uid,'pill_consents','current'));if(!same(t))return;
+            state.consent=snap.exists()?snap.data():null;
+            if(state.consent?.deletionPending){view(['piHistoryPanel']);status('동의 철회 후 사진 삭제가 남아 있습니다. 아래 동의 철회 버튼으로 삭제를 마쳐 주세요.',true);return;}
+            if(!hasConsent()){view(['piConsent']);return;}
+            el('piAnalyze').hidden=false;el('piAnalyze').textContent='사진 저장하고 식별하기';
+            if(autoCamera)await startCamera('front');
+        } catch(error) {if(same(t))status(errorText(error),true);}
+        finally {if(same(t))setBusy(false);}
+    }
+    async function openPillIdentification() {
+        if(!auth.currentUser){window.switchAppTab?.('records');alert('약식별은 로그인 후 이용할 수 있습니다.');return;}
+        if(dialog.open)return;
+        state.uid=auth.currentUser.uid;state.previousFocus=document.activeElement;dialog.showModal();await newCapture(true);
+    }
+    el('pillIdFloatingButton').addEventListener('click',openPillIdentification);
+    el('pillIdMedicineButton')?.addEventListener('click',openPillIdentification);
+    el('piClose').addEventListener('click',()=>dialog.close());
+    dialog.addEventListener('close',()=>{invalidateView();state.consent=null;status();if(state.previousFocus?.isConnected)state.previousFocus.focus({preventScroll:true});});
+    el('piNew').addEventListener('click',()=>newCapture(true));
+    el('piStopCamera').addEventListener('click',stopCamera);
+    el('piAccept').addEventListener('click',async()=>{
+        if(state.busy)return;
+        if(!['piPersonal','piSensitive','piAIConsent'].every(id=>el(id).checked)){status('세 가지 동의 항목을 각각 확인해 주세요.',true);return;}
+        const t=token();setBusy(true);status('동의 내용을 저장하고 있습니다.');
+        try {await call('pillIdConsent',{version:POLICY,personal:true,sensitive:true,ai:true});if(!same(t))return;setBusy(false);await newCapture(true);}
+        catch(error){if(same(t))status(errorText(error),true);}
+        finally{if(same(t))setBusy(false);}
+    });
+    async function startCamera(side) {
+        if(!hasConsent()||state.record)return;
+        stopCamera();state.side=side;const seq=state.cameraSeq,t=token();
+        if(!navigator.mediaDevices?.getUserMedia){status('이 브라우저에서는 아래 촬영 버튼으로 카메라를 열어 주세요.');return;}
+        try {
+            const stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:'environment'},width:{ideal:1600},height:{ideal:1200}}});
+            if(!same(t)||seq!==state.cameraSeq||document.hidden){stream.getTracks().forEach(track=>track.stop());return;}
+            state.stream=stream;el('piVideo').srcObject=stream;await el('piVideo').play();
+            if(!same(t)||seq!==state.cameraSeq)return;
+            el('piCameraLabel').textContent=side==='front'?'앞면 촬영':'같은 알약을 뒤집어 뒷면 촬영';el('piCamera').hidden=false;
+            status(side==='front'?'먼저 알약 앞면의 문자에 초점을 맞춰 주세요.':'알약을 뒤집은 다음 뒷면을 촬영해 주세요.');
+        } catch(error) {if(same(t)&&seq===state.cameraSeq){stopCamera();status('카메라를 열지 못했습니다. 촬영 버튼을 다시 누르거나 사진 선택을 이용해 주세요.',true);}}
+    }
+    function chooseFile(side,native=false) {
+        if(state.busy||state.record||!hasConsent())return;
+        state.side=side;state.fileToken={...token(),side};const input=el(native?'piNativeCamera':'piFile');input.value='';input.click();
+    }
+    dialog.querySelectorAll('[data-pi-camera]').forEach(button=>button.addEventListener('click',()=>{
+        if(!navigator.mediaDevices?.getUserMedia||(!state.stream&&/iPhone|iPad|Android/i.test(navigator.userAgent)))chooseFile(button.dataset.piCamera,true);
+        else startCamera(button.dataset.piCamera);
+    }));
+    dialog.querySelectorAll('[data-pi-file]').forEach(button=>button.addEventListener('click',()=>chooseFile(button.dataset.piFile)));
+    function setPhoto(side,blob) {
+        const old=state.urls.get(side);if(old)URL.revokeObjectURL(old);
+        const url=URL.createObjectURL(blob);state.urls.set(side,url);state.photos[side]=blob;
+        const cap=side==='front'?'Front':'Back';el('pi'+cap+'Preview').src=url;el('pi'+cap+'Preview').hidden=false;el('pi'+cap+'Empty').hidden=true;
+    }
+    async function jpegFrom(source,width,height) {
+        if(!width||!height||width<100||height<100||width*height>40000000)throw new Error('PHOTO_SIZE');
+        const ratio=Math.min(1,1600/width,1600/height),canvas=document.createElement('canvas');canvas.width=Math.round(width*ratio);canvas.height=Math.round(height*ratio);
+        canvas.getContext('2d').drawImage(source,0,0,canvas.width,canvas.height);
+        const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',.9));
+        if(!blob||blob.size>3*1024*1024)throw new Error('PHOTO_SIZE');return blob;
+    }
+    async function filePhoto(event) {
+        const file=event.target.files?.[0],t=state.fileToken;if(!file||!t||!same(t)||state.busy)return;
+        if(!file.type.startsWith('image/')||file.size>20*1024*1024){status('20MB 이하의 사진을 선택해 주세요.',true);return;}
+        setBusy(true);stopCamera();let bitmap,tempUrl;
+        try {
+            if(typeof createImageBitmap==='function')bitmap=await createImageBitmap(file,{imageOrientation:'from-image'});
+            else {tempUrl=URL.createObjectURL(file);bitmap=await new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=reject;img.src=tempUrl;});}
+            const blob=await jpegFrom(bitmap,bitmap.width||bitmap.naturalWidth,bitmap.height||bitmap.naturalHeight);if(!same(t))return;
+            setPhoto(t.side,blob);state.id=null;status(state.photos.front&&state.photos.back?'앞·뒷면 사진을 확인한 뒤 식별하기를 눌러 주세요.':t.side==='front'?'이제 같은 알약의 뒷면을 촬영해 주세요.':'앞면 사진도 촬영해 주세요.');
+        } catch(error){if(same(t))status('사진을 읽지 못했습니다. JPEG/PNG 사진으로 다시 촬영하거나 선택해 주세요.',true);}
+        finally{bitmap?.close?.();if(tempUrl)URL.revokeObjectURL(tempUrl);if(same(t))setBusy(false);}
+    }
+    el('piFile').addEventListener('change',filePhoto);el('piNativeCamera').addEventListener('change',filePhoto);
+    el('piShutter').addEventListener('click',async()=>{
+        if(state.busy||!state.stream)return;const t=token(),side=state.side;setBusy(true);
+        try {const v=el('piVideo'),blob=await jpegFrom(v,v.videoWidth,v.videoHeight);if(!same(t))return;
+            setPhoto(side,blob);state.id=null;
+            if(side==='front'&&!state.photos.back){state.side='back';el('piCameraLabel').textContent='같은 알약을 뒤집어 뒷면 촬영';status('앞면 촬영 완료. 알약을 뒤집어 뒷면을 촬영해 주세요.');}
+            else{stopCamera();status('앞·뒷면 사진을 확인한 뒤 식별하기를 눌러 주세요.');}
+        }catch(error){if(same(t))status('촬영 화면이 준비되지 않았습니다. 잠시 후 다시 눌러 주세요.',true);}
+        finally{if(same(t))setBusy(false);}
+    });
+    async function upload(side,photo,t,id,hash) {
+        const ref=storageRef(storage,`pill_identification/${t.uid}/${id}/${side}.jpg`);
+        try {const old=await getMetadata(ref);if(old.customMetadata?.sha256===hash&&old.size===photo.size)return;throw new Error('PHOTO_CONFLICT');}
+        catch(error){if(error.code!=='storage/object-not-found')throw error;}
+        if(!same(t))return;
+        const task=uploadBytesResumable(ref,photo,{contentType:'image/jpeg',customMetadata:{policyVersion:POLICY,sha256:hash}});state.tasks.push(task);
+        await new Promise((resolve,reject)=>task.on('state_changed',snapshot=>{
+            if(same(t))status(`${side==='front'?'앞면':'뒷면'} 사진 저장 중 ${Math.round(snapshot.bytesTransferred/snapshot.totalBytes*100)}%`);
+        },reject,resolve));state.tasks=state.tasks.filter(item=>item!==task);
+    }
+    async function analyze(retry=false) {
+        if(state.busy)return;const t=token();setBusy(true);stopCamera();
+        try {
+            if(!state.record) {
+                if(!state.photos.front||!state.photos.back){status('앞면과 뒷면을 모두 촬영해 주세요.',true);return;}
+                state.id ||= crypto.randomUUID();const id=state.id,photos={};
+                for(const side of ['front','back']){const b=state.photos[side];photos[side]={size:b.size,sha256:[...new Uint8Array(await crypto.subtle.digest('SHA-256',await b.arrayBuffer()))].map(v=>v.toString(16).padStart(2,'0')).join('')};}
+                if(!same(t))return;status('촬영 기록을 만들고 있습니다.');await call('pillIdStart',{id,photos});if(!same(t))return;
+                for(const side of ['front','back']){await upload(side,state.photos[side],t,id,photos[side].sha256);if(!same(t))return;}
+            }
+            status('사진 저장 완료. 앞·뒷면의 문자와 외형을 분석하고 있습니다. 잠시 기다려 주세요.');
+            const result=await call('pillIdAnalyze',{id:state.id,retry});if(!same(t))return;
+            renderRecord(result);status(result.analysis?.blocked?'알약이 하나씩 선명하게 보이도록 새로 촬영해 주세요.':result.candidates.length?'분석 완료. 판독 문자를 확인하고 후보를 비교해 주세요.':'후보를 찾을 정보가 부족합니다. 사진을 확인하며 식별 정보를 직접 입력해 주세요.');
+        }catch(error){if(same(t))status(errorText(error),true);}
+        finally{if(same(t))setBusy(false);}
+    }
+    el('piAnalyze').addEventListener('click',()=>analyze());el('piRetry').addEventListener('click',()=>analyze(true));
+    const textNode=(tag,text,className='')=>{const n=document.createElement(tag);n.textContent=text;if(className)n.className=className;return n;};
+    function fillFeatures(features) {
+        for(const side of ['front','back']){const cap=side==='front'?'Front':'Back',f=features[side];el('pi'+cap+'TextState').value=f.textState;el('pi'+cap+'Text').value=f.text;
+            el('pi'+cap+'Text').disabled=f.textState!=='readable';for(const o of el('pi'+cap+'Colors').options)o.selected=f.colors.includes(o.value);el('pi'+cap+'Line').value=f.line;}
+        el('piShape').value=features.shape;
+    }
+    function readFeatures() {
+        const read=cap=>({text:el('pi'+cap+'Text').value.trim(),textState:el('pi'+cap+'TextState').value,colors:[...el('pi'+cap+'Colors').selectedOptions].map(o=>o.value),line:el('pi'+cap+'Line').value});
+        const f={front:read('Front'),back:read('Back'),shape:el('piShape').value};
+        for(const s of ['front','back']){if(f[s].colors.length>3)throw new Error('색상은 각 면당 최대 3개를 선택해 주세요.');if(f[s].textState==='readable'&&!f[s].text)throw new Error('문자를 입력하거나 판독 불가를 선택해 주세요.');if(f[s].textState!=='readable')f[s].text='';}
+        return f;
+    }
+    for(const side of ['Front','Back'])el('pi'+side+'TextState').addEventListener('change',()=>el('pi'+side+'Text').disabled=el('pi'+side+'TextState').value!=='readable');
+    el('piFeatureForm').addEventListener('submit',async event=>{
+        event.preventDefault();if(state.busy||!state.record)return;let features;
+        try{features=readFeatures();}catch(error){status(error.message,true);return;}
+        const t=token();setBusy(true);status('수정한 식별 정보로 후보를 다시 찾고 있습니다.');
+        try{const result=await call('pillIdSearch',{id:state.id,revision:state.record.revision,features});if(!same(t))return;renderRecord(result);status('수정한 정보와 검색 결과를 저장했습니다.');}
+        catch(error){if(same(t))status(errorText(error),true);}finally{if(same(t))setBusy(false);}
+    });
+    function renderRecord(record) {
+        state.record=record;state.id=record.id;view(record.status==='ready'?['piCapture','piResults']:['piCapture']);
+        el('piSavedLabel').textContent='계정에 저장된 앞·뒷면 사진 · 바꾸려면 새로 촬영을 선택하세요.';
+        el('piAnalyze').hidden=record.status==='ready'||record.status==='deleting';el('piAnalyze').textContent='저장된 사진 분석하기';
+        if(record.status!=='ready')return;
+        const notices=record.analysis?.notices||[];el('piAnalysisNotices').textContent=notices.join('\n');el('piAnalysisNotices').hidden=!notices.length;
+        el('piRawOCRText').textContent=(record.analysis?.ocr||[]).map((r,i)=>`${i?'뒷면':'앞면'} OCR: ${r.available?(r.text||'읽은 문자 없음'):'분석 서비스 이용 불가'}`).join('\n\n');
+        if(record.features)fillFeatures(record.features);
+        el('piFeatureFields').disabled=state.busy||!!record.analysis?.blocked;
+        el('piCandidateCount').textContent=String(record.candidates?.length||0);el('piCandidates').replaceChildren();
+        const pretty=value=>({unknown:'판독 불가',none:'없음',other:'기타'})[value]||value||'미등록';
+        (record.candidates||[]).forEach((candidate,i)=>{
+            const card=document.createElement('article');card.className='pi-candidate';const top=textNode('div','','pi-candidate-top');
+            const ref=textNode('div','','pi-reference');ref.dataset.piCode=candidate.code;ref.append(textNode('span','참고 이미지 불러오는 중'));top.append(ref);
+            const title=textNode('div','');title.append(textNode('h4',`${i+1}. ${candidate.name}`),textNode('div',candidate.company||'','pi-muted'),textNode('span',`유사도 ${candidate.score.toFixed(1)} / 100`,'pi-score'+(candidate.textPoints<35?' pi-low':'')),textNode('div',candidate.evidence,'pi-muted'));top.append(title);card.append(top);
+            const dl=document.createElement('dl');dl.className='pi-specs';
+            for(const [label,value] of [['표시 (앞)',candidate.frontText],['표시 (뒤)',candidate.backText],['모양',candidate.shape],['색상 (앞/뒤)',`${candidate.frontColors||'미등록'} / ${candidate.backColors||'미등록'}`],['분할선 (앞/뒤)',`${candidate.frontLine||'미등록'} / ${candidate.backLine||'미등록'}`]])dl.append(textNode('dt',label),textNode('dd',value||'미등록'));
+            if(candidate.frontMark||candidate.backMark)dl.append(textNode('dt','마크 설명'),textNode('dd',`${candidate.frontMark||'미등록'} / ${candidate.backMark||'미등록'}`));card.append(dl);
+            const detail=document.createElement('details');detail.append(textNode('summary','이 후보가 나온 근거 보기'));
+            detail.append(textNode('p',`${candidate.swapped?'앞·뒷면을 서로 바꿔 비교한 점수입니다.':'촬영 앞면을 자료 앞면과 비교한 점수입니다.'} 비교 가능한 항목: ${candidate.coverage} / 100점. 자료의 빈 칸은 없는 것으로 단정하지 않습니다.`));
+            const list=document.createElement('ul');list.className='pi-reasons';for(const d of candidate.details||[])list.append(textNode('li',`${d.label}: ${pretty(d.observed)} ↔ ${pretty(d.reference)} · ${d.reason} (${d.points}/${d.weight}점)`));detail.append(list);card.append(detail);
+            const a=textNode('a','식약처 제품 정보 ↗');a.href=`https://nedrug.mfds.go.kr/pbp/CCBBB01/getItemDetail?itemSeq=${encodeURIComponent(candidate.code)}`;a.target='_blank';a.rel='noopener noreferrer';card.append(a);el('piCandidates').append(card);
+        });
+        if(!record.candidates?.length)el('piCandidates').append(textNode('p',record.analysis?.blocked?'앞·뒷면을 다시 촬영해 주세요.':'판독된 정보에 맞는 후보가 없습니다. 문자를 확인하거나 다시 촬영해 주세요.','pi-muted'));
+        el('piDataset').textContent=`자료: 지정된 DrugIdentification.json · ${(record.dataset?.records||0).toLocaleString()}개 식별 항목 · 자료 버전 ${record.dataset?.version||''} · ${record.reviewed?'직접 확인·수정한 정보':'자동 판독 정보'}`;
+        if(record.candidates?.length)loadReferenceImages();
+    }
+    async function loadReferenceImages() {
+        if(!state.record?.candidates?.length)return;const t=token(),seq=++state.imageSeq,id=state.id;
+        el('piImageStatus').textContent='식약처의 현재 참고 이미지를 불러오고 있습니다.';
+        try {
+            const result=await call('pillIdImages',{id});if(!same(t)||seq!==state.imageSeq||id!==state.id)return;
+            let missing=0;
+            for(const item of result.images||[]){const box=[...el('piCandidates').querySelectorAll('[data-pi-code]')].find(n=>n.dataset.piCode===item.code);if(!box)continue;box.replaceChildren();
+                if(typeof item.dataUrl==='string'&&/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(item.dataUrl)){const img=document.createElement('img');img.alt='식약처에 등록된 약품 낱알 참고 이미지';img.src=item.dataUrl;img.loading='lazy';img.addEventListener('error',()=>{box.replaceChildren(textNode('span','참고 이미지 없음'));});box.append(img);}
+                else{missing++;box.append(textNode('span','참고 이미지 없음'));}}
+            el('piImageStatus').textContent='식약처 현재 참고 이미지입니다. 자료의 등록 당시 외형과 다를 수 있습니다.'+(missing?` ${missing}개 이미지는 제공되지 않아 제품 정보 링크로 확인해 주세요.`:'');
+        }catch(error){if(same(t)&&seq===state.imageSeq){el('piImageStatus').textContent='참고 이미지를 불러오지 못했습니다. 다시 불러오기를 누르거나 제품 정보 링크를 확인해 주세요.';el('piCandidates').querySelectorAll('.pi-reference').forEach(box=>box.replaceChildren(textNode('span','이미지 연결 실패')));}}
+    }
+    el('piReloadImages').addEventListener('click',loadReferenceImages);
+    async function loadPrivatePhotos(id,t) {
+        const results=await Promise.allSettled(['front','back'].map(async side=>{
+            const blob=await getBlob(storageRef(storage,`pill_identification/${t.uid}/${id}/${side}.jpg`),3*1024*1024);
+            const magic=new Uint8Array(await blob.slice(0,3).arrayBuffer());if(magic[0]!==255||magic[1]!==216||magic[2]!==255)throw new Error('PHOTO_INVALID');
+            if(same(t)&&id===state.id)setPhoto(side,blob.slice(0,blob.size,'image/jpeg'));
+        }));
+        if(same(t)&&results.some(r=>r.status==='rejected'))status('저장된 사진 일부를 불러오지 못했습니다. 기록을 다시 열어 보세요. 업로드가 중단된 기록은 삭제 후 새로 촬영해 주세요.',true);
+    }
+    async function openRecord(id) {
+        if(state.busy)return;invalidateView();const t=token();setBusy(true);status('저장한 기록을 불러오고 있습니다.');
+        try{const snap=await getDoc(doc(db,'users',t.uid,'pill_identifications',id));if(!same(t))return;if(!snap.exists())throw {code:'functions/not-found'};
+            renderRecord({...snap.data(),id});status(snap.data().status==='processing'?'서버에서 분석 중입니다. 잠시 후 촬영 기록을 새로고침해 주세요.':'');await loadPrivatePhotos(id,t);
+        }catch(error){if(same(t))status(errorText(error),true);}finally{if(same(t))setBusy(false);}
+    }
+    function confirmAction(title,description,action) {
+        if(state.busy)return;state.confirmation=action;stopCamera();el('piConfirmTitle').textContent=title;el('piConfirmText').textContent=description;el('piConfirm').hidden=false;
+        el('piConfirm').scrollIntoView({block:'nearest',behavior:'smooth'});el('piConfirmCancel').focus();
+    }
+    el('piConfirmCancel').addEventListener('click',()=>{state.confirmation=null;el('piConfirm').hidden=true;});
+    el('piConfirmAccept').addEventListener('click',()=>{const action=state.confirmation;state.confirmation=null;el('piConfirm').hidden=true;action?.();});
+    async function history(more=false) {
+        if(state.busy)return;if(!more){invalidateView();state.cursor=null;}view(['piHistoryPanel']);const t=token();setBusy(true);status('촬영 기록을 불러오고 있습니다.');
+        try {
+            const constraints=[orderBy('createdAt','desc')];if(more&&state.cursor)constraints.push(startAfter(state.cursor));constraints.push(limit(20));
+            const snap=await getDocs(query(collection(db,'users',t.uid,'pill_identifications'),...constraints));if(!same(t))return;
+            if(!more)el('piHistoryList').replaceChildren();state.cursor=snap.docs.at(-1)||state.cursor;el('piMoreHistory').hidden=snap.size<20;
+            for(const d of snap.docs){const r=d.data(),row=textNode('article','','pi-history-item'),body=document.createElement('div');
+                const date=r.createdAt?.toDate?.();body.append(textNode('strong',date?date.toLocaleString('ko-KR'):'저장 시간 확인 중'));
+                const label={uploading:'사진 업로드 중 또는 중단',processing:'분석 중',ready:r.analysis?.blocked?'재촬영 필요':'분석 완료',error:'분석 재시도 가능',deleting:'삭제 재시도 필요'}[r.status]||'기록';
+                body.append(textNode('p',label,'pi-muted'));row.append(body);const actions=textNode('div','','pi-row');
+                const open=textNode('button','보기','pi-secondary');open.type='button';open.dataset.piBusy='';open.addEventListener('click',()=>openRecord(d.id));
+                const remove=textNode('button','삭제','pi-text-button');remove.type='button';remove.dataset.piBusy='';remove.addEventListener('click',()=>confirmAction('이 촬영 기록을 삭제할까요?','앞·뒷면 사진과 식별 결과가 함께 삭제되며 복구할 수 없습니다.',async()=>{
+                    const now=token();setBusy(true);status('사진과 결과를 삭제하고 있습니다.');try{await call('pillIdDelete',{id:d.id});if(same(now)){setBusy(false);await history();}}catch(error){if(same(now))status(errorText(error),true);}finally{if(same(now))setBusy(false);}
+                }));actions.append(open,remove);row.append(actions);el('piHistoryList').append(row);
+            }
+            if(!more&&!snap.size)el('piHistoryList').append(textNode('p','아직 촬영한 기록이 없습니다.','pi-muted'));status();
+        }catch(error){if(same(t))status(errorText(error),true);}finally{if(same(t))setBusy(false);}
+    }
+    el('piHistory').addEventListener('click',()=>history());el('piRefresh').addEventListener('click',()=>history());el('piMoreHistory').addEventListener('click',()=>history(true));
+    el('piRevoke').addEventListener('click',()=>confirmAction('동의를 철회하고 모든 촬영 기록을 삭제할까요?','약식별의 사진과 식별 결과를 모두 삭제합니다. 삭제가 끝나기 전에 창을 닫으면 이 버튼으로 이어서 삭제할 수 있습니다.',async()=>{
+        const t=token();setBusy(true);status('동의를 철회하고 촬영 기록을 삭제하고 있습니다.');
+        try {let result;do{result=await call('pillIdRevoke',{});if(!same(t))return;status(`사진과 결과를 삭제하고 있습니다.${result.more?' 다음 기록 정리 중…':''}`);}while(result.more);
+            state.consent=null;setBusy(false);await history();if(dialog.open)status('동의 철회와 사진·결과 삭제가 완료되었습니다.');
+        }catch(error){if(same(t))status('삭제가 완료되지 않았습니다. 동의 철회 버튼을 다시 눌러 이어서 삭제해 주세요. '+errorText(error),true);}
+        finally{if(same(t))setBusy(false);}
+    }));
+    document.addEventListener('visibilitychange',()=>{if(document.hidden)stopCamera();});window.addEventListener('pagehide',stopCamera);
+    onAuthStateChanged(auth,user=>{if(state.uid!==user?.uid){if(dialog.open)dialog.close();invalidateView();state.consent=null;state.uid=user?.uid||null;}});
+}
+initPillIdentification();
+
 
     onAuthStateChanged(auth, async (user) => {
         if (user) {
