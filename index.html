@@ -2135,7 +2135,7 @@
     import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, deleteDoc, collection, addDoc, query, orderBy, limit, onSnapshot, getDocs, where, startAfter, serverTimestamp, writeBatch, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
     import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-messaging.js";
-    import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app-check.js";
+    import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app-check.js";
     import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-functions.js";
     import { getStorage, ref as storageRef, uploadBytesResumable, getBlob, getMetadata, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-storage.js";
 
@@ -4426,7 +4426,7 @@ function initPillIdentification() {
     // Fill in the public reCAPTCHA v3 site key registered for this Firebase web app before deployment.
     const PILL_ID_CONFIG = { appCheckSiteKey: '6LfI28QtAAAAANzmGSBTvsJWCq4IKNmuxz8CqZ1D', region: 'asia-northeast3' };
     if (PILL_ID_CONFIG.appCheckSiteKey) {
-        try { initializeAppCheck(app, { provider: new ReCaptchaV3Provider(PILL_ID_CONFIG.appCheckSiteKey), isTokenAutoRefreshEnabled: true }); }
+        try { initializeAppCheck(app, { provider: new ReCaptchaEnterpriseProvider(PILL_ID_CONFIG.appCheckSiteKey), isTokenAutoRefreshEnabled: true }); }
         catch (error) { console.warn('약식별 앱 검증 초기화 실패:', error.code || 'initialization'); }
     }
     const el = id => document.getElementById(id), dialog = el('pillIdDialog');
