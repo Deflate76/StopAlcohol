@@ -10,7 +10,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>금주도전/건강기록</title>
-    <meta name="app-build" content="records-calendar-v10-pill-matching">
+    <meta name="app-build" content="records-calendar-v11-range-markers">
     
     <meta name="description" content="금주 도전부터 건강 상태, 진단과 처방전까지. 나의 건강을 하루씩 기록하는 금주도전/건강기록." />
     <meta name="theme-color" content="#ffffff" />
@@ -194,7 +194,8 @@
         .chart-container { position: relative; height: 250px; width: 100%; margin: 10px 0; }
         /* 배지 크기는 기존 대비 70%: 글씨·여백·테두리를 함께 축소합니다. */
         #sectionStats .chart-container > .goal-gap-badge,
-        #calendarModal .cal-best-start-badge {
+        #calendarModal .cal-best-start-badge,
+        #calendarModal .cal-range-badge {
             box-sizing: border-box; display: block; width: max-content;
             padding: 4.2px 7px; border: 1.4px solid #d97706; border-radius: 7px;
             color: #111827 !important; -webkit-text-fill-color: #111827 !important;
@@ -217,6 +218,7 @@
         @media (prefers-reduced-motion: reduce) {
             #sectionStats .chart-container > .goal-gap-badge,
             #calendarModal .cal-best-start-badge,
+            #calendarModal .cal-range-badge,
             #calendarModal .cal-day.cal-best-start-focus { animation: none !important; opacity: 1; }
         }
         
@@ -454,9 +456,17 @@
             box-shadow: 0 0 12px rgba(245, 158, 11, 0.8);
             animation: longestStartCellGlow 2s ease-in-out infinite;
         }
-        #calendarModal .cal-best-start-badge {
+        #calendarModal .cal-best-start-badge,
+        #calendarModal .cal-range-badge {
             position: absolute; left: 50%; bottom: 11px; transform: translateX(-50%);
             z-index: 30; max-width: calc(100% - 4px); padding: 2px 3px; white-space: nowrap;
+        }
+        #calendarModal .cal-day.cal-range-marker { padding-bottom: 32px; }
+        #calendarModal .cal-day.cal-range-multiple { padding-bottom: 46px; }
+        #calendarModal .cal-range-badge.cal-ongoing-badge {
+            background: #dbeafe !important; border-color: #3b82f6;
+            color: #1e3a8a !important; -webkit-text-fill-color: #1e3a8a !important;
+            box-shadow: 0 0 8px rgba(59, 130, 246, 0.3); animation: none;
         }
         .cal-best-record-note { flex-basis: 100%; color: #92400e; font-size: 0.75rem; font-weight: 800; text-align: center; }
         @keyframes longestStartCellGlow {
@@ -720,7 +730,7 @@
         .prescription-view-btn { border-color: #0284c7; color: #0369a1; background: #f0f9ff; }
         #calendarModal { padding-bottom: min(16px, 3vh); box-sizing: border-box; }
         #calendarModal .modal-content { max-width: 400px; padding: 14px 16px 16px; max-height: 92vh; max-height: 92dvh; }
-        #calendarModal .close-btn-top { top: 4px; right: 6px; }
+        #calendarModal .close-btn-top { top: 4px; right: 16px; }
         #calendarModal .cal-header { margin: 12px 0 9px; padding: 0 21px 0 0; }
         #calendarModal .cal-month-success-container { margin: 0 0 8px; }
         #calendarModal .cal-alcohol-change-compare-box { margin-top: 8px; padding: 9px; }
@@ -1215,7 +1225,7 @@
 <!-- 시각적 피드백 캘린더 모달 -->
 <div id="calendarModal" class="modal">
     <div class="modal-content">
-        <button class="close-btn-top" onclick="closeModal('calendarModal')">&times;</button>
+        <button type="button" class="close-btn-top" onclick="closeModal('calendarModal')" aria-label="달력 닫기">&times;</button>
         
         <div class="cal-header">
             <button class="cal-btn" onclick="changeCalMonth(-1)">&#10094;</button>
@@ -6666,6 +6676,8 @@ initPillIdentification();
     };
 
     function renderCalendar(year, month, mode) {
+        const calendarNow = new Date();
+        const bestRecord = mode === 'longest' ? refreshLongestChallengeRecord(calendarNow.getTime()) : null;
         document.getElementById('calMonthTitle').innerText = `${year}년 ${month + 1}월`;
         updateCalendarMonthSuccessUI(year, month);
         updateCalendarMonthAlcoholCompareUI(year, month);
@@ -6689,7 +6701,7 @@ initPillIdentification();
                 <div><span style="display:inline-block; width:10px; height:10px; background:var(--warning-color); border-radius:2px;"></span> 최장 금주 구간</div>
                 ${alcoholLegendHtml}
                 <div class="cal-best-record-note">${globalBestStartDate
-                    ? `${formatDateShortKo(globalBestStartDate)} ~ ${formatDateShortKo(globalBestEndDate)} · 시작일을 반짝이는 배지로 표시합니다.`
+                    ? `${formatDateShortKo(globalBestStartDate)} ~ ${formatDateShortKo(globalBestEndDate)}${bestRecord?.isActive ? ' (진행중)' : ''} · 시작일과 ${bestRecord?.isActive ? '진행중인 오늘' : '종료일'}을 배지로 표시합니다.`
                     : '표시할 최장 단주 기록이 없습니다.'}</div>
             `;
         } else {
@@ -6715,7 +6727,7 @@ initPillIdentification();
             grid.innerHTML += `<div class="cal-day empty"></div>`;
         }
 
-        const today = new Date();
+        const today = new Date(calendarNow);
         today.setHours(0,0,0,0);
 
         const dailyCravings = {};
@@ -6757,15 +6769,15 @@ initPillIdentification();
 
             let customStyle = ""; 
             let onClickEvent = "";
-            let longestStartBadge = '';
-            let longestStartAttributes = '';
+            let calendarRangeBadge = '';
+            let calendarRangeDescription = '';
             const iterDateStrCal = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
             const failedChallengeForDay = findFailedChallengeByDate(iterDateStrCal);
             const alcoholRecordForDay = getAlcoholRecordForDate(iterDateStrCal);
 
             if (mode === 'current' && userQuitDate) {
                 const sDate = new Date(userQuitDate); sDate.setHours(0,0,0,0);
-                const eDate = new Date(); eDate.setHours(0,0,0,0);
+                const eDate = today;
                 
                 const isStart = iterTime === sDate.getTime();
                 const isEnd = iterTime === eDate.getTime();
@@ -6775,6 +6787,11 @@ initPillIdentification();
                     else if (isStart) classList.push('range-curr-start');
                     else if (isEnd) classList.push('range-curr-end');
                     else classList.push('range-curr-mid');
+                    if (isEnd) {
+                        classList.push('cal-range-marker');
+                        calendarRangeBadge = '<span class="cal-range-badge cal-ongoing-badge" aria-hidden="true">진행중</span>';
+                        calendarRangeDescription = '현재 단주 도전 진행중';
+                    }
                 }
             } 
             else if (mode === 'longest') {
@@ -6785,10 +6802,24 @@ initPillIdentification();
                     const isStart = iterTime === sd.getTime();
                     const isEnd = iterTime === ed.getTime();
 
-                    if (isStart) {
-                        classList.push('cal-best-start-focus');
-                        longestStartBadge = '<span class="cal-best-start-badge" aria-hidden="true">시작</span>';
-                        longestStartAttributes = `aria-label="${formatDateShortKo(sd)}, 최장 단주 기록 시작일" title="최장 단주 기록 시작일"`;
+                    if (isStart || isEnd) {
+                        const labels = [];
+                        const descriptions = [];
+                        classList.push('cal-range-marker');
+                        if (isStart) {
+                            classList.push('cal-best-start-focus');
+                            labels.push('시작');
+                            descriptions.push('최장 단주 기록 시작일');
+                        }
+                        if (isEnd) {
+                            labels.push(bestRecord?.isActive ? '진행중' : '종료');
+                            descriptions.push(bestRecord?.isActive ? '최장 단주 기록 진행중' : '최장 단주 기록 종료일');
+                        }
+                        if (labels.length > 1) classList.push('cal-range-multiple');
+                        const badgeClass = isStart ? 'cal-best-start-badge' : 'cal-range-badge';
+                        const ongoingClass = isEnd && bestRecord?.isActive && !isStart ? ' cal-ongoing-badge' : '';
+                        calendarRangeBadge = `<span class="${badgeClass}${ongoingClass}" aria-hidden="true">${labels.join('<br>')}</span>`;
+                        calendarRangeDescription = descriptions.join(' · ');
                     }
                     if (iterTime >= sd.getTime() && iterTime <= ed.getTime()) {
                         if (isStart && isEnd) classList.push('range-best-single');
@@ -6882,8 +6913,8 @@ initPillIdentification();
             onClickEvent = `onclick="openCalendarDayContentFromClick(event, '${iterDateStrCal}')"`;
             const hasHealthEntry = hr.entries.some(entry => entry.date === iterDateStrCal);
             const healthBadge = hasHealthEntry ? '<span class="cal-health-dot" aria-hidden="true"></span>' : '';
-            const dateLabel = longestStartAttributes || `aria-label="${iterDateStrCal} 건강기록${hasHealthEntry ? ' 있음' : ' 추가'}"`;
-            grid.innerHTML += `<div class="${classList.join(' ')}" ${customStyle} ${onClickEvent} ${dateLabel} role="button" tabindex="0" data-date="${iterDateStrCal}" onpointerdown="startPress(event, this)" onpointermove="moveCalendarPress(event)" onpointerup="cancelPress()" onpointerleave="cancelPress()" onpointercancel="cancelCalendarGesture()" onkeydown="handleHealthDayKey(event, '${iterDateStrCal}')" oncontextmenu="event.preventDefault()">${day}${cravingBadge}${cBadge}${logBadge}${longestStartBadge}${healthBadge}</div>`;
+            const dateLabel = `aria-label="${iterDateStrCal}${calendarRangeDescription ? ', ' + calendarRangeDescription : ''}, 건강기록${hasHealthEntry ? ' 있음' : ' 추가'}"${calendarRangeDescription ? ` title="${calendarRangeDescription}"` : ''}`;
+            grid.innerHTML += `<div class="${classList.join(' ')}" ${customStyle} ${onClickEvent} ${dateLabel} role="button" tabindex="0" data-date="${iterDateStrCal}" onpointerdown="startPress(event, this)" onpointermove="moveCalendarPress(event)" onpointerup="cancelPress()" onpointerleave="cancelPress()" onpointercancel="cancelCalendarGesture()" onkeydown="handleHealthDayKey(event, '${iterDateStrCal}')" oncontextmenu="event.preventDefault()">${day}${cravingBadge}${cBadge}${logBadge}${calendarRangeBadge}${healthBadge}</div>`;
         }
     }
 
