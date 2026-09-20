@@ -10,7 +10,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>금주도전/건강기록</title>
-    <meta name="app-build" content="records-calendar-v7-streak-history-logout">
+    <meta name="app-build" content="records-calendar-v8-tabs-recovery-rank">
     
     <meta name="description" content="금주 도전부터 건강 상태, 진단과 처방전까지. 나의 건강을 하루씩 기록하는 금주도전/건강기록." />
     <meta name="theme-color" content="#ffffff" />
@@ -795,13 +795,59 @@
         #prescriptionImageModal .modal-content { max-width: 880px; }
         @media (max-width: 360px) { .health-diagnosis-input { grid-template-columns: minmax(0, 1fr) 117px 27px; } .header-actions, .header-actions .header-record-actions { gap: 4px; } .header-actions > button, .header-actions .header-record-actions button { padding: 7px 2px; font-size: .65rem; letter-spacing: -.025em; } }
 
+
+        .app-title { display: flex; align-items: center; justify-content: center; gap: 9px; font-size: clamp(1.15rem, 5vw, 1.6rem); margin-top: 0; margin-bottom: 19px; }
+        .app-title-icon { width: 27px; height: 27px; color: #0f766e; flex: 0 0 auto; }
+        .app-tab-list { display: grid; grid-template-columns: 1.1fr .85fr 1.1fr; gap: 4px; padding: 4px; border: 1px solid #e2e8f0; border-radius: 13px; background: #f1f5f9; margin-bottom: 20px; }
+        .app-tab-button { appearance: none; min-width: 0; min-height: 42px; padding: 9px 4px; border: 0; border-radius: 9px; background: transparent; color: #64748b; font-family: inherit; font-size: clamp(.68rem, 2.65vw, .79rem); font-weight: 800; line-height: 1.45; word-break: keep-all; cursor: pointer; }
+        .app-tab-button[aria-selected="true"] { background: #fff; color: #0f766e; box-shadow: 0 2px 6px rgba(15, 23, 42, .09); }
+        .app-tab-button:hover { color: #0f766e; }
+        .app-tab-button:focus-visible, .info-resource-link:focus-visible, .diagnosis-detail-btn:focus-visible, .diagnosis-recover-btn:focus-visible { outline: 2px solid #0f766e; outline-offset: 3px; }
+        .app-tab-panel[hidden], #floatingQuickNav[hidden], .health-diagnosis-recovery[hidden] { display: none !important; }
+        .app-tab-panel { min-width: 0; }
+        .info-tab-panel { text-align: left; padding: 4px 0 12px; }
+        .info-tab-heading { margin-bottom: 20px; }
+        .info-tab-icon { display: inline-grid; place-items: center; width: 42px; height: 42px; border-radius: 13px; background: #eff6ff; font-size: 1.35rem; }
+        .info-tab-icon.supplements { background: #f0fdf4; }
+        .info-tab-heading h2 { margin: 10px 0 5px; color: #1e293b; font-size: 1.25rem; }
+        .info-tab-heading p { margin: 0; color: #64748b; font-size: .85rem; line-height: 1.6; word-break: keep-all; }
+        .info-resource-card { margin-bottom: 12px; padding: 17px; border: 1px solid #dbeafe; border-radius: 16px; background: linear-gradient(135deg, #f8fbff, #fff); }
+        .info-source-label { display: block; color: #64748b; font-size: .7rem; }
+        .info-resource-card h3 { margin: 9px 0 6px; font-size: 1rem; color: #1e3a5f; }
+        .info-resource-card p { margin: 0 0 13px; color: #475569; font-size: .83rem; line-height: 1.7; word-break: keep-all; }
+        .info-resource-link { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px; border-radius: 9px; background: #1d4ed8; color: white; text-decoration: none; font-size: .83rem; font-weight: 750; }
+        .info-resource-link.secondary { background: #eaf2ff; color: #1d4ed8; }
+        .info-resource-card.supplements { border-color: #d1fae5; background: linear-gradient(135deg, #f6fdf9, #fff); }
+        .supplements .info-resource-link { background: #0f766e; }
+        .supplements .info-resource-link.secondary { background: #e4f5ed; color: #0f766e; }
+        .info-tab-footnote { color: #64748b; font-size: .72rem; text-align: center; }
+        .app-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+        .diagnosis-row { box-sizing: border-box; cursor: default; padding: 9px 10px; }
+        .diagnosis-detail-btn { appearance: none; display: flex; flex-wrap: wrap; flex: 1; min-width: 0; align-items: center; justify-content: space-between; gap: 6px 10px; border: 0; border-radius: 5px; background: transparent; padding: 2px; text-align: left; font: inherit; cursor: pointer; }
+        .diagnosis-detail-text { min-width: 0; flex: 1 1 120px; }
+        .diagnosis-recover-btn { flex: 0 0 auto; appearance: none; border: 1px solid #99d9c9; border-radius: 8px; background: #effcf7; color: #0f766e; padding: 7px 9px; font-family: inherit; font-size: .75rem; font-weight: 800; cursor: pointer; }
+        .diagnosis-recover-btn:hover { background: #d9f7e9; }
+        .diagnosis-recover-btn:disabled { opacity: .55; cursor: wait; }
+        .diagnosis-row.is-recovered { background: #f7fdf9; border-color: #bbdfc9; }
+        .diagnosis-recovery-status { flex: 0 0 auto; color: #15803d; font-size: .7rem; font-weight: 800; white-space: nowrap; }
+        .diagnosis-recovery-name { color: #134e4a; font-weight: 800; overflow-wrap: anywhere; }
+        .health-diagnosis-recovery { grid-column: 1 / -1; }
+        #accumulatedRecordsModal .accumulated-records-table { min-width: 340px; }
+        .accumulated-record-rank { display: inline-block; border-radius: 7px; background: #f1f5f9; color: #475569; padding: 3px 5px; font-size: .72rem; font-weight: 850; white-space: nowrap; }
+        .accumulated-record-rank.rank-first { background: #fef3c7; color: #92400e; }
     </style>
 </head>
 <body>
 <div id="pageTopAnchor" class="page-scroll-anchor" aria-hidden="true"></div>
 
 <div class="container">
-    <h1>금주도전/건강기록</h1>
+    <h1 class="app-title"><svg class="app-title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/><path d="M3 12h4l2-4 4 8 2-4h6"/></svg><span>금주도전/건강기록</span></h1>
+    <div class="app-tab-list" role="tablist" aria-label="주요 기능">
+        <button type="button" id="appTabRecords" class="app-tab-button" role="tab" aria-selected="true" aria-controls="appPanelRecords" tabindex="0" data-app-tab="records">금주도전/<wbr>건강기록</button>
+        <button type="button" id="appTabMedicines" class="app-tab-button" role="tab" aria-selected="false" aria-controls="appPanelMedicines" tabindex="-1" data-app-tab="medicines">의약품 정보</button>
+        <button type="button" id="appTabSupplements" class="app-tab-button" role="tab" aria-selected="false" aria-controls="appPanelSupplements" tabindex="-1" data-app-tab="supplements">건강기능식품 정보</button>
+    </div>
+    <section id="appPanelRecords" class="app-tab-panel" role="tabpanel" aria-labelledby="appTabRecords" tabindex="0">
     <button id="enablePushBtn" class="stat-btn" style="display:none; margin-bottom: 18px; border-color: var(--primary-color); color: var(--primary-color);">🔔 푸시 알림 허용</button>
     <div id="pushTestLinkRow" class="push-test-link-row">
         <button id="sendTestPushBtn" class="push-link-btn" type="button">푸시 알람 상태 체크</button>
@@ -1034,6 +1080,39 @@
         <button class="craving-btn" style="background: linear-gradient(135deg, #8aa2b6, #5f7185); margin-top: 30px; font-size: 0.95rem; box-shadow: 0 7px 16px rgba(95, 113, 133, 0.18);" onclick="resetDate()">🔄 금주 실패... 새로운 단주 도전 및 재설정</button>
         <button class="craving-btn" style="background: linear-gradient(135deg, #a18ad4, #7662b8); margin-top: 15px; font-size: 0.95rem; box-shadow: 0 7px 16px rgba(118, 98, 184, 0.18);" onclick="goToControlMode()">🍷 금주 실패... 음주 조절 모드로 전환</button>
     </div>
+    </section>
+    <section id="appPanelMedicines" class="app-tab-panel info-tab-panel" role="tabpanel" aria-labelledby="appTabMedicines" tabindex="0" hidden>
+        <div class="info-tab-heading"><span class="info-tab-icon" aria-hidden="true">💊</span><h2>의약품 정보</h2><p>약에 대해 궁금할 때, 공식 정보를 확인해 보세요.</p></div>
+        <article class="info-resource-card">
+            <span class="info-source-label">식품의약품안전처 · 의약품안전나라</span>
+            <h3>의약품 제품정보 찾기</h3>
+            <p>처방전이나 약봉투에 적힌 제품명으로 의약품 정보를 찾아보세요.</p>
+            <a class="info-resource-link" href="https://nedrug.mfds.go.kr/searchDrug" target="_blank" rel="noopener noreferrer">의약품 검색 열기 <span aria-hidden="true">↗</span><span class="app-sr-only"> (새 창)</span></a>
+        </article>
+        <article class="info-resource-card">
+            <span class="info-source-label">식품의약품안전처 · 의약품안전나라</span>
+            <h3>의약품 사용정보</h3>
+            <p>일반의약품의 사용 방법과 주의사항에 관한 안내를 확인하세요.</p>
+            <a class="info-resource-link secondary" href="https://nedrug.mfds.go.kr/cntnts/35" target="_blank" rel="noopener noreferrer">사용정보 열기 <span aria-hidden="true">↗</span><span class="app-sr-only"> (새 창)</span></a>
+        </article>
+        <p class="info-tab-footnote">조회 버튼은 공식 사이트를 새 창으로 엽니다.</p>
+    </section>
+    <section id="appPanelSupplements" class="app-tab-panel info-tab-panel" role="tabpanel" aria-labelledby="appTabSupplements" tabindex="0" hidden>
+        <div class="info-tab-heading"><span class="info-tab-icon supplements" aria-hidden="true">🌿</span><h2>건강기능식품 정보</h2><p>제품 이름을 확인하고, 공식 등록 정보를 찾아보세요.</p></div>
+        <article class="info-resource-card supplements">
+            <span class="info-source-label">식품의약품안전처 · 식품안전나라</span>
+            <h3>건강기능식품 제품 검색</h3>
+            <p>제품명이나 제조업소명으로 신고된 제품 정보를 확인할 수 있습니다.</p>
+            <a class="info-resource-link" href="https://www.foodsafetykorea.go.kr/portal/healthyfoodlife/searchHomeHF.do?menu_grp=MENU_NEW04&amp;menu_no=2823" target="_blank" rel="noopener noreferrer">건강기능식품 검색 열기 <span aria-hidden="true">↗</span><span class="app-sr-only"> (새 창)</span></a>
+        </article>
+        <article class="info-resource-card supplements">
+            <span class="info-source-label">질병관리청 · 국가건강정보포털</span>
+            <h3>약품·식품정보 안내</h3>
+            <p>의약품과 식품 관련 공식 정보의 조회 경로를 함께 살펴보세요.</p>
+            <a class="info-resource-link secondary" href="https://health.kdca.go.kr/healthinfo/biz/health/gnrlzHealthInfo/healthInfo/medcinFoodInfoMain.do" target="_blank" rel="noopener noreferrer">공식 정보 안내 열기 <span aria-hidden="true">↗</span><span class="app-sr-only"> (새 창)</span></a>
+        </article>
+        <p class="info-tab-footnote">조회 버튼은 공식 사이트를 새 창으로 엽니다.</p>
+    </section>
 </div>
 
 
@@ -1621,18 +1700,20 @@
         <p id="accumulatedRecordsSummary" class="accumulated-records-summary" role="status" aria-live="polite"></p>
         <p class="accumulated-records-help">열 제목을 누르면 정렬 순서가 바뀝니다. ↑ 오름차순 · ↓ 내림차순</p>
         <div id="accumulatedRecordsTableWrap" class="accumulated-records-table-wrap" hidden>
-            <table class="accumulated-records-table" aria-label="단주 기록별 시작날짜, 종료날짜, 유지기간">
+            <table class="accumulated-records-table" aria-label="단주 기록별 시작날짜, 종료날짜, 유지기간, 유지기간 순위">
+                <colgroup><col><col><col><col style="width: 64px;"></colgroup>
                 <thead>
                     <tr>
                         <th scope="col" data-sort-key="start" aria-sort="descending"><button type="button" onclick="sortAccumulatedRecords('start')">시작날짜 <span data-sort-indicator aria-hidden="true">↓</span></button></th>
                         <th scope="col" data-sort-key="end" aria-sort="none"><button type="button" onclick="sortAccumulatedRecords('end')">종료날짜 <span data-sort-indicator aria-hidden="true">↕</span></button></th>
                         <th scope="col" data-sort-key="duration" aria-sort="none"><button type="button" onclick="sortAccumulatedRecords('duration')">유지기간 <span data-sort-indicator aria-hidden="true">↕</span></button></th>
+                        <th scope="col" data-sort-key="rank" aria-sort="none"><button type="button" onclick="sortAccumulatedRecords('rank')">순위 <span data-sort-indicator aria-hidden="true">↕</span></button></th>
                     </tr>
                 </thead>
                 <tbody id="accumulatedRecordsBody"></tbody>
             </table>
         </div>
-        <p class="accumulated-records-help">진행 중인 기록의 유지기간은 팝업을 연 시각까지 계산합니다. 종료날짜가 없는 기록은 종료날짜 정렬 시 맨 아래에 표시됩니다.</p>
+        <p class="accumulated-records-help">순위는 유지기간이 긴 순서이며, 동일한 유지기간은 공동 순위입니다. 진행 중인 기록은 팝업을 연 시각 기준입니다. 종료날짜가 없는 기록은 종료날짜 정렬 시 맨 아래에 표시됩니다.</p>
         <button type="button" class="stat-btn" style="margin-top: 12px;" onclick="closeModal('accumulatedRecordsModal')">닫기</button>
     </div>
 </div>
@@ -1772,6 +1853,28 @@
     </div>
 </div>
 
+<!-- 사용자 확인을 받은 회복일을 기존 비공개 진단 기록에 저장 -->
+<div id="diagnosisRecoveryModal" class="modal health-modal" role="dialog" aria-modal="true" aria-labelledby="diagnosisRecoveryTitle" aria-describedby="diagnosisRecoveryMessage" hidden>
+    <div class="modal-content">
+        <button type="button" class="close-btn-top" onclick="closeHealthDialog('diagnosisRecoveryModal')" aria-label="회복 기록 취소">&times;</button>
+        <h3 id="diagnosisRecoveryTitle">정말 회복되었나요?</h3>
+        <p id="diagnosisRecoveryName" class="diagnosis-recovery-name"></p>
+        <p id="diagnosisRecoveryMessage" class="health-muted">회복된 날짜를 확인한 뒤 기록해 주세요.</p>
+        <form onsubmit="event.preventDefault(); confirmDiagnosisRecovery()">
+            <fieldset id="diagnosisRecoveryFields" style="border:0; padding:0; margin:0; min-width:0;">
+                <label class="health-label" for="diagnosisRecoveryDate">회복일</label>
+                <input type="date" id="diagnosisRecoveryDate" required oninput="updateDiagnosisRecoveryPreview()">
+                <p id="diagnosisRecoveryPreview" class="health-muted" aria-live="polite"></p>
+                <div class="health-actions">
+                    <button type="button" id="diagnosisRecoveryCancel" class="health-btn" onclick="closeHealthDialog('diagnosisRecoveryModal')">취소</button>
+                    <button type="submit" class="health-btn primary">회복으로 기록</button>
+                </div>
+            </fieldset>
+        </form>
+        <p id="diagnosisRecoveryStatus" class="health-status" role="status" aria-live="polite"></p>
+    </div>
+</div>
+
 <!-- 건강정보는 별도 동의 후 로그인 계정의 비공개 경로에 저장합니다. -->
 <div id="healthDayModal" class="modal health-modal" role="dialog" aria-modal="true" aria-labelledby="healthDayTitle" hidden>
     <div class="modal-content">
@@ -1906,6 +2009,40 @@
     </div>
 </div>
 
+<script>
+// Top-level tabs have their own controls; the recovery/community tabs remain independent.
+(() => {
+    const buttons = Array.from(document.querySelectorAll('[data-app-tab]'));
+    window.switchAppTab = function(tabName, focusTab = false) {
+        const selected = buttons.find(button => button.dataset.appTab === tabName);
+        if (!selected) return;
+        buttons.forEach(button => {
+            const active = button === selected;
+            button.setAttribute('aria-selected', String(active));
+            button.tabIndex = active ? 0 : -1;
+            document.getElementById(button.getAttribute('aria-controls')).hidden = !active;
+        });
+        const nav = document.getElementById('floatingQuickNav');
+        if (nav) nav.hidden = tabName !== 'records';
+        if (focusTab) selected.focus({ preventScroll: true });
+        document.dispatchEvent(new CustomEvent('app:tabchange', { detail: { tab: tabName } }));
+    };
+    buttons.forEach((button, index) => {
+        button.addEventListener('click', () => switchAppTab(button.dataset.appTab));
+        button.addEventListener('keydown', event => {
+            let next;
+            if (event.key === 'ArrowRight') next = (index + 1) % buttons.length;
+            else if (event.key === 'ArrowLeft') next = (index + buttons.length - 1) % buttons.length;
+            else if (event.key === 'Home') next = 0;
+            else if (event.key === 'End') next = buttons.length - 1;
+            else return;
+            event.preventDefault();
+            switchAppTab(buttons[next].dataset.appTab, true);
+        });
+    });
+})();
+</script>
+
 <script type="module">
 
 
@@ -1916,7 +2053,7 @@
 
     
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
-    import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, deleteDoc, collection, addDoc, query, orderBy, limit, onSnapshot, getDocs, where, serverTimestamp, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, deleteDoc, collection, addDoc, query, orderBy, limit, onSnapshot, getDocs, where, serverTimestamp, writeBatch, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
     import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-messaging.js";
     import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-functions.js";
@@ -2381,6 +2518,11 @@
         }
     };
 
+    document.addEventListener('app:tabchange', event => {
+        closeFloatingQuickNav(); updateFloatingNavVisibility();
+        if (event.detail?.tab === 'records') { resizeVisibleChartsAfterSectionChange(); hrRenderDiagnoses(); }
+    });
+
     window.scrollToPageTarget = function(targetId) {
         if (targetId === 'pageTopAnchor') {
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2408,7 +2550,7 @@
         const displayArea = document.getElementById('displayArea');
         if (!nav || !displayArea) return;
         const isDisplayVisible = window.getComputedStyle(displayArea).display !== 'none';
-        const shouldShow = !!(userId && auth.currentUser && isDisplayVisible);
+        const shouldShow = !!(userId && auth.currentUser && isDisplayVisible && !document.getElementById('appPanelRecords').hidden);
         nav.classList.toggle('is-visible', shouldShow);
         if (!shouldShow) closeFloatingQuickNav();
     }
@@ -3130,7 +3272,7 @@
     function buildStreakRecordBadgeHtml(currentDays) {
         const recordInfo = getCurrentStreakRecordInfo(currentDays);
         if (!recordInfo) return '';
-        return `<button type="button" class="streak-record-badge" onclick="openStreakRecordsModal(${recordInfo.targetDays}, event)" aria-haspopup="dialog" aria-controls="streakRecordsModal" aria-label="연속 ${recordInfo.targetDays}일 이상 달성한 1번째부터 ${recordInfo.ordinal}번째 기록 보기" title="연속 ${recordInfo.targetDays}일 이상 달성한 기록 보기">${recordInfo.ordinal}번째 기록</button>`;
+        return `<button type="button" class="streak-record-badge" onclick="openStreakRecordsModal(${recordInfo.targetDays}, event)" aria-haspopup="dialog" aria-controls="streakRecordsModal" aria-label="역대 ${recordInfo.ordinal}번째 기록, 연속 ${recordInfo.targetDays}일 이상 달성한 1번째부터 ${recordInfo.ordinal}번째 기록 보기" title="연속 ${recordInfo.targetDays}일 이상 달성한 기록 보기">역대 ${recordInfo.ordinal}번째 기록</button>`;
     }
 
     function buildMainDaysRenderKey(currentDays, totalCumul, successRate) {
@@ -3471,7 +3613,8 @@
     const hr = {
         uid: null, generation: 0, unsubs: [], entries: [], photos: [], consents: {},
         loaded: { health: false, photos: false, consents: false }, errors: {},
-        day: null, editingId: null, busy: false, consentPending: null, privacyScope: 'health',
+        day: null, editingId: null, editDiagnosisSignature: null, busy: false, consentPending: null, privacyScope: 'health',
+        recoveryTarget: null, recoverySaving: false,
         dialogs: [], returnFocus: new Map(), urls: new Map(), galleryGeneration: 0,
         stream: null, cameraGeneration: 0, hasPreview: false, redact: false, redactOrigin: null,
         redactBackup: null, uploadTask: null, photoProcessing: false, fileGeneration: 0
@@ -3510,6 +3653,14 @@
         card.tabIndex = -1; card.focus({ preventScroll: true });
     }
     window.closeHealthDialog = function(id, force = false) {
+        if (id === 'diagnosisRecoveryModal') {
+            if (hr.recoverySaving && !force) return;
+            hr.recoveryTarget = null;
+            hrEl('diagnosisRecoveryName').textContent = '';
+            hrEl('diagnosisRecoveryDate').value = '';
+            hrEl('diagnosisRecoveryPreview').textContent = '';
+            hrSetStatus('diagnosisRecoveryStatus');
+        }
         if (id === 'logoutConfirmModal') {
             if (logoutInProgress && !force) return;
             logoutConfirmUid = null;
@@ -3621,7 +3772,8 @@
         hrEl('calendarModal').style.display = 'none';
         hrClearCapture(); hrReleasePhotoUrls();
         hr.uid = uid; hr.entries = []; hr.photos = []; hr.consents = {}; hr.errors = {};
-        hr.day = null; hr.editingId = null; hr.busy = false;
+        hr.day = null; hr.editingId = null; hr.editDiagnosisSignature = null; hr.busy = false;
+        hr.recoveryTarget = null; hr.recoverySaving = false; hrEl('diagnosisRecoveryFields').disabled = false;
         hr.loaded = { health: false, photos: false, consents: false };
         hrEl('healthDayEntries').replaceChildren(); hrEl('prescriptionGallery').replaceChildren();
         hrEl('healthEntryNote').value = ''; hrEl('healthDiagnosisInputs').replaceChildren();
@@ -3651,22 +3803,117 @@
         hrRenderDiagnoses(); if (hr.day) hrRenderDayEntries();
         if (hrEl('calendarModal').style.display === 'flex') renderCalendar(currentCalDate.getFullYear(), currentCalDate.getMonth(), currentCalMode);
     }
+    function hrRecoveryDetails(diagnosis) {
+        if (!diagnosis || !hrValidDate(diagnosis.date) || !hrValidDate(diagnosis.recoveredDate)) return null;
+        const days = hrDayNumber(diagnosis.recoveredDate) - hrDayNumber(diagnosis.date);
+        if (days < 0) return null;
+        return { date: diagnosis.recoveredDate, days, label: days === 0 ? '당일 회복' : `${days}일 만에 회복` };
+    }
+    function hrDiagnosisSignature(diagnoses) {
+        return JSON.stringify((Array.isArray(diagnoses) ? diagnoses : []).map(d => [d?.name, d?.date, d?.recoveredDate || '']));
+    }
+    function hrRecordConflict(message) {
+        const error = new Error(message); error.code = 'health/record-conflict'; return error;
+    }
     function hrRenderDiagnoses() {
         const list = hrEl('diagnosisRecordList'); if (!list) return;
         list.replaceChildren();
         if (hr.errors.health) { list.textContent = hr.errors.health; return; }
-        const records = hr.entries.flatMap(entry => (Array.isArray(entry.diagnoses) ? entry.diagnoses : []).filter(d => hrValidDate(d.date)).map(d => ({ ...d, entry })));
+        const records = hr.entries.flatMap(entry => (Array.isArray(entry.diagnoses) ? entry.diagnoses : [])
+            .map((d, index) => ({ ...d, entry, index })).filter(d => hrValidDate(d.date)));
         records.sort((a, b) => b.date.localeCompare(a.date) || String(a.name).localeCompare(String(b.name), 'ko'));
         hrEl('diagnosisRecordCount').textContent = records.length ? `${records.length}개` : '';
         if (!records.length) { list.textContent = hr.uid && !hr.loaded.health ? '진단 기록을 불러오는 중입니다…' : '달력 날짜를 눌러 진단명을 추가해 보세요.'; return; }
         for (const record of records) {
+            const recovery = hrRecoveryDetails(record);
             const elapsed = hrDayNumber(hrToday()) - hrDayNumber(record.date);
-            const button = document.createElement('button'); button.type = 'button'; button.className = 'diagnosis-row';
-            button.innerHTML = `<span><strong>${escapeHtml(record.name)}</strong><small>${escapeHtml(record.date)} 진단</small></span><span class="diagnosis-day-count">${elapsed >= 0 ? `+${elapsed}일 · ${elapsed + 1}일째` : '진단일 확인'}</span>`;
-            button.addEventListener('click', () => { openHealthDay(record.entry.date); editHealthEntry(record.entry.id); });
-            list.append(button);
+            const row = document.createElement('div'); row.className = 'diagnosis-row';
+            row.classList.toggle('is-recovered', !!recovery);
+            const detail = document.createElement('button'); detail.type = 'button'; detail.className = 'diagnosis-detail-btn';
+            detail.innerHTML = `<span class="diagnosis-detail-text"><strong>${escapeHtml(record.name)}</strong><small>${escapeHtml(record.date)} 진단</small>${recovery ? `<small>${escapeHtml(recovery.date)} 회복</small>` : ''}</span><span class="diagnosis-day-count">${recovery ? recovery.label : elapsed >= 0 ? `+${elapsed}일 · ${elapsed + 1}일째` : '진단일 확인'}</span>`;
+            detail.setAttribute('aria-label', `${record.name} 진단 기록 보기${recovery ? `, ${recovery.date} 회복, ${recovery.label}` : ''}`);
+            detail.addEventListener('click', () => { openHealthDay(record.entry.date); editHealthEntry(record.entry.id); });
+            row.append(detail);
+            if (recovery) {
+                const status = document.createElement('span'); status.className = 'diagnosis-recovery-status'; status.textContent = '✓ 회복'; row.append(status);
+            } else {
+                const recover = document.createElement('button'); recover.type = 'button'; recover.className = 'diagnosis-recover-btn'; recover.textContent = '회복';
+                recover.disabled = hr.busy || !hrSameUser(hr.uid) || elapsed < 0;
+                recover.setAttribute('aria-label', `${record.name} 회복 기록`);
+                recover.addEventListener('click', () => openDiagnosisRecovery(record.entry.id, record.index));
+                row.append(recover);
+            }
+            list.append(row);
         }
     }
+    window.openDiagnosisRecovery = function(entryId, diagnosisIndex) {
+        if (hr.busy || !hrSameUser(hr.uid)) return;
+        const entry = hr.entries.find(item => item.id === entryId);
+        const diagnosis = entry?.diagnoses?.[diagnosisIndex];
+        if (!diagnosis || !hrValidDate(diagnosis.date) || diagnosis.date > hrToday() || hrRecoveryDetails(diagnosis)) return;
+        hr.recoveryTarget = { entryId, name: diagnosis.name, date: diagnosis.date, index: diagnosisIndex };
+        hrEl('diagnosisRecoveryName').textContent = diagnosis.name;
+        const dateInput = hrEl('diagnosisRecoveryDate');
+        dateInput.min = diagnosis.date; dateInput.max = hrToday(); dateInput.value = hrToday();
+        hrEl('diagnosisRecoveryFields').disabled = false;
+        hrSetStatus('diagnosisRecoveryStatus'); updateDiagnosisRecoveryPreview();
+        hrOpen('diagnosisRecoveryModal');
+        hrEl('diagnosisRecoveryCancel').focus({ preventScroll: true });
+    };
+    window.updateDiagnosisRecoveryPreview = function() {
+        const target = hr.recoveryTarget;
+        const recoveredDate = hrEl('diagnosisRecoveryDate').value;
+        const recovery = target && hrRecoveryDetails({ date: target.date, recoveredDate });
+        hrEl('diagnosisRecoveryPreview').textContent = recovery && recoveredDate <= hrToday()
+            ? `${target.date} 진단 · ${recovery.label}` : '회복일은 진단일 이후부터 오늘까지 선택해 주세요.';
+    };
+    window.confirmDiagnosisRecovery = async function() {
+        const target = hr.recoveryTarget;
+        const uid = hr.uid, generation = hr.generation;
+        if (!target || hr.busy || !hrSameUser(uid)) return;
+        const recoveredDate = hrEl('diagnosisRecoveryDate').value;
+        if (!hrRecoveryDetails({ date: target.date, recoveredDate }) || recoveredDate > hrToday()) {
+            return hrSetStatus('diagnosisRecoveryStatus', '회복일은 진단일부터 오늘 사이의 날짜로 입력해 주세요.', true);
+        }
+        const stillCurrent = () => hrSameUser(uid) && hr.generation === generation && hr.recoveryTarget === target;
+        hr.busy = true; hr.recoverySaving = true; hrEl('diagnosisRecoveryFields').disabled = true;
+        try {
+            if (!await hrRequireConsent('health')) {
+                if (stillCurrent()) hrSetStatus('diagnosisRecoveryStatus', '건강기록 이용에 동의한 후 회복일을 저장할 수 있습니다.', true);
+                return;
+            }
+            if (!stillCurrent()) return;
+            hrSetStatus('diagnosisRecoveryStatus', '회복일을 저장하고 있습니다…');
+            const ref = doc(db, 'users', uid, 'health_entries', target.entryId);
+            const diagnoses = await runTransaction(db, async transaction => {
+                const snapshot = await transaction.get(ref);
+                if (!stillCurrent()) throw hrRecordConflict('계정이 변경되어 저장을 중단했습니다.');
+                if (!snapshot.exists()) throw hrRecordConflict('삭제된 기록입니다. 진단 목록을 다시 확인해 주세요.');
+                const current = snapshot.data().diagnoses;
+                if (!Array.isArray(current)) throw hrRecordConflict('진단 기록이 변경되었습니다. 목록에서 다시 선택해 주세요.');
+                const matching = current.map((d, index) => ({ d, index })).filter(({ d }) => d?.name === target.name && d?.date === target.date);
+                const selected = matching.length === 1 ? matching[0] : matching.find(item => item.index === target.index);
+                if (!selected) throw hrRecordConflict('진단명이나 진단일이 변경되었습니다. 목록에서 다시 선택해 주세요.');
+                // A concurrent confirmation must not replace a recovery date already saved.
+                if (hrRecoveryDetails(selected.d)) return current;
+                const next = current.map((d, index) => index === selected.index ? { ...d, recoveredDate } : d);
+                transaction.update(ref, { diagnoses: next, updatedAt: serverTimestamp() });
+                return next;
+            });
+            if (!stillCurrent()) return;
+            hr.entries = hr.entries.map(entry => entry.id === target.entryId ? { ...entry, diagnoses } : entry);
+            hrRefreshHealthUI(); closeHealthDialog('diagnosisRecoveryModal', true);
+        } catch (error) {
+            if (stillCurrent()) hrSetStatus('diagnosisRecoveryStatus', error?.code === 'health/record-conflict' ? error.message : hrErrorMessage(error, '회복일을 저장'), true);
+        } finally {
+            if (hrSameUser(uid) && hr.generation === generation) {
+                hr.busy = false; hr.recoverySaving = false; hrEl('diagnosisRecoveryFields').disabled = false;
+                hrRenderDiagnoses();
+                if (hrEl('diagnosisRecoveryModal').hidden && hrEl('diagnosisRecordList').getClientRects().length) hrEl('diagnosisRecordList').focus({ preventScroll: true });
+            }
+        }
+    };
+
     window.openHealthDay = function(date) {
         if (!hrSameUser(hr.uid)) return alert('로그인 후 이용해 주세요.');
         if (!hrValidDate(date) || hr.busy) return;
@@ -3677,22 +3924,27 @@
         hrOpen('healthDayModal'); hrEl('healthDayModal').querySelector('.modal-content').scrollTop = 0;
     };
     window.resetHealthEntryForm = function() {
-        hr.editingId = null; hrEl('healthEntryNote').value = '';
+        hr.editingId = null; hr.editDiagnosisSignature = null; hrEl('healthEntryNote').value = '';
         const now = new Date(); hrEl('healthEntryTime').value = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
         for (const id of ['healthCondition', 'healthStress']) { hrEl(id).value = 5; hrEl(id).dataset.touched = 'false'; hrEl(`${id}Value`).textContent = '선택 안 함'; }
         hrEl('healthDiagnosisInputs').replaceChildren(); addHealthDiagnosisInput();
         hrEl('healthEntrySave').textContent = '＋ 기록 추가'; hrEl('healthEntryCancelEdit').hidden = true;
     };
     window.touchHealthRange = id => { hrEl(id).dataset.touched = 'true'; hrEl(`${id}Value`).textContent = `${hrEl(id).value}/10`; };
-    window.addHealthDiagnosisInput = function(name = '', date = hr.day || hrToday()) {
+    window.addHealthDiagnosisInput = function(name = '', date = hr.day || hrToday(), recoveredDate = '') {
         const container = hrEl('healthDiagnosisInputs');
         if (container.children.length >= 20) return hrSetStatus('healthDayStatus', '한 기록에는 진단명을 20개까지 입력할 수 있습니다. 새 기록을 추가해 주세요.', true);
         const row = document.createElement('div'); row.className = 'health-diagnosis-input';
-        row.innerHTML = '<label>진단명<input type="text" data-diagnosis-name maxlength="80" placeholder="진단명"></label><label>진단일<input type="date" data-diagnosis-date></label><button type="button" class="health-btn" aria-label="이 진단명 입력란 삭제">×</button>';
+        row.innerHTML = '<label>진단명<input type="text" data-diagnosis-name maxlength="80" placeholder="진단명"></label><label>진단일<input type="date" data-diagnosis-date></label><button type="button" class="health-btn" aria-label="이 진단명 입력란 삭제">×</button><label class="health-diagnosis-recovery" hidden>회복일 · 비우면 회복 표시 취소<input type="date" data-diagnosis-recovered-date></label>';
         row.querySelector('[data-diagnosis-name]').value = name;
         const dateInput = row.querySelector('[data-diagnosis-date]'); dateInput.value = date; dateInput.max = hrToday();
+        const recoveryInput = row.querySelector('[data-diagnosis-recovered-date]');
+        recoveryInput.value = hrValidDate(recoveredDate) ? recoveredDate : ''; recoveryInput.min = date; recoveryInput.max = hrToday();
+        row.querySelector('.health-diagnosis-recovery').hidden = !recoveryInput.value;
+        dateInput.addEventListener('input', () => { recoveryInput.min = dateInput.value; });
         row.querySelector('button').addEventListener('click', () => row.remove()); container.append(row);
     };
+
     function hrReadHealthForm() {
         if (!hrValidDate(hr.day) || hr.day > hrToday()) throw new Error('기록 날짜를 확인해 주세요.');
         const time = hrEl('healthEntryTime').value;
@@ -3702,7 +3954,9 @@
             const name = row.querySelector('[data-diagnosis-name]').value.trim(); if (!name) continue;
             const date = row.querySelector('[data-diagnosis-date]').value;
             if (name.length > 80 || !hrValidDate(date) || date > hrToday()) throw new Error('진단명과 진단일을 확인해 주세요. 미래 진단일은 입력할 수 없습니다.');
-            if (!diagnoses.some(d => d.name === name && d.date === date)) diagnoses.push({ name, date });
+            const recoveredDate = row.querySelector('[data-diagnosis-recovered-date]').value;
+            if (recoveredDate && (!hrRecoveryDetails({ date, recoveredDate }) || recoveredDate > hrToday())) throw new Error('회복일은 진단일부터 오늘 사이의 날짜로 입력해 주세요.');
+            if (!diagnoses.some(d => d.name === name && d.date === date)) diagnoses.push({ name, date, ...(recoveredDate ? { recoveredDate } : {}) });
         }
         const note = hrEl('healthEntryNote').value.trim();
         const condition = hrEl('healthCondition').dataset.touched === 'true' ? Number(hrEl('healthCondition').value) : null;
@@ -3713,19 +3967,39 @@
     window.saveHealthEntry = async function() {
         if (hr.busy || !hrSameUser(hr.uid)) return;
         let data; try { data = hrReadHealthForm(); } catch (error) { return hrSetStatus('healthDayStatus', error.message, true); }
-        const uid = hr.uid, editingId = hr.editingId; hr.busy = true; hrEl('healthEntryFields').disabled = true;
+        const uid = hr.uid, editingId = hr.editingId, generation = hr.generation;
+        const diagnosisSignature = hr.editDiagnosisSignature;
+        const stillCurrent = () => hrSameUser(uid) && hr.generation === generation;
+        hr.busy = true; hrEl('healthEntryFields').disabled = true;
         try {
-            if (!await hrRequireConsent('health') || !hrSameUser(uid)) return;
+            if (!await hrRequireConsent('health') || !stillCurrent()) return;
             hrSetStatus('healthDayStatus', '기록을 저장하고 있습니다…');
             const target = editingId ? doc(db, 'users', uid, 'health_entries', editingId) : doc(collection(db, 'users', uid, 'health_entries'));
             const payload = { ...data, updatedAt: serverTimestamp() };
-            if (!editingId) { payload.createdAt = serverTimestamp(); payload.createdAtClient = new Date().toISOString(); }
-            await setDoc(target, payload, { merge: !!editingId });
-            if (!hrSameUser(uid)) return;
+            if (editingId) {
+                await runTransaction(db, async transaction => {
+                    const current = await transaction.get(target);
+                    if (!stillCurrent()) throw hrRecordConflict('계정이 변경되어 저장을 중단했습니다.');
+                    if (!current.exists()) throw hrRecordConflict('삭제된 기록입니다. 입력 내용을 확인하고 새 기록으로 남겨 주세요.');
+                    if (hrDiagnosisSignature(current.data().diagnoses) !== diagnosisSignature) {
+                        throw hrRecordConflict('다른 화면에서 진단 또는 회복일이 변경되었습니다. 입력 내용을 확인한 뒤 기록을 다시 열어 수정해 주세요.');
+                    }
+                    // update() keeps original creation timestamps and avoids recreating deleted records.
+                    transaction.update(target, payload);
+                });
+            } else {
+                payload.createdAt = serverTimestamp(); payload.createdAtClient = new Date().toISOString();
+                await setDoc(target, payload);
+            }
+            if (!stillCurrent()) return;
             resetHealthEntryForm(); hrSetStatus('healthDayStatus', editingId ? '기록을 수정했습니다.' : '기록을 추가했습니다. 이어서 새 기록을 남길 수 있습니다.');
-        } catch (error) { if (hrSameUser(uid)) hrSetStatus('healthDayStatus', hrErrorMessage(error), true); }
-        finally { if (hrSameUser(uid)) { hr.busy = false; hrEl('healthEntryFields').disabled = false; } }
+        } catch (error) {
+            if (stillCurrent()) hrSetStatus('healthDayStatus', error?.code === 'health/record-conflict' ? error.message : hrErrorMessage(error), true);
+        } finally {
+            if (stillCurrent()) { hr.busy = false; hrEl('healthEntryFields').disabled = false; hrRenderDiagnoses(); }
+        }
     };
+
     function hrRenderDayEntries() {
         const list = hrEl('healthDayEntries'); list.replaceChildren();
         const entries = hr.entries.filter(e => e.date === hr.day).sort((a, b) => (b.recordedLocal || '').localeCompare(a.recordedLocal || '') || (b.createdAtClient || '').localeCompare(a.createdAtClient || ''));
@@ -3739,7 +4013,10 @@
             const values = [];
             if (entry.condition !== null && entry.condition !== undefined) values.push(`컨디션 ${entry.condition}/10`);
             if (entry.stress !== null && entry.stress !== undefined) values.push(`스트레스 ${entry.stress}/10`);
-            (Array.isArray(entry.diagnoses) ? entry.diagnoses : []).forEach(d => values.push(`${d.name} · ${d.date} 진단`));
+            (Array.isArray(entry.diagnoses) ? entry.diagnoses : []).forEach(d => {
+                const recovery = hrRecoveryDetails(d);
+                values.push(`${d.name} · ${d.date} 진단${recovery ? ` · ${recovery.date} 회복 · ${recovery.label}` : ''}`);
+            });
             values.forEach(value => { const chip = document.createElement('span'); chip.className = 'health-chip'; chip.textContent = value; chips.append(chip); }); card.append(chips);
             const created = entry.createdAt?.toDate ? entry.createdAt.toDate() : new Date(entry.createdAtClient || '');
             if (!isNaN(created)) { const meta = document.createElement('p'); meta.className = 'health-muted'; meta.textContent = `저장 시각 ${created.toLocaleString('ko-KR')}`; card.append(meta); }
@@ -3750,12 +4027,12 @@
     }
     window.editHealthEntry = function(id) {
         if (hr.busy) return; const entry = hr.entries.find(e => e.id === id); if (!entry) return;
-        hr.editingId = id; hrEl('healthEntryNote').value = entry.note || ''; hrEl('healthEntryTime').value = entry.time || '12:00';
+        hr.editingId = id; hr.editDiagnosisSignature = hrDiagnosisSignature(entry.diagnoses); hrEl('healthEntryNote').value = entry.note || ''; hrEl('healthEntryTime').value = entry.time || '12:00';
         for (const [id, key] of [['healthCondition', 'condition'], ['healthStress', 'stress']]) {
             const value = entry[key]; hrEl(id).dataset.touched = value != null ? 'true' : 'false'; hrEl(id).value = value ?? 5;
             hrEl(`${id}Value`).textContent = value != null ? `${value}/10` : '선택 안 함';
         }
-        hrEl('healthDiagnosisInputs').replaceChildren(); (entry.diagnoses || []).forEach(d => addHealthDiagnosisInput(d.name, d.date));
+        hrEl('healthDiagnosisInputs').replaceChildren(); (entry.diagnoses || []).forEach(d => addHealthDiagnosisInput(d.name, d.date, d.recoveredDate || ''));
         if (!hrEl('healthDiagnosisInputs').children.length) addHealthDiagnosisInput();
         hrEl('healthEntrySave').textContent = '수정 저장'; hrEl('healthEntryCancelEdit').hidden = false;
         hrSetStatus('healthDayStatus', '기록을 수정 중입니다.'); hrEl('healthDayModal').querySelector('.modal-content').scrollTop = 0;
@@ -5790,7 +6067,7 @@
     }
 
     function getSortedAccumulatedRecords(rows, key, direction) {
-        const field = { start: 'startMs', end: 'endMs', duration: 'durationMs' }[key] || 'startMs';
+        const field = { start: 'startMs', end: 'endMs', duration: 'durationMs', rank: 'durationRank' }[key] || 'startMs';
         const multiplier = direction === 'asc' ? 1 : -1;
         return [...rows].sort((a, b) => {
             const aValue = a[field];
@@ -5803,8 +6080,19 @@
         });
     }
 
+    function rankAccumulatedRecords(rows) {
+        const durations = rows.filter(row => Number.isFinite(row.durationMs) && row.durationMs >= 0)
+            .map(row => row.durationMs).sort((a, b) => b - a);
+        const ranks = new Map(), counts = new Map();
+        durations.forEach((duration, index) => {
+            if (!ranks.has(duration)) ranks.set(duration, index + 1);
+            counts.set(duration, (counts.get(duration) || 0) + 1);
+        });
+        return rows.map(row => ({ ...row, durationRank: ranks.get(row.durationMs) ?? null, tiedRank: (counts.get(row.durationMs) || 0) > 1 }));
+    }
+
     function renderAccumulatedRecords() {
-        const rows = getSortedAccumulatedRecords(accumulatedRecordsRows, accumulatedRecordsSort.key, accumulatedRecordsSort.direction);
+        const rows = getSortedAccumulatedRecords(rankAccumulatedRecords(accumulatedRecordsRows), accumulatedRecordsSort.key, accumulatedRecordsSort.direction);
         const body = document.getElementById('accumulatedRecordsBody');
         const summary = document.getElementById('accumulatedRecordsSummary');
         const activeCount = rows.filter(row => row.isActive).length;
@@ -5817,25 +6105,26 @@
                 <td>${formatAccumulatedRecordDate(row.startMs)}</td>
                 <td>${row.isActive ? '<span class="accumulated-record-active">진행 중</span>' : formatAccumulatedRecordDate(row.endMs)}</td>
                 <td><span class="accumulated-record-duration">${formatAccumulatedDuration(row.durationMs)}</span></td>
+                <td>${row.durationRank === null ? '—' : `<span class="accumulated-record-rank${row.durationRank === 1 ? ' rank-first' : ''}">${row.tiedRank ? '공동 ' : ''}${row.durationRank}위</span>`}</td>
             </tr>
         `).join('');
-        const labels = { start: '시작날짜', end: '종료날짜', duration: '유지기간' };
+        const labels = { start: '시작날짜', end: '종료날짜', duration: '유지기간', rank: '순위' };
         document.querySelectorAll('#accumulatedRecordsModal th[data-sort-key]').forEach(header => {
             const key = header.dataset.sortKey;
             const selected = key === accumulatedRecordsSort.key;
             const ascending = accumulatedRecordsSort.direction === 'asc';
             header.setAttribute('aria-sort', selected ? (ascending ? 'ascending' : 'descending') : 'none');
             header.querySelector('[data-sort-indicator]').textContent = selected ? (ascending ? '↑' : '↓') : '↕';
-            const nextOrder = selected && !ascending ? '오름차순' : '내림차순';
+            const nextOrder = selected ? (ascending ? '내림차순' : '오름차순') : (key === 'rank' ? '오름차순' : '내림차순');
             header.querySelector('button').setAttribute('aria-label', `${labels[key]} ${nextOrder}으로 정렬`);
         });
     }
 
     window.sortAccumulatedRecords = function(key) {
-        if (!['start', 'end', 'duration'].includes(key)) return;
+        if (!['start', 'end', 'duration', 'rank'].includes(key)) return;
         accumulatedRecordsSort = {
             key,
-            direction: accumulatedRecordsSort.key === key && accumulatedRecordsSort.direction === 'desc' ? 'asc' : 'desc'
+            direction: accumulatedRecordsSort.key === key ? (accumulatedRecordsSort.direction === 'desc' ? 'asc' : 'desc') : (key === 'rank' ? 'asc' : 'desc')
         };
         renderAccumulatedRecords();
     };
