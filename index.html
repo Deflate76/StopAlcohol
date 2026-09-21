@@ -10,7 +10,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>금주도전/건강기록</title>
-    <meta name="app-build" content="records-calendar-v12-min-abstinence">
+    <meta name="app-build" content="records-calendar-v13-compact-abstinence">
     
     <meta name="description" content="금주 도전부터 건강 상태, 진단과 처방전까지. 나의 건강을 하루씩 기록하는 금주도전/건강기록." />
     <meta name="theme-color" content="#ffffff" />
@@ -856,10 +856,20 @@
         .diagnosis-abstinence-btn:focus-visible, .min-abstinence-progress button:focus-visible, #diagnosisAbstinenceModal :is(button, input, select, a):focus-visible { outline: 2px solid #0f766e; outline-offset: 3px; }
         #mainDaysContainer { width: 100%; min-width: 0; }
         #mainDaysContainer > .clickable-time-box { box-sizing: border-box; max-width: 100%; }
-        .min-abstinence-progress { box-sizing: border-box; width: 100%; max-width: 400px; margin: 10px auto 2px; padding: 12px; background: #f0fdfa; border: 1px solid #99e1d7; border-radius: 13px; text-align: left; color: #134e4a; cursor: default; }
+        .min-abstinence-progress { box-sizing: border-box; width: 100%; max-width: 400px; margin: 7px auto 9px; padding: 9px 11px; background: #f0fdfa; border: 1px solid #99e1d7; border-radius: 13px; text-align: left; color: #134e4a; cursor: default; }
         .min-abstinence-progress.is-empty { background: #fff; border-style: dashed; color: #64748b; }
         .min-abstinence-head, .min-abstinence-values { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-size: .78rem; }
         .min-abstinence-head strong { font-size: .8rem; }
+        .min-abstinence-head { flex-wrap: nowrap; gap: 8px; }
+        .min-abstinence-toggle { appearance: none; display: flex; flex: 1; min-width: 0; align-items: center; gap: 7px; border: 0; border-radius: 5px; background: transparent; color: inherit; padding: 3px 0; text-align: left; font: inherit; cursor: pointer; }
+        .min-abstinence-toggle strong { flex-shrink: 0; }
+        .min-abstinence-toggle::after { content: '＋'; margin-left: auto; flex-shrink: 0; font-size: 1rem; font-weight: 900; color: #0f766e; }
+        .min-abstinence-toggle[aria-expanded="true"]::after { content: '－'; }
+        .min-abstinence-compact-summary { min-width: 0; color: #52756e; font-size: .68rem; line-height: 1.3; overflow-wrap: anywhere; }
+        .min-abstinence-head > .health-link { flex-shrink: 0; white-space: nowrap; }
+        .min-abstinence-progress[data-collapsed="true"] { padding-top: 5px; padding-bottom: 5px; }
+        .min-abstinence-body { margin-top: 7px; border-top: 1px solid #ccefe7; padding-top: 3px; }
+        .min-abstinence-body[hidden] { display: none !important; }
         .min-abstinence-progress .health-link { padding: 3px 0; }
         .min-abstinence-condition { margin: 6px 0 8px; font-size: .72rem; line-height: 1.5; overflow-wrap: anywhere; }
         .min-abstinence-values { font-weight: 800; }
@@ -2329,6 +2339,9 @@
     } catch (e) {
         alcoholRiskStackExpanded = false;
     }
+    // A display preference only; diagnosis data stays in the private health records.
+    let minAbstinenceProgressExpanded = false;
+    try { minAbstinenceProgressExpanded = localStorage.getItem('minAbstinenceProgressExpanded') === 'true'; } catch (e) {}
     let lastMainDaysRenderState = null;
     
     let globalMaxDays = 0;
@@ -3474,8 +3487,9 @@
                     <div class="time-unit-row"><div class="time-unit">${currentDays}일</div>${buildStreakRecordBadgeHtml(currentDays)}</div>
                 </div>
                 <div class="clickable-time-box" onclick="openCalendarModal('accumulated')" style="margin-top: -10px; padding: 5px 15px;">
+                    <span class="sub-time-clickable">(누적 ${totalCumul}일 보기)</span>
+                    <div id="minAbstinenceProgressSlot" style="width:100%; min-width:0;">${buildMinAbstinenceProgressHtml()}</div>
                     <div class="cumulative-success-row">
-                        <span class="sub-time-clickable">(누적 ${totalCumul}일 보기)</span>
                         <div class="success-rate-box" title="성공률 = (금주 도전일 수 - 실패일수) / 금주 도전일 수">
                             <span>성공률 ${successRate}%</span>
                             <div class="success-rate-progress"><div class="success-rate-progress-fill" style="width:${successRate}%;"></div></div>
@@ -3483,7 +3497,6 @@
                         ${alcoholDementiaRiskBoxHtml}
                         ${buildAlcoholRiskStackToggleHtml()}
                     </div>
-                    <div id="minAbstinenceProgressSlot" style="width:100%; min-width:0;">${buildMinAbstinenceProgressHtml()}</div>
                     ${alcoholDiseaseRiskStackHtml}
                 </div>
             `;
@@ -4118,13 +4131,40 @@
             ? (elapsedDays >= totalDays ? 100 : Math.min(99.9, Math.round(Math.max(0, elapsedDays / totalDays) * 1000) / 10)) : null;
         return { ...latest, today, startDate, remainingDays, totalDays, elapsedDays, percent };
     }
+    function buildMinAbstinencePanelHtml(content, summary, hasGoal) {
+        const expanded = minAbstinenceProgressExpanded;
+        return `<section id="minAbstinenceProgressPanel" class="min-abstinence-progress${hasGoal ? '' : ' is-empty'}" data-collapsed="${!expanded}" onclick="event.stopPropagation()" aria-label="최소 금주 목표 진행률">
+            <div class="min-abstinence-head">
+                <button type="button" id="minAbstinenceProgressToggle" class="min-abstinence-toggle" onclick="toggleMinAbstinenceProgress(event)" aria-expanded="${expanded}" aria-controls="minAbstinenceProgressContent" aria-label="최소 금주 목표 ${expanded ? '접기' : '펼치기'}">
+                    <strong>최소 금주 목표</strong><span class="min-abstinence-compact-summary">${escapeHtml(summary)}</span>
+                </button>
+                <button type="button" class="health-link" onclick="openMinAbstinenceSettings(event)">${hasGoal ? '기간 수정' : '설정하기'}</button>
+            </div>
+            <div id="minAbstinenceProgressContent" class="min-abstinence-body"${expanded ? '' : ' hidden'}>${content}</div>
+        </section>`;
+    }
+    window.toggleMinAbstinenceProgress = function(event) {
+        event?.stopPropagation();
+        minAbstinenceProgressExpanded = !minAbstinenceProgressExpanded;
+        const panel = hrEl('minAbstinenceProgressPanel');
+        const button = hrEl('minAbstinenceProgressToggle');
+        const content = hrEl('minAbstinenceProgressContent');
+        if (panel) panel.dataset.collapsed = String(!minAbstinenceProgressExpanded);
+        if (button) {
+            button.setAttribute('aria-expanded', String(minAbstinenceProgressExpanded));
+            button.setAttribute('aria-label', `최소 금주 목표 ${minAbstinenceProgressExpanded ? '접기' : '펼치기'}`);
+        }
+        if (content) content.hidden = !minAbstinenceProgressExpanded;
+        try { localStorage.setItem('minAbstinenceProgressExpanded', String(minAbstinenceProgressExpanded)); } catch (e) {}
+    };
     function buildMinAbstinenceProgressHtml() {
         if (!hrSameUser(hr.uid)) return '';
         const data = hrGetMinAbstinenceProgress();
         if (!data) {
             const message = hr.errors.health ? '최소 금주 목표를 불러오지 못했습니다. 건강기록의 연결 상태를 확인해 주세요.'
                 : !hr.loaded.health ? '최소 금주 목표를 불러오는 중입니다…' : '질환진단 기록에서 최소 금주 기간을 설정해 보세요.';
-            return `<section class="min-abstinence-progress is-empty" onclick="event.stopPropagation()" aria-label="최소 금주 목표"><div class="min-abstinence-head"><strong>최소 금주 목표</strong><button type="button" class="health-link" onclick="openMinAbstinenceSettings(event)">설정하기</button></div><div class="min-abstinence-condition">${message}</div></section>`;
+            const summary = hr.errors.health ? '확인 필요' : !hr.loaded.health ? '불러오는 중' : '미설정';
+            return buildMinAbstinencePanelHtml(`<div class="min-abstinence-condition">${message}</div>`, summary, false);
         }
         const left = data.remainingDays > 0 ? `완료일까지 ${data.remainingDays}일 남음` : data.today === data.plan.endDate ? '오늘이 설정한 완료일입니다' : '설정한 목표일이 지났습니다';
         const progress = data.percent !== null
@@ -4132,10 +4172,9 @@
                 <div class="min-abstinence-track" role="progressbar" aria-label="최소 금주 목표 기간 진행률" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${data.percent}" aria-valuetext="${data.percent}%, ${left}"><div class="min-abstinence-fill" style="width:${data.percent}%"></div></div>
                 <div class="min-abstinence-axis"><span>0% · 금주 시작<br>${escapeHtml(data.startDate)}</span><span>100% · 최소 완료일<br>${escapeHtml(data.plan.endDate)}</span></div>`
             : `<div class="min-abstinence-values">${left}</div><div class="min-abstinence-note">${!data.startDate ? '금주 도전을 시작하면 진행률이 표시됩니다.' : '이 목표일은 현재 금주 시작일과 같거나 이전입니다. 목표일을 다시 설정해 주세요.'}</div>`;
-        return `<section class="min-abstinence-progress" onclick="event.stopPropagation()" aria-label="최소 금주 목표 진행률">
-            <div class="min-abstinence-head"><strong>최소 금주 목표</strong><button type="button" class="health-link" onclick="openMinAbstinenceSettings(event)">기간 수정</button></div>
-            <div class="min-abstinence-condition">${escapeHtml(data.name)} · ${escapeHtml(data.plan.endDate)}까지 금주<br>설정된 질환 중 가장 늦은 완료일 기준</div>
-            ${progress}<div class="min-abstinence-note">날짜 기준 진행률이며 실제 금주 여부를 판정하지 않습니다. 목표일 이후 음주 여부는 치료 상태에 따라 확인하세요.</div></section>`;
+        const summary = `${data.percent !== null ? `${data.percent}% · ` : ''}${data.remainingDays > 0 ? `${data.remainingDays}일 남음` : '목표일 도달'}`;
+        return buildMinAbstinencePanelHtml(`<div class="min-abstinence-condition">${escapeHtml(data.name)} · ${escapeHtml(data.plan.endDate)}까지 금주<br>설정된 질환 중 가장 늦은 완료일 기준</div>
+            ${progress}<div class="min-abstinence-note">날짜 기준 진행률이며 실제 금주 여부를 판정하지 않습니다. 목표일 이후 음주 여부는 치료 상태에 따라 확인하세요.</div>`, summary, true);
     }
     function hrRefreshMinAbstinenceProgress() {
         const slot = hrEl('minAbstinenceProgressSlot');
