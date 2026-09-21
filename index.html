@@ -10,7 +10,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>금주도전/건강기록</title>
-    <meta name="app-build" content="records-calendar-v11-range-markers">
+    <meta name="app-build" content="records-calendar-v12-min-abstinence">
     
     <meta name="description" content="금주 도전부터 건강 상태, 진단과 처방전까지. 나의 건강을 하루씩 기록하는 금주도전/건강기록." />
     <meta name="theme-color" content="#ffffff" />
@@ -845,6 +845,42 @@
         #accumulatedRecordsModal .accumulated-records-table { min-width: 340px; }
         .accumulated-record-rank { display: inline-block; border-radius: 7px; background: #f1f5f9; color: #475569; padding: 3px 5px; font-size: .72rem; font-weight: 850; white-space: nowrap; }
         .accumulated-record-rank.rank-first { background: #fef3c7; color: #92400e; }
+        /* 질환별 최소 금주 목표 */
+        .diagnosis-row { flex-wrap: wrap; }
+        .diagnosis-abstinence { flex: 1 0 100%; min-width: 0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px 10px; padding-top: 8px; border-top: 1px dashed #ccfbf1; }
+        .diagnosis-abstinence-label { color: #0f766e; font-size: .76rem; font-weight: 800; overflow-wrap: anywhere; }
+        .diagnosis-abstinence-label.is-complete { color: #64748b; }
+        .diagnosis-abstinence-btn { appearance: none; border: 1px solid #99d9c9; border-radius: 9px; background: #effcf7; color: #0f766e; padding: 8px 10px; font: inherit; font-size: .73rem; font-weight: 800; cursor: pointer; }
+        .diagnosis-abstinence-btn:hover { background: #d9f7e9; }
+        .diagnosis-abstinence-btn:disabled { opacity: .55; cursor: wait; }
+        .diagnosis-abstinence-btn:focus-visible, .min-abstinence-progress button:focus-visible, #diagnosisAbstinenceModal :is(button, input, select, a):focus-visible { outline: 2px solid #0f766e; outline-offset: 3px; }
+        #mainDaysContainer { width: 100%; min-width: 0; }
+        #mainDaysContainer > .clickable-time-box { box-sizing: border-box; max-width: 100%; }
+        .min-abstinence-progress { box-sizing: border-box; width: 100%; max-width: 400px; margin: 10px auto 2px; padding: 12px; background: #f0fdfa; border: 1px solid #99e1d7; border-radius: 13px; text-align: left; color: #134e4a; cursor: default; }
+        .min-abstinence-progress.is-empty { background: #fff; border-style: dashed; color: #64748b; }
+        .min-abstinence-head, .min-abstinence-values { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-size: .78rem; }
+        .min-abstinence-head strong { font-size: .8rem; }
+        .min-abstinence-progress .health-link { padding: 3px 0; }
+        .min-abstinence-condition { margin: 6px 0 8px; font-size: .72rem; line-height: 1.5; overflow-wrap: anywhere; }
+        .min-abstinence-values { font-weight: 800; }
+        .min-abstinence-percent { color: #0f766e; font-size: 1rem; font-variant-numeric: tabular-nums; }
+        .min-abstinence-track { height: 11px; margin-top: 7px; border-radius: 999px; background: #ccefe7; overflow: hidden; }
+        .min-abstinence-fill { height: 100%; border-radius: inherit; background: linear-gradient(90deg, #2dd4bf, #0f766e); transition: width .35s ease; }
+        .min-abstinence-axis { display: flex; justify-content: space-between; gap: 12px; margin-top: 5px; font-size: .63rem; color: #52756e; }
+        .min-abstinence-axis span:last-child { text-align: right; }
+        .min-abstinence-note { margin-top: 7px; color: #64748b; font-size: .65rem; line-height: 1.5; }
+        .abstinence-recommendation { margin: 10px 0; padding: 11px; background: #f0fdfa; border: 1px solid #b8e8de; border-radius: 12px; }
+        .abstinence-recommendation strong { display: block; color: #115e59; font-size: .85rem; }
+        .abstinence-recommendation p { font-size: .76rem; line-height: 1.6; color: #475569; }
+        .abstinence-sources { display: flex; gap: 5px 12px; flex-wrap: wrap; font-size: .68rem; line-height: 1.6; }
+        .abstinence-sources a { color: #0f766e; text-decoration: underline; text-underline-offset: 2px; }
+        .abstinence-duration-inputs { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
+        .abstinence-duration-inputs label { min-width: 0; }
+        #diagnosisAbstinenceModal select { box-sizing: border-box; width: 100%; min-width: 0; margin: 4px 0 0; padding: 10px; border: 1px solid #cbd5e1; border-radius: 10px; font: inherit; font-size: .9rem; color: #334155; background: #fff; }
+        #diagnosisAbstinencePreview { padding: 10px; border-radius: 10px; background: #f8fafc; color: #0f766e; font-weight: 800; }
+        #diagnosisAbstinenceModal [hidden] { display: none !important; }
+        .health-diagnosis-abstinence-note { grid-column: 1 / -1; margin: 0; color: #0f766e; font-size: .7rem; }
+        @media (prefers-reduced-motion: reduce) { .min-abstinence-fill { transition: none; } }
     </style>
 <style>
 /* Private pill identification. Native dialog keeps the camera above existing app modals. */
@@ -1884,6 +1920,46 @@
         <input type="number" id="editFailAmountInput" min="1" max="10" class="reason-input" style="margin-bottom: 10px; width:100%;" placeholder="예: 5">
 
         <button class="start-btn" style="width:100%; padding: 14px; font-size: 1.1rem; margin-top: 20px;" onclick="saveEditedReasons()">정보 저장</button>
+    </div>
+</div>
+
+<!-- 각 진단의 개인 금주 목표: 확인한 값만 기존 건강기록에 저장 -->
+<div id="diagnosisAbstinenceModal" class="modal health-modal" role="dialog" aria-modal="true" aria-labelledby="diagnosisAbstinenceTitle" aria-describedby="diagnosisAbstinenceNote" hidden>
+    <div class="modal-content">
+        <button type="button" class="close-btn-top" onclick="closeHealthDialog('diagnosisAbstinenceModal')" aria-label="최소 금주 기간 설정 닫기">&times;</button>
+        <h3 id="diagnosisAbstinenceTitle">최소 금주 기간 설정</h3>
+        <p id="diagnosisAbstinenceName" class="diagnosis-recovery-name"></p>
+        <form onsubmit="event.preventDefault(); confirmDiagnosisAbstinence()">
+            <fieldset id="diagnosisAbstinenceFields" style="border:0; padding:0; margin:0; min-width:0;">
+                <div id="diagnosisAbstinenceRecommendations"></div>
+                <label class="health-label" for="diagnosisAbstinenceBaseDate">기간 계산 기준일</label>
+                <input type="date" id="diagnosisAbstinenceBaseDate" required oninput="updateDiagnosisAbstinencePreview('base')">
+                <div class="health-actions">
+                    <button type="button" class="health-btn" onclick="setDiagnosisAbstinenceBase('diagnosis')">진단일</button>
+                    <button type="button" id="diagnosisAbstinenceUseQuitDate" class="health-btn" onclick="setDiagnosisAbstinenceBase('quit')">현재 금주 시작일</button>
+                    <button type="button" class="health-btn" onclick="setDiagnosisAbstinenceBase('today')">오늘</button>
+                </div>
+                <div class="abstinence-duration-inputs">
+                    <label class="health-label" for="diagnosisAbstinenceDuration">최소 금주 기간
+                        <input type="number" id="diagnosisAbstinenceDuration" min="1" max="1200" step="1" inputmode="numeric" placeholder="직접 입력" oninput="updateDiagnosisAbstinencePreview('duration')">
+                    </label>
+                    <label class="health-label" for="diagnosisAbstinenceUnit">기간 단위
+                        <select id="diagnosisAbstinenceUnit" onchange="updateDiagnosisAbstinencePreview('duration')"><option value="months">개월</option><option value="weeks">주</option><option value="days">일</option></select>
+                    </label>
+                </div>
+                <label class="health-label" for="diagnosisAbstinenceEndDate">최소 금주 완료일 · 직접 변경 가능</label>
+                <input type="date" id="diagnosisAbstinenceEndDate" required oninput="updateDiagnosisAbstinencePreview('end')">
+                <p id="diagnosisAbstinencePreview" class="health-muted" aria-live="polite"></p>
+                <p class="health-muted">기간은 위 기준일부터 계산합니다. 진행 막대의 0%는 현재 금주 도전 시작일이고, 100%는 설정된 완료일입니다.</p>
+                <p id="diagnosisAbstinenceNote" class="health-muted">추천 내용을 참고해 본인의 목표를 정해 주세요. 완료일은 개인 목표일이며, 음주를 재개해도 된다는 뜻은 아닙니다. 치료 중이라면 담당 의료진과 기간을 상의하세요.</p>
+                <div class="health-actions">
+                    <button type="button" class="health-btn" onclick="closeHealthDialog('diagnosisAbstinenceModal')">취소</button>
+                    <button type="submit" class="health-btn primary wide">확인 · 저장</button>
+                    <button type="button" id="diagnosisAbstinenceRemove" class="health-btn danger" onclick="confirmDiagnosisAbstinence(true)" hidden>설정 해제</button>
+                </div>
+            </fieldset>
+        </form>
+        <p id="diagnosisAbstinenceStatus" class="health-status" role="status" aria-live="polite"></p>
     </div>
 </div>
 
@@ -3384,7 +3460,8 @@
             diseaseRisk.averageAlcoholAmount,
             diseaseRepresentativeKey,
             streakRecordInfo ? `${streakRecordInfo.targetDays}:${streakRecordInfo.ordinal}:${streakRecordInfo.totalQualified}` : 'streak-none',
-            (allChallengesData || []).length
+            (allChallengesData || []).length,
+            hrToday(), hrCurrentQuitDate()
         ].join('|');
     }
 
@@ -3406,6 +3483,7 @@
                         ${alcoholDementiaRiskBoxHtml}
                         ${buildAlcoholRiskStackToggleHtml()}
                     </div>
+                    <div id="minAbstinenceProgressSlot" style="width:100%; min-width:0;">${buildMinAbstinenceProgressHtml()}</div>
                     ${alcoholDiseaseRiskStackHtml}
                 </div>
             `;
@@ -3704,7 +3782,7 @@
         uid: null, generation: 0, unsubs: [], entries: [], photos: [], consents: {},
         loaded: { health: false, photos: false, consents: false }, errors: {},
         day: null, editingId: null, editDiagnosisSignature: null, busy: false, consentPending: null, privacyScope: 'health',
-        recoveryTarget: null, recoverySaving: false,
+        recoveryTarget: null, recoverySaving: false, abstinenceTarget: null, abstinenceSaving: false,
         dialogs: [], returnFocus: new Map(), urls: new Map(), galleryGeneration: 0,
         stream: null, cameraGeneration: 0, hasPreview: false, redact: false, redactOrigin: null,
         redactBackup: null, uploadTask: null, photoProcessing: false, fileGeneration: 0
@@ -3743,6 +3821,15 @@
         card.tabIndex = -1; card.focus({ preventScroll: true });
     }
     window.closeHealthDialog = function(id, force = false) {
+        if (id === 'diagnosisAbstinenceModal') {
+            if (hr.abstinenceSaving && !force) return;
+            hr.abstinenceTarget = null;
+            hrEl('diagnosisAbstinenceName').textContent = '';
+            hrEl('diagnosisAbstinenceRecommendations').replaceChildren();
+            for (const inputId of ['diagnosisAbstinenceBaseDate', 'diagnosisAbstinenceEndDate', 'diagnosisAbstinenceDuration']) hrEl(inputId).value = '';
+            hrEl('diagnosisAbstinencePreview').textContent = '';
+            hrSetStatus('diagnosisAbstinenceStatus');
+        }
         if (id === 'diagnosisRecoveryModal') {
             if (hr.recoverySaving && !force) return;
             hr.recoveryTarget = null;
@@ -3785,7 +3872,7 @@
         const modal = hrEl(id);
         if (event.key === 'Escape') { event.preventDefault(); closeHealthDialog(id); return; }
         if (event.key !== 'Tab') return;
-        const focusable = [...modal.querySelectorAll('button, input, textarea, a[href], [tabindex="0"]')].filter(el => !el.disabled && el.getClientRects().length);
+        const focusable = [...modal.querySelectorAll('button, input, select, textarea, a[href], [tabindex="0"]')].filter(el => !el.matches(':disabled') && el.getClientRects().length);
         if (!focusable.length) { event.preventDefault(); return; }
         const index = focusable.indexOf(document.activeElement);
         if (event.shiftKey && index <= 0) { event.preventDefault(); focusable.at(-1).focus(); }
@@ -3865,6 +3952,7 @@
         hr.uid = uid; hr.entries = []; hr.photos = []; hr.consents = {}; hr.errors = {};
         hr.day = null; hr.editingId = null; hr.editDiagnosisSignature = null; hr.busy = false;
         hr.recoveryTarget = null; hr.recoverySaving = false; hrEl('diagnosisRecoveryFields').disabled = false;
+        hr.abstinenceTarget = null; hr.abstinenceSaving = false; hrEl('diagnosisAbstinenceFields').disabled = false;
         hr.loaded = { health: false, photos: false, consents: false };
         hrEl('healthDayEntries').replaceChildren(); hrEl('prescriptionGallery').replaceChildren();
         hrEl('healthEntryNote').value = ''; hrEl('healthDiagnosisInputs').replaceChildren();
@@ -3901,12 +3989,13 @@
         return { date: diagnosis.recoveredDate, days, label: days === 0 ? '당일 회복' : `${days}일 만에 회복` };
     }
     function hrDiagnosisSignature(diagnoses) {
-        return JSON.stringify((Array.isArray(diagnoses) ? diagnoses : []).map(d => [d?.name, d?.date, d?.recoveredDate || '']));
+        return JSON.stringify((Array.isArray(diagnoses) ? diagnoses : []).map(d => [d?.name, d?.date, d?.recoveredDate || '', hrAbstinenceSignature(d?.minAbstinence)]));
     }
     function hrRecordConflict(message) {
         const error = new Error(message); error.code = 'health/record-conflict'; return error;
     }
     function hrRenderDiagnoses() {
+        hrRefreshMinAbstinenceProgress();
         const list = hrEl('diagnosisRecordList'); if (!list) return;
         list.replaceChildren();
         if (hr.errors.health) { list.textContent = hr.errors.health; return; }
@@ -3934,9 +4023,243 @@
                 recover.addEventListener('click', () => openDiagnosisRecovery(record.entry.id, record.index));
                 row.append(recover);
             }
+            const abstinence = document.createElement('div'); abstinence.className = 'diagnosis-abstinence';
+            const plan = hrAbstinencePlan(record.minAbstinence);
+            const label = document.createElement('span'); label.className = 'diagnosis-abstinence-label';
+            label.textContent = plan ? `${plan.endDate}까지 금주${plan.endDate < hrToday() ? ' · 목표일 경과' : ''}` : '최소 금주 기간 미설정';
+            label.classList.toggle('is-complete', !!plan && plan.endDate < hrToday());
+            const set = document.createElement('button'); set.type = 'button'; set.className = 'diagnosis-abstinence-btn';
+            set.textContent = plan ? '최소 금주 기간 수정' : '최소 금주 기간 설정';
+            set.setAttribute('aria-label', `${record.name} ${set.textContent}`);
+            set.setAttribute('aria-haspopup', 'dialog'); set.setAttribute('aria-controls', 'diagnosisAbstinenceModal');
+            set.disabled = hr.busy || !hrSameUser(hr.uid) || elapsed < 0;
+            set.addEventListener('click', () => openDiagnosisAbstinence(record.entry.id, record.index));
+            abstinence.append(label, set); row.append(abstinence);
             list.append(row);
         }
     }
+    // Minimum abstinence goals belong to each private diagnosis, never the public profile.
+    // Six months for vestibular neuritis/shingles is the requested app default, not a clinical guideline.
+    const HR_ABSTINENCE_GUIDANCE_CHECKED = '2026-09-21';
+    const HR_ABSTINENCE_GUIDANCE = [
+        { key: 'vestibular', match: /전정신경염|vestibularneur(?:on)?itis/i, title: '전정신경염 · 기본 제안 6개월', months: 6,
+          text: '6개월은 이 앱의 개인 목표 제안입니다. NHS는 술이 어지럼 증상을 악화시킬 수 있어 피하도록 안내합니다. 회복 상태와 치료에 따라 기간을 조정하세요.',
+          sources: [['NHS 전정신경염', 'https://www.nhs.uk/conditions/labyrinthitis/']] },
+        { key: 'shingles', match: /대상포진|shingles|herpeszoster/i, title: '대상포진 · 기본 제안 6개월', months: 6,
+          text: '6개월은 이 앱의 개인 목표 제안이며 일률적인 의학적 금주 기간은 아닙니다. 통증과 치료 상태에 따라 조정하세요. 프레가발린을 복용한다면 술을 피하도록 안내됩니다.',
+          sources: [['NHS 대상포진', 'https://www.nhs.uk/conditions/shingles/'], ['NHS 프레가발린·음주', 'https://www.nhs.uk/medicines/pregabalin/common-questions-about-pregabalin/']] },
+        { key: 'chronic-pancreatitis', match: /만성췌장염|알[코콜]올성췌장염|알[코콜]올유발췌장염|chronicpancreatitis|alcohol(?:ic|related|induced)pancreatitis/i,
+          title: '만성·알코올 관련 췌장염 · 지속 금주 상담',
+          text: '만성 췌장염은 추가 손상을 줄이기 위해 술을 피하도록 권고됩니다. 알코올 관련 췌장염도 지속 금주를 담당 의료진과 상의하세요. 아래 날짜를 정한다면 개인 목표를 재평가할 날짜로 사용하세요.',
+          sources: [['NHS 만성 췌장염', 'https://www.nhs.uk/conditions/chronic-pancreatitis/'], ['NHS 급성 췌장염', 'https://www.nhs.uk/conditions/acute-pancreatitis/']] },
+        { key: 'acute-pancreatitis', match: /급성췌장염|acutepancreatitis/i, title: '급성 췌장염 · 최소 6개월 안내 참고', months: 6,
+          text: 'NHS 병원 환자 안내에는 급성 췌장염 후 원인과 관계없이 최소 6개월 금주가 제시됩니다. 알코올이 원인이거나 재발한 경우에는 기간을 제한하지 않는 금주가 필요할 수 있으므로 의료진과 상의하세요.',
+          sources: [['NHS 병원 급성 췌장염 안내', 'https://sthk.merseywestlancs.nhs.uk/leaflets/download/sthk-61dc2a0934c697.25593916']] },
+        { key: 'alcohol-liver', match: /(?<!비)알[코콜]올성(?:지방간|간염|간질환|간경변|간경화)|(?<!non)alcohol(?:ic|related)(?:fattyliver|hepatitis|liverdisease)|\barld\b/i,
+          title: '알코올 관련 간질환 · 지속적인 완전 금주',
+          text: '질환 단계와 관계없이 완전히 금주하도록 치료하는 것이 원칙입니다. 임의의 몇 개월 뒤 음주 재개일을 정하지 말고 검사 결과와 치료 경과를 확인하세요. 아래 날짜는 개인 목표를 재평가할 날짜로 정할 수 있습니다.',
+          sources: [['NHS 알코올 관련 간질환', 'https://www.nhs.uk/conditions/alcohol-related-liver-disease-arld/']] },
+        { key: 'gastritis', match: /위염|gastritis/i, title: '위염 · 치료·증상에 맞춰 기간 설정',
+          text: 'NHS는 위염 증상 관리 시 술을 피하도록 안내합니다. 모든 위염에 공통된 개월 수를 제시하지 않으므로, 원인 치료와 증상 경과에 맞춰 개인 목표일을 정하세요.',
+          sources: [['NHS 위염', 'https://www.nhs.uk/conditions/gastritis/']] },
+        { key: 'gout', match: /통풍|\bgout\b/i, title: '통풍 · 발작 중 금주, 이후 지속 관리',
+          text: '통풍 발작 중에는 술을 피하도록 안내됩니다. 이후에도 음주량 관리와 금주일이 권고되며 정해진 공통 개월 수는 없습니다. 요산 수치와 치료 경과를 참고해 목표일을 정하세요.',
+          sources: [['NHS 통풍', 'https://www.nhs.uk/conditions/gout/']] }
+    ];
+    function hrAbstinenceRecommendations(name) {
+        const normalized = String(name || '').normalize('NFKC').replace(/[\s\-·_]/g, '');
+        const matches = HR_ABSTINENCE_GUIDANCE.filter(item => item.match.test(normalized));
+        return matches.length ? matches : [{ key: 'individual', title: '개별 금주 기간 확인이 필요한 질환',
+            text: '이 진단명에 대해 앱에서 확인한 공통 금주 기간은 없습니다. 질환의 중증도, 복용약, 검사 결과와 의료진 안내를 참고해 기간이나 완료일을 직접 정해 주세요.', sources: [] }];
+    }
+    function hrAbstinencePlan(value) {
+        if (!value || !hrValidDate(value.baseDate) || !hrValidDate(value.endDate) || value.endDate <= value.baseDate) return null;
+        return value;
+    }
+    function hrAbstinenceSignature(value) {
+        if (!value) return 'null';
+        return JSON.stringify(Object.keys(value).sort().map(key => [key, value[key]]));
+    }
+    function hrAddAbstinencePeriod(baseDate, value, unit) {
+        const number = Number(value);
+        const max = { months: 1200, weeks: 5217, days: 36525 }[unit];
+        if (!hrValidDate(baseDate) || !max || !Number.isInteger(number) || number < 1 || number > max) return '';
+        const [y, m, d] = baseDate.split('-').map(Number);
+        let result;
+        if (unit === 'months') {
+            // Clamp month ends: August 31 + 6 months is February 28/29, not March.
+            const target = new Date(y, m - 1 + number, 1, 12);
+            const lastDay = new Date(target.getFullYear(), target.getMonth() + 1, 0, 12).getDate();
+            target.setDate(Math.min(d, lastDay)); result = dateToKey(target);
+        } else {
+            result = dateToKey(new Date(y, m - 1, d + number * (unit === 'weeks' ? 7 : 1), 12));
+        }
+        return hrValidDate(result) ? result : '';
+    }
+    function hrCurrentQuitDate() {
+        return currentChallengeId && userQuitDate ? dateToKey(userQuitDate) : '';
+    }
+    function hrGetMinAbstinenceProgress(today = hrToday()) {
+        if (!hrSameUser(hr.uid) || hr.errors.health) return null;
+        let latest = null;
+        for (const entry of hr.entries) {
+            (Array.isArray(entry.diagnoses) ? entry.diagnoses : []).forEach((diagnosis, index) => {
+                const plan = hrAbstinencePlan(diagnosis?.minAbstinence);
+                if (plan && hrValidDate(diagnosis.date) && (!latest || plan.endDate > latest.plan.endDate)) latest = { name: diagnosis.name, entryId: entry.id, index, plan };
+            });
+        }
+        if (!latest) return null;
+        const startDate = hrCurrentQuitDate();
+        const remainingDays = Math.max(0, hrDayNumber(latest.plan.endDate) - hrDayNumber(today));
+        const totalDays = hrDayNumber(latest.plan.endDate) - hrDayNumber(startDate);
+        const elapsedDays = hrDayNumber(today) - hrDayNumber(startDate);
+        // Calendar-day arithmetic is stable across time zones and daylight-saving changes.
+        const percent = Number.isFinite(totalDays) && totalDays > 0
+            ? (elapsedDays >= totalDays ? 100 : Math.min(99.9, Math.round(Math.max(0, elapsedDays / totalDays) * 1000) / 10)) : null;
+        return { ...latest, today, startDate, remainingDays, totalDays, elapsedDays, percent };
+    }
+    function buildMinAbstinenceProgressHtml() {
+        if (!hrSameUser(hr.uid)) return '';
+        const data = hrGetMinAbstinenceProgress();
+        if (!data) {
+            const message = hr.errors.health ? '최소 금주 목표를 불러오지 못했습니다. 건강기록의 연결 상태를 확인해 주세요.'
+                : !hr.loaded.health ? '최소 금주 목표를 불러오는 중입니다…' : '질환진단 기록에서 최소 금주 기간을 설정해 보세요.';
+            return `<section class="min-abstinence-progress is-empty" onclick="event.stopPropagation()" aria-label="최소 금주 목표"><div class="min-abstinence-head"><strong>최소 금주 목표</strong><button type="button" class="health-link" onclick="openMinAbstinenceSettings(event)">설정하기</button></div><div class="min-abstinence-condition">${message}</div></section>`;
+        }
+        const left = data.remainingDays > 0 ? `완료일까지 ${data.remainingDays}일 남음` : data.today === data.plan.endDate ? '오늘이 설정한 완료일입니다' : '설정한 목표일이 지났습니다';
+        const progress = data.percent !== null
+            ? `<div class="min-abstinence-values"><span>${left}</span><span class="min-abstinence-percent">${data.percent}%</span></div>
+                <div class="min-abstinence-track" role="progressbar" aria-label="최소 금주 목표 기간 진행률" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${data.percent}" aria-valuetext="${data.percent}%, ${left}"><div class="min-abstinence-fill" style="width:${data.percent}%"></div></div>
+                <div class="min-abstinence-axis"><span>0% · 금주 시작<br>${escapeHtml(data.startDate)}</span><span>100% · 최소 완료일<br>${escapeHtml(data.plan.endDate)}</span></div>`
+            : `<div class="min-abstinence-values">${left}</div><div class="min-abstinence-note">${!data.startDate ? '금주 도전을 시작하면 진행률이 표시됩니다.' : '이 목표일은 현재 금주 시작일과 같거나 이전입니다. 목표일을 다시 설정해 주세요.'}</div>`;
+        return `<section class="min-abstinence-progress" onclick="event.stopPropagation()" aria-label="최소 금주 목표 진행률">
+            <div class="min-abstinence-head"><strong>최소 금주 목표</strong><button type="button" class="health-link" onclick="openMinAbstinenceSettings(event)">기간 수정</button></div>
+            <div class="min-abstinence-condition">${escapeHtml(data.name)} · ${escapeHtml(data.plan.endDate)}까지 금주<br>설정된 질환 중 가장 늦은 완료일 기준</div>
+            ${progress}<div class="min-abstinence-note">날짜 기준 진행률이며 실제 금주 여부를 판정하지 않습니다. 목표일 이후 음주 여부는 치료 상태에 따라 확인하세요.</div></section>`;
+    }
+    function hrRefreshMinAbstinenceProgress() {
+        const slot = hrEl('minAbstinenceProgressSlot');
+        if (slot) {
+            const html = buildMinAbstinenceProgressHtml();
+            if (slot.innerHTML !== html) slot.innerHTML = html;
+        }
+    }
+    window.openMinAbstinenceSettings = function(event) {
+        event?.stopPropagation();
+        const data = hrGetMinAbstinenceProgress();
+        if (data) return openDiagnosisAbstinence(data.entryId, data.index);
+        const section = hrEl('diagnosisRecordSection');
+        if (section.dataset.collapsed === 'true') toggleInlineCollapsible('diagnosisRecordSection');
+        section.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        hrEl('diagnosisRecordList').focus({ preventScroll: true });
+    };
+    window.openDiagnosisAbstinence = function(entryId, diagnosisIndex) {
+        if (hr.busy || !hrSameUser(hr.uid)) return;
+        const diagnosis = hr.entries.find(entry => entry.id === entryId)?.diagnoses?.[diagnosisIndex];
+        if (!diagnosis || !hrValidDate(diagnosis.date) || diagnosis.date > hrToday()) return;
+        const plan = hrAbstinencePlan(diagnosis.minAbstinence);
+        hr.abstinenceTarget = { entryId, index: diagnosisIndex, name: diagnosis.name, date: diagnosis.date, signature: hrAbstinenceSignature(diagnosis.minAbstinence) };
+        hrEl('diagnosisAbstinenceName').textContent = `${diagnosis.name} · ${diagnosis.date} 진단`;
+        hrEl('diagnosisAbstinenceFields').disabled = false;
+        const cards = hrEl('diagnosisAbstinenceRecommendations'); cards.replaceChildren();
+        const guidance = hrAbstinenceRecommendations(diagnosis.name);
+        for (const item of guidance) {
+            const card = document.createElement('div'); card.className = 'abstinence-recommendation';
+            card.innerHTML = `<strong>${escapeHtml(item.title)}</strong><p>${escapeHtml(item.text)}</p><div class="abstinence-sources">${item.sources.map(([label, url]) => `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">${escapeHtml(label)}</a>`).join('')}${item.sources.length ? `<span>확인 ${HR_ABSTINENCE_GUIDANCE_CHECKED}</span>` : ''}</div>`;
+            if (item.months) {
+                const button = document.createElement('button'); button.type = 'button'; button.className = 'health-btn';
+                button.textContent = `${item.months}개월 제안 적용`;
+                button.addEventListener('click', () => {
+                    hrEl('diagnosisAbstinenceUnit').value = 'months'; hrEl('diagnosisAbstinenceDuration').value = item.months;
+                    updateDiagnosisAbstinencePreview('duration');
+                });
+                card.append(button);
+            }
+            cards.append(card);
+        }
+        hrEl('diagnosisAbstinenceBaseDate').value = plan?.baseDate || diagnosis.date;
+        const hasOngoingGuidance = guidance.some(item => ['chronic-pancreatitis', 'alcohol-liver'].includes(item.key));
+        const months = hasOngoingGuidance ? 0 : Math.max(0, ...guidance.map(item => item.months || 0));
+        hrEl('diagnosisAbstinenceUnit').value = plan?.durationUnit || 'months';
+        if (!['months', 'weeks', 'days'].includes(hrEl('diagnosisAbstinenceUnit').value)) hrEl('diagnosisAbstinenceUnit').value = 'months';
+        hrEl('diagnosisAbstinenceDuration').value = plan ? (plan.durationValue || '') : (months || '');
+        hrEl('diagnosisAbstinenceEndDate').value = plan?.endDate || '';
+        hrEl('diagnosisAbstinenceRemove').hidden = !diagnosis.minAbstinence;
+        hrEl('diagnosisAbstinenceUseQuitDate').disabled = !hrValidDate(hrCurrentQuitDate());
+        hrSetStatus('diagnosisAbstinenceStatus');
+        updateDiagnosisAbstinencePreview(plan ? 'preview' : 'duration');
+        hrOpen('diagnosisAbstinenceModal');
+    };
+    window.setDiagnosisAbstinenceBase = function(kind) {
+        if (!hr.abstinenceTarget || hr.abstinenceSaving) return;
+        const date = kind === 'quit' ? hrCurrentQuitDate() : kind === 'today' ? hrToday() : hr.abstinenceTarget.date;
+        if (hrValidDate(date)) { hrEl('diagnosisAbstinenceBaseDate').value = date; updateDiagnosisAbstinencePreview('base'); }
+    };
+    window.updateDiagnosisAbstinencePreview = function(changed = 'preview') {
+        const baseDate = hrEl('diagnosisAbstinenceBaseDate').value;
+        const duration = hrEl('diagnosisAbstinenceDuration');
+        const unit = hrEl('diagnosisAbstinenceUnit').value;
+        const end = hrEl('diagnosisAbstinenceEndDate');
+        duration.max = { months: 1200, weeks: 5217, days: 36525 }[unit] || 1200;
+        if (changed === 'end') duration.value = '';
+        if (changed === 'duration' || (changed === 'base' && duration.value !== '')) end.value = hrAddAbstinencePeriod(baseDate, duration.value, unit);
+        end.min = hrAddAbstinencePeriod(baseDate, 1, 'days');
+        const plan = hrAbstinencePlan({ baseDate, endDate: end.value });
+        const preview = hrEl('diagnosisAbstinencePreview');
+        preview.textContent = plan ? `${plan.endDate}까지 금주 · 기준일부터 ${hrDayNumber(plan.endDate) - hrDayNumber(baseDate)}일${plan.endDate < hrToday() ? ' (이미 지난 목표일)' : ''}`
+            : '기준일과 기간을 입력하거나 기준일보다 늦은 완료일을 선택해 주세요.';
+    };
+    window.confirmDiagnosisAbstinence = async function(remove = false) {
+        const target = hr.abstinenceTarget, uid = hr.uid, generation = hr.generation;
+        if (!target || hr.busy || !hrSameUser(uid)) return;
+        const baseDate = hrEl('diagnosisAbstinenceBaseDate').value, endDate = hrEl('diagnosisAbstinenceEndDate').value;
+        const durationValue = Number(hrEl('diagnosisAbstinenceDuration').value), durationUnit = hrEl('diagnosisAbstinenceUnit').value;
+        if (!remove && !hrAbstinencePlan({ baseDate, endDate })) return hrSetStatus('diagnosisAbstinenceStatus', '기준일보다 늦은 완료일을 입력해 주세요.', true);
+        const periodMatches = hrAddAbstinencePeriod(baseDate, durationValue, durationUnit) === endDate;
+        const plan = remove ? null : { baseDate, endDate, durationValue: periodMatches ? durationValue : null, durationUnit: periodMatches ? durationUnit : 'custom', confirmedAt: new Date().toISOString() };
+        const stillCurrent = () => hrSameUser(uid) && hr.generation === generation && hr.abstinenceTarget === target;
+        hr.busy = true; hr.abstinenceSaving = true; hrEl('diagnosisAbstinenceFields').disabled = true;
+        try {
+            if (!await hrRequireConsent('health')) {
+                if (stillCurrent()) hrSetStatus('diagnosisAbstinenceStatus', '건강기록 이용에 동의한 후 저장할 수 있습니다.', true);
+                return;
+            }
+            if (!stillCurrent()) return;
+            hrSetStatus('diagnosisAbstinenceStatus', remove ? '설정을 해제하고 있습니다…' : '최소 금주 기간을 저장하고 있습니다…');
+            const ref = doc(db, 'users', uid, 'health_entries', target.entryId);
+            const diagnoses = await runTransaction(db, async transaction => {
+                const snapshot = await transaction.get(ref);
+                if (!stillCurrent()) throw hrRecordConflict('계정이 변경되어 저장을 중단했습니다.');
+                if (!snapshot.exists()) throw hrRecordConflict('삭제된 기록입니다. 목록을 다시 확인해 주세요.');
+                const current = snapshot.data().diagnoses;
+                if (!Array.isArray(current)) throw hrRecordConflict('진단 기록이 변경되었습니다. 목록에서 다시 선택해 주세요.');
+                const matches = current.map((d, index) => ({ d, index })).filter(({ d }) => d?.name === target.name && d?.date === target.date);
+                const selected = matches.length === 1 ? matches[0] : matches.find(item => item.index === target.index);
+                if (!selected) throw hrRecordConflict('진단명이나 진단일이 변경되었습니다. 목록에서 다시 선택해 주세요.');
+                if (hrAbstinenceSignature(selected.d.minAbstinence) !== target.signature) throw hrRecordConflict('다른 화면에서 금주 기간이 변경되었습니다. 창을 닫고 다시 열어 확인해 주세요.');
+                const next = current.map((d, index) => {
+                    if (index !== selected.index) return d;
+                    const edited = { ...d };
+                    if (remove) delete edited.minAbstinence; else edited.minAbstinence = plan;
+                    return edited;
+                });
+                transaction.update(ref, { diagnoses: next, updatedAt: serverTimestamp() });
+                return next;
+            });
+            if (!stillCurrent()) return;
+            hr.entries = hr.entries.map(entry => entry.id === target.entryId ? { ...entry, diagnoses } : entry);
+            hrRefreshHealthUI(); closeHealthDialog('diagnosisAbstinenceModal', true);
+        } catch (error) {
+            if (stillCurrent()) hrSetStatus('diagnosisAbstinenceStatus', error?.code === 'health/record-conflict' ? error.message : hrErrorMessage(error, '최소 금주 기간을 저장'), true);
+        } finally {
+            if (hrSameUser(uid) && hr.generation === generation) {
+                hr.busy = false; hr.abstinenceSaving = false; hrEl('diagnosisAbstinenceFields').disabled = false;
+                hrRenderDiagnoses();
+                if (hrEl('diagnosisAbstinenceModal').hidden && hrEl('diagnosisRecordList').getClientRects().length) hrEl('diagnosisRecordList').focus({ preventScroll: true });
+            }
+        }
+    };
+
     window.openDiagnosisRecovery = function(entryId, diagnosisIndex) {
         if (hr.busy || !hrSameUser(hr.uid)) return;
         const entry = hr.entries.find(item => item.id === entryId);
@@ -4022,11 +4345,19 @@
         hrEl('healthEntrySave').textContent = '＋ 기록 추가'; hrEl('healthEntryCancelEdit').hidden = true;
     };
     window.touchHealthRange = id => { hrEl(id).dataset.touched = 'true'; hrEl(`${id}Value`).textContent = `${hrEl(id).value}/10`; };
-    window.addHealthDiagnosisInput = function(name = '', date = hr.day || hrToday(), recoveredDate = '') {
+    window.addHealthDiagnosisInput = function(name = '', date = hr.day || hrToday(), recoveredDate = '', minAbstinence = null) {
         const container = hrEl('healthDiagnosisInputs');
         if (container.children.length >= 20) return hrSetStatus('healthDayStatus', '한 기록에는 진단명을 20개까지 입력할 수 있습니다. 새 기록을 추가해 주세요.', true);
         const row = document.createElement('div'); row.className = 'health-diagnosis-input';
         row.innerHTML = '<label>진단명<input type="text" data-diagnosis-name maxlength="80" placeholder="진단명"></label><label>진단일<input type="date" data-diagnosis-date></label><button type="button" class="health-btn" aria-label="이 진단명 입력란 삭제">×</button><label class="health-diagnosis-recovery" hidden>회복일 · 비우면 회복 표시 취소<input type="date" data-diagnosis-recovered-date></label>';
+        // Retain the confirmed goal when editing notes, dates, names, or recovery fields.
+        row.hrMinAbstinence = minAbstinence ? { ...minAbstinence } : null;
+        const savedPlan = hrAbstinencePlan(minAbstinence);
+        if (savedPlan) {
+            const note = document.createElement('p'); note.className = 'health-diagnosis-abstinence-note';
+            note.textContent = `최소 금주: ${savedPlan.endDate}까지 · 기간 수정은 질환진단 목록에서`;
+            row.append(note);
+        }
         row.querySelector('[data-diagnosis-name]').value = name;
         const dateInput = row.querySelector('[data-diagnosis-date]'); dateInput.value = date; dateInput.max = hrToday();
         const recoveryInput = row.querySelector('[data-diagnosis-recovered-date]');
@@ -4047,7 +4378,7 @@
             if (name.length > 80 || !hrValidDate(date) || date > hrToday()) throw new Error('진단명과 진단일을 확인해 주세요. 미래 진단일은 입력할 수 없습니다.');
             const recoveredDate = row.querySelector('[data-diagnosis-recovered-date]').value;
             if (recoveredDate && (!hrRecoveryDetails({ date, recoveredDate }) || recoveredDate > hrToday())) throw new Error('회복일은 진단일부터 오늘 사이의 날짜로 입력해 주세요.');
-            if (!diagnoses.some(d => d.name === name && d.date === date)) diagnoses.push({ name, date, ...(recoveredDate ? { recoveredDate } : {}) });
+            if (!diagnoses.some(d => d.name === name && d.date === date)) diagnoses.push({ name, date, ...(recoveredDate ? { recoveredDate } : {}), ...(row.hrMinAbstinence ? { minAbstinence: { ...row.hrMinAbstinence } } : {}) });
         }
         const note = hrEl('healthEntryNote').value.trim();
         const condition = hrEl('healthCondition').dataset.touched === 'true' ? Number(hrEl('healthCondition').value) : null;
@@ -4073,7 +4404,7 @@
                     if (!stillCurrent()) throw hrRecordConflict('계정이 변경되어 저장을 중단했습니다.');
                     if (!current.exists()) throw hrRecordConflict('삭제된 기록입니다. 입력 내용을 확인하고 새 기록으로 남겨 주세요.');
                     if (hrDiagnosisSignature(current.data().diagnoses) !== diagnosisSignature) {
-                        throw hrRecordConflict('다른 화면에서 진단 또는 회복일이 변경되었습니다. 입력 내용을 확인한 뒤 기록을 다시 열어 수정해 주세요.');
+                        throw hrRecordConflict('다른 화면에서 진단, 회복일 또는 금주 기간이 변경되었습니다. 입력 내용을 확인한 뒤 기록을 다시 열어 수정해 주세요.');
                     }
                     // update() keeps original creation timestamps and avoids recreating deleted records.
                     transaction.update(target, payload);
@@ -4106,7 +4437,8 @@
             if (entry.stress !== null && entry.stress !== undefined) values.push(`스트레스 ${entry.stress}/10`);
             (Array.isArray(entry.diagnoses) ? entry.diagnoses : []).forEach(d => {
                 const recovery = hrRecoveryDetails(d);
-                values.push(`${d.name} · ${d.date} 진단${recovery ? ` · ${recovery.date} 회복 · ${recovery.label}` : ''}`);
+                const plan = hrAbstinencePlan(d.minAbstinence);
+                values.push(`${d.name} · ${d.date} 진단${recovery ? ` · ${recovery.date} 회복 · ${recovery.label}` : ''}${plan ? ` · ${plan.endDate}까지 금주` : ''}`);
             });
             values.forEach(value => { const chip = document.createElement('span'); chip.className = 'health-chip'; chip.textContent = value; chips.append(chip); }); card.append(chips);
             const created = entry.createdAt?.toDate ? entry.createdAt.toDate() : new Date(entry.createdAtClient || '');
@@ -4123,7 +4455,7 @@
             const value = entry[key]; hrEl(id).dataset.touched = value != null ? 'true' : 'false'; hrEl(id).value = value ?? 5;
             hrEl(`${id}Value`).textContent = value != null ? `${value}/10` : '선택 안 함';
         }
-        hrEl('healthDiagnosisInputs').replaceChildren(); (entry.diagnoses || []).forEach(d => addHealthDiagnosisInput(d.name, d.date, d.recoveredDate || ''));
+        hrEl('healthDiagnosisInputs').replaceChildren(); (entry.diagnoses || []).forEach(d => addHealthDiagnosisInput(d.name, d.date, d.recoveredDate || '', d.minAbstinence || null));
         if (!hrEl('healthDiagnosisInputs').children.length) addHealthDiagnosisInput();
         hrEl('healthEntrySave').textContent = '수정 저장'; hrEl('healthEntryCancelEdit').hidden = false;
         hrSetStatus('healthDayStatus', '기록을 수정 중입니다.'); hrEl('healthDayModal').querySelector('.modal-content').scrollTop = 0;
