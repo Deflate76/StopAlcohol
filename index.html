@@ -10,7 +10,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>금주도전/건강기록</title>
-    <meta name="app-build" content="records-calendar-v13-compact-abstinence">
+    <meta name="app-build" content="records-calendar-v14-coffee-sleep">
     
     <meta name="description" content="금주 도전부터 건강 상태, 진단과 처방전까지. 나의 건강을 하루씩 기록하는 금주도전/건강기록." />
     <meta name="theme-color" content="#ffffff" />
@@ -914,6 +914,42 @@
 @media(max-width:480px){.pill-id-dialog{padding:16px;max-height:calc(100dvh - 20px);border-radius:18px}.pi-photo-pair,.pi-feature-grid{gap:9px}.pi-photo-box{height:125px}.pi-feature-grid>section{padding:10px}.pi-reference{flex-basis:95px;min-height:80px}.pi-reference img{width:95px}.pi-candidate{padding:12px}.pi-candidate-top{gap:9px}.pi-candidate h4{font-size:13px}.pi-result-heading{align-items:flex-start}.pill-id-floating{right:calc(10px + env(safe-area-inset-right,0px));bottom:calc(86px + env(safe-area-inset-bottom,0px));width:56px;height:56px}}
 @media(prefers-reduced-motion:reduce){.pill-id-dialog *{scroll-behavior:auto!important}}
 
+/* Coffee and sleep diary: the same floating button size as pill identification. */
+.coffee-floating { bottom:calc(166px + env(safe-area-inset-bottom,0px)); background:linear-gradient(145deg,#c08457,#854d29); box-shadow:0 5px 18px #854d2933; }
+.coffee-floating .coffee-floating-inner { background:linear-gradient(145deg,#fffdf8,#fff2e5)!important; color:#854d29!important; }
+#coffeeSleepModal .modal-content { max-width:650px; }
+#coffeeSleepModal [hidden] { display:none!important; }
+#coffeeSleepModal h3 { padding-right:30px; }
+#coffeeSleepModal h4 { margin:16px 0 8px; font-size:.9rem; color:#475569; }
+#coffeeSleepModal select { width:100%; min-width:0; box-sizing:border-box; margin-top:4px; padding:10px; border:1px solid #cbd5e1; border-radius:10px; font:inherit; font-size:.86rem; color:#334155; background:#fff; }
+#coffeeSleepModal fieldset { border:0; padding:0; margin:0; min-width:0; }
+.cs-tabs { display:flex; gap:6px; margin:12px 0; }
+.cs-tab { flex:1; min-width:0; padding:10px 5px; border:1px solid #e2d2c3; border-radius:10px; background:#fff; color:#6b4b33; font:inherit; font-size:.8rem; font-weight:800; }
+.cs-tab[aria-selected="true"] { background:#854d29; border-color:#854d29; color:white; }
+.cs-form-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 10px; }
+.cs-full { grid-column:1 / -1; }
+.cs-inline-value { margin:10px 0; padding:10px; border-radius:10px; background:#fff7ed; color:#854d29; font-size:.82rem; font-weight:800; }
+.cs-summary { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; margin:12px 0; }
+.cs-summary > div { padding:10px 7px; background:#f8fafc; border-radius:10px; border:1px solid #e2e8f0; min-width:0; }
+.cs-summary strong { display:block; font-size:.94rem; color:#475569; overflow-wrap:anywhere; }
+.cs-summary span { font-size:.68rem; color:#64748b; }
+.cs-history { display:grid; gap:7px; max-height:300px; overflow:auto; margin-top:10px; }
+.cs-history-item { display:flex; align-items:center; justify-content:space-between; gap:8px; border:1px solid #e2e8f0; border-radius:10px; padding:10px; background:#fff; }
+.cs-history-item > div { min-width:0; }
+.cs-history-item strong { display:block; font-size:.84rem; color:#475569; overflow-wrap:anywhere; }
+.cs-history-item .health-actions { margin:0; flex-shrink:0; }
+.cs-history-item .health-btn { padding:7px 8px; }
+.cs-chart-wrap { position:relative; height:300px; margin:14px 0; }
+.cs-table-wrap { overflow:auto; max-height:320px; margin-top:8px; }
+.cs-table { width:100%; border-collapse:collapse; font-size:.73rem; text-align:right; white-space:nowrap; }
+.cs-table caption { text-align:left; color:#475569; padding:6px 0; }
+.cs-table th,.cs-table td { border-bottom:1px solid #e2e8f0; padding:8px 7px; }
+.cs-table thead th { position:sticky; top:0; background:#f8fafc; color:#475569; z-index:1; }
+.cs-table th:first-child,.cs-table td:first-child { text-align:left; }
+.cs-table td small { display:block; color:#64748b; }
+.app-version-label { display:inline-block; margin-left:7px; font-size:.7rem; color:#64748b; }
+#coffeeSleepModal :is(button,input,select,textarea):focus-visible { outline:2px solid #854d29; outline-offset:3px; }
+@media(max-width:480px) { .coffee-floating { bottom:calc(152px + env(safe-area-inset-bottom,0px)); } .cs-chart-wrap { height:250px; } .cs-history-item { flex-wrap:wrap; } }
 </style>
 </head>
 <body>
@@ -1225,7 +1261,7 @@
 </nav>
 
 <footer>
-    &copy; 2026 Alcoholaway.com All rights reserved.
+    &copy; 2026 Alcoholaway.com All rights reserved. <span id="appVersionLabel" class="app-version-label">v14</span>
 </footer>
 
 <!-- 닉네임 설정 모달 -->
@@ -2162,6 +2198,74 @@
     });
 })();
 </script>
+
+<button id="coffeeFloatingButton" class="pill-id-floating coffee-floating" type="button" onclick="openCoffeeSleep()" aria-label="커피 섭취와 수면 기록" aria-haspopup="dialog" aria-controls="coffeeSleepModal">
+    <span class="floating-nav-toggle-inner pill-id-floating-inner coffee-floating-inner"><svg aria-hidden="true" viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h12v7a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V8Z"/><path d="M16 9h2a3 3 0 1 1 0 6h-2M8 3v2M12 2v3M3 22h16"/></svg><span>커피</span></span>
+</button>
+<div id="coffeeSleepModal" class="modal health-modal" role="dialog" aria-modal="true" aria-labelledby="coffeeSleepTitle" hidden>
+    <div class="modal-content">
+        <button type="button" class="close-btn-top" onclick="closeHealthDialog('coffeeSleepModal')" aria-label="커피·수면 기록 닫기">&times;</button>
+        <h3 id="coffeeSleepTitle">☕ 커피와 지난밤 수면</h3>
+        <p class="health-muted">커피를 마신 시간과 양, 다음 날 아침의 수면 기록을 함께 살펴보세요.</p>
+        <div class="cs-tabs" role="tablist" aria-label="커피·수면 기록 화면">
+            <button type="button" id="csTabCoffee" class="cs-tab" role="tab" aria-selected="true" aria-controls="csCoffeePanel" onclick="csSwitchTab('coffee')">커피 기록</button>
+            <button type="button" id="csTabSleep" class="cs-tab" role="tab" aria-selected="false" aria-controls="csSleepPanel" tabindex="-1" onclick="csSwitchTab('sleep')">지난밤 수면</button>
+            <button type="button" id="csTabCompare" class="cs-tab" role="tab" aria-selected="false" aria-controls="csComparePanel" tabindex="-1" onclick="csSwitchTab('compare')">추이 비교</button>
+        </div>
+        <p id="csStatus" class="health-status" role="status" aria-live="polite"></p>
+        <section id="csCoffeePanel" role="tabpanel" aria-labelledby="csTabCoffee">
+            <form onsubmit="event.preventDefault(); csSaveCoffee()">
+                <fieldset id="csCoffeeFields">
+                    <label class="health-label" for="csTakenAt">마신 날짜와 시간</label>
+                    <input id="csTakenAt" type="datetime-local" required oninput="csCoffeeDateChanged()">
+                    <div class="cs-form-grid">
+                        <label class="health-label" for="csCoffeeType">종류<select id="csCoffeeType"><option value="americano">아메리카노 / 드립</option><option value="espresso">에스프레소</option><option value="latte">라테</option><option value="mix">믹스커피</option><option value="decaf">디카페인</option><option value="other">기타 커피</option></select></label>
+                        <label class="health-label" for="csCoffeeUnit">입력 단위<select id="csCoffeeUnit" onchange="csUpdateAmountPreview()"><option value="cups">잔</option><option value="ml">mL</option></select></label>
+                        <label class="health-label" for="csCoffeeAmount">마신 양<input id="csCoffeeAmount" type="number" min="0" max="100" step="0.25" value="1" required oninput="csUpdateAmountPreview()"></label>
+                        <label class="health-label" id="csCupMlLabel" for="csCupMl">한 잔의 용량 (mL)<input id="csCupMl" type="number" min="1" max="3000" step="1" value="240" required oninput="csUpdateAmountPreview()"></label>
+                    </div>
+                    <p id="csAmountPreview" class="cs-inline-value" aria-live="polite"></p>
+                    <p class="health-muted">한 잔의 용량은 실제 마신 컵에 맞춰 바꿔 주세요. 마시지 않은 날은 양을 0으로 기록하면 됩니다.</p>
+                    <label class="health-label" for="csCoffeeMemo">메모 (선택)</label><input id="csCoffeeMemo" type="text" maxlength="120" placeholder="예: 점심 후, 작은 컵">
+                    <div class="health-actions"><button type="submit" id="csCoffeeSave" class="health-btn primary wide">커피 기록 저장</button><button type="button" id="csCoffeeCancelEdit" class="health-btn" onclick="csResetCoffeeForm()" hidden>수정 취소</button></div>
+                </fieldset>
+            </form>
+            <h4>날짜별 커피 기록</h4>
+            <label class="health-label" for="csHistoryDate">조회 날짜</label><input type="date" id="csHistoryDate" required onchange="csRenderHistory()">
+            <p id="csHistorySummary" class="health-muted"></p><div id="csCoffeeHistory" class="cs-history"></div>
+        </section>
+        <section id="csSleepPanel" role="tabpanel" aria-labelledby="csTabSleep" hidden>
+            <form onsubmit="event.preventDefault(); csSaveSleep()">
+                <fieldset id="csSleepFields">
+                    <label class="health-label" for="csWakeDate">일어난 날짜 · 지난밤 수면</label><input id="csWakeDate" type="date" required onchange="csLoadSleepForm()">
+                    <p id="csSleepNightLabel" class="cs-inline-value"></p>
+                    <div class="cs-form-grid">
+                        <label class="health-label" for="csSleepHours">총 수면시간 · 시간<input id="csSleepHours" type="number" min="0" max="24" step="1" inputmode="numeric" placeholder="예: 7" required></label>
+                        <label class="health-label" for="csSleepMinutes">분<input id="csSleepMinutes" type="number" min="0" max="59" step="1" inputmode="numeric" value="0" required></label>
+                    </div>
+                    <label class="health-label" for="csSleepQuality">수면의 질<select id="csSleepQuality" required><option value="">선택해 주세요</option><option value="1">1 · 매우 나쁨</option><option value="2">2 · 나쁨</option><option value="3">3 · 보통</option><option value="4">4 · 좋음</option><option value="5">5 · 매우 좋음</option></select></label>
+                    <label class="health-label" for="csSleepMemo">메모 (선택)</label><input id="csSleepMemo" type="text" maxlength="120" placeholder="예: 밤중에 두 번 깸">
+                    <p class="health-muted">예전 날짜를 선택해 뒤늦게 입력하거나 수정할 수 있습니다. 잠을 못 잤다면 0시간 0분으로 기록하세요.</p>
+                    <div class="health-actions"><button type="submit" id="csSleepSave" class="health-btn primary wide">지난밤 수면 저장</button><button type="button" id="csSleepDelete" class="health-btn danger" onclick="csDeleteSleep()" hidden>수면 기록 삭제</button></div>
+                </fieldset>
+            </form>
+        </section>
+        <section id="csComparePanel" role="tabpanel" aria-labelledby="csTabCompare" hidden>
+            <div class="cs-form-grid">
+                <label class="health-label" for="csRangeDays">조회 기간<select id="csRangeDays" onchange="csRenderComparison()"><option value="7">최근 7일</option><option value="30" selected>최근 30일</option><option value="90">최근 90일</option></select></label>
+                <label class="health-label" for="csRangeEnd">마지막 커피 날짜<input id="csRangeEnd" type="date" required onchange="csRenderComparison()"></label>
+                <label class="health-label cs-full" for="csCompareMetric">커피 양과 함께 볼 항목<select id="csCompareMetric" onchange="csRenderComparison()"><option value="hours">그날 밤 수면시간 (시간)</option><option value="quality">그날 밤 수면의 질 (1~5점)</option></select></label>
+            </div>
+            <p id="csComparisonRange" class="health-muted"></p>
+            <p class="health-muted">커피를 마신 날 → 그날 밤부터 다음 날 아침까지의 수면을 연결합니다. 커피는 음료 용량(mL) 기준이며, 카페인 함량이 아닙니다. 기록하지 않은 날은 빈칸으로 남깁니다.</p>
+            <div id="csComparisonSummary" class="cs-summary"></div>
+            <div id="csChartWrap" class="cs-chart-wrap"><canvas id="csComparisonChart" role="img" aria-label="날짜별 커피 양과 그날 밤 수면 비교 그래프"></canvas></div>
+            <p id="csChartStatus" class="health-muted" role="status"></p>
+            <details><summary class="health-muted">날짜별 수치 모두 보기 · 기록 수정</summary><div class="cs-table-wrap"><table class="cs-table"><caption>커피 날짜 기준 비교</caption><thead><tr><th scope="col">커피 날짜</th><th scope="col">커피 (mL)</th><th scope="col">수면시간</th><th scope="col">수면의 질</th><th scope="col">기록</th></tr></thead><tbody id="csComparisonTable"></tbody></table></div></details>
+        </section>
+        <div class="health-actions"><button type="button" class="health-link" onclick="openHealthPrivacy('health')">건강기록 개인정보 처리 안내</button></div>
+    </div>
+</div>
 
 <button id="pillIdFloatingButton" class="pill-id-floating" type="button" aria-label="약식별: 알약 앞뒤 촬영" aria-haspopup="dialog">
   <span class="floating-nav-toggle-inner pill-id-floating-inner"><svg aria-hidden="true" viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m9 5 10 10M5 19a6 6 0 0 1 0-8l6-6a6 6 0 0 1 8 8l-6 6a6 6 0 0 1-8 0Z"/><path d="m7 12 3-3" stroke-linecap="round"/></svg><span>약식별</span></span>
@@ -3834,6 +3938,10 @@
         card.tabIndex = -1; card.focus({ preventScroll: true });
     }
     window.closeHealthDialog = function(id, force = false) {
+        if (id === 'coffeeSleepModal') {
+            if (cs.saving && !force) return;
+            cs.chart?.destroy(); cs.chart = null; cs.chartKey = '';
+        }
         if (id === 'diagnosisAbstinenceModal') {
             if (hr.abstinenceSaving && !force) return;
             hr.abstinenceTarget = null;
@@ -3895,9 +4003,9 @@
         const photo = scope === 'photos';
         return `<dl>
             <dt>처리 주체</dt><dd>Alcoholaway.com 운영자</dd>
-            <dt>수집·이용 목적</dt><dd>본인의 ${photo ? '처방전·약봉투 사진을 보관하고 날짜별로 조회·삭제' : '일상 건강기록을 보관하고 질환 진단일과 경과일을 조회·관리'}하기 위해 사용합니다.</dd>
+            <dt>수집·이용 목적</dt><dd>본인의 ${photo ? '처방전·약봉투 사진을 보관하고 날짜별로 조회·삭제' : '일상 건강·커피·수면 기록을 보관하고 섭취량·수면 추이와 질환 진단일·경과일을 조회·관리'}하기 위해 사용합니다.</dd>
             <dt>개인정보 항목</dt><dd>로그인 계정 식별자, 기록 날짜·시간, ${photo ? '직접 입력한 제목·메모와 사진에 남아 있는 성명 등 개인정보' : '직접 작성한 자유 기록'}, 동의 여부·시각·안내문 버전.</dd>
-            <dt>별도 동의를 받는 민감정보</dt><dd><strong>${photo ? '사진에 포함된 질환명, 처방약, 투약법, 진료·조제 내용 등 건강정보' : '컨디션, 스트레스, 질환명, 진단일, 자유 기록에 포함된 증상·진료 등 건강정보'}.</strong></dd>
+            <dt>별도 동의를 받는 민감정보</dt><dd><strong>${photo ? '사진에 포함된 질환명, 처방약, 투약법, 진료·조제 내용 등 건강정보' : '컨디션, 스트레스, 질환명, 진단일, 커피 섭취 시각·양, 수면시간·수면의 질, 자유 기록에 포함된 증상·진료 등 건강정보'}.</strong></dd>
             <dt>보유·이용 기간</dt><dd>직접 삭제하거나 이 기능의 동의를 철회할 때까지 보관합니다. 동의 철회 시 해당 기록 삭제를 함께 실행합니다. 삭제가 실패하면 화면에 알리고 재시도할 수 있습니다. 동의 이력은 해당 기능의 철회·삭제 완료 시 함께 삭제됩니다.</dd>
             <dt>저장·열람 방식</dt><dd>로그인한 계정에 연결하여 Google Firebase에 보관합니다. 이 기능에는 커뮤니티 공개·광고 활용·외부 분석 전송 기능이 없습니다. 사진은 저장 전에 확인하고 가릴 수 있습니다.</dd>
             <dt>동의를 거부할 권리</dt><dd>동의하지 않을 수 있습니다. 거부하면 이 ${photo ? '사진 기록' : '건강·진단 기록'} 기능의 신규 저장만 이용할 수 없으며 기존 금주 기능은 계속 이용할 수 있습니다.</dd>
@@ -3967,6 +4075,7 @@
         hr.recoveryTarget = null; hr.recoverySaving = false; hrEl('diagnosisRecoveryFields').disabled = false;
         hr.abstinenceTarget = null; hr.abstinenceSaving = false; hrEl('diagnosisAbstinenceFields').disabled = false;
         hr.loaded = { health: false, photos: false, consents: false };
+        csResetAccount();
         hrEl('healthDayEntries').replaceChildren(); hrEl('prescriptionGallery').replaceChildren();
         hrEl('healthEntryNote').value = ''; hrEl('healthDiagnosisInputs').replaceChildren();
         hrEl('healthPrivacyConsentState').textContent = ''; hrEl('healthEntryFields').disabled = false;
@@ -3993,6 +4102,7 @@
     }
     function hrRefreshHealthUI() {
         hrRenderDiagnoses(); if (hr.day) hrRenderDayEntries();
+        csRefresh();
         if (hrEl('calendarModal').style.display === 'flex') renderCalendar(currentCalDate.getFullYear(), currentCalDate.getMonth(), currentCalMode);
     }
     function hrRecoveryDetails(diagnosis) {
@@ -4469,7 +4579,7 @@
         if (!entries.length) { const empty = document.createElement('p'); empty.className = 'health-muted'; empty.textContent = hr.loaded.health ? '아직 기록이 없습니다. 첫 기록을 남겨보세요.' : '기록을 불러오는 중입니다…'; list.append(empty); return; }
         for (const entry of entries) {
             const card = document.createElement('article'); card.className = 'health-entry';
-            card.innerHTML = `<time datetime="${escapeHtml(entry.recordedLocal)}">${escapeHtml(entry.date)} ${escapeHtml(entry.time || '')}</time><div class="health-entry-note">${escapeHtml(entry.note)}</div>`;
+            card.innerHTML = `<time datetime="${escapeHtml(entry.recordedLocal)}">${escapeHtml(entry.date)} ${entry.recordType === 'sleep' ? '기상일 기준' : escapeHtml(entry.time || '')}</time><div class="health-entry-note">${escapeHtml(entry.note)}</div>`;
             const chips = document.createElement('div');
             const values = [];
             if (entry.condition !== null && entry.condition !== undefined) values.push(`컨디션 ${entry.condition}/10`);
@@ -4489,6 +4599,7 @@
     }
     window.editHealthEntry = function(id) {
         if (hr.busy) return; const entry = hr.entries.find(e => e.id === id); if (!entry) return;
+        if (csCoffeeValue(entry) || csSleepValue(entry)) { closeHealthDialog('healthDayModal'); openCoffeeSleep(entry.recordType,id); return; }
         hr.editingId = id; hr.editDiagnosisSignature = hrDiagnosisSignature(entry.diagnoses); hrEl('healthEntryNote').value = entry.note || ''; hrEl('healthEntryTime').value = entry.time || '12:00';
         for (const [id, key] of [['healthCondition', 'condition'], ['healthStress', 'stress']]) {
             const value = entry[key]; hrEl(id).dataset.touched = value != null ? 'true' : 'false'; hrEl(id).value = value ?? 5;
@@ -4507,6 +4618,286 @@
         catch (error) { if (hrSameUser(uid)) hrSetStatus('healthDayStatus', hrErrorMessage(error, '삭제'), true); }
         finally { if (hrSameUser(uid)) hr.busy = false; }
     };
+    // Coffee and sleep share the existing private health_entries lifecycle and consent.
+    const CS_TYPES = { americano: '아메리카노 / 드립', espresso: '에스프레소', latte: '라테', mix: '믹스커피', decaf: '디카페인', other: '기타 커피' };
+    const cs = { tab: 'coffee', saving: false, coffeeId: null, coffeeSignature: null, pendingCoffeeId: null, sleepId: null, sleepSignature: null, sleepReady: false, chart: null, chartKey: '' };
+    function csShiftDay(date, offset) {
+        if (!hrValidDate(date) || !Number.isInteger(offset)) return '';
+        const [y,m,d] = date.split('-').map(Number);
+        return dateToKey(new Date(y,m-1,d+offset,12));
+    }
+    function csNowLocal() { return toDateTimeLocalValue(new Date()).slice(0,16); }
+    function csRecordSignature(entry) {
+        if (!entry) return 'null';
+        const c = entry.coffee, s = entry.sleep;
+        return JSON.stringify([entry.recordType, entry.date, entry.time, entry.note,
+            c && [c.takenAtLocal,c.type,c.amount,c.unit,c.cupMl,c.totalMl,c.memo],
+            s && [s.wakeDate,s.nightDate,s.minutes,s.quality,s.memo]]);
+    }
+    function csCoffeeValue(entry) {
+        const c = entry?.coffee;
+        return entry?.recordType === 'coffee' && c && hrValidDate(entry.date) && Number.isFinite(c.totalMl) && c.totalMl >= 0 && c.totalMl <= 10000 ? c : null;
+    }
+    function csSleepValue(entry) {
+        const s = entry?.sleep;
+        return entry?.recordType === 'sleep' && s && hrValidDate(s.wakeDate) && Number.isInteger(s.minutes) && s.minutes >= 0 && s.minutes <= 1440 && Number.isInteger(s.quality) && s.quality >= 1 && s.quality <= 5 ? s : null;
+    }
+    function csTimeLabel(minutes) { return `${Math.floor(minutes/60)}시간 ${minutes%60}분`; }
+    function csUpdateDisabled() {
+        const disabled = cs.saving || !hrSameUser(hr.uid) || !hr.loaded.health || !!hr.errors.health;
+        hrEl('csCoffeeFields').disabled = disabled; hrEl('csSleepFields').disabled = disabled;
+        hrEl('csHistoryDate').disabled = cs.saving;
+        document.querySelectorAll('.cs-tab').forEach(button => { button.disabled = cs.saving; });
+    }
+    function csResetAccount() {
+        cs.chart?.destroy(); cs.chart = null; cs.chartKey = '';
+        cs.saving = false; cs.coffeeId = null; cs.coffeeSignature = null; cs.pendingCoffeeId = null;
+        cs.sleepId = null; cs.sleepSignature = null; cs.sleepReady = false;
+        for (const id of ['csCoffeeHistory','csComparisonTable','csComparisonSummary']) hrEl(id).replaceChildren();
+        for (const id of ['csHistorySummary','csAmountPreview','csSleepNightLabel','csChartStatus','csStatus']) hrEl(id).textContent = '';
+        for (const id of ['csTakenAt','csCoffeeMemo','csSleepHours','csSleepMemo','csWakeDate']) hrEl(id).value = '';
+        hrEl('csSleepQuality').value = ''; hrEl('csSleepMinutes').value = '0';
+        csUpdateDisabled();
+    }
+    window.openCoffeeSleep = function(tab = 'coffee', entryId = null) {
+        if (!hrSameUser(hr.uid)) return alert('로그인 후 커피·수면 기록을 이용해 주세요.');
+        if (hr.busy) return;
+        for (const id of ['csHistoryDate','csWakeDate','csRangeEnd']) hrEl(id).max = hrToday();
+        hrEl('csTakenAt').max = csNowLocal();
+        hrEl('csHistoryDate').value = hrToday(); hrEl('csWakeDate').value = hrToday(); hrEl('csRangeEnd').value = hrToday();
+        csResetCoffeeForm(); csLoadSleepForm(); hrSetStatus('csStatus');
+        hrOpen('coffeeSleepModal'); csSwitchTab(tab);
+        if (entryId) {
+            const entry = hr.entries.find(item => item.id === entryId);
+            if (csCoffeeValue(entry)) csEditCoffee(entryId);
+            else if (csSleepValue(entry)) { hrEl('csWakeDate').value = entry.sleep.wakeDate; csLoadSleepForm(); csSwitchTab('sleep'); }
+        }
+        csRefresh();
+    };
+    window.csSwitchTab = function(tab) {
+        if (cs.saving || !['coffee','sleep','compare'].includes(tab)) return;
+        cs.tab = tab;
+        for (const [key,suffix] of [['coffee','Coffee'],['sleep','Sleep'],['compare','Compare']]) {
+            const selected = key === tab, button = hrEl(`csTab${suffix}`);
+            button.setAttribute('aria-selected', String(selected)); button.tabIndex = selected ? 0 : -1;
+            hrEl(`cs${suffix}Panel`).hidden = !selected;
+        }
+        if (tab === 'compare') csRenderComparison();
+    };
+    document.querySelectorAll('.cs-tab').forEach((button,index) => button.addEventListener('keydown', event => {
+        const keys = ['coffee','sleep','compare']; let next;
+        if (event.key === 'ArrowRight') next = (index+1)%3;
+        else if (event.key === 'ArrowLeft') next = (index+2)%3;
+        else if (event.key === 'Home') next = 0;
+        else if (event.key === 'End') next = 2;
+        else return;
+        if (cs.saving) return; event.preventDefault(); csSwitchTab(keys[next]); document.querySelectorAll('.cs-tab')[next].focus();
+    }));
+    window.csResetCoffeeForm = function() {
+        if (cs.saving) return;
+        cs.coffeeId = null; cs.coffeeSignature = null; cs.pendingCoffeeId = null;
+        hrEl('csTakenAt').value = csNowLocal(); hrEl('csTakenAt').max = csNowLocal();
+        hrEl('csCoffeeType').value = 'americano'; hrEl('csCoffeeUnit').value = 'cups';
+        hrEl('csCoffeeAmount').value = '1'; hrEl('csCupMl').value = '240'; hrEl('csCoffeeMemo').value = '';
+        hrEl('csCoffeeSave').textContent = '커피 기록 저장'; hrEl('csCoffeeCancelEdit').hidden = true; csUpdateAmountPreview();
+    };
+    window.csUpdateAmountPreview = function() {
+        const cups = hrEl('csCoffeeUnit').value === 'cups';
+        hrEl('csCupMlLabel').hidden = !cups; hrEl('csCupMl').required = cups;
+        const input = hrEl('csCoffeeAmount'); input.max = cups ? '100' : '10000'; input.step = cups ? '0.25' : '1';
+        const amount = Number(input.value), size = Number(hrEl('csCupMl').value);
+        const total = amount * (cups ? size : 1);
+        hrEl('csAmountPreview').textContent = input.value !== '' && Number.isFinite(total) && total >= 0 && total <= 10000
+            ? total === 0 ? '커피를 마시지 않은 날로 기록합니다.' : `총 ${Math.round(total*100)/100} mL${cups ? ` · ${amount}잔 × ${size} mL` : ''}`
+            : '마신 양과 컵 용량을 확인해 주세요.';
+    };
+    window.csCoffeeDateChanged = function() {
+        const date = hrEl('csTakenAt').value.slice(0,10);
+        if (hrValidDate(date) && date <= hrToday()) { hrEl('csHistoryDate').value = date; csRenderHistory(); }
+    };
+    function csReadCoffeeForm() {
+        const takenAtLocal = hrEl('csTakenAt').value, date = takenAtLocal.slice(0,10), time = takenAtLocal.slice(11,16);
+        if (!hrValidDate(date) || !/^\d{4}-\d{2}-\d{2}T([01]\d|2[0-3]):[0-5]\d$/.test(takenAtLocal) || takenAtLocal > csNowLocal()) throw new Error('마신 날짜와 시간을 현재 또는 과거로 입력해 주세요.');
+        const unit = hrEl('csCoffeeUnit').value, amount = Number(hrEl('csCoffeeAmount').value), cupMl = unit === 'cups' ? Number(hrEl('csCupMl').value) : null;
+        if (!['cups','ml'].includes(unit) || hrEl('csCoffeeAmount').value === '' || !Number.isFinite(amount) || amount < 0 || (unit === 'cups' ? amount > 100 || !Number.isInteger(amount*4) : amount > 10000 || !Number.isInteger(amount))) throw new Error('커피 양은 잔 단위 0.25 간격 또는 mL 단위 정수로 입력해 주세요.');
+        if (unit === 'cups' && (!Number.isInteger(cupMl) || cupMl < 1 || cupMl > 3000)) throw new Error('한 잔의 용량은 1~3,000mL로 입력해 주세요.');
+        const totalMl = Math.round(amount*(unit === 'cups' ? cupMl : 1)*100)/100, type = hrEl('csCoffeeType').value, memo = hrEl('csCoffeeMemo').value.trim();
+        if (!CS_TYPES[type] || totalMl > 10000 || memo.length > 120) throw new Error('커피 종류, 양 또는 메모를 확인해 주세요.');
+        const coffee = {takenAtLocal,type,amount,unit,cupMl,totalMl,memo};
+        return {recordType:'coffee',date,time,recordedLocal:takenAtLocal,condition:null,stress:null,diagnoses:[],coffee,
+            note:totalMl === 0 ? `☕ 커피 마시지 않음${memo ? ` · ${memo}` : ''}` : `☕ ${CS_TYPES[type]} ${totalMl}mL · ${time}${memo ? ` · ${memo}` : ''}`};
+    }
+    window.csSaveCoffee = async function() {
+        if (hr.busy || cs.saving || !hrSameUser(hr.uid)) return;
+        let data; try { data = csReadCoffeeForm(); } catch (error) { return hrSetStatus('csStatus',error.message,true); }
+        const id = cs.coffeeId || cs.pendingCoffeeId || doc(collection(db,'users',hr.uid,'health_entries')).id;
+        if (!cs.coffeeId) cs.pendingCoffeeId = id;
+        if (await csWriteRecord(id,data,cs.coffeeId ? cs.coffeeSignature : 'null')) {
+            hrEl('csHistoryDate').value = data.date; csResetCoffeeForm(); csRenderHistory();
+            hrSetStatus('csStatus','커피 기록을 저장했습니다.');
+        }
+    };
+    window.csEditCoffee = function(id) {
+        if (hr.busy || cs.saving) return;
+        const entry = hr.entries.find(item => item.id === id), c = csCoffeeValue(entry); if (!c) return;
+        cs.coffeeId = id; cs.coffeeSignature = csRecordSignature(entry); cs.pendingCoffeeId = null;
+        hrEl('csTakenAt').value = c.takenAtLocal; hrEl('csCoffeeType').value = c.type;
+        hrEl('csCoffeeUnit').value = c.unit; hrEl('csCoffeeAmount').value = c.amount; hrEl('csCupMl').value = c.cupMl || 240;
+        hrEl('csCoffeeMemo').value = c.memo || ''; hrEl('csCoffeeSave').textContent = '커피 기록 수정 저장';
+        hrEl('csCoffeeCancelEdit').hidden = false; csUpdateAmountPreview(); csSwitchTab('coffee');
+        hrSetStatus('csStatus','커피 기록을 수정 중입니다.');
+    };
+    window.csLoadSleepForm = function() {
+        if (cs.saving) return;
+        const wakeDate = hrEl('csWakeDate').value;
+        cs.sleepId = hrValidDate(wakeDate) ? `sleep_${wakeDate}` : null;
+        const entry = hr.entries.find(item => item.id === cs.sleepId);
+        const sleep = csSleepValue(entry); cs.sleepSignature = csRecordSignature(entry); cs.sleepReady = hr.loaded.health;
+        hrEl('csSleepHours').value = sleep ? Math.floor(sleep.minutes/60) : '';
+        hrEl('csSleepMinutes').value = sleep ? sleep.minutes%60 : '0'; hrEl('csSleepQuality').value = sleep ? sleep.quality : '';
+        hrEl('csSleepMemo').value = sleep?.memo || ''; hrEl('csSleepDelete').hidden = !sleep;
+        hrEl('csSleepSave').textContent = sleep ? '지난밤 수면 수정 저장' : '지난밤 수면 저장';
+        hrEl('csSleepNightLabel').textContent = hrValidDate(wakeDate) ? `${csShiftDay(wakeDate,-1)} 밤 → ${wakeDate} 아침 · 전날 커피와 비교` : '일어난 날짜를 선택해 주세요.';
+    };
+    function csReadSleepForm() {
+        const wakeDate = hrEl('csWakeDate').value, hours = Number(hrEl('csSleepHours').value), minutePart = Number(hrEl('csSleepMinutes').value), quality = Number(hrEl('csSleepQuality').value), memo = hrEl('csSleepMemo').value.trim();
+        if (!hrValidDate(wakeDate) || wakeDate > hrToday()) throw new Error('일어난 날짜는 오늘 또는 과거 날짜로 입력해 주세요.');
+        if (hrEl('csSleepHours').value === '' || hrEl('csSleepMinutes').value === '' || !Number.isInteger(hours) || !Number.isInteger(minutePart) || hours < 0 || minutePart < 0 || minutePart > 59 || hours*60+minutePart > 1440) throw new Error('총 수면시간을 0~24시간 범위로 입력해 주세요.');
+        if (!Number.isInteger(quality) || quality < 1 || quality > 5 || memo.length > 120) throw new Error('수면의 질을 1~5점 중 선택하고 메모를 확인해 주세요.');
+        const minutes = hours*60+minutePart, nightDate = csShiftDay(wakeDate,-1);
+        return {recordType:'sleep',date:wakeDate,time:'00:00',recordedLocal:`${wakeDate}T00:00`,condition:null,stress:null,diagnoses:[],
+            sleep:{wakeDate,nightDate,minutes,quality,memo},note:`🌙 ${nightDate} 밤 수면 · ${csTimeLabel(minutes)} · 질 ${quality}/5${memo ? ` · ${memo}` : ''}`};
+    }
+    window.csSaveSleep = async function() {
+        if (hr.busy || cs.saving || !hrSameUser(hr.uid)) return;
+        let data; try { data = csReadSleepForm(); } catch (error) { return hrSetStatus('csStatus',error.message,true); }
+        const id = `sleep_${data.sleep.wakeDate}`;
+        if (id !== cs.sleepId) return hrSetStatus('csStatus','날짜를 다시 선택한 후 저장해 주세요.',true);
+        if (await csWriteRecord(id,data,cs.sleepSignature)) { csLoadSleepForm(); hrSetStatus('csStatus','지난밤 수면을 저장했습니다. 전날 커피와 연결해 비교합니다.'); }
+    };
+    async function csWriteRecord(id,data,expected,remove = false) {
+        const uid = hr.uid, generation = hr.generation;
+        if (hr.busy || cs.saving || !hrSameUser(uid)) return false;
+        if (!hr.loaded.health || hr.errors.health) { hrSetStatus('csStatus','건강기록을 불러온 뒤 다시 시도해 주세요.',true); return false; }
+        const same = () => hrSameUser(uid) && hr.generation === generation;
+        hr.busy = true; cs.saving = true; csUpdateDisabled();
+        try {
+            if (!remove && (!await hrRequireConsent('health') || !same())) return false;
+            hrSetStatus('csStatus',remove ? '기록을 삭제하고 있습니다…' : '기록을 저장하고 있습니다…');
+            const ref = doc(db,'users',uid,'health_entries',id);
+            const saved = await runTransaction(db,async transaction => {
+                const snap = await transaction.get(ref);
+                if (!same()) throw hrRecordConflict('계정이 변경되어 저장을 중단했습니다.');
+                const current = snap.exists() ? snap.data() : null;
+                if (csRecordSignature(current) !== expected) throw hrRecordConflict('다른 화면에서 기록이 변경되었거나 삭제되었습니다. 해당 기록을 다시 열어 확인해 주세요.');
+                if (remove) { transaction.delete(ref); return null; }
+                const payload = {...data,policyVersion:HR_POLICY_VERSION,updatedAt:serverTimestamp()};
+                if (current) transaction.update(ref,payload);
+                else { payload.createdAt=serverTimestamp(); payload.createdAtClient=new Date().toISOString(); transaction.set(ref,payload); }
+                return {...current,...payload,id};
+            });
+            if (!same()) return false;
+            hr.entries = hr.entries.filter(entry => entry.id !== id); if (saved) hr.entries.push(saved);
+            hrRefreshHealthUI(); return true;
+        } catch(error) {
+            if (same()) hrSetStatus('csStatus',error?.code === 'health/record-conflict' ? error.message : hrErrorMessage(error,remove ? '커피·수면 기록을 삭제' : '커피·수면 기록을 저장'),true);
+            return false;
+        } finally {
+            if (same()) { hr.busy=false; cs.saving=false; csUpdateDisabled(); csRefresh(); hrRenderDiagnoses(); }
+        }
+    }
+    window.csDeleteRecord = async function(id) {
+        if (hr.busy || cs.saving || !hrSameUser(hr.uid)) return;
+        const entry = hr.entries.find(item => item.id === id);
+        if ((!csCoffeeValue(entry) && !csSleepValue(entry)) || !confirm('선택한 커피·수면 기록을 삭제할까요?')) return;
+        if (await csWriteRecord(id,null,csRecordSignature(entry),true)) {
+            if (id === cs.coffeeId) csResetCoffeeForm(); if (id === cs.sleepId) csLoadSleepForm();
+            hrSetStatus('csStatus','기록을 삭제했습니다.');
+        }
+    };
+    window.csDeleteSleep = function() { if (cs.sleepId) csDeleteRecord(cs.sleepId); };
+    window.csRenderHistory = function() {
+        const date = hrEl('csHistoryDate').value, list = hrEl('csCoffeeHistory'); list.replaceChildren();
+        const entries = hr.entries.filter(entry => entry.date === date && csCoffeeValue(entry)).sort((a,b) => b.coffee.takenAtLocal.localeCompare(a.coffee.takenAtLocal) || a.id.localeCompare(b.id));
+        hrEl('csHistorySummary').textContent = entries.length ? `${date} · 총 ${entries.reduce((sum,e)=>sum+e.coffee.totalMl,0).toLocaleString()}mL · 섭취 ${entries.filter(e=>e.coffee.totalMl>0).length}회` : '아직 커피 기록이 없습니다. 미입력한 날은 0으로 계산하지 않습니다.';
+        for (const entry of entries) {
+            const c = entry.coffee, row = document.createElement('article'); row.className='cs-history-item';
+            row.innerHTML = `<div><strong>${escapeHtml(c.takenAtLocal.slice(11))} · ${c.totalMl === 0 ? '커피 마시지 않음' : `${escapeHtml(CS_TYPES[c.type] || '커피')} ${c.totalMl.toLocaleString()}mL`}</strong><small class="health-muted">${escapeHtml(c.memo || '')}</small></div>`;
+            const actions = document.createElement('div'); actions.className='health-actions';
+            for (const [label,action] of [['수정',()=>csEditCoffee(entry.id)],['삭제',()=>csDeleteRecord(entry.id)]]) {
+                const button=document.createElement('button'); button.type='button'; button.className='health-btn'; button.textContent=label;
+                button.disabled=cs.saving; button.setAttribute('aria-label',`${c.takenAtLocal} 커피 기록 ${label}`); button.addEventListener('click',action); actions.append(button);
+            }
+            row.append(actions); list.append(row);
+        }
+    };
+    function csBuildSeries(entries,endDate,days) {
+        if (!hrValidDate(endDate) || ![7,30,90].includes(days)) return [];
+        const coffees = new Map(), sleeps = new Map();
+        for (const entry of entries) {
+            const c=csCoffeeValue(entry), s=csSleepValue(entry);
+            if (c) { const previous=coffees.get(entry.date)||{ml:0,count:0,lastTime:''}; previous.ml+=c.totalMl; if(c.totalMl>0){previous.count++;previous.lastTime=previous.lastTime>entry.time?previous.lastTime:entry.time;} coffees.set(entry.date,previous); }
+            if (s) sleeps.set(s.wakeDate,s);
+        }
+        return Array.from({length:days},(_,index)=>{
+            const date=csShiftDay(endDate,index-days+1), wakeDate=csShiftDay(date,1), c=coffees.get(date), s=sleeps.get(wakeDate);
+            return {date,wakeDate,coffeeMl:c?c.ml:null,count:c?c.count:0,lastTime:c?.lastTime||'',sleepMinutes:s?s.minutes:null,sleepHours:s?Math.round(s.minutes/60*100)/100:null,quality:s?s.quality:null};
+        });
+    }
+    window.csOpenDayFromComparison = function(date,tab) {
+        if (cs.saving) return;
+        if (tab === 'sleep') { const wake=csShiftDay(date,1); if(wake>hrToday())return; hrEl('csWakeDate').value=wake; csLoadSleepForm(); }
+        else { csResetCoffeeForm(); hrEl('csTakenAt').value=date === hrToday()?csNowLocal():`${date}T12:00`; hrEl('csHistoryDate').value=date; csRenderHistory(); }
+        csSwitchTab(tab);
+    };
+    window.csRenderComparison = function() {
+        const end=hrEl('csRangeEnd').value, days=Number(hrEl('csRangeDays').value), metric=hrEl('csCompareMetric').value;
+        if (!hrValidDate(end) || end>hrToday() || ![7,30,90].includes(days)) { hrSetStatus('csChartStatus','조회 날짜를 오늘 또는 과거로 선택해 주세요.',true); return; }
+        const rows=csBuildSeries(hr.entries,end,days), table=hrEl('csComparisonTable'); table.replaceChildren();
+        hrEl('csComparisonRange').textContent=`${rows[0].date} ~ ${end} · ${days}일 · 수면은 다음 날 아침 기준`;
+        const coffeeRows=rows.filter(r=>r.coffeeMl!==null), sleepRows=rows.filter(r=>r.sleepMinutes!==null);
+        const averageMl=coffeeRows.length?Math.round(coffeeRows.reduce((s,r)=>s+r.coffeeMl,0)/coffeeRows.length).toLocaleString()+' mL':'—';
+        const averageSleep=sleepRows.length?csTimeLabel(Math.round(sleepRows.reduce((s,r)=>s+r.sleepMinutes,0)/sleepRows.length)):'—';
+        const averageQuality=sleepRows.length?(sleepRows.reduce((s,r)=>s+r.quality,0)/sleepRows.length).toFixed(1)+' / 5':'—';
+        hrEl('csComparisonSummary').innerHTML=`<div><strong>${averageMl}</strong><span>기록일 평균 커피 · ${coffeeRows.length}일</span></div><div><strong>${averageSleep}</strong><span>평균 수면 · ${sleepRows.length}일</span></div><div><strong>${averageQuality}</strong><span>평균 수면의 질</span></div>`;
+        for (const row of [...rows].reverse()) {
+            const tr=document.createElement('tr');
+            tr.innerHTML=`<td>${row.date}<small>기상 ${row.wakeDate}</small></td><td>${row.coffeeMl===null?'미입력':row.coffeeMl.toLocaleString()}</td><td>${row.sleepMinutes===null?'미입력':csTimeLabel(row.sleepMinutes)}</td><td>${row.quality===null?'—':`${row.quality}/5`}</td>`;
+            const actions=document.createElement('td');
+            for (const [label,tab] of [['커피','coffee'],['수면','sleep']]) {
+                const button=document.createElement('button'); button.type='button'; button.className='health-link'; button.textContent=label;
+                button.setAttribute('aria-label',`${tab==='sleep'?row.wakeDate:row.date} ${label} 기록`); button.disabled=cs.saving || (tab==='sleep' && row.wakeDate>hrToday());
+                button.addEventListener('click',()=>csOpenDayFromComparison(row.date,tab)); actions.append(button,document.createTextNode(' '));
+            }
+            tr.append(actions); table.append(tr);
+        }
+        const chartKey=JSON.stringify([metric,rows]);
+        if (cs.chart && cs.chartKey===chartKey) return;
+        cs.chart?.destroy(); cs.chart=null; cs.chartKey='';
+        hrSetStatus('csChartStatus',!coffeeRows.length&&!sleepRows.length?'표시할 기록이 없습니다. 커피와 수면을 먼저 입력해 주세요.':'빈칸은 미입력, 0mL는 커피를 마시지 않았다고 기록한 날입니다.');
+        if (typeof Chart !== 'function') { hrEl('csChartWrap').hidden=true; hrSetStatus('csChartStatus','그래프를 불러오지 못했습니다. 아래 날짜별 수치에서 비교할 수 있습니다.',true); return; }
+        hrEl('csChartWrap').hidden=false;
+        const quality=metric==='quality', sleepLabel=quality?'그날 밤 수면의 질 (점)':'그날 밤 수면시간 (시간)';
+        try {
+            cs.chart=new Chart(hrEl('csComparisonChart').getContext('2d'),{
+                type:'bar',data:{labels:rows.map(r=>r.date.slice(5)),datasets:[
+                    {type:'bar',label:'커피 양 (mL)',data:rows.map(r=>r.coffeeMl),yAxisID:'coffee',backgroundColor:'#bd895b',borderRadius:4,order:2},
+                    {type:'line',label:sleepLabel,data:rows.map(r=>quality?r.quality:r.sleepHours),yAxisID:'sleep',borderColor:'#4f46e5',backgroundColor:'#4f46e5',pointRadius:3,tension:.2,spanGaps:false,order:1}
+                ]},options:{responsive:true,maintainAspectRatio:false,animation:false,interaction:{mode:'index',intersect:false},
+                    scales:{coffee:{type:'linear',position:'left',beginAtZero:true,title:{display:true,text:'커피 (mL)'}},sleep:{type:'linear',position:'right',beginAtZero:true,...(quality?{max:5,ticks:{stepSize:1}}:{suggestedMax:10}),grid:{drawOnChartArea:false},title:{display:true,text:quality?'수면의 질 (1~5)':'수면 (시간)'}},x:{ticks:{maxTicksLimit:10}}},
+                    plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:11}}},tooltip:{callbacks:{title:items=>{const r=rows[items[0]?.dataIndex];return r?`${r.date} 커피 / ${r.wakeDate} 기상`:'';},label:context=>{const r=rows[context.dataIndex];return context.datasetIndex===0?`커피 ${r.coffeeMl}mL${r.lastTime?` · 마지막 ${r.lastTime}`:''}`:quality?`수면의 질 ${r.quality}/5`:`수면 ${csTimeLabel(r.sleepMinutes)}`;}}}}}
+            }); cs.chartKey=chartKey;
+        } catch(error) { cs.chart?.destroy(); cs.chart=null; hrEl('csChartWrap').hidden=true; hrSetStatus('csChartStatus','그래프 표시 중 오류가 발생했습니다. 아래 날짜별 수치를 확인해 주세요.',true); }
+    };
+    function csRefresh() {
+        if (hrEl('coffeeSleepModal').hidden) return;
+        csUpdateDisabled();
+        if (!hrSameUser(hr.uid)) return;
+        if (hr.errors.health) { cs.chart?.destroy();cs.chart=null;cs.chartKey='';hrEl('csChartWrap').hidden=true;hrEl('csCoffeeHistory').replaceChildren();hrEl('csComparisonTable').replaceChildren();hrEl('csComparisonSummary').replaceChildren();hrSetStatus('csStatus',hr.errors.health,true);return; }
+        if (!hr.loaded.health) { hrSetStatus('csStatus','커피·수면 기록을 불러오고 있습니다…'); return; }
+        if (!cs.sleepReady) { csLoadSleepForm(); hrSetStatus('csStatus'); }
+        csRenderHistory(); if (cs.tab==='compare') csRenderComparison();
+    }
     window.openLegacyDayRecords = function() { if (hr.busy) return; const date = hr.day; closeHealthDialog('healthDayModal'); if (date) openCalendarDayDetailModal(date); };
     document.addEventListener('visibilitychange', () => { if (!document.hidden) hrRenderDiagnoses(); else hrStopCamera(); });
     window.addEventListener('pagehide', () => { hrStopCamera(); hrReleasePhotoUrls(); });
