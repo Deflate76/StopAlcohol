@@ -10,7 +10,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>금주도전/건강기록</title>
-    <meta name="app-build" content="records-calendar-v15-medication-reminders">
+    <meta name="app-build" content="records-calendar-v16-reminder-time-defaults">
     
     <meta name="description" content="금주 도전부터 건강 상태, 진단과 처방전까지. 나의 건강을 하루씩 기록하는 금주도전/건강기록." />
     <meta name="theme-color" content="#ffffff" />
@@ -960,6 +960,13 @@
 .community-floating .community-floating-inner { background:linear-gradient(145deg,#fffdf7,#fff1cf)!important; color:#9a5e09!important; }
 .medication-reminder-card { border-color:#c4ddd8; background:linear-gradient(135deg,#f3fbf8,#fff); text-align:left; }
 .medication-reminder-card h3 { color:#115e59; }
+.medication-reminder-card > .mr-card-summary { display:flex; align-items:center; justify-content:space-between; gap:12px; list-style:none; cursor:pointer; user-select:none; }
+.medication-reminder-card > .mr-card-summary::-webkit-details-marker { display:none; }
+.medication-reminder-card > .mr-card-summary h3 { margin:0; font-size:1rem; }
+.medication-reminder-card > .mr-card-summary::after { content:'＋'; flex:0 0 auto; color:#0f766e; font-size:1.3rem; font-weight:800; line-height:1; }
+.medication-reminder-card[open] > .mr-card-summary { margin-bottom:13px; padding-bottom:12px; border-bottom:1px dashed #c4ddd8; }
+.medication-reminder-card[open] > .mr-card-summary::after { content:'－'; }
+.medication-reminder-card > .mr-card-summary:focus-visible { outline:2px solid #0f766e; outline-offset:5px; border-radius:4px; }
 .medication-reminder-card fieldset { border:0; padding:0; margin:0; min-width:0; }
 .medication-reminder-card [hidden] { display:none!important; }
 .mr-grid,.mr-times { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px 10px; margin:12px 0; }
@@ -1250,9 +1257,9 @@
             <p>일반의약품의 사용 방법과 주의사항에 관한 안내를 확인하세요.</p>
             <a class="info-resource-link secondary" href="https://nedrug.mfds.go.kr/cntnts/35" target="_blank" rel="noopener noreferrer">사용정보 열기 <span aria-hidden="true">↗</span><span class="app-sr-only"> (새 창)</span></a>
         </article>
-        <article class="info-resource-card medication-reminder-card" id="medicationReminderCard" aria-labelledby="medicationReminderTitle">
+        <details class="info-resource-card medication-reminder-card" id="medicationReminderCard" aria-labelledby="medicationReminderTitle">
+            <summary class="mr-card-summary"><h3 id="medicationReminderTitle">🔔 의약품 복약알람</h3></summary>
             <span class="info-source-label">반복 일정 · 휴대폰 달력으로 가져오기</span>
-            <h3 id="medicationReminderTitle">🔔 의약품 복약알람</h3>
             <p>처방전·약봉투에 적힌 복용법에 맞춰 입력해 주세요. 한국 시간(Asia/Seoul)을 기준으로 매일 반복합니다.</p>
             <form id="medicationReminderForm">
                 <fieldset id="mrFields" disabled>
@@ -1263,7 +1270,8 @@
                         <label class="mr-label" for="mrMeal">식사 기준<select id="mrMeal" required><option value="">선택하세요</option><option value="before">식전</option><option value="after">식후</option><option value="any">식사와 무관</option><option value="bedtime">취침 전</option></select></label>
                         <label class="mr-label mr-wide" for="mrMealMinutes" id="mrMealMinutesLabel" hidden><span>식사 전·후 간격 <small>(분, 선택)</small></span><input id="mrMealMinutes" type="number" min="0" max="180" step="1" inputmode="numeric" placeholder="예: 약봉투에 30분이라고 적혀 있으면 30" disabled></label>
                     </div>
-                    <small class="mr-help" id="mrFrequencyHelp">하루 1~12회 · 횟수만큼 실제 복약 시각을 입력하세요.</small>
+                    <small class="mr-help" id="mrFrequencyHelp">하루 1~12회 · 횟수를 바꾸면 시각이 기본값으로 다시 설정됩니다. 각 시간은 직접 수정할 수 있습니다.</small>
+                    <p class="mr-help" id="mrDefaultTimeNote">자동 입력은 생활시간 기준 예시입니다. 처방전·약봉투에 정해진 복약 시각과 간격을 우선하세요.</p>
                     <div class="mr-times" id="mrTimes"></div>
                     <p class="mr-help">식전·식후는 일정에 메모됩니다. 알람은 아래 기간에 입력한 복약 시각을 기준으로 울립니다.</p>
                     <div class="mr-grid">
@@ -1283,7 +1291,7 @@
                 <p>파일 전달만으로 달력 등록이 완료되지는 않습니다. 앱에 따라 알림을 다시 설정해야 할 수 있습니다. .ics를 열지 못하면 <a href="https://support.google.com/calendar/answer/37118?hl=ko" target="_blank" rel="noopener noreferrer">컴퓨터의 Google Calendar에서 가져오기</a>를 이용하세요.</p>
                 <p>달력에 가져온 일정은 이 화면에서 수정·삭제해도 자동으로 바뀌지 않습니다. 기존 반복 일정을 달력에서 지운 후 다시 가져오면 중복을 피할 수 있습니다.</p>
             </details>
-        </article>
+        </details>
 
         <p class="info-tab-footnote">조회 버튼은 공식 사이트를 새 창으로 엽니다.</p>
     </section>
@@ -2437,16 +2445,36 @@
             return { time,index,first,count:Math.floor((end-first)/DAY)+1 };
         }).filter(slot => slot.count > 0);
     }
+    // 편집 편의를 위한 생활시간 예시이며 약별 권장 복용법이나 6/8시간 간격 처방을 대신하지 않습니다.
+    const MR_DEFAULT_TIMES = Object.freeze({
+        1: Object.freeze(['08:00']),
+        2: Object.freeze(['08:00', '20:00']),
+        3: Object.freeze(['08:00', '15:00', '22:00']),
+        4: Object.freeze(['07:00', '12:00', '17:00', '22:00'])
+    });
+    function defaultReminderTimes(count) {
+        if (MR_DEFAULT_TIMES[count]) return [...MR_DEFAULT_TIMES[count]];
+        // 5~12회는 07~22시 사이를 5분 단위로 균등 배치한 예시입니다.
+        return Array.from({length:count}, (_, index) => {
+            const minutes = 7 * 60 + Math.round((15 * 60 * index / (count - 1)) / 5) * 5;
+            return `${String(Math.floor(minutes / 60)).padStart(2,'0')}:${String(minutes % 60).padStart(2,'0')}`;
+        });
+    }
     function renderTimes(values = null) {
         const count = Number($('mrFrequency').value);
         if (!Number.isInteger(count) || count < 1 || count > 12) return;
-        const old = values || Array.from($('mrTimes').querySelectorAll('input'), input => input.value);
-        $('mrTimes').replaceChildren();
+        const container = $('mrTimes');
+        // 같은 횟수에 다시 발생한 입력 이벤트로 수동 편집 중인 시간을 덮어쓰지 않습니다.
+        if (values === null && container.dataset.count === String(count)) return;
+        const defaults = defaultReminderTimes(count);
+        container.replaceChildren(); container.dataset.count = String(count);
         for (let i=0;i<count;i++) {
             const label = node('label',`${i+1}회차 복약 시각`,'mr-label'); label.htmlFor = `mrTime${i}`;
-            const input = document.createElement('input'); input.type='time'; input.id=`mrTime${i}`; input.required=true; input.step='60'; input.value=old[i] || '';
-            label.append(input); $('mrTimes').append(label);
+            const input = document.createElement('input'); input.type='time'; input.id=`mrTime${i}`; input.required=true; input.step='60'; input.value=values?.[i] ?? defaults[i];
+            input.setAttribute('aria-describedby','mrDefaultTimeNote');
+            label.append(input); container.append(label);
         }
+        $('mrDefaultTimeNote').textContent = (count >= 5 ? '5회 이상 기본값은 07~22시 사이에 고르게 배치한 편집용 예시입니다. ' : '자동 입력은 생활시간 기준 예시입니다. ') + '처방전·약봉투에 정해진 복약 시각과 간격을 우선하세요.';
     }
     function updateMeal() {
         const enabled = ['before','after'].includes($('mrMeal').value);
