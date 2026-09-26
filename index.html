@@ -10,7 +10,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>금주도전/건강기록</title>
-    <meta name="app-build" content="records-calendar-v20-prescription-ai-request-fix">
+    <meta name="app-build" content="records-calendar-v21-floating-ai-chat">
     
     <meta name="description" content="금주 도전부터 건강 상태, 진단과 처방전까지. 나의 건강을 하루씩 기록하는 금주도전/건강기록." />
     <meta name="theme-color" content="#ffffff" />
@@ -998,28 +998,46 @@
 
 </style>
 <style>
-/* AI assistant: visible in Medicines, with an entry button on the main screen. */
-#firebaseAiTestCard [hidden] { display:none!important; }
-#firebaseAiTestCard { text-align:left; scroll-margin-top:20px; border-color:#c4ddd8; background:linear-gradient(135deg,#f0faf6,#fff); }
-.ai-assistant-entry { display:flex; align-items:center; justify-content:space-between; gap:10px; width:100%; margin:0 0 16px; padding:12px 15px; border:1px solid #b9ddd4; border-radius:13px; background:#f0faf6; color:#115e59; font:inherit; text-align:left; cursor:pointer; box-sizing:border-box; }
-.ai-assistant-entry strong { display:block; font-size:.9rem; }
-.ai-assistant-entry small { display:block; margin-top:3px; font-size:.74rem; color:#53766c; line-height:1.5; }
-.ai-assistant-entry:focus-visible { outline:2px solid #0f766e; outline-offset:3px; }
+/* Floating assistant and accessible question/answer dialog. */
+html.ai-assistant-open { overflow:hidden; }
+.ai-assistant-floating { bottom:calc(310px + env(safe-area-inset-bottom,0px)); background:linear-gradient(145deg,#7e91d8,#5554a0); box-shadow:0 5px 18px #5554a033; }
+.ai-assistant-floating .ai-assistant-floating-inner { background:linear-gradient(145deg,#fff,#f1efff)!important; color:#5554a0!important; }
+.ai-assistant-dialog { width:min(570px,calc(100vw - 28px)); max-height:calc(100vh - 28px); max-height:calc(100dvh - 28px); box-sizing:border-box; padding:0; border:1px solid #d6e2e1; border-radius:22px; color:#334155; background:#fff; box-shadow:0 24px 80px #132b3745; overflow:hidden; }
+.ai-assistant-dialog:not([open]) { display:none; }
+.ai-assistant-dialog[open] { display:flex; flex-direction:column; }
+.ai-assistant-dialog::backdrop { background:#142d3a88; }
+.ai-assistant-dialog [hidden] { display:none!important; }
+.ai-assistant-heading { display:flex; justify-content:space-between; align-items:center; gap:12px; flex:0 0 auto; padding:17px 20px; border-bottom:1px solid #e5eeeb; background:#f4f8f7; }
+.ai-assistant-heading h2 { color:#285c58; font-size:1.1rem; margin:0; }
+.ai-assistant-heading p { color:#71817e; font-size:.75rem; margin:4px 0 0; }
+.ai-assistant-close { width:36px; height:36px; flex:0 0 36px; border:0; border-radius:50%; background:#e6efec; color:#345954; font-size:25px; cursor:pointer; }
+#firebaseAiTestCard { padding:18px 20px; min-height:0; overflow-y:auto; overscroll-behavior:contain; text-align:left; }
+.ai-chat-welcome { margin:0 0 14px; font-size:.86rem; line-height:1.8; color:#536865; }
+.ai-chat-log { display:flex; flex-direction:column; gap:12px; max-height:38dvh; min-height:90px; overflow-y:auto; overscroll-behavior:contain; padding:2px 2px 12px; margin-bottom:14px; }
+.ai-chat-message { max-width:94%; padding:11px 13px; border:1px solid #e1e9e6; border-radius:13px; background:#f5f8f7; overflow-wrap:anywhere; }
+.ai-chat-message strong { display:block; font-size:.71rem; color:#607772; margin-bottom:5px; }
+.ai-chat-message p { white-space:pre-wrap; font-size:.86rem; line-height:1.85; margin:0; }
+.ai-chat-user { align-self:flex-end; background:#eff0fc; border-color:#e0e1f1; }
+.ai-chat-assistant { align-self:flex-start; }
+.ai-chat-pending { opacity:.65; }
+.ai-chat-suggestions { display:flex; flex-wrap:wrap; gap:6px; margin:8px 0 13px; }
+.ai-chat-suggestions button { padding:7px 10px; border:1px solid #d5e1dc; border-radius:18px; background:white; color:#41665e; font-family:inherit; font-size:.74rem; cursor:pointer; }
+.ai-chat-suggestions button:disabled { opacity:.5; cursor:wait; }
+#aiQuestion { min-height:88px; max-height:180px; resize:vertical; line-height:1.6; }
+.ai-chat-input-meta { display:flex; justify-content:space-between; gap:10px; color:#7a8986; font-size:.69rem; margin-top:5px; }
+.ai-chat-actions { display:flex; gap:8px; flex-wrap:wrap; margin:10px 0; }
+.ai-chat-actions .mr-primary { flex:1; }
 .ai-test-fields { display:grid; gap:12px; margin:14px 0; }
-.ai-helper-topics { display:grid; gap:7px; margin:14px 0; padding:0; border:0; min-width:0; }
-.ai-helper-topics legend { margin-bottom:8px; font-size:.83rem; font-weight:800; color:#334155; }
-.ai-helper-topics label { display:flex; align-items:center; gap:9px; padding:11px; border:1px solid #cbded8; border-radius:10px; background:#fff; cursor:pointer; font-size:.84rem; color:#334155; }
-.ai-helper-topics label:has(input:checked) { border-color:#0f766e; background:#eaf7f1; color:#115e59; font-weight:800; }
-.ai-helper-topics input { flex:0 0 auto; margin:0; width:17px; height:17px; accent-color:#0f766e; }
-.ai-helper-topics label:focus-within { outline:2px solid #0f766e; outline-offset:2px; }
-#firebaseAiTestCard .ai-test-status { margin:12px 0 0; white-space:pre-wrap; overflow-wrap:anywhere; word-break:normal; }
-#firebaseAiTestCard .ai-test-result { margin:12px 0 0; padding:14px; border:1px solid #cbded8; border-radius:10px; background:#fff; white-space:pre-wrap; overflow-wrap:anywhere; font:inherit; font-size:.88rem; line-height:1.9; }
+#firebaseAiTestCard .ai-test-status { margin:10px 0; color:#527368; font-size:.78rem; line-height:1.6; white-space:pre-wrap; overflow-wrap:anywhere; }
 #firebaseAiTestCard[data-state=error] .ai-test-status { color:#b91c1c; }
-#firebaseAiTestCard[data-state=success] .ai-test-status { color:#166534; }
 .ai-helper-details { margin-top:12px; color:#64748b; font-size:.75rem; line-height:1.7; overflow-wrap:anywhere; }
 .ai-helper-details summary { cursor:pointer; }
 .ai-helper-details pre { white-space:pre-wrap; font:inherit; }
-@media(max-width:480px) { #firebaseAiTestCard { padding-right:40px; } }
+.ai-assistant-dialog button:focus-visible { outline:2px solid #586aae; outline-offset:3px; }
+.ai-chat-footer { border-top:1px dashed #dce5e1; padding-top:10px; margin-top:12px; }
+.ai-chat-footer button { border:0; background:none; color:#32776b; font:inherit; font-size:.75rem; padding:4px 0; cursor:pointer; }
+@media(max-width:480px) { .ai-assistant-floating { bottom:calc(284px + env(safe-area-inset-bottom,0px)); } .ai-assistant-dialog { width:calc(100vw - 20px); max-height:calc(100dvh - 20px); border-radius:18px; } .ai-assistant-heading { padding:15px 16px; } #firebaseAiTestCard { padding:15px 16px; } }
+@media(max-height:420px) { .pill-id-floating { width:44px; height:44px; } #pillIdFloatingButton { bottom:90px; } #coffeeFloatingButton { bottom:142px; } #communityFloatingButton { bottom:194px; } #aiAssistantFloatingButton { bottom:246px; } }
 </style>
 <style>
 .prescription-card .prescription-ai-btn { display:block; width:100%; margin:8px 0; padding:9px 6px; border-color:#0f766e; background:#0f766e; color:white; line-height:1.5; font-size:.74rem; }
@@ -1068,9 +1086,6 @@
         <button type="button" id="appTabMedicines" class="app-tab-button" role="tab" aria-selected="false" aria-controls="appPanelMedicines" tabindex="-1" data-app-tab="medicines">의약품 정보</button>
         <button type="button" id="appTabSupplements" class="app-tab-button" role="tab" aria-selected="false" aria-controls="appPanelSupplements" tabindex="-1" data-app-tab="supplements">건강기능식품 정보</button>
     </div>
-    <button type="button" id="aiAssistantOpen" class="ai-assistant-entry" aria-controls="firebaseAiTestCard">
-        <span><strong>AI 도우미</strong><small>금주 응원 · 술 권유 거절 문구 · 복약 알람 준비</small></span><span aria-hidden="true">→</span>
-    </button>
     <section id="appPanelRecords" class="app-tab-panel" role="tabpanel" aria-labelledby="appTabRecords" tabindex="0">
     <button id="enablePushBtn" class="stat-btn" style="display:none; margin-bottom: 18px; border-color: var(--primary-color); color: var(--primary-color);">🔔 푸시 알림 허용</button>
     <div id="pushTestLinkRow" class="push-test-link-row">
@@ -1307,47 +1322,6 @@
     </section>
     <section id="appPanelMedicines" class="app-tab-panel info-tab-panel" role="tabpanel" aria-labelledby="appTabMedicines" tabindex="0" hidden>
         <div class="info-tab-heading"><span class="info-tab-icon" aria-hidden="true">💊</span><h2>의약품 정보</h2><p>약에 대해 궁금할 때, 공식 정보를 확인해 보세요.</p></div>
-        <article id="firebaseAiTestCard" class="info-resource-card" aria-labelledby="firebaseAiTestTitle" data-state="loading">
-            <span class="info-source-label">Gemini AI</span>
-            <h3 id="firebaseAiTestTitle" tabindex="-1">AI 도우미</h3>
-            <p>도움받을 주제를 선택하고 <strong>AI 답변 받기</strong>를 누르세요. Gemini가 새로운 답변을 작성합니다.</p>
-            <form id="firebaseAiTestForm">
-                <fieldset id="aiHelperTopics" class="ai-helper-topics">
-                    <legend>어떤 도움이 필요한가요?</legend>
-                    <label><input type="radio" name="aiHelperTopic" value="encourage" checked>오늘의 금주 응원</label>
-                    <label><input type="radio" name="aiHelperTopic" value="refusal">술 권유 거절 문구</label>
-                    <label><input type="radio" name="aiHelperTopic" value="reminder">복약 알람 준비 체크리스트</label>
-                </fieldset>
-                <p class="mr-help">선택한 주제만 AI에 전송합니다. 내 건강 기록이나 사진은 사용하지 않습니다.</p>
-                <div class="mr-actions">
-                    <button id="aiTestRun" class="mr-btn mr-primary" type="submit" disabled>AI 답변 받기</button>
-                    <button id="aiTestLogin" class="mr-btn" type="button">Google 로그인하고 이용하기</button>
-                </div>
-                <details id="aiTestSettings" class="ai-helper-details" hidden>
-                    <summary>개발자 연결 설정</summary>
-                    <div class="ai-test-fields">
-                        <label class="mr-label" for="aiTestProvider">API 제공업체
-                            <select id="aiTestProvider"><option value="google">Gemini Developer API</option><option value="agent">Agent Platform (구 Vertex AI)</option></select>
-                        </label>
-                        <label class="mr-label" for="aiTestModel">모델 ID
-                            <input id="aiTestModel" type="text" value="gemini-3.8-flash" required maxlength="120" pattern="[A-Za-z0-9][A-Za-z0-9._-]*" autocomplete="off" spellcheck="false">
-                        </label>
-                        <label id="aiTestLocationField" class="mr-label" for="aiTestLocation" hidden>모델 위치
-                            <input id="aiTestLocation" type="text" value="global" required maxlength="60" pattern="[a-z0-9]+(-[a-z0-9]+)*" autocomplete="off" spellcheck="false" disabled>
-                        </label>
-                    </div>
-                    <p class="mr-help">Firebase 콘솔에서 활성화한 제공업체와 사용 가능한 모델을 설정하세요. 이 화면의 변경은 현재 페이지에만 적용됩니다.</p>
-                </details>
-            </form>
-            <p id="aiTestStatus" class="ai-test-status" role="status" aria-live="polite">AI 기능을 준비하고 있습니다…</p>
-            <section id="aiHelperAnswer" aria-labelledby="aiHelperAnswerTitle" hidden>
-                <h4 id="aiHelperAnswerTitle">AI 답변</h4>
-                <div id="aiTestResult" class="ai-test-result"></div>
-                <p class="mr-help">AI가 작성한 일반적인 안내입니다. 약 복용 방법은 처방전·약봉투와 의사·약사의 안내를 확인하세요.</p>
-                <button id="aiOpenReminder" class="mr-btn" type="button" hidden>복약 알람 만들기</button>
-            </section>
-            <details id="aiHelperError" class="ai-helper-details" hidden><summary>오류 상세 보기</summary><pre id="aiHelperErrorText"></pre></details>
-        </article>
         <article class="info-resource-card"><span class="info-source-label">알약 앞·뒷면 촬영</span><h3>사진으로 약식별</h3><p>문자·색상·모양·분할선을 비교해 가까운 후보 10개를 찾아보세요.</p><button type="button" id="pillIdMedicineButton" class="pi-primary">💊 약식별 시작</button></article>
         <article class="info-resource-card">
             <span class="info-source-label">식품의약품안전처 · 의약품안전나라</span>
@@ -2381,12 +2355,7 @@
         if (focusTab) selected.focus({ preventScroll: true });
         document.dispatchEvent(new CustomEvent('app:tabchange', { detail: { tab: tabName } }));
     };
-    document.getElementById('aiAssistantOpen').addEventListener('click', () => {
-        window.switchAppTab('medicines');
-        const heading = document.getElementById('firebaseAiTestTitle');
-        heading.focus({ preventScroll:true });
-        document.getElementById('firebaseAiTestCard').scrollIntoView({ behavior:'smooth', block:'start' });
-    });
+
     window.aiHelperStartupTimer = setTimeout(() => {
         const card = document.getElementById('firebaseAiTestCard');
         if (card.dataset.aiReady === 'true') return;
@@ -2407,6 +2376,75 @@
             event.preventDefault();
             switchAppTab(buttons[next].dataset.appTab, true);
         });
+    });
+})();
+</script>
+
+<button id="aiAssistantFloatingButton" class="pill-id-floating ai-assistant-floating" type="button" aria-label="AI 도우미에게 질문하기" aria-haspopup="dialog" aria-controls="aiAssistantModal" aria-expanded="false">
+    <span class="floating-nav-toggle-inner pill-id-floating-inner ai-assistant-floating-inner"><svg aria-hidden="true" viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v5a3 3 0 0 1-3 3H8l-5 2 1-5V7a3 3 0 0 1 3-3h6"/><path d="m18 2 1.1 3.9L23 7l-3.9 1.1L18 12l-1.1-3.9L13 7l3.9-1.1L18 2ZM8 11h3M8 15h7"/></svg><span>도우미</span></span>
+</button>
+<dialog id="aiAssistantModal" class="ai-assistant-dialog" aria-labelledby="firebaseAiTestTitle" aria-describedby="aiAssistantDescription">
+    <header class="ai-assistant-heading"><div><h2 id="firebaseAiTestTitle" tabindex="-1">AI 도우미</h2><p id="aiAssistantDescription">궁금한 내용을 편하게 물어보세요</p></div><button id="aiAssistantClose" class="ai-assistant-close" type="button" aria-label="AI 도우미 닫기">×</button></header>
+    <div id="firebaseAiTestCard" data-state="loading">
+        <p id="aiChatWelcome" class="ai-chat-welcome">금주를 이어가는 방법부터 일상 속 궁금한 점까지,<br>도우미와 이야기해 보세요.</p>
+        <div id="aiConversation" class="ai-chat-log" role="log" aria-label="도우미와 나눈 대화" aria-live="polite" hidden></div>
+        <form id="firebaseAiTestForm">
+            <div class="ai-chat-suggestions" aria-label="질문 예시">
+                <button type="button" data-ai-question="오늘 금주를 이어갈 수 있도록 짧게 응원해 주세요.">금주 응원</button>
+                <button type="button" data-ai-question="술을 권하는 자리에서 자연스럽게 거절할 말을 알려주세요.">술 권유 거절</button>
+                <button type="button" data-ai-question="복약알람을 만들기 전에 약봉투에서 무엇을 확인해야 하나요?">복약알람 준비</button>
+            </div>
+            <label class="mr-label" for="aiQuestion">질문<textarea id="aiQuestion" rows="3" maxlength="2000" required placeholder="예: 오늘 술 생각이 날 때 어떻게 기분을 전환하면 좋을까요?" aria-describedby="aiQuestionPrivacy"></textarea></label>
+            <div class="ai-chat-input-meta"><span>Ctrl / ⌘ + Enter로 보내기</span><span id="aiQuestionCount">0/2,000</span></div>
+            <div class="ai-chat-actions"><button id="aiTestRun" class="mr-btn mr-primary" type="submit" disabled>질문 보내기</button><button id="aiNewConversation" class="mr-btn" type="button" disabled>새 대화</button><button id="aiTestLogin" class="mr-btn" type="button">Google 로그인하고 이용하기</button></div>
+                <details id="aiTestSettings" class="ai-helper-details" hidden>
+                    <summary>개발자 연결 설정</summary>
+                    <div class="ai-test-fields">
+                        <label class="mr-label" for="aiTestProvider">API 제공업체
+                            <select id="aiTestProvider"><option value="google">Gemini Developer API</option><option value="agent">Agent Platform (구 Vertex AI)</option></select>
+                        </label>
+                        <label class="mr-label" for="aiTestModel">모델 ID
+                            <input id="aiTestModel" type="text" value="gemini-3.8-flash" required maxlength="120" pattern="[A-Za-z0-9][A-Za-z0-9._-]*" autocomplete="off" spellcheck="false">
+                        </label>
+                        <label id="aiTestLocationField" class="mr-label" for="aiTestLocation" hidden>모델 위치
+                            <input id="aiTestLocation" type="text" value="global" required maxlength="60" pattern="[a-z0-9]+(-[a-z0-9]+)*" autocomplete="off" spellcheck="false" disabled>
+                        </label>
+                    </div>
+                    <p class="mr-help">Firebase 콘솔에서 활성화한 제공업체와 사용 가능한 모델을 설정하세요. 이 화면의 변경은 현재 페이지에만 적용됩니다.</p>
+                </details>
+        </form>
+        <p id="aiTestStatus" class="ai-test-status" role="status" aria-live="polite">AI 기능을 준비하고 있습니다…</p>
+        <details id="aiHelperError" class="ai-helper-details" hidden><summary>오류 상세 보기</summary><pre id="aiHelperErrorText"></pre></details>
+        <div class="ai-chat-footer"><p id="aiQuestionPrivacy" class="mr-help">입력한 질문과 이 창의 최근 대화를 Gemini에 전송합니다. 건강 기록·사진은 자동으로 가져오지 않습니다. 대화는 새로고침하거나 로그아웃하면 사라집니다.</p><p class="mr-help">AI 답변은 틀릴 수 있습니다. 복약 방법은 처방전과 의사·약사의 안내를 확인하세요.</p><button type="button" id="aiOpenReminder">복약알람 화면 열기 →</button></div>
+    </div>
+</dialog>
+<script>
+(() => {
+    const dialog=document.getElementById('aiAssistantModal'), button=document.getElementById('aiAssistantFloatingButton');
+    let previousFocus=null,restoreFocus=true,outsidePress=false;
+    window.openAiAssistant=function(){
+        if(dialog.open)return;
+        window.closeFloatingQuickNav?.();previousFocus=document.activeElement;restoreFocus=true;
+        dialog.showModal();document.documentElement.classList.add('ai-assistant-open');button.setAttribute('aria-expanded','true');
+        document.getElementById('firebaseAiTestTitle').focus({preventScroll:true});
+    };
+    window.closeAiAssistant=function(restore=true){restoreFocus=restore;if(dialog.open)dialog.close();};
+    button.addEventListener('click',()=>window.openAiAssistant());
+    document.getElementById('aiAssistantClose').addEventListener('click',()=>window.closeAiAssistant());
+    const outside=event=>{const r=dialog.getBoundingClientRect();return event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom;};
+    dialog.addEventListener('pointerdown',event=>{outsidePress=event.target===dialog&&outside(event);});
+    dialog.addEventListener('click',event=>{if(outsidePress&&event.target===dialog&&outside(event))window.closeAiAssistant();outsidePress=false;});
+    dialog.addEventListener('keydown',event=>{
+        if(event.key!=='Tab')return;
+        const controls=[...dialog.querySelectorAll('button,input,textarea,select,a[href],summary,[tabindex]:not([tabindex="-1"])')].filter(node=>!node.matches(':disabled')&&node.getClientRects().length);
+        if(!controls.length){event.preventDefault();return;}
+        const index=controls.indexOf(document.activeElement);
+        if(event.shiftKey&&index<=0){event.preventDefault();controls.at(-1).focus();}
+        else if(!event.shiftKey&&(index<0||index===controls.length-1)){event.preventDefault();controls[0].focus();}
+    });
+    dialog.addEventListener('close',()=>{
+        document.documentElement.classList.remove('ai-assistant-open');button.setAttribute('aria-expanded','false');
+        if(restoreFocus && previousFocus?.isConnected)previousFocus.focus({preventScroll:true});
     });
 })();
 </script>
@@ -4585,7 +4623,7 @@
         if (previous?.isConnected && previous.getClientRects().length) previous.focus({ preventScroll: true });
     };
     document.addEventListener('keydown', event => {
-        if (document.getElementById('pillIdDialog')?.open) return;
+        if (document.getElementById('pillIdDialog')?.open || document.getElementById('aiAssistantModal')?.open) return;
         const id = hr.dialogs.at(-1); if (!id) return;
         const modal = hrEl(id);
         if (event.key === 'Escape') { event.preventDefault(); closeHealthDialog(id); return; }
@@ -10806,47 +10844,53 @@ initPillIdentification();
     window.toggleEtc = (val) => document.getElementById('etcReason').style.display = (val === '기타') ? 'block' : 'none';
 
 
-    // Visible AI helper. The debug query controls developer settings only.
-    // Public service authorization and quotas remain configured in Firebase.
+    // Free-form chat stays in this page's memory and is isolated from health/photo records.
     function initFirebaseAiAssistant() {
-        const el = id => document.getElementById(id);
-        const card = el('firebaseAiTestCard'), form = el('firebaseAiTestForm');
-        const run = el('aiTestRun'), login = el('aiTestLogin'), status = el('aiTestStatus');
-        const output = el('aiTestResult'), answer = el('aiHelperAnswer'), provider = el('aiTestProvider');
-        const modelInput = el('aiTestModel'), locationInput = el('aiTestLocation');
-        const topics = el('aiHelperTopics'), errorBox = el('aiHelperError'), errorText = el('aiHelperErrorText');
-        const developerMode = aiTestParams.get('ai-test') === '1';
-        const commonPrompt = '한국어 존댓말로 간결하게 작성하세요. 일반적인 안내이며 사용자의 개인 기록은 제공되지 않았습니다. 병명, 건강 상태, 복용약, 금주 일수, 성공 확률을 추측하지 마세요. 진단이나 치료, 금단 관리, 복약 용량·횟수·시간 변경을 지시하지 마세요. 굵게 표시나 표 없이 읽기 쉬운 문장으로 작성하세요. ';
-        const tasks = Object.freeze({
-            encourage: { title:'오늘의 금주 응원', prompt:commonPrompt + '금주를 이어가려는 성인에게 부담을 주거나 죄책감을 자극하지 않는 응원 문장 3개를 작성하세요. 건강 효과를 단정하거나 미래의 성공을 보장하지 마세요.' },
-            refusal: { title:'술 권유 거절 문구', prompt:commonPrompt + '술을 권하는 자리에서 쓸 수 있는 짧고 자연스러운 거절 문구를 친구, 직장 동료, 재차 권하는 사람에게 각각 하나씩 총 3개 작성하세요. 질병이나 약 복용에 대한 거짓 핑계는 만들지 마세요.' },
-            reminder: { title:'복약 알람 준비 체크리스트', prompt:commonPrompt + '복약 알람을 등록하기 전에 처방전이나 약봉투에서 확인할 항목을 체크리스트 5개로 작성하세요. 약 이름, 처방된 횟수와 실제 시간, 식사 관련 지시, 시작일·종료일을 포함하세요. 구체적인 약명이나 권장 복약 시간을 새로 제안하지 말고 모호한 지시는 약사에게 확인하도록 안내하세요.' }
-        });
-        let busy = false, authReady = false, authRevision = 0, returnAfterLogin = false;
-        const setStatus = (message, state = 'idle') => {
-            status.textContent = message;
-            card.dataset.state = state;
-        };
-        const syncControls = () => {
-            run.disabled = busy || !authReady || !auth.currentUser;
-            run.textContent = busy ? 'AI가 답변을 작성하고 있어요…' : 'AI 답변 받기';
-            topics.disabled = busy;
-            provider.disabled = modelInput.disabled = busy;
-            locationInput.disabled = busy || provider.value !== 'agent';
-            login.hidden = !!auth.currentUser;
-            card.setAttribute('aria-busy', String(busy));
-        };
-        const clearResult = () => {
-            answer.hidden = true;
-            output.textContent = '';
-            errorBox.hidden = true;
-            errorBox.open = false;
-            errorText.textContent = '';
-            el('aiOpenReminder').hidden = true;
-        };
-        const withDeadline = (promise, timeout = 45000) => new Promise((resolve, reject) => {
-            const timer = setTimeout(() => reject(Object.assign(new Error('Request timeout'), { code:'ai/timeout' })), timeout);
-            Promise.resolve(promise).then(value => { clearTimeout(timer); resolve(value); }, error => { clearTimeout(timer); reject(error); });
+        const el=id=>document.getElementById(id);
+        const dialog=el('aiAssistantModal'), card=el('firebaseAiTestCard'), form=el('firebaseAiTestForm');
+        const question=el('aiQuestion'), run=el('aiTestRun'), login=el('aiTestLogin'), status=el('aiTestStatus');
+        const conversation=el('aiConversation'), provider=el('aiTestProvider'), modelInput=el('aiTestModel'), locationInput=el('aiTestLocation');
+        const errorBox=el('aiHelperError'), errorText=el('aiHelperErrorText');
+        const suggestions=[...dialog.querySelectorAll('[data-ai-question]')];
+        const systemInstruction='Alcoholaway의 AI 도우미로서 사용자의 질문에 한국어 존댓말로 명확하고 간결하게 답하세요. 금주·생활습관·복약알람을 포함한 일반적인 질문을 돕습니다. 사용자가 이 대화에 입력한 내용 외에 건강 기록, 처방전 사진, 복용약, 금주 일수나 계정 정보를 조회할 수 없습니다. 보지 않은 기록을 보았다고 하거나 실행하지 않은 알람 생성·달력 등록을 완료했다고 하지 마세요. 모르는 사실은 불확실하다고 밝히고 최신 정보 확인이 필요하면 안내하세요. 진단을 확정하거나 개인의 약 용량·횟수·시간을 새로 정하거나 변경하지 마세요. 복약 지시가 불분명하면 처방전과 의료진의 안내를 확인하도록 하세요. 응급 증상이 제시되면 즉시 의료 도움을 받도록 안내하세요. 답변은 표나 HTML 없이 읽기 쉬운 문장과 짧은 목록으로 작성하세요.';
+        const MAX_TURNS=6;
+        let turns=[], busy=false, authReady=false, uid=null, requestId=0, controller=null;
+        const setStatus=(message,state='idle')=>{status.textContent=message;card.dataset.state=state;};
+        function syncControls() {
+            run.disabled=busy || !authReady || !auth.currentUser || !question.value.trim();
+            run.textContent=busy?'답변 작성 중…':'질문 보내기';
+            question.disabled=busy;
+            suggestions.forEach(button=>button.disabled=busy);
+            provider.disabled=modelInput.disabled=busy;
+            locationInput.disabled=busy || provider.value!=='agent';
+            login.hidden=!!auth.currentUser;
+            el('aiNewConversation').disabled=!turns.length && !busy;
+            card.setAttribute('aria-busy',String(busy));
+            el('aiQuestionCount').textContent=`${question.value.length}/2,000`;
+        }
+        function addMessage(role,text,pending=false) {
+            const item=document.createElement('div');item.className='ai-chat-message ai-chat-'+role;
+            const name=document.createElement('strong');name.textContent=role==='user'?'나':'도우미';
+            const body=document.createElement('p');body.textContent=text;
+            if(pending)item.classList.add('ai-chat-pending');
+            item.append(name,body);conversation.append(item);
+        }
+        function renderConversation(pending='') {
+            conversation.replaceChildren();
+            for(const turn of turns){addMessage('user',turn.question);addMessage('assistant',turn.answer);}
+            if(pending){addMessage('user',pending);addMessage('assistant','답변을 작성하고 있습니다…',true);}
+            conversation.hidden=!turns.length && !pending;
+            el('aiChatWelcome').hidden=!!turns.length || !!pending;
+            conversation.scrollTop=conversation.scrollHeight;
+        }
+        function clearError(){errorBox.hidden=true;errorBox.open=false;errorText.textContent='';}
+        function cancelRequest() {
+            requestId++;controller?.abort();controller=null;busy=false;
+            renderConversation();syncControls();
+        }
+        const withDeadline=(promise,timeout=45000)=>new Promise((resolve,reject)=>{
+            const timer=setTimeout(()=>reject(Object.assign(new Error('Request timeout'),{code:'ai/timeout'})),timeout);
+            Promise.resolve(promise).then(value=>{clearTimeout(timer);resolve(value);},error=>{clearTimeout(timer);reject(error);});
         });
         const friendlyError = (error, stage) => {
             const code = String(error?.code || 'unknown').replace(/[^a-zA-Z0-9_./-]/g, '').slice(0, 100);
@@ -10874,89 +10918,78 @@ initPillIdentification();
             }
             return `${stage} 단계 실패 (${code})\n${help}`;
         };
-        card.dataset.aiReady = 'true';
-        clearTimeout(window.aiHelperStartupTimer);
-        el('aiTestSettings').hidden = !developerMode;
-        if (developerMode) window.switchAppTab?.('medicines');
-        login.addEventListener('click', () => {
-            returnAfterLogin = true;
-            window.switchAppTab?.('records', true);
-            document.querySelector('#loginArea .google-btn')?.click();
+        card.dataset.aiReady='true';clearTimeout(window.aiHelperStartupTimer);
+        el('aiTestSettings').hidden=aiTestParams.get('ai-test')!=='1';
+        if(aiTestParams.get('ai-test')==='1')window.openAiAssistant();
+        login.addEventListener('click',()=>document.querySelector('#loginArea .google-btn')?.click());
+        provider.addEventListener('change',()=>{el('aiTestLocationField').hidden=provider.value!=='agent';syncControls();});
+        question.addEventListener('input',syncControls);
+        question.addEventListener('keydown',event=>{
+            if(event.key==='Enter' && (event.ctrlKey||event.metaKey) && !event.isComposing){event.preventDefault();if(!run.disabled)form.requestSubmit();}
         });
-        provider.addEventListener('change', () => {
-            el('aiTestLocationField').hidden = provider.value !== 'agent';
-            syncControls();
+        suggestions.forEach(button=>button.addEventListener('click',()=>{
+            question.value=button.dataset.aiQuestion;syncControls();question.focus();
+        }));
+        el('aiNewConversation').addEventListener('click',()=>{
+            cancelRequest();turns=[];question.value='';clearError();renderConversation();syncControls();
+            setStatus(auth.currentUser?'새 질문을 입력해 주세요.':'Google 로그인 후 질문할 수 있습니다.');question.focus();
         });
-        topics.addEventListener('change', () => {
-            clearResult();
-            setStatus(auth.currentUser ? 'AI 답변 받기를 누르면 선택한 주제로 답변을 만듭니다.' : 'Google 로그인 후 AI 도우미를 이용할 수 있습니다.');
+        dialog.addEventListener('close',()=>{
+            if(busy){cancelRequest();setStatus('답변 요청을 중단했습니다. 다시 질문할 수 있습니다.');}
         });
-        el('aiOpenReminder').addEventListener('click', () => {
-            const reminder = el('medicationReminderCard');
-            reminder.open = true;
-            reminder.scrollIntoView({ behavior:'smooth', block:'start' });
-            el('mrName').focus({ preventScroll:true });
+        el('aiOpenReminder').addEventListener('click',()=>{
+            window.closeAiAssistant(false);window.switchAppTab('medicines');
+            const reminder=el('medicationReminderCard');reminder.open=true;
+            reminder.scrollIntoView({behavior:'smooth',block:'start'});el('mrName').focus({preventScroll:true});
         });
-        onAuthStateChanged(auth, user => {
-            authReady = true;
-            authRevision++;
-            clearResult();
-            setStatus(user ? '주제를 고르고 AI 답변 받기를 눌러 주세요.' : 'Google 로그인 후 AI 도우미를 이용할 수 있습니다.');
-            syncControls();
-            if (user && returnAfterLogin) {
-                returnAfterLogin = false;
-                el('aiAssistantOpen').click();
+        onAuthStateChanged(auth,user=>{
+            const next=user?.uid || null;
+            if(!authReady || next!==uid) {
+                cancelRequest();if(uid!==null)question.value='';
+                uid=next;turns=[];clearError();renderConversation();
             }
+            authReady=true;
+            setStatus(user?'궁금한 내용을 입력하고 질문을 보내세요.':'Google 로그인 후 질문할 수 있습니다.');syncControls();
         });
-        form.addEventListener('submit', async event => {
+        form.addEventListener('submit',async event=>{
             event.preventDefault();
-            if (busy || !authReady || !auth.currentUser || !form.reportValidity()) return;
-            const task = tasks[form.querySelector('[name="aiHelperTopic"]:checked')?.value];
-            if (!task) return;
-            const requestUid = auth.currentUser.uid, revision = authRevision;
-            const isCurrent = () => revision === authRevision && auth.currentUser?.uid === requestUid;
-            const selectedProvider = provider.value, modelId = modelInput.value.trim();
-            const location = locationInput.value.trim();
-            busy = true;
-            syncControls();
-            clearResult();
-            let stage = 'App Check';
+            if(!dialog.open || busy || !authReady || !auth.currentUser || !form.reportValidity())return;
+            const text=question.value.trim();if(!text || text.length>2000)return;
+            const owner=auth.currentUser.uid, sequence=++requestId;
+            const current=()=>dialog.open && requestId===sequence && auth.currentUser?.uid===owner;
+            const selectedProvider=provider.value,modelId=modelInput.value.trim(),location=locationInput.value.trim();
+            controller=new AbortController();const signal=controller.signal;
+            busy=true;clearError();syncControls();renderConversation(text);
+            let stage='App Check';
             try {
-                setStatus('AI에 연결하고 있습니다…', 'loading');
-                if (!appCheck) throw appCheckInitError || new Error('App Check initialization failed');
-                await withDeadline(getAppCheckToken(appCheck, false));
-                if (!isCurrent()) return;
-                stage = 'AI SDK';
-                const { getAI, getGenerativeModel, GoogleAIBackend, AgentPlatformBackend } =
-                    await withDeadline(import('https://www.gstatic.com/firebasejs/12.19.0/firebase-ai.js'));
-                if (!isCurrent()) return;
-                stage = 'Gemini';
-                const backend = selectedProvider === 'agent' ? new AgentPlatformBackend(location) : new GoogleAIBackend();
-                const ai = getAI(app, { backend });
-                const model = getGenerativeModel(ai, { model: modelId, generationConfig: { maxOutputTokens: 2048 } }, { timeout: 45000 });
-                setStatus(`AI가 ‘${task.title}’ 답변을 작성하고 있습니다…`, 'loading');
-                // Only a fixed topic prompt is sent. No health records, account details or photos.
-                const result = await model.generateContent(task.prompt);
-                if (!isCurrent()) return;
-                const responseText = result.response.text().trim();
-                if (!responseText) throw Object.assign(new Error('Empty text response'), { code:'ai-test/empty-response' });
-                output.textContent = responseText;
-                el('aiHelperAnswerTitle').textContent = `${task.title} · AI 답변`;
-                answer.hidden = false;
-                el('aiOpenReminder').hidden = task !== tasks.reminder;
-                setStatus('Gemini AI가 답변을 작성했습니다.', 'success');
-            } catch (error) {
-                if (isCurrent()) {
-                    const detail = friendlyError(error, stage);
-                    errorText.textContent = detail;
-                    errorBox.hidden = false;
-                    setStatus(/prepayment|prepay|credits.*depleted|no credits/i.test(String(error?.message)) ? 'Gemini 선불 크레딧이 부족합니다. 아래 오류 상세를 확인해 주세요.' : /429|quota|resource.exhausted/i.test(String(error?.message))
-                        ? 'AI 사용량 한도에 도달했습니다. 잠시 후 다시 시도해 주세요.'
-                        : 'AI 답변을 받지 못했습니다. 아래 오류 상세에서 원인을 확인할 수 있습니다.', 'error');
+                setStatus('AI에 연결하고 있습니다…','loading');
+                if(!appCheck)throw appCheckInitError || new Error('App Check initialization failed');
+                await withDeadline(getAppCheckToken(appCheck,false));if(!current())return;
+                stage='AI SDK';
+                const {getAI,getGenerativeModel,GoogleAIBackend,AgentPlatformBackend}=await withDeadline(import('https://www.gstatic.com/firebasejs/12.19.0/firebase-ai.js'));
+                if(!current())return;
+                stage='Gemini';
+                const backend=selectedProvider==='agent'?new AgentPlatformBackend(location):new GoogleAIBackend();
+                const ai=getAI(app,{backend});
+                const model=getGenerativeModel(ai,{model:modelId,systemInstruction,generationConfig:{maxOutputTokens:4096}},{timeout:45000,signal});
+                const contents=turns.slice(-MAX_TURNS).flatMap(turn=>[
+                    {role:'user',parts:[{text:turn.question}]},{role:'model',parts:[{text:turn.answer}]}
+                ]);
+                contents.push({role:'user',parts:[{text}]});
+                setStatus('도우미가 답변을 작성하고 있습니다…','loading');
+                const result=await model.generateContent({contents});if(!current())return;
+                const responseText=result.response.text().trim();
+                if(!responseText)throw Object.assign(new Error('Empty text response'),{code:'ai-test/empty-response'});
+                turns.push({question:text,answer:responseText});turns=turns.slice(-MAX_TURNS);
+                question.value='';renderConversation();setStatus('답변이 도착했습니다. 이어서 질문할 수 있습니다.','success');
+                conversation.lastElementChild?.scrollIntoView({behavior:'smooth',block:'nearest'});
+            }catch(error) {
+                if(current()) {
+                    renderConversation();errorText.textContent=friendlyError(error,stage);errorBox.hidden=false;
+                    setStatus('답변을 받지 못했습니다. 입력한 질문을 확인하고 다시 보내세요.','error');
                 }
-            } finally {
-                busy = false;
-                syncControls();
+            }finally {
+                if(requestId===sequence){busy=false;controller=null;syncControls();}
             }
         });
     }
