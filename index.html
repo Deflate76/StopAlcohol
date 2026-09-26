@@ -10,7 +10,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>금주도전/건강기록</title>
-    <meta name="app-build" content="records-calendar-v14-coffee-sleep">
+    <meta name="app-build" content="records-calendar-v15-medication-reminders">
     
     <meta name="description" content="금주 도전부터 건강 상태, 진단과 처방전까지. 나의 건강을 하루씩 기록하는 금주도전/건강기록." />
     <meta name="theme-color" content="#ffffff" />
@@ -951,6 +951,45 @@
 #coffeeSleepModal :is(button,input,select,textarea):focus-visible { outline:2px solid #854d29; outline-offset:3px; }
 @media(max-width:480px) { .coffee-floating { bottom:calc(152px + env(safe-area-inset-bottom,0px)); } .cs-chart-wrap { height:250px; } .cs-history-item { flex-wrap:wrap; } }
 </style>
+<style>
+/* 현재 도전 요약 / 커뮤니티 바로가기 / 복약 달력 */
+#timerDisplaySection .timer-summary-label { display:flex; flex-wrap:wrap; align-items:center; gap:3px 8px; }
+#timerDisplaySection .timer-summary-label > span { flex:0 1 auto; }
+#currentChallengeRecordCount { display:inline-block; font-size:.74rem; line-height:1.5; font-weight:750; color:#b45309; }
+.community-floating { bottom:calc(238px + env(safe-area-inset-bottom,0px)); background:linear-gradient(145deg,#f5b942,#c77d12); box-shadow:0 5px 18px #b8792133; }
+.community-floating .community-floating-inner { background:linear-gradient(145deg,#fffdf7,#fff1cf)!important; color:#9a5e09!important; }
+.medication-reminder-card { border-color:#c4ddd8; background:linear-gradient(135deg,#f3fbf8,#fff); text-align:left; }
+.medication-reminder-card h3 { color:#115e59; }
+.medication-reminder-card fieldset { border:0; padding:0; margin:0; min-width:0; }
+.medication-reminder-card [hidden] { display:none!important; }
+.mr-grid,.mr-times { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px 10px; margin:12px 0; }
+.mr-wide { grid-column:1 / -1; }
+.mr-label { display:flex; flex-direction:column; gap:5px; min-width:0; font-size:.82rem; font-weight:800; color:#334155; }
+.mr-label small { font-weight:500; }
+.mr-label input,.mr-label select,.mr-label textarea { box-sizing:border-box; display:block; width:100%; min-width:0; max-width:100%; min-height:43px; margin:0; padding:10px; border:1px solid #cbd5e1; border-radius:10px; background:#fff; color:#334155; font-family:inherit; font-size:16px; }
+.mr-label input[type=date],.mr-label input[type=time] { appearance:none; -webkit-appearance:none; }
+.mr-label textarea { resize:vertical; }
+.medication-reminder-card p.mr-help,.mr-help { display:block; margin:8px 0; color:#64748b; font-size:.74rem; font-weight:400; line-height:1.6; overflow-wrap:anywhere; }
+.mr-actions { display:flex; flex-wrap:wrap; gap:7px; margin-top:12px; }
+.mr-btn { appearance:none; border:1px solid #cbd5e1; border-radius:10px; padding:10px 12px; background:white; color:#475569; font-family:inherit; font-size:.8rem; font-weight:800; cursor:pointer; }
+.mr-btn.mr-primary { background:#0f766e; border-color:#0f766e; color:#fff; }
+.mr-btn.mr-danger { color:#b91c1c; border-color:#fecaca; }
+.mr-btn:disabled { opacity:.5; cursor:default; }
+.mr-btn:focus-visible,.mr-label input:focus-visible,.mr-label select:focus-visible,.mr-label textarea:focus-visible { outline:2px solid #0f766e; outline-offset:2px; }
+.mr-list { display:grid; gap:10px; margin-top:12px; }
+.mr-saved { border:1px solid #cbded8; border-radius:12px; padding:13px; background:white; overflow-wrap:anywhere; }
+.mr-saved h4 { margin:0 0 6px; color:#115e59; font-size:.94rem; }
+.mr-saved p { margin:5px 0; font-size:.78rem; }
+.mr-saved .mr-times-text { font-variant-numeric:tabular-nums; font-weight:800; color:#0f766e; }
+.mr-calendar-help { margin-top:13px; padding-top:12px; border-top:1px dashed #cbd5e1; color:#475569; font-size:.76rem; }
+.mr-calendar-help summary { cursor:pointer; font-weight:800; }
+.mr-calendar-help ol { padding-left:20px; }
+.mr-calendar-help p { font-size:.74rem; margin:8px 0; }
+.mr-calendar-help a { color:#0f766e; }
+@media(max-width:480px) { .community-floating { bottom:calc(218px + env(safe-area-inset-bottom,0px)); } }
+@media(max-width:360px) { .mr-grid,.mr-times { grid-template-columns:minmax(0,1fr); } .medication-reminder-card { padding:13px; } }
+
+</style>
 </head>
 <body>
 <div id="pageTopAnchor" class="page-scroll-anchor" aria-hidden="true"></div>
@@ -1053,7 +1092,7 @@
 
 
         <div class="timer-display inline-collapsible-section" id="timerDisplaySection" data-collapsed="false">
-            <button type="button" class="inline-collapsible-summary" onclick="toggleInlineCollapsible('timerDisplaySection')" aria-expanded="true" aria-label="현재 도전 타이머 접기 또는 펼치기"><span>⏱️ 현재 도전 타이머</span></button>
+            <button type="button" class="inline-collapsible-summary" onclick="toggleInlineCollapsible('timerDisplaySection')" aria-expanded="true" aria-label="현재 도전 타이머 접기 또는 펼치기"><span class="timer-summary-label"><span>⏱️ 현재 도전 타이머</span><small id="currentChallengeRecordCount" class="health-muted" title="도전 시작을 1일째로 표시합니다. 생존율은 기존 그래프의 추정 모델이며 실제 이용자 순위가 아닙니다."></small></span></button>
             <div class="inline-collapsible-content timer-display-content">
             <div id="mainDaysContainer" style="width: 100%;">
                 <!-- JS에서 동적으로 달력 호버 UI를 생성합니다 -->
@@ -1175,7 +1214,7 @@
                     <button class="tab-btn active" onclick="switchTab(this, 'physical')">신체<br>회복</button>
                     <button class="tab-btn" onclick="switchTab(this, 'liver')">간<br>기능</button>
                     <button class="tab-btn" onclick="switchTab(this, 'brain')">뇌<br>기능</button>
-                    <button class="tab-btn" style="color: var(--warning-color);" onclick="switchTab(this, 'community')">생존자<br>통신</button>
+                    <button id="survivorCommunityTab" type="button" class="tab-btn" style="color: var(--warning-color);" onclick="switchTab(this, 'community')">생존자<br>통신</button>
                 </div>
 
                 <div class="change-section" id="changeSection">
@@ -1211,6 +1250,41 @@
             <p>일반의약품의 사용 방법과 주의사항에 관한 안내를 확인하세요.</p>
             <a class="info-resource-link secondary" href="https://nedrug.mfds.go.kr/cntnts/35" target="_blank" rel="noopener noreferrer">사용정보 열기 <span aria-hidden="true">↗</span><span class="app-sr-only"> (새 창)</span></a>
         </article>
+        <article class="info-resource-card medication-reminder-card" id="medicationReminderCard" aria-labelledby="medicationReminderTitle">
+            <span class="info-source-label">반복 일정 · 휴대폰 달력으로 가져오기</span>
+            <h3 id="medicationReminderTitle">🔔 의약품 복약알람</h3>
+            <p>처방전·약봉투에 적힌 복용법에 맞춰 입력해 주세요. 한국 시간(Asia/Seoul)을 기준으로 매일 반복합니다.</p>
+            <form id="medicationReminderForm">
+                <fieldset id="mrFields" disabled>
+                    <div class="mr-grid">
+                        <label class="mr-label mr-wide" for="mrName">약 이름<input id="mrName" type="text" maxlength="80" required placeholder="처방전이나 약봉투의 약 이름" autocomplete="off"></label>
+                        <label class="mr-label mr-wide" for="mrDose"><span>1회 복용량 <small>(선택)</small></span><input id="mrDose" type="text" maxlength="80" placeholder="예: 1정, 5mL" autocomplete="off"></label>
+                        <label class="mr-label" for="mrFrequency">1일 복약 횟수<input id="mrFrequency" type="number" min="1" max="12" step="1" value="1" required inputmode="numeric" aria-describedby="mrFrequencyHelp"></label>
+                        <label class="mr-label" for="mrMeal">식사 기준<select id="mrMeal" required><option value="">선택하세요</option><option value="before">식전</option><option value="after">식후</option><option value="any">식사와 무관</option><option value="bedtime">취침 전</option></select></label>
+                        <label class="mr-label mr-wide" for="mrMealMinutes" id="mrMealMinutesLabel" hidden><span>식사 전·후 간격 <small>(분, 선택)</small></span><input id="mrMealMinutes" type="number" min="0" max="180" step="1" inputmode="numeric" placeholder="예: 약봉투에 30분이라고 적혀 있으면 30" disabled></label>
+                    </div>
+                    <small class="mr-help" id="mrFrequencyHelp">하루 1~12회 · 횟수만큼 실제 복약 시각을 입력하세요.</small>
+                    <div class="mr-times" id="mrTimes"></div>
+                    <p class="mr-help">식전·식후는 일정에 메모됩니다. 알람은 아래 기간에 입력한 복약 시각을 기준으로 울립니다.</p>
+                    <div class="mr-grid">
+                        <label class="mr-label" for="mrStart">시작일<input id="mrStart" type="date" min="2000-01-01" max="9999-12-31" required></label>
+                        <label class="mr-label" for="mrEnd"><span>종료일 <small>(당일 포함)</small></span><input id="mrEnd" type="date" min="2000-01-01" max="9999-12-31" required></label>
+                        <label class="mr-label mr-wide" for="mrLead">알림 시점<select id="mrLead"><option value="0">복약 시각 정각</option><option value="5">5분 전</option><option value="10">10분 전</option><option value="15">15분 전</option><option value="30">30분 전</option><option value="60">1시간 전</option></select></label>
+                        <label class="mr-label mr-wide" for="mrMemo"><span>복약 메모 <small>(선택)</small></span><textarea id="mrMemo" maxlength="500" rows="2" placeholder="약봉투의 안내 등"></textarea></label>
+                    </div>
+                    <div class="mr-actions"><button type="submit" class="mr-btn mr-primary" id="mrSave">복약 알람 생성</button><button type="button" class="mr-btn" id="mrCancel" hidden>수정 취소</button></div>
+                </fieldset>
+            </form>
+            <p id="mrStatus" class="health-status" role="status" aria-live="polite"></p>
+            <p id="mrStorageNote" class="mr-help">저장할 계정을 확인하고 있습니다.</p>
+            <div id="mrList" class="mr-list" aria-label="생성한 복약 알람"></div>
+            <details class="mr-calendar-help"><summary>휴대폰 달력에 적용하는 방법</summary>
+                <ol><li>알람을 생성한 뒤 <strong>내 폰에 적용</strong>을 누르세요.</li><li>공유 대상에서 달력을 선택하거나, 내려받은 .ics 파일을 달력 앱으로 여세요.</li><li>달력 앱에서 가져오기·저장을 완료하고, 첫 일정의 알림과 휴대폰 알림 권한을 확인하세요.</li></ol>
+                <p>파일 전달만으로 달력 등록이 완료되지는 않습니다. 앱에 따라 알림을 다시 설정해야 할 수 있습니다. .ics를 열지 못하면 <a href="https://support.google.com/calendar/answer/37118?hl=ko" target="_blank" rel="noopener noreferrer">컴퓨터의 Google Calendar에서 가져오기</a>를 이용하세요.</p>
+                <p>달력에 가져온 일정은 이 화면에서 수정·삭제해도 자동으로 바뀌지 않습니다. 기존 반복 일정을 달력에서 지운 후 다시 가져오면 중복을 피할 수 있습니다.</p>
+            </details>
+        </article>
+
         <p class="info-tab-footnote">조회 버튼은 공식 사이트를 새 창으로 엽니다.</p>
     </section>
     <section id="appPanelSupplements" class="app-tab-panel info-tab-panel" role="tabpanel" aria-labelledby="appTabSupplements" tabindex="0" hidden>
@@ -2199,6 +2273,9 @@
 })();
 </script>
 
+<button id="communityFloatingButton" class="pill-id-floating community-floating" type="button" onclick="openSurvivorCommunity()" aria-label="생존자 통신 바로가기" aria-controls="communitySection">
+    <span class="floating-nav-toggle-inner pill-id-floating-inner community-floating-inner"><svg aria-hidden="true" viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11a8 8 0 0 1-8 8H7l-5 3 2-6a8 8 0 1 1 17-5Z"/><path d="M8 10h8M8 14h5"/></svg><span>통신</span></span>
+</button>
 <button id="coffeeFloatingButton" class="pill-id-floating coffee-floating" type="button" onclick="openCoffeeSleep()" aria-label="커피 섭취와 수면 기록" aria-haspopup="dialog" aria-controls="coffeeSleepModal">
     <span class="floating-nav-toggle-inner pill-id-floating-inner coffee-floating-inner"><svg aria-hidden="true" viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h12v7a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V8Z"/><path d="M16 9h2a3 3 0 1 1 0 6h-2M8 3v2M12 2v3M3 22h16"/></svg><span>커피</span></span>
 </button>
@@ -2321,6 +2398,221 @@
   </section>
   <section id="piConfirm" class="pi-confirm" hidden aria-labelledby="piConfirmTitle"><h3 id="piConfirmTitle"></h3><p id="piConfirmText"></p><div class="pi-row"><button id="piConfirmCancel" type="button" class="pi-secondary">취소</button><button id="piConfirmAccept" type="button" class="pi-danger">삭제</button></div></section>
 </dialog>
+
+<script>
+// 복약 계획은 계정별로 이 브라우저에만 보관합니다. 실제 알림은 가져온 달력이 담당합니다.
+(() => {
+    'use strict';
+    const $ = id => document.getElementById(id);
+    const DAY = 86400000, KST = 9 * 3600000;
+    const PREFIX = 'alcoholaway:medication-reminders:v1:';
+    const MEALS = { before:'식전', after:'식후', any:'식사와 무관', bedtime:'취침 전' };
+    const state = { ready:false, key:null, plans:[], editing:null, busy:false };
+    const kstDate = (now = Date.now()) => new Date(now + KST).toISOString().slice(0,10);
+    const dateNumber = value => {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return NaN;
+        const result = Date.parse(value + 'T00:00:00Z');
+        return Number.isFinite(result) && new Date(result).toISOString().slice(0,10) === value && value >= '2000-01-01' ? result : NaN;
+    };
+    const timeOK = value => typeof value === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(value);
+    const mealText = plan => MEALS[plan.meal] + (['before','after'].includes(plan.meal) && plan.mealMinutes !== null ? ` ${plan.mealMinutes}분` : '');
+    const node = (tag, text, cls) => { const el = document.createElement(tag); if(text !== undefined) el.textContent = text; if(cls) el.className = cls; return el; };
+    const status = (message = '', error = false) => { $('mrStatus').textContent = message; $('mrStatus').classList.toggle('is-error', error); };
+    function validPlan(p) {
+        return p && typeof p.id === 'string' && /^[a-zA-Z0-9-]{8,80}$/.test(p.id)
+            && typeof p.name === 'string' && p.name.trim().length > 0 && p.name.length <= 80
+            && typeof p.dose === 'string' && p.dose.length <= 80 && typeof p.memo === 'string' && p.memo.length <= 500
+            && Object.hasOwn(MEALS,p.meal) && (p.mealMinutes === null || Number.isInteger(p.mealMinutes) && p.mealMinutes >= 0 && p.mealMinutes <= 180)
+            && Number.isFinite(dateNumber(p.start)) && Number.isFinite(dateNumber(p.end)) && p.start <= p.end
+            && Array.isArray(p.times) && p.times.length >= 1 && p.times.length <= 12 && p.times.every(timeOK) && new Set(p.times).size === p.times.length
+            && [0,5,10,15,30,60].includes(p.lead) && Number.isInteger(p.revision) && p.revision >= 0;
+    }
+    function slots(plan, now = Date.now()) {
+        const end = dateNumber(plan.end), today = dateNumber(kstDate(now));
+        return plan.times.map((time,index) => {
+            const [hours,minutes] = time.split(':').map(Number);
+            const offset = (hours*60 + minutes)*60000 - KST;
+            let first = Math.max(dateNumber(plan.start), today);
+            if (first + offset < now) first += DAY;
+            return { time,index,first,count:Math.floor((end-first)/DAY)+1 };
+        }).filter(slot => slot.count > 0);
+    }
+    function renderTimes(values = null) {
+        const count = Number($('mrFrequency').value);
+        if (!Number.isInteger(count) || count < 1 || count > 12) return;
+        const old = values || Array.from($('mrTimes').querySelectorAll('input'), input => input.value);
+        $('mrTimes').replaceChildren();
+        for (let i=0;i<count;i++) {
+            const label = node('label',`${i+1}회차 복약 시각`,'mr-label'); label.htmlFor = `mrTime${i}`;
+            const input = document.createElement('input'); input.type='time'; input.id=`mrTime${i}`; input.required=true; input.step='60'; input.value=old[i] || '';
+            label.append(input); $('mrTimes').append(label);
+        }
+    }
+    function updateMeal() {
+        const enabled = ['before','after'].includes($('mrMeal').value);
+        $('mrMealMinutesLabel').hidden = !enabled; $('mrMealMinutes').disabled = !enabled;
+    }
+    function resetForm() {
+        state.editing = null; $('medicationReminderForm').reset();
+        $('mrStart').value = kstDate(); $('mrEnd').value = kstDate(); $('mrEnd').min = kstDate();
+        $('mrSave').textContent='복약 알람 생성'; $('mrCancel').hidden=true;
+        renderTimes([]); updateMeal();
+    }
+    function readPlans() {
+        const raw = localStorage.getItem(state.key);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        if (parsed.version !== 1 || !Array.isArray(parsed.plans) || !parsed.plans.every(validPlan) || new Set(parsed.plans.map(p=>p.id)).size !== parsed.plans.length) {
+            throw new Error('저장된 복약 알람을 읽을 수 없습니다. 기존 데이터는 변경하지 않았습니다.');
+        }
+        return parsed.plans;
+    }
+    function commit(plans) {
+        try { localStorage.setItem(state.key, JSON.stringify({version:1, plans})); state.plans=plans; return true; }
+        catch { status('저장 공간이 부족하거나 브라우저에서 저장이 차단되어 있습니다. 설정을 확인한 후 다시 시도해 주세요.',true); return false; }
+    }
+    window.bindMedicationReminderAccount = function(uid) {
+        const key = PREFIX + (uid || 'guest');
+        if (state.ready && state.key === key) return;
+        state.key=key; state.ready=true; state.plans=[]; state.busy=false;
+        resetForm(); status(); $('mrFields').disabled=false;
+        $('mrStorageNote').textContent = uid ? '복약 계획은 이 기기의 현재 계정에 저장됩니다. 다른 기기로 자동 동기화되지 않습니다.' : '복약 계획은 로그인하지 않은 이 브라우저에 저장됩니다. 로그인 후에는 해당 계정의 계획을 따로 보여줍니다.';
+        try { state.plans = readPlans(); }
+        catch { $('mrFields').disabled=true; status('복약 알람 저장소를 열 수 없습니다. 브라우저의 저장 설정을 확인해 주세요. 기존 데이터는 변경하지 않았습니다.',true); }
+        renderList();
+    };
+    function edit(plan) {
+        state.editing=plan.id; $('mrName').value=plan.name; $('mrDose').value=plan.dose;
+        $('mrFrequency').value=plan.times.length; $('mrMeal').value=plan.meal; $('mrMealMinutes').value=plan.mealMinutes ?? '';
+        $('mrStart').value=plan.start; $('mrEnd').min=plan.start; $('mrEnd').value=plan.end;
+        $('mrLead').value=plan.lead; $('mrMemo').value=plan.memo; renderTimes(plan.times); updateMeal();
+        $('mrSave').textContent='변경 내용 저장'; $('mrCancel').hidden=false;
+        status('수정 후에는 달력의 기존 반복 일정을 삭제하고 새 파일을 가져와 주세요.');
+        $('mrName').focus({preventScroll:true}); $('medicationReminderForm').scrollIntoView({behavior:'smooth',block:'start'});
+    }
+    function addButton(parent,label,handler,cls='') {
+        const button=node('button',label,`mr-btn ${cls}`); button.type='button'; button.addEventListener('click',handler); parent.append(button); return button;
+    }
+    function removePlan(plan) {
+        if (!confirm(`“${plan.name}” 복약 계획을 삭제할까요?\n휴대폰 달력에 가져온 일정은 달력 앱에서도 따로 삭제해야 합니다.`)) return;
+        try {
+            const current=readPlans();
+            if (!commit(current.filter(item=>item.id!==plan.id))) return;
+            if (state.editing===plan.id) resetForm(); renderList(); status('복약 계획을 삭제했습니다. 달력에 가져온 일정은 달력 앱에서 따로 삭제해 주세요.');
+        } catch(e) { status(e.message,true); }
+    }
+    function renderList() {
+        $('mrList').replaceChildren();
+        if (!state.plans.length) { $('mrList').append(node('p','아직 생성한 복약 알람이 없습니다.','mr-help')); return; }
+        for (const plan of state.plans) {
+            const card=node('section',undefined,'mr-saved'); card.append(node('h4',plan.name));
+            card.append(node('p',`1일 ${plan.times.length}회 · ${mealText(plan)}${plan.dose ? ' · 1회 '+plan.dose : ''}`));
+            card.append(node('p',plan.times.join(' · '),'mr-times-text'));
+            card.append(node('p',`${plan.start} ~ ${plan.end} (종료일 포함)`));
+            card.append(node('p',plan.lead ? `복약 ${plan.lead}분 전 알림` : '복약 시각 정각 알림'));
+            if(plan.memo) card.append(node('p',plan.memo));
+            const next=slots(plan);
+            const note = !next.length ? '기간 종료 · 남은 복약 일정 없음' : `${next.reduce((n,slot)=>n+slot.count,0).toLocaleString()}회 남음 · 내 폰에 적용하면 지금 이후의 일정만 전달합니다.`;
+            card.append(node('p',note,'mr-help'));
+            const actions=node('div',undefined,'mr-actions');
+            const apply=addButton(actions,'내 폰에 적용',()=>exportPlan(plan.id,true),'mr-primary');
+            const download=addButton(actions,'달력 파일(.ics) 저장',()=>exportPlan(plan.id,false));
+            apply.disabled=download.disabled=!next.length || state.busy;
+            addButton(actions,'수정',()=>edit(plan)); addButton(actions,'삭제',()=>removePlan(plan),'mr-danger');
+            card.append(actions); $('mrList').append(card);
+        }
+    }
+    function escapeICS(value) {
+        return String(value).replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g,'').replace(/\\/g,'\\\\').replace(/\r\n|\r|\n/g,'\\n').replace(/;/g,'\\;').replace(/,/g,'\\,');
+    }
+    function foldICS(line) {
+        const encoder=new TextEncoder(); let out='',part='',bytes=0;
+        for(const char of line) {
+            const size=encoder.encode(char).length;
+            if(bytes+size>75) { out+=part+'\r\n'; part=' '; bytes=1; }
+            part+=char; bytes+=size;
+        }
+        return out+part;
+    }
+    function calendarFile(plan,now=Date.now()) {
+        if(!validPlan(plan)) throw new Error('복약 계획을 확인해 주세요.');
+        const remaining=slots(plan,now);
+        if(!remaining.length) throw new Error('종료일까지 남은 복약 시각이 없습니다. 날짜와 시간을 수정해 주세요.');
+        const stamp=new Date(now).toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z');
+        const summary=`복약 · ${plan.name}${plan.dose ? ' · '+plan.dose : ''}`;
+        const description=[`약 이름: ${plan.name}`,plan.dose && `1회 복용량: ${plan.dose}`,`복용 기준: ${mealText(plan)}`,`매일 ${plan.times.length}회 / 한국 시간 (Asia/Seoul)`,`기간: ${plan.start} ~ ${plan.end} (종료일 포함)`,plan.memo].filter(Boolean).join('\n');
+        const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//AlcoholAway//Medication Reminders//KO','CALSCALE:GREGORIAN','X-WR-CALNAME:복약 알람','X-WR-TIMEZONE:Asia/Seoul',
+            'BEGIN:VTIMEZONE','TZID:Asia/Seoul','BEGIN:STANDARD','DTSTART:19700101T000000','TZOFFSETFROM:+0900','TZOFFSETTO:+0900','TZNAME:KST','END:STANDARD','END:VTIMEZONE'];
+        for(const slot of remaining) {
+            const date=new Date(slot.first).toISOString().slice(0,10).replace(/-/g,'');
+            lines.push('BEGIN:VEVENT',`UID:${plan.id}-${slot.index}@reminders.alcoholaway.com`,`DTSTAMP:${stamp}`,`SEQUENCE:${plan.revision}`,
+                `DTSTART;TZID=Asia/Seoul:${date}T${slot.time.replace(':','')}00`,'DURATION:PT5M',`RRULE:FREQ=DAILY;COUNT=${slot.count}`,
+                `SUMMARY:${escapeICS(summary)}`,`DESCRIPTION:${escapeICS(description)}`,'STATUS:CONFIRMED','TRANSP:TRANSPARENT','CLASS:PRIVATE',
+                'BEGIN:VALARM','ACTION:DISPLAY',`TRIGGER:${plan.lead ? '-PT'+plan.lead+'M' : 'PT0S'}`,`DESCRIPTION:${escapeICS(summary)}`,'END:VALARM','END:VEVENT');
+        }
+        lines.push('END:VCALENDAR');
+        return new File([lines.map(foldICS).join('\r\n')+'\r\n'],`medication-${plan.id}.ics`,{type:'text/calendar;charset=utf-8'});
+    }
+    function downloadFile(file) {
+        const url=URL.createObjectURL(file); const a=document.createElement('a'); a.href=url; a.download=file.name; document.body.append(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),60000);
+    }
+    async function exportPlan(id,share) {
+        if(state.busy) return;
+        const key=state.key;
+        try {
+            const plan=readPlans().find(item=>item.id===id);
+            if(!plan) throw new Error('계획이 변경되었거나 삭제되었습니다. 화면을 새로고침해 주세요.');
+            const file=calendarFile(plan); state.busy=true; renderList();
+            let canShare=false;
+            try { canShare=share && !!navigator.share && !!navigator.canShare?.({files:[file]}); } catch {}
+            if(canShare) {
+                try { await navigator.share({files:[file]}); }
+                catch(e) {
+                    if(state.key!==key) return;
+                    if(e.name==='AbortError') { status('달력 전달을 취소했습니다. 복약 계획은 그대로 저장되어 있습니다.'); return; }
+                    downloadFile(file); status('공유를 사용할 수 없어 달력 파일을 내려받았습니다. 파일을 달력 앱으로 열어 가져오기·저장을 완료하세요.'); return;
+                }
+                if(state.key===key) status('달력 파일을 전달했습니다. 달력 앱에서 가져오기·저장을 완료하고 첫 일정의 알림을 확인하세요.');
+            } else {
+                downloadFile(file); status('달력 파일을 내려받았습니다. 파일을 달력 앱으로 열어 가져오기·저장을 완료하고 알림을 확인하세요.');
+            }
+        } catch(e) { if(state.key===key) status(e.message || '달력 파일을 만들지 못했습니다. 다시 시도해 주세요.',true); }
+        finally { if(state.key===key) { state.busy=false; renderList(); } }
+    }
+    $('medicationReminderForm').addEventListener('submit',event=>{
+        event.preventDefault(); if(!state.ready || !$('medicationReminderForm').reportValidity()) return;
+        try {
+            const current=readPlans(), previous=current.find(plan=>plan.id===state.editing);
+            if(state.editing && !previous) throw new Error('다른 창에서 삭제한 계획입니다. 수정 취소 후 새로 생성해 주세요.');
+            const randomId=()=> typeof crypto.randomUUID==='function' ? crypto.randomUUID() : Array.from(crypto.getRandomValues(new Uint8Array(16)),n=>n.toString(16).padStart(2,'0')).join('');
+            const times=Array.from($('mrTimes').querySelectorAll('input'),input=>input.value).sort();
+            const plan={id:previous?.id || randomId(),name:$('mrName').value.trim(),dose:$('mrDose').value.trim(),meal:$('mrMeal').value,
+                mealMinutes:!$('mrMealMinutes').disabled && $('mrMealMinutes').value!=='' ? Number($('mrMealMinutes').value) : null,
+                times,start:$('mrStart').value,end:$('mrEnd').value,lead:Number($('mrLead').value),memo:$('mrMemo').value.trim(),revision:previous ? previous.revision+1 : 0};
+            if(plan.end<plan.start) throw new Error('종료일은 시작일보다 빠를 수 없습니다.');
+            if(new Set(times).size!==times.length) throw new Error('복약 시각이 중복됩니다. 회차별 시각을 확인해 주세요.');
+            if(!validPlan(plan) || times.length!==Number($('mrFrequency').value)) throw new Error('약 이름·횟수·날짜·복약 시각을 확인해 주세요.');
+            if(!slots(plan).length) throw new Error('종료일까지 남은 복약 시각이 없습니다. 날짜와 시간을 확인해 주세요.');
+            if(!commit(previous ? current.map(item=>item.id===plan.id ? plan : item) : [...current,plan])) return;
+            resetForm(); renderList(); status(previous ? '변경 내용을 저장했습니다. 달력의 기존 일정을 지운 뒤 다시 적용해 주세요.' : '복약 알람을 생성했습니다. 아래 내 폰에 적용 버튼으로 달력에 가져오세요.');
+            $('mrList').scrollIntoView({behavior:'smooth',block:'nearest'});
+        } catch(e) { status(e.message,true); }
+    });
+    $('mrFrequency').addEventListener('input',()=>renderTimes()); $('mrMeal').addEventListener('change',updateMeal);
+    $('mrStart').addEventListener('change',()=>{ $('mrEnd').min=$('mrStart').value || '2000-01-01'; });
+    $('mrCancel').addEventListener('click',()=>{resetForm();status();});
+    document.addEventListener('app:tabchange',event=>{if(event.detail?.tab==='medicines' && state.ready) renderList();});
+    document.addEventListener('visibilitychange',()=>{if(!document.hidden && state.ready) renderList();});
+    window.addEventListener('storage',event=>{
+        if(!state.ready || (event.key!==state.key && event.key!==null)) return;
+        try { state.plans=readPlans(); renderList(); status('다른 창의 변경 내용을 반영했습니다.'); }
+        catch(e) { status(e.message,true); }
+    });
+    // 계정 전환 시 상위 인증 콜백에서 bindMedicationReminderAccount(uid)를 호출합니다.
+    resetForm();
+})();
+
+</script>
 
 <script type="module">
 
@@ -5510,6 +5802,7 @@ initPillIdentification();
 
 
     onAuthStateChanged(auth, async (user) => {
+        window.bindMedicationReminderAccount?.(user?.uid || null);
         if (user) {
             userId = user.uid;
             hrBindAccount(user.uid);
@@ -5611,6 +5904,7 @@ initPillIdentification();
             hrBindAccount(null);
             userQuitDate = null;
             currentChallengeId = null;
+            updateCurrentChallengeSummary(null);
             cautionDays = [];
             dailyLogsData = {};
             userProfile.nickname = '';
@@ -7952,6 +8246,30 @@ initPillIdentification();
         return Math.max(0, diff / 86400000);
     }
 
+    window.openSurvivorCommunity = function() {
+        window.switchAppTab('records');
+        if (!userId || !auth.currentUser) {
+            alert('생존자 통신은 로그인 후 이용할 수 있습니다.');
+            document.getElementById('loginArea').scrollIntoView({ behavior:'smooth', block:'center' });
+            return;
+        }
+        const section = document.getElementById('sectionRecovery');
+        const tab = document.getElementById('survivorCommunityTab');
+        if (!currentChallengeId || getComputedStyle(document.getElementById('displayArea')).display === 'none') {
+            alert('도전을 시작한 뒤 생존자 통신을 이용할 수 있습니다.');
+            document.getElementById('setupArea').scrollIntoView({ behavior:'smooth', block:'center' });
+            return;
+        }
+        section.open = true;
+        closeFloatingQuickNav();
+        window.switchTab(tab, 'community');
+        updateMainSectionControlState();
+        requestAnimationFrame(() => {
+            tab.focus({ preventScroll:true });
+            tab.scrollIntoView({ behavior:'smooth', block:'start' });
+        });
+    };
+
     window.switchTab = function(btn, tabName) {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
@@ -9448,8 +9766,29 @@ initPillIdentification();
         } catch (e) { alert("저장 실패: " + e.message); }
     };
 
+    function updateCurrentChallengeSummary(startISO, nowMs = Date.now()) {
+        const summary = document.getElementById('currentChallengeRecordCount');
+        if (!summary) return;
+        const startMs = startISO ? new Date(startISO).getTime() : NaN;
+        let text = '';
+        if (Number.isFinite(startMs)) {
+            const elapsed = (nowMs - startMs) / 86400000;
+            if (elapsed < 0) text = '시작 예정';
+            else {
+                const survivors = Math.max(1, Math.round(1000 * Math.exp(-0.04 * elapsed)));
+                const rate = (survivors / 10).toLocaleString('ko-KR', { maximumFractionDigits:1 });
+                text = `${(Math.floor(elapsed) + 1).toLocaleString()}일째 · 상위 약 ${rate}% (추정)`;
+            }
+        }
+        if (summary.textContent !== text) {
+            summary.textContent = text;
+            summary.closest('button')?.setAttribute('aria-label', `현재 도전 타이머${text ? ', ' + text : ''}, 접기 또는 펼치기`);
+        }
+    }
+
     window.startApp = function(startISO) {
         localStorage.setItem('quitDrinkingDateTime_server', startISO);
+        updateCurrentChallengeSummary(startISO);
         document.getElementById('setupArea').style.display = 'none';
         document.getElementById('displayArea').style.display = 'block';
         updatePushButtonState();
@@ -9468,6 +9807,7 @@ initPillIdentification();
             const start = new Date(startISO);
             const now = new Date();
             const diff = now - start;
+            updateCurrentChallengeSummary(startISO, now.getTime());
             if (diff < 0) return;
 
             const days = diff / 86400000;
