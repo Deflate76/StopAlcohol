@@ -10355,7 +10355,7 @@ initPillIdentification();
 </dialog>
 <script type="module">
 // Embedded into index.html by assemble-html.py. No browser writes to Firestore.
-const OTC_CATALOG_ID = 'otc_ddbdb479f06b';
+const OTC_CATALOG_ID = 'otc_review_20260926_33a241232f55';
 const OTC_IMAGE_BASE = 'https://raw.githubusercontent.com/Deflate76/StopAlcohol/Rollback-version2/DrugImage/';
 
 function normalizeOtcBarcode(raw) {
@@ -10458,13 +10458,25 @@ function installOtcBarcodeScanner({ db, auth, doc, getDoc, onAuthStateChanged, d
       : `${source.productName} (${source.route} · ${source.form})의 자료입니다. 선택한 제품에 적용되는지는 검토되지 않았습니다.`;
     const sourceBox = node('p', intro + ' ' + (source.notes || ''), 'otc-source');
     sourceBox.append(dom.createTextNode(' '), externalLink('근거 허가사항 보기 ↗', source.url)); section.append(sourceBox);
-    const labels = [...new Map(info.referenceRules.map(r => [r.patientGroupCode, `[${r.patientGroupCode}] ${r.patientGroupLabel}`])).values()];
-    section.append(node('p', '기준제품에 기재된 환자군: ' + (labels.join(' · ') || '분류된 규칙 없음'), 'otc-meta'));
-    const detail = node('details'); detail.open = sameProduct;
-    detail.append(node('summary', `조건별 주의정보 ${info.referenceRules.length}건 보기`), ruleList(info.referenceRules)); section.append(detail);
-    // Excipients are product-specific; never project them onto other products sharing an active ingredient.
-    if (sameProduct && info.excipientRules?.length) {
-      const excipient = node('details'); excipient.append(node('summary', '기준제품의 첨가제 관련 조건 별도 확인'), ruleList(info.excipientRules)); section.append(excipient);
+    // CSV references apply only to their exact source product, including combination-product labels.
+    if (!sameProduct) {
+      section.append(node('p', '이 제품의 주의환자 정보는 미확인입니다. 성분이 같아도 다른 품목의 규칙을 적용하지 않습니다.', 'otc-unknown'));
+      return section;
+    }
+    const exactRules = list => (Array.isArray(list) ? list : []).filter(r =>
+      r.sourceProductItemCode === product.itemCode && r.conditions?.sourceProductItemCode === product.itemCode && r.conditions?.requireExactProductMatch === true);
+    const references = exactRules(info.referenceRules), excipients = exactRules(info.excipientRules), sites = exactRules(info.applicationSiteRules);
+    const labels = [...new Map(references.map(r => [r.patientGroupCode, `[${r.patientGroupCode}] ${r.patientGroupLabel}`])).values()];
+    if (references.length) {
+      section.append(node('p', '기준제품에 기재된 환자군: ' + labels.join(' · '), 'otc-meta'));
+      const detail = node('details'); detail.open = true;
+      detail.append(node('summary', `조건별 주의정보 ${references.length}건 보기`), ruleList(references)); section.append(detail);
+    } else section.append(node('p', '환자군별 주의정보는 이 자료에서 확인되지 않았습니다. 주의할 환자가 없다는 뜻은 아닙니다.', 'otc-unknown'));
+    if (excipients.length) {
+      const excipient = node('details'); excipient.append(node('summary', '기준제품의 첨가제 관련 조건 별도 확인'), ruleList(excipients)); section.append(excipient);
+    }
+    if (sites.length) {
+      const site = node('details'); site.append(node('summary', '기준제품의 사용 부위 관련 조건 별도 확인'), ruleList(sites)); section.append(site);
     }
     return section;
   }
