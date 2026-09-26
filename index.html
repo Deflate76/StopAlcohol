@@ -10,7 +10,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>금주도전/건강기록</title>
-    <meta name="app-build" content="records-calendar-v16-reminder-time-defaults">
+    <meta name="app-build" content="records-calendar-v17-firebase-ai-logic">
     
     <meta name="description" content="금주 도전부터 건강 상태, 진단과 처방전까지. 나의 건강을 하루씩 기록하는 금주도전/건강기록." />
     <meta name="theme-color" content="#ffffff" />
@@ -997,6 +997,16 @@
 @media(max-width:360px) { .mr-grid,.mr-times { grid-template-columns:minmax(0,1fr); } .medication-reminder-card { padding:13px; } }
 
 </style>
+<style>
+/* Developer connection test; shown only with ?ai-test=1. */
+#firebaseAiTestCard[hidden], #firebaseAiTestCard [hidden] { display:none!important; }
+#firebaseAiTestCard { text-align:left; }
+.ai-test-fields { display:grid; gap:12px; margin:14px 0; }
+#firebaseAiTestCard .ai-test-status { margin-top:12px; white-space:pre-wrap; overflow-wrap:anywhere; word-break:normal; }
+#firebaseAiTestCard .ai-test-result { margin:12px 0 0; padding:12px; border:1px solid #bfdbfe; border-radius:10px; background:#fff; white-space:pre-wrap; overflow-wrap:anywhere; font:inherit; font-size:.85rem; }
+#firebaseAiTestCard[data-state=error] .ai-test-status { color:#b91c1c; }
+#firebaseAiTestCard[data-state=success] .ai-test-status { color:#166534; }
+</style>
 <!-- OTC barcode styles BEGIN -->
 <style>
 /* OTC barcode lookup: selectors are scoped to avoid altering the existing app. */
@@ -1263,6 +1273,31 @@
     </section>
     <section id="appPanelMedicines" class="app-tab-panel info-tab-panel" role="tabpanel" aria-labelledby="appTabMedicines" tabindex="0" hidden>
         <div class="info-tab-heading"><span class="info-tab-icon" aria-hidden="true">💊</span><h2>의약품 정보</h2><p>약에 대해 궁금할 때, 공식 정보를 확인해 보세요.</p></div>
+        <article id="firebaseAiTestCard" class="info-resource-card" aria-labelledby="firebaseAiTestTitle" hidden>
+            <span class="info-source-label">개발자 연결 확인</span>
+            <h3 id="firebaseAiTestTitle">Firebase AI Logic 테스트</h3>
+            <p>로그인 후 버튼을 누르면 “AI 연결 성공”이라고 답하도록 요청합니다. 건강 기록이나 사진은 전송하지 않습니다.</p>
+            <form id="firebaseAiTestForm">
+                <div class="ai-test-fields">
+                    <label class="mr-label" for="aiTestProvider">API 제공업체
+                        <select id="aiTestProvider"><option value="google">Gemini Developer API</option><option value="agent">Agent Platform (구 Vertex AI)</option></select>
+                    </label>
+                    <label class="mr-label" for="aiTestModel">모델 ID
+                        <input id="aiTestModel" type="text" value="gemini-3.8-flash" required maxlength="120" pattern="[A-Za-z0-9][A-Za-z0-9._-]*" autocomplete="off" spellcheck="false">
+                    </label>
+                    <label id="aiTestLocationField" class="mr-label" for="aiTestLocation" hidden>모델 위치
+                        <input id="aiTestLocation" type="text" value="global" required maxlength="60" pattern="[a-z0-9]+(-[a-z0-9]+)*" autocomplete="off" spellcheck="false" disabled>
+                    </label>
+                </div>
+                <p class="mr-help">Firebase 콘솔에서 활성화한 제공업체와 사용 가능한 모델을 선택하세요. 버튼을 누를 때만 Gemini 요청을 1회 보냅니다.</p>
+                <div class="mr-actions">
+                    <button id="aiTestRun" class="mr-btn mr-primary" type="submit" disabled>Gemini 연결 테스트</button>
+                    <button id="aiTestLogin" class="mr-btn" type="button">로그인 화면으로</button>
+                </div>
+            </form>
+            <p id="aiTestStatus" class="ai-test-status" role="status" aria-live="polite">Firebase SDK를 불러오는 중입니다. 이 상태가 계속되면 새로고침 후 개발자 도구의 Console에서 모듈 로딩 오류를 확인하세요.</p>
+            <pre id="aiTestResult" class="ai-test-result" aria-label="Gemini 응답" hidden></pre>
+        </article>
         <article class="info-resource-card"><span class="info-source-label">알약 앞·뒷면 촬영</span><h3>사진으로 약식별</h3><p>문자·색상·모양·분할선을 비교해 가까운 후보 10개를 찾아보세요.</p><button type="button" id="pillIdMedicineButton" class="pi-primary">💊 약식별 시작</button></article>
         <article class="info-resource-card">
             <span class="info-source-label">식품의약품안전처 · 의약품안전나라</span>
@@ -2670,13 +2705,13 @@
 
 
     
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
-    import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, deleteDoc, collection, addDoc, query, orderBy, limit, onSnapshot, getDocs, where, startAfter, serverTimestamp, writeBatch, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
-    import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-messaging.js";
-    import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app-check.js";
-    import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-functions.js";
-    import { getStorage, ref as storageRef, uploadBytesResumable, getBlob, getMetadata, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-storage.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+    import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, deleteDoc, collection, addDoc, query, orderBy, limit, onSnapshot, getDocs, where, startAfter, serverTimestamp, writeBatch, runTransaction } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+    import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-messaging.js";
+    import { initializeAppCheck, ReCaptchaEnterpriseProvider, getToken as getAppCheckToken } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app-check.js";
+    import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-functions.js";
+    import { getStorage, ref as storageRef, uploadBytesResumable, getBlob, getMetadata, deleteObject } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-storage.js";
 
     const stages = [ { d: 1, t: "1일: 알코올 완전 배출", desc: "혈중 알코올이 0이 되며, 몸이 본격적인 해독 스위치를 켭니다." }, { d: 2, t: "2일: 숙취 및 갈증 해소", desc: "체내 수분 밸런스가 정상화되고 극심한 피로감과 두통이 사라집니다." }, { d: 3, t: "3일: 금단 증상 완화", desc: "초기 불안감과 손떨림이 잦아들며, 신체가 알코올 없는 상태에 적응하기 시작합니다." }, { d: 5, t: "5일: 피부 톤 및 탄력 개선", desc: "탈수 증상이 회복되어 푸석했던 피부가 맑아지고 생기가 돕니다." }, { d: 7, t: "1주: 깊은 수면(REM) 회복", desc: "수면의 질이 극적으로 향상되어 아침에 일어날 때 진짜 '개운함'을 느낍니다." }, { d: 10, t: "10일: 브레인 포그 걷힘", desc: "머릿속 안개가 걷힌 듯 인지 능력이 맑아지고 집중력이 상승합니다." }, { d: 14, t: "2주: 위장 및 소화력 회복", desc: "위점막이 재생되어 속쓰림, 역류성 식도염, 더부룩함이 크게 개선됩니다." }, { d: 21, t: "3주: 혈압 및 심박수 안정화", desc: "고혈압 수치가 제자리를 찾기 시작하며 심혈관계의 부담이 확 줄어듭니다." }, { d: 30, t: "1개월: 간 지방 수치 대폭 감소", desc: "지방간이 최대 15~20% 감소하며, 간 수치 정상화로 피로회복력이 급증합니다." }, { d: 60, t: "2개월: 강력한 면역력 형성", desc: "백혈구 기능이 완전히 회복되어 감기 등 외부 바이러스에 대한 저항력이 강해집니다." }, { d: 90, t: "3개월: 도파민 시스템 정상화", desc: "술 없이도 일상에서 자연스러운 행복과 스트레스 해소를 온전히 느낄 수 있게 됩니다." }, { d: 180, t: "6개월: 눈에 띄는 체형 변화", desc: "불필요한 '빈 칼로리' 섭취가 사라져 뱃살이 줄어들고 얼굴선이 뚜렷해집니다." }, { d: 365, t: "1년: 중증 질환 위험 급감", desc: "간경화, 유방암, 구강암 등 알코올 관련 치명적 질환의 위험이 비약적으로 떨어집니다." }, { d: 730, t: "2년: 뇌세포 용적 회복", desc: "알코올로 인해 위축되었던 뇌의 회백질이 건강한 비음주자 수준으로 재생됩니다." }, { d: 1825, t: "5년: 소화기계 완벽한 리셋", desc: "식도암, 위암 등의 발생 확률이 금주 전의 절반 수준으로 대폭 낮아집니다." }, { d: 3650, t: "10년: 완전한 리셋 및 자유", desc: "신체의 거의 모든 지표가 평생 술을 마시지 않은 사람과 유사한 수준으로 건강해집니다." } ];
     const liverStages = [ { d: 1, t: "1일: 해독 공장 가동", desc: "간이 알코올 분해 업무를 끝내고, 쌓여있던 독소를 처리하는 본래 업무에 집중합니다." }, { d: 7, t: "1주: 염증 수치 하락", desc: "알코올로 인한 간의 미세한 염증들이 가라앉으며 혈액 검사상 간 수치가 하락하기 시작합니다." }, { d: 14, t: "2주: 지방 대사 재개", desc: "알코올 대신 지방을 연소하기 시작하여 간에 끼어있던 기름기가 빠져나가기 시작합니다." }, { d: 30, t: "1개월: 지방간 20% 감소", desc: "지방간 수치가 급격히 떨어지며, 간의 크기가 정상으로 돌아오고 혈색이 좋아집니다." }, { d: 90, t: "3개월: 단백질 합성 최적화", desc: "알부민 등 필수 단백질 합성이 원활해져 만성 피로가 사라지고 근육 성장이 효율적으로 변합니다." }, { d: 180, t: "6개월: 간 섬유화 억제", desc: "딱딱하게 굳으려던 간 조직의 손상이 멈추고, 건강한 간 세포가 그 자리를 대체합니다." }, { d: 365, t: "1년: 해독 능력 극대화", desc: "간의 정화 능력이 정점에 도달하여 약물 대사나 독소 배출 속도가 비약적으로 빨라집니다." }, { d: 1825, t: "5년: 간암 발생률 급감", desc: "간세포의 변이 가능성이 차단되어, 간암 및 간경변 위험이 일반인 수준에 근접합니다." }, { d: 3650, t: "10년: 완벽한 재생 완료", desc: "오랜 기간 손상받았던 간 조직이 완전히 새것처럼 리모델링되어 최상의 상태를 유지합니다." } ];
@@ -2715,6 +2750,27 @@
     };
 
     const app = initializeApp(firebaseConfig);
+
+    // Shared App Check: initialize once, before Auth / Firestore / Functions / AI.
+    const APP_CHECK_SITE_KEY = '6LfI28QtAAAAANzmGSBTvsJWCq4IKNmuxz8CqZ1D';
+    const aiTestParams = new URLSearchParams(window.location.search);
+    const isLocalAiDevelopment = ['localhost', '127.0.0.1', '[::1]'].includes(window.location.hostname);
+    if (isLocalAiDevelopment && aiTestParams.get('ai-debug') === '1') {
+        // Register the generated token in Firebase App Check > Manage debug tokens.
+        // Never put an actual debug token in this source file.
+        self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+    }
+    let appCheck = null;
+    let appCheckInitError = null;
+    try {
+        appCheck = initializeAppCheck(app, {
+            provider: new ReCaptchaEnterpriseProvider(APP_CHECK_SITE_KEY),
+            isTokenAutoRefreshEnabled: true
+        });
+    } catch (error) {
+        appCheckInitError = error;
+        console.warn('App Check 초기화 실패:', error.code || 'initialization');
+    }
     const db = getFirestore(app);
     const auth = getAuth(app);
     const messaging = getMessaging(app);
@@ -5536,12 +5592,8 @@ function initPillIdentification() {
     const MATCHER_VERSION = '2026-09-20-orientation-partial-v2';
     const PILL_REFERENCE_BASE = 'https://raw.githubusercontent.com/Deflate76/StopAlcohol/Rollback-version2/DrugImage/';
     const NOTICE = "처리 주체: Alcoholaway.com 운영자. 목적: 알약 사진 보관, 문자·외형 분석 및 식별 후보 검색. 항목: 계정 식별자, 알약 앞·뒷면 사진, 촬영·저장 시각, 판독 문자·색상·모양·분할선, 검색 결과. 사진에는 건강·복약 관련 민감정보가 포함될 수 있습니다. 사진과 판독 결과는 직접 삭제하거나 동의를 철회할 때까지 본인 계정에 보관합니다. 사진은 Google Cloud의 Cloud Vision 및 Vertex AI로 전송되어 분석되며, 분석 처리가 국내로 한정되지 않습니다. 사진 배경에 얼굴, 이름, 처방전 등 개인정보가 들어가지 않도록 해 주세요. 동의를 거부해도 다른 기능을 사용할 수 있습니다. 약식별 기록 화면에서 기록 삭제 및 동의 철회가 가능합니다. 판독 결과와 유사도는 약품의 확정 식별이나 복용 판단을 대신하지 않습니다.";
-    // Fill in the public reCAPTCHA Enterprise site key registered for this Firebase web app before deployment.
-    const PILL_ID_CONFIG = { appCheckSiteKey: '6LfI28QtAAAAANzmGSBTvsJWCq4IKNmuxz8CqZ1D', region: 'asia-northeast3' };
-    if (PILL_ID_CONFIG.appCheckSiteKey) {
-        try { initializeAppCheck(app, { provider: new ReCaptchaEnterpriseProvider(PILL_ID_CONFIG.appCheckSiteKey), isTokenAutoRefreshEnabled: true }); }
-        catch (error) { console.warn('약식별 앱 검증 초기화 실패:', error.code || 'initialization'); }
-    }
+    // App Check is shared with the rest of the page and initialized above.
+    const PILL_ID_CONFIG = { region: 'asia-northeast3' };
     const el = id => document.getElementById(id), dialog = el('pillIdDialog');
     const storage = getStorage(app), callable = getFunctions(app, PILL_ID_CONFIG.region);
     const colors = ['하양','노랑','주황','분홍','빨강','갈색','연두','초록','청록','파랑','남색','보라','자주','회색','검정','투명'];
@@ -10327,6 +10379,113 @@ initPillIdentification();
     window.closeModal = (id) => document.getElementById(id).style.display = 'none';
     window.toggleEtc = (val) => document.getElementById('etcReason').style.display = (val === '기타') ? 'block' : 'none';
 
+
+    // This query flag only controls visibility; it is not an admin access rule.
+    // AI request authorization / quotas are configured in Firebase, not in the DOM.
+    function initFirebaseAiConnectionTest() {
+        if (aiTestParams.get('ai-test') !== '1') return;
+        const el = id => document.getElementById(id);
+        const card = el('firebaseAiTestCard'), form = el('firebaseAiTestForm');
+        const run = el('aiTestRun'), login = el('aiTestLogin'), status = el('aiTestStatus');
+        const output = el('aiTestResult'), provider = el('aiTestProvider');
+        const modelInput = el('aiTestModel'), locationInput = el('aiTestLocation');
+        let busy = false, authReady = false, authRevision = 0;
+        const setStatus = (message, state = 'idle') => {
+            status.textContent = message;
+            card.dataset.state = state;
+        };
+        const syncControls = () => {
+            run.disabled = busy || !authReady || !auth.currentUser;
+            provider.disabled = modelInput.disabled = busy;
+            locationInput.disabled = busy || provider.value !== 'agent';
+            login.hidden = !!auth.currentUser;
+            card.setAttribute('aria-busy', String(busy));
+        };
+        const friendlyError = (error, stage) => {
+            const code = String(error?.code || 'unknown').replace(/[^a-zA-Z0-9_./-]/g, '').slice(0, 100);
+            const detail = String(error?.message || '');
+            let help;
+            if (stage === 'App Check') {
+                help = 'App Check의 등록 앱, reCAPTCHA Enterprise 사이트 키와 허용 도메인을 확인하세요.';
+                if (isLocalAiDevelopment) help += ' 로컬에서는 ?ai-test=1&ai-debug=1로 열고 Console의 디버그 토큰을 Firebase에 등록하세요.';
+            } else if (stage === 'AI SDK') {
+                help = 'firebase-ai.js를 불러오지 못했습니다. 네트워크 또는 콘텐츠 차단 설정을 확인하세요.';
+            } else if (/429|quota|resource.exhausted/i.test(code + ' ' + detail)) {
+                help = '요청 한도에 도달했습니다. Firebase AI Logic의 할당량과 해당 제공업체의 결제 상태를 확인하세요.';
+            } else if (/404|not.found|not supported/i.test(code + ' ' + detail)) {
+                help = '선택한 제공업체·위치에서 이 모델을 사용할 수 없습니다. 콘솔과 공식 모델 목록의 모델 ID를 확인하세요.';
+            } else if (/401|403|permission|unauthenticated|api.key/i.test(code + ' ' + detail)) {
+                help = 'API 제공업체 활성화, Firebase AI Logic의 App Check 설정, Firebase 웹 API 키의 API 제한을 확인하세요.';
+            } else if (/timeout|timed.out|deadline/i.test(code + ' ' + detail)) {
+                help = '응답 대기 시간이 초과되었습니다. 연결 상태를 확인한 뒤 다시 시도하세요.';
+            } else if (code === 'ai-test/empty-response') {
+                help = '요청은 완료됐지만 텍스트 응답이 없습니다. 사용 가능한 모델 ID를 확인한 뒤 다시 시도하세요.';
+            } else {
+                help = '연결 상태, API 제공업체 설정, 모델 ID를 확인하세요.';
+            }
+            return `${stage} 단계 실패 (${code})\n${help}`;
+        };
+        card.hidden = false;
+        window.switchAppTab?.('medicines');
+        login.addEventListener('click', () => window.switchAppTab?.('records', true));
+        provider.addEventListener('change', () => {
+            el('aiTestLocationField').hidden = provider.value !== 'agent';
+            syncControls();
+        });
+        onAuthStateChanged(auth, user => {
+            authReady = true;
+            authRevision++;
+            output.hidden = true;
+            output.textContent = '';
+            setStatus(user ? '준비되었습니다. 버튼을 눌러 App Check와 Gemini 응답을 확인하세요.' : '먼저 기존 Google 계정으로 로그인한 다음 의약품 정보 탭으로 돌아오세요.');
+            syncControls();
+        });
+        form.addEventListener('submit', async event => {
+            event.preventDefault();
+            if (busy || !authReady || !auth.currentUser || !form.reportValidity()) return;
+            const requestUid = auth.currentUser.uid, revision = authRevision;
+            const isCurrent = () => revision === authRevision && auth.currentUser?.uid === requestUid;
+            const selectedProvider = provider.value, modelId = modelInput.value.trim();
+            const location = locationInput.value.trim();
+            busy = true;
+            syncControls();
+            output.hidden = true;
+            output.textContent = '';
+            let stage = 'App Check';
+            try {
+                setStatus('App Check 토큰을 확인하는 중입니다…');
+                if (!appCheck) throw appCheckInitError || new Error('App Check initialization failed');
+                await getAppCheckToken(appCheck, false);
+                if (!isCurrent()) return;
+                stage = 'AI SDK';
+                setStatus('App Check 통과. AI SDK를 불러오는 중입니다…');
+                // Keep every Firebase CDN import in this file on the same version.
+                const { getAI, getGenerativeModel, GoogleAIBackend, AgentPlatformBackend } =
+                    await import('https://www.gstatic.com/firebasejs/12.19.0/firebase-ai.js');
+                if (!isCurrent()) return;
+                stage = 'Gemini';
+                const backend = selectedProvider === 'agent' ? new AgentPlatformBackend(location) : new GoogleAIBackend();
+                const ai = getAI(app, { backend });
+                const model = getGenerativeModel(ai, { model: modelId, generationConfig: { maxOutputTokens: 2048 } }, { timeout: 45000 });
+                setStatus('App Check 통과. Gemini 응답을 기다리는 중입니다…');
+                // Fixed non-personal prompt only. Never attach health records or photos here.
+                const result = await model.generateContent('Firebase AI Logic 연결 테스트입니다. 다른 설명 없이 "AI 연결 성공" 한 줄로만 답해 주세요.');
+                if (!isCurrent()) return;
+                const responseText = result.response.text().trim();
+                if (!responseText) throw Object.assign(new Error('Empty text response'), { code: 'ai-test/empty-response' });
+                output.textContent = responseText;
+                output.hidden = false;
+                setStatus(`App Check 통과 · Gemini 연결 성공 (${modelId})`, 'success');
+            } catch (error) {
+                if (isCurrent()) setStatus(friendlyError(error, stage), 'error');
+            } finally {
+                busy = false;
+                syncControls();
+            }
+        });
+    }
+    initFirebaseAiConnectionTest();
+
 </script>
 
 <!-- OTC barcode feature BEGIN -->
@@ -10649,9 +10808,9 @@ function installOtcBarcodeScanner({ db, auth, doc, getDoc, onAuthStateChanged, d
   return { lookup, startCamera, stopCamera, decodePhoto, closeWork, unsubscribe };
 }
 
-import { getApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
-import { getFirestore, doc, getDocFromServer } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
+import { getApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+import { getFirestore, doc, getDocFromServer } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 try {
   const otcApp = getApp();
   installOtcBarcodeScanner({ db: getFirestore(otcApp), auth: getAuth(otcApp), doc, getDoc: getDocFromServer, onAuthStateChanged });
