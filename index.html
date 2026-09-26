@@ -10,7 +10,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>금주도전/건강기록</title>
-    <meta name="app-build" content="records-calendar-v17-firebase-ai-logic">
+    <meta name="app-build" content="records-calendar-v18-visible-ai-assistant">
     
     <meta name="description" content="금주 도전부터 건강 상태, 진단과 처방전까지. 나의 건강을 하루씩 기록하는 금주도전/건강기록." />
     <meta name="theme-color" content="#ffffff" />
@@ -998,14 +998,28 @@
 
 </style>
 <style>
-/* Developer connection test; shown only with ?ai-test=1. */
-#firebaseAiTestCard[hidden], #firebaseAiTestCard [hidden] { display:none!important; }
-#firebaseAiTestCard { text-align:left; }
+/* AI assistant: visible in Medicines, with an entry button on the main screen. */
+#firebaseAiTestCard [hidden] { display:none!important; }
+#firebaseAiTestCard { text-align:left; scroll-margin-top:20px; border-color:#c4ddd8; background:linear-gradient(135deg,#f0faf6,#fff); }
+.ai-assistant-entry { display:flex; align-items:center; justify-content:space-between; gap:10px; width:100%; margin:0 0 16px; padding:12px 15px; border:1px solid #b9ddd4; border-radius:13px; background:#f0faf6; color:#115e59; font:inherit; text-align:left; cursor:pointer; box-sizing:border-box; }
+.ai-assistant-entry strong { display:block; font-size:.9rem; }
+.ai-assistant-entry small { display:block; margin-top:3px; font-size:.74rem; color:#53766c; line-height:1.5; }
+.ai-assistant-entry:focus-visible { outline:2px solid #0f766e; outline-offset:3px; }
 .ai-test-fields { display:grid; gap:12px; margin:14px 0; }
-#firebaseAiTestCard .ai-test-status { margin-top:12px; white-space:pre-wrap; overflow-wrap:anywhere; word-break:normal; }
-#firebaseAiTestCard .ai-test-result { margin:12px 0 0; padding:12px; border:1px solid #bfdbfe; border-radius:10px; background:#fff; white-space:pre-wrap; overflow-wrap:anywhere; font:inherit; font-size:.85rem; }
+.ai-helper-topics { display:grid; gap:7px; margin:14px 0; padding:0; border:0; min-width:0; }
+.ai-helper-topics legend { margin-bottom:8px; font-size:.83rem; font-weight:800; color:#334155; }
+.ai-helper-topics label { display:flex; align-items:center; gap:9px; padding:11px; border:1px solid #cbded8; border-radius:10px; background:#fff; cursor:pointer; font-size:.84rem; color:#334155; }
+.ai-helper-topics label:has(input:checked) { border-color:#0f766e; background:#eaf7f1; color:#115e59; font-weight:800; }
+.ai-helper-topics input { flex:0 0 auto; margin:0; width:17px; height:17px; accent-color:#0f766e; }
+.ai-helper-topics label:focus-within { outline:2px solid #0f766e; outline-offset:2px; }
+#firebaseAiTestCard .ai-test-status { margin:12px 0 0; white-space:pre-wrap; overflow-wrap:anywhere; word-break:normal; }
+#firebaseAiTestCard .ai-test-result { margin:12px 0 0; padding:14px; border:1px solid #cbded8; border-radius:10px; background:#fff; white-space:pre-wrap; overflow-wrap:anywhere; font:inherit; font-size:.88rem; line-height:1.9; }
 #firebaseAiTestCard[data-state=error] .ai-test-status { color:#b91c1c; }
 #firebaseAiTestCard[data-state=success] .ai-test-status { color:#166534; }
+.ai-helper-details { margin-top:12px; color:#64748b; font-size:.75rem; line-height:1.7; overflow-wrap:anywhere; }
+.ai-helper-details summary { cursor:pointer; }
+.ai-helper-details pre { white-space:pre-wrap; font:inherit; }
+@media(max-width:480px) { #firebaseAiTestCard { padding-right:40px; } }
 </style>
 <!-- OTC barcode styles BEGIN -->
 <style>
@@ -1037,6 +1051,9 @@
         <button type="button" id="appTabMedicines" class="app-tab-button" role="tab" aria-selected="false" aria-controls="appPanelMedicines" tabindex="-1" data-app-tab="medicines">의약품 정보</button>
         <button type="button" id="appTabSupplements" class="app-tab-button" role="tab" aria-selected="false" aria-controls="appPanelSupplements" tabindex="-1" data-app-tab="supplements">건강기능식품 정보</button>
     </div>
+    <button type="button" id="aiAssistantOpen" class="ai-assistant-entry" aria-controls="firebaseAiTestCard">
+        <span><strong>AI 도우미</strong><small>금주 응원 · 술 권유 거절 문구 · 복약 알람 준비</small></span><span aria-hidden="true">→</span>
+    </button>
     <section id="appPanelRecords" class="app-tab-panel" role="tabpanel" aria-labelledby="appTabRecords" tabindex="0">
     <button id="enablePushBtn" class="stat-btn" style="display:none; margin-bottom: 18px; border-color: var(--primary-color); color: var(--primary-color);">🔔 푸시 알림 허용</button>
     <div id="pushTestLinkRow" class="push-test-link-row">
@@ -1273,30 +1290,46 @@
     </section>
     <section id="appPanelMedicines" class="app-tab-panel info-tab-panel" role="tabpanel" aria-labelledby="appTabMedicines" tabindex="0" hidden>
         <div class="info-tab-heading"><span class="info-tab-icon" aria-hidden="true">💊</span><h2>의약품 정보</h2><p>약에 대해 궁금할 때, 공식 정보를 확인해 보세요.</p></div>
-        <article id="firebaseAiTestCard" class="info-resource-card" aria-labelledby="firebaseAiTestTitle" hidden>
-            <span class="info-source-label">개발자 연결 확인</span>
-            <h3 id="firebaseAiTestTitle">Firebase AI Logic 테스트</h3>
-            <p>로그인 후 버튼을 누르면 “AI 연결 성공”이라고 답하도록 요청합니다. 건강 기록이나 사진은 전송하지 않습니다.</p>
+        <article id="firebaseAiTestCard" class="info-resource-card" aria-labelledby="firebaseAiTestTitle" data-state="loading">
+            <span class="info-source-label">Gemini AI</span>
+            <h3 id="firebaseAiTestTitle" tabindex="-1">AI 도우미</h3>
+            <p>도움받을 주제를 선택하고 <strong>AI 답변 받기</strong>를 누르세요. Gemini가 새로운 답변을 작성합니다.</p>
             <form id="firebaseAiTestForm">
-                <div class="ai-test-fields">
-                    <label class="mr-label" for="aiTestProvider">API 제공업체
-                        <select id="aiTestProvider"><option value="google">Gemini Developer API</option><option value="agent">Agent Platform (구 Vertex AI)</option></select>
-                    </label>
-                    <label class="mr-label" for="aiTestModel">모델 ID
-                        <input id="aiTestModel" type="text" value="gemini-3.8-flash" required maxlength="120" pattern="[A-Za-z0-9][A-Za-z0-9._-]*" autocomplete="off" spellcheck="false">
-                    </label>
-                    <label id="aiTestLocationField" class="mr-label" for="aiTestLocation" hidden>모델 위치
-                        <input id="aiTestLocation" type="text" value="global" required maxlength="60" pattern="[a-z0-9]+(-[a-z0-9]+)*" autocomplete="off" spellcheck="false" disabled>
-                    </label>
-                </div>
-                <p class="mr-help">Firebase 콘솔에서 활성화한 제공업체와 사용 가능한 모델을 선택하세요. 버튼을 누를 때만 Gemini 요청을 1회 보냅니다.</p>
+                <fieldset id="aiHelperTopics" class="ai-helper-topics">
+                    <legend>어떤 도움이 필요한가요?</legend>
+                    <label><input type="radio" name="aiHelperTopic" value="encourage" checked>오늘의 금주 응원</label>
+                    <label><input type="radio" name="aiHelperTopic" value="refusal">술 권유 거절 문구</label>
+                    <label><input type="radio" name="aiHelperTopic" value="reminder">복약 알람 준비 체크리스트</label>
+                </fieldset>
+                <p class="mr-help">선택한 주제만 AI에 전송합니다. 내 건강 기록이나 사진은 사용하지 않습니다.</p>
                 <div class="mr-actions">
-                    <button id="aiTestRun" class="mr-btn mr-primary" type="submit" disabled>Gemini 연결 테스트</button>
-                    <button id="aiTestLogin" class="mr-btn" type="button">로그인 화면으로</button>
+                    <button id="aiTestRun" class="mr-btn mr-primary" type="submit" disabled>AI 답변 받기</button>
+                    <button id="aiTestLogin" class="mr-btn" type="button">Google 로그인하고 이용하기</button>
                 </div>
+                <details id="aiTestSettings" class="ai-helper-details" hidden>
+                    <summary>개발자 연결 설정</summary>
+                    <div class="ai-test-fields">
+                        <label class="mr-label" for="aiTestProvider">API 제공업체
+                            <select id="aiTestProvider"><option value="google">Gemini Developer API</option><option value="agent">Agent Platform (구 Vertex AI)</option></select>
+                        </label>
+                        <label class="mr-label" for="aiTestModel">모델 ID
+                            <input id="aiTestModel" type="text" value="gemini-3.8-flash" required maxlength="120" pattern="[A-Za-z0-9][A-Za-z0-9._-]*" autocomplete="off" spellcheck="false">
+                        </label>
+                        <label id="aiTestLocationField" class="mr-label" for="aiTestLocation" hidden>모델 위치
+                            <input id="aiTestLocation" type="text" value="global" required maxlength="60" pattern="[a-z0-9]+(-[a-z0-9]+)*" autocomplete="off" spellcheck="false" disabled>
+                        </label>
+                    </div>
+                    <p class="mr-help">Firebase 콘솔에서 활성화한 제공업체와 사용 가능한 모델을 설정하세요. 이 화면의 변경은 현재 페이지에만 적용됩니다.</p>
+                </details>
             </form>
-            <p id="aiTestStatus" class="ai-test-status" role="status" aria-live="polite">Firebase SDK를 불러오는 중입니다. 이 상태가 계속되면 새로고침 후 개발자 도구의 Console에서 모듈 로딩 오류를 확인하세요.</p>
-            <pre id="aiTestResult" class="ai-test-result" aria-label="Gemini 응답" hidden></pre>
+            <p id="aiTestStatus" class="ai-test-status" role="status" aria-live="polite">AI 기능을 준비하고 있습니다…</p>
+            <section id="aiHelperAnswer" aria-labelledby="aiHelperAnswerTitle" hidden>
+                <h4 id="aiHelperAnswerTitle">AI 답변</h4>
+                <div id="aiTestResult" class="ai-test-result"></div>
+                <p class="mr-help">AI가 작성한 일반적인 안내입니다. 약 복용 방법은 처방전·약봉투와 의사·약사의 안내를 확인하세요.</p>
+                <button id="aiOpenReminder" class="mr-btn" type="button" hidden>복약 알람 만들기</button>
+            </section>
+            <details id="aiHelperError" class="ai-helper-details" hidden><summary>오류 상세 보기</summary><pre id="aiHelperErrorText"></pre></details>
         </article>
         <article class="info-resource-card"><span class="info-source-label">알약 앞·뒷면 촬영</span><h3>사진으로 약식별</h3><p>문자·색상·모양·분할선을 비교해 가까운 후보 10개를 찾아보세요.</p><button type="button" id="pillIdMedicineButton" class="pi-primary">💊 약식별 시작</button></article>
         <article class="info-resource-card">
@@ -2319,6 +2352,20 @@
         if (focusTab) selected.focus({ preventScroll: true });
         document.dispatchEvent(new CustomEvent('app:tabchange', { detail: { tab: tabName } }));
     };
+    document.getElementById('aiAssistantOpen').addEventListener('click', () => {
+        window.switchAppTab('medicines');
+        const heading = document.getElementById('firebaseAiTestTitle');
+        heading.focus({ preventScroll:true });
+        document.getElementById('firebaseAiTestCard').scrollIntoView({ behavior:'smooth', block:'start' });
+    });
+    window.aiHelperStartupTimer = setTimeout(() => {
+        const card = document.getElementById('firebaseAiTestCard');
+        if (card.dataset.aiReady === 'true') return;
+        card.dataset.state = 'error';
+        document.getElementById('aiTestStatus').textContent = 'AI 기능을 불러오지 못했습니다. 인터넷 연결을 확인하고 새로고침해 주세요.';
+        document.getElementById('aiHelperError').hidden = false;
+        document.getElementById('aiHelperErrorText').textContent = 'Firebase 초기화가 완료되지 않았습니다. 브라우저 Console에서 SDK 로딩 오류를 확인하세요.';
+    }, 15000);
     buttons.forEach((button, index) => {
         button.addEventListener('click', () => switchAppTab(button.dataset.appTab));
         button.addEventListener('keydown', event => {
@@ -10380,27 +10427,48 @@ initPillIdentification();
     window.toggleEtc = (val) => document.getElementById('etcReason').style.display = (val === '기타') ? 'block' : 'none';
 
 
-    // This query flag only controls visibility; it is not an admin access rule.
-    // AI request authorization / quotas are configured in Firebase, not in the DOM.
-    function initFirebaseAiConnectionTest() {
-        if (aiTestParams.get('ai-test') !== '1') return;
+    // Visible AI helper. The debug query controls developer settings only.
+    // Public service authorization and quotas remain configured in Firebase.
+    function initFirebaseAiAssistant() {
         const el = id => document.getElementById(id);
         const card = el('firebaseAiTestCard'), form = el('firebaseAiTestForm');
         const run = el('aiTestRun'), login = el('aiTestLogin'), status = el('aiTestStatus');
-        const output = el('aiTestResult'), provider = el('aiTestProvider');
+        const output = el('aiTestResult'), answer = el('aiHelperAnswer'), provider = el('aiTestProvider');
         const modelInput = el('aiTestModel'), locationInput = el('aiTestLocation');
-        let busy = false, authReady = false, authRevision = 0;
+        const topics = el('aiHelperTopics'), errorBox = el('aiHelperError'), errorText = el('aiHelperErrorText');
+        const developerMode = aiTestParams.get('ai-test') === '1';
+        const commonPrompt = '한국어 존댓말로 간결하게 작성하세요. 일반적인 안내이며 사용자의 개인 기록은 제공되지 않았습니다. 병명, 건강 상태, 복용약, 금주 일수, 성공 확률을 추측하지 마세요. 진단이나 치료, 금단 관리, 복약 용량·횟수·시간 변경을 지시하지 마세요. 굵게 표시나 표 없이 읽기 쉬운 문장으로 작성하세요. ';
+        const tasks = Object.freeze({
+            encourage: { title:'오늘의 금주 응원', prompt:commonPrompt + '금주를 이어가려는 성인에게 부담을 주거나 죄책감을 자극하지 않는 응원 문장 3개를 작성하세요. 건강 효과를 단정하거나 미래의 성공을 보장하지 마세요.' },
+            refusal: { title:'술 권유 거절 문구', prompt:commonPrompt + '술을 권하는 자리에서 쓸 수 있는 짧고 자연스러운 거절 문구를 친구, 직장 동료, 재차 권하는 사람에게 각각 하나씩 총 3개 작성하세요. 질병이나 약 복용에 대한 거짓 핑계는 만들지 마세요.' },
+            reminder: { title:'복약 알람 준비 체크리스트', prompt:commonPrompt + '복약 알람을 등록하기 전에 처방전이나 약봉투에서 확인할 항목을 체크리스트 5개로 작성하세요. 약 이름, 처방된 횟수와 실제 시간, 식사 관련 지시, 시작일·종료일을 포함하세요. 구체적인 약명이나 권장 복약 시간을 새로 제안하지 말고 모호한 지시는 약사에게 확인하도록 안내하세요.' }
+        });
+        let busy = false, authReady = false, authRevision = 0, returnAfterLogin = false;
         const setStatus = (message, state = 'idle') => {
             status.textContent = message;
             card.dataset.state = state;
         };
         const syncControls = () => {
             run.disabled = busy || !authReady || !auth.currentUser;
+            run.textContent = busy ? 'AI가 답변을 작성하고 있어요…' : 'AI 답변 받기';
+            topics.disabled = busy;
             provider.disabled = modelInput.disabled = busy;
             locationInput.disabled = busy || provider.value !== 'agent';
             login.hidden = !!auth.currentUser;
             card.setAttribute('aria-busy', String(busy));
         };
+        const clearResult = () => {
+            answer.hidden = true;
+            output.textContent = '';
+            errorBox.hidden = true;
+            errorBox.open = false;
+            errorText.textContent = '';
+            el('aiOpenReminder').hidden = true;
+        };
+        const withDeadline = (promise, timeout = 45000) => new Promise((resolve, reject) => {
+            const timer = setTimeout(() => reject(Object.assign(new Error('Request timeout'), { code:'ai/timeout' })), timeout);
+            Promise.resolve(promise).then(value => { clearTimeout(timer); resolve(value); }, error => { clearTimeout(timer); reject(error); });
+        });
         const friendlyError = (error, stage) => {
             const code = String(error?.code || 'unknown').replace(/[^a-zA-Z0-9_./-]/g, '').slice(0, 100);
             const detail = String(error?.message || '');
@@ -10425,66 +10493,93 @@ initPillIdentification();
             }
             return `${stage} 단계 실패 (${code})\n${help}`;
         };
-        card.hidden = false;
-        window.switchAppTab?.('medicines');
-        login.addEventListener('click', () => window.switchAppTab?.('records', true));
+        card.dataset.aiReady = 'true';
+        clearTimeout(window.aiHelperStartupTimer);
+        el('aiTestSettings').hidden = !developerMode;
+        if (developerMode) window.switchAppTab?.('medicines');
+        login.addEventListener('click', () => {
+            returnAfterLogin = true;
+            window.switchAppTab?.('records', true);
+            document.querySelector('#loginArea .google-btn')?.click();
+        });
         provider.addEventListener('change', () => {
             el('aiTestLocationField').hidden = provider.value !== 'agent';
             syncControls();
         });
+        topics.addEventListener('change', () => {
+            clearResult();
+            setStatus(auth.currentUser ? 'AI 답변 받기를 누르면 선택한 주제로 답변을 만듭니다.' : 'Google 로그인 후 AI 도우미를 이용할 수 있습니다.');
+        });
+        el('aiOpenReminder').addEventListener('click', () => {
+            const reminder = el('medicationReminderCard');
+            reminder.open = true;
+            reminder.scrollIntoView({ behavior:'smooth', block:'start' });
+            el('mrName').focus({ preventScroll:true });
+        });
         onAuthStateChanged(auth, user => {
             authReady = true;
             authRevision++;
-            output.hidden = true;
-            output.textContent = '';
-            setStatus(user ? '준비되었습니다. 버튼을 눌러 App Check와 Gemini 응답을 확인하세요.' : '먼저 기존 Google 계정으로 로그인한 다음 의약품 정보 탭으로 돌아오세요.');
+            clearResult();
+            setStatus(user ? '주제를 고르고 AI 답변 받기를 눌러 주세요.' : 'Google 로그인 후 AI 도우미를 이용할 수 있습니다.');
             syncControls();
+            if (user && returnAfterLogin) {
+                returnAfterLogin = false;
+                el('aiAssistantOpen').click();
+            }
         });
         form.addEventListener('submit', async event => {
             event.preventDefault();
             if (busy || !authReady || !auth.currentUser || !form.reportValidity()) return;
+            const task = tasks[form.querySelector('[name="aiHelperTopic"]:checked')?.value];
+            if (!task) return;
             const requestUid = auth.currentUser.uid, revision = authRevision;
             const isCurrent = () => revision === authRevision && auth.currentUser?.uid === requestUid;
             const selectedProvider = provider.value, modelId = modelInput.value.trim();
             const location = locationInput.value.trim();
             busy = true;
             syncControls();
-            output.hidden = true;
-            output.textContent = '';
+            clearResult();
             let stage = 'App Check';
             try {
-                setStatus('App Check 토큰을 확인하는 중입니다…');
+                setStatus('AI에 연결하고 있습니다…', 'loading');
                 if (!appCheck) throw appCheckInitError || new Error('App Check initialization failed');
-                await getAppCheckToken(appCheck, false);
+                await withDeadline(getAppCheckToken(appCheck, false));
                 if (!isCurrent()) return;
                 stage = 'AI SDK';
-                setStatus('App Check 통과. AI SDK를 불러오는 중입니다…');
-                // Keep every Firebase CDN import in this file on the same version.
                 const { getAI, getGenerativeModel, GoogleAIBackend, AgentPlatformBackend } =
-                    await import('https://www.gstatic.com/firebasejs/12.19.0/firebase-ai.js');
+                    await withDeadline(import('https://www.gstatic.com/firebasejs/12.19.0/firebase-ai.js'));
                 if (!isCurrent()) return;
                 stage = 'Gemini';
                 const backend = selectedProvider === 'agent' ? new AgentPlatformBackend(location) : new GoogleAIBackend();
                 const ai = getAI(app, { backend });
                 const model = getGenerativeModel(ai, { model: modelId, generationConfig: { maxOutputTokens: 2048 } }, { timeout: 45000 });
-                setStatus('App Check 통과. Gemini 응답을 기다리는 중입니다…');
-                // Fixed non-personal prompt only. Never attach health records or photos here.
-                const result = await model.generateContent('Firebase AI Logic 연결 테스트입니다. 다른 설명 없이 "AI 연결 성공" 한 줄로만 답해 주세요.');
+                setStatus(`AI가 ‘${task.title}’ 답변을 작성하고 있습니다…`, 'loading');
+                // Only a fixed topic prompt is sent. No health records, account details or photos.
+                const result = await model.generateContent(task.prompt);
                 if (!isCurrent()) return;
                 const responseText = result.response.text().trim();
-                if (!responseText) throw Object.assign(new Error('Empty text response'), { code: 'ai-test/empty-response' });
+                if (!responseText) throw Object.assign(new Error('Empty text response'), { code:'ai-test/empty-response' });
                 output.textContent = responseText;
-                output.hidden = false;
-                setStatus(`App Check 통과 · Gemini 연결 성공 (${modelId})`, 'success');
+                el('aiHelperAnswerTitle').textContent = `${task.title} · AI 답변`;
+                answer.hidden = false;
+                el('aiOpenReminder').hidden = task !== tasks.reminder;
+                setStatus('Gemini AI가 답변을 작성했습니다.', 'success');
             } catch (error) {
-                if (isCurrent()) setStatus(friendlyError(error, stage), 'error');
+                if (isCurrent()) {
+                    const detail = friendlyError(error, stage);
+                    errorText.textContent = detail;
+                    errorBox.hidden = false;
+                    setStatus(/429|quota|resource.exhausted/i.test(String(error?.message))
+                        ? 'AI 사용량 한도에 도달했습니다. 잠시 후 다시 시도해 주세요.'
+                        : 'AI 답변을 받지 못했습니다. 아래 오류 상세에서 원인을 확인할 수 있습니다.', 'error');
+                }
             } finally {
                 busy = false;
                 syncControls();
             }
         });
     }
-    initFirebaseAiConnectionTest();
+    initFirebaseAiAssistant();
 
 </script>
 
