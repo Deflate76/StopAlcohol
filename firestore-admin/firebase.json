@@ -1,0 +1,8 @@
+{
+  "functions": [{
+    "source": "functions",
+    "codebase": "firestore-admin",
+    "runtime": "nodejs22",
+    "ignore": ["node_modules", ".git", "*.log", "test", "set-admin.mjs"]
+  }]
+}

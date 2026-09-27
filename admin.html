@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <meta name="color-scheme" content="light">
+  <title>Firestore 관리자 · AlcoholAway</title>
+  <link rel="stylesheet" href="firestore-admin/admin.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">A</span>AlcoholAway</a>
+    <span class="topbar-title">Firestore 관리자</span>
+    <nav><a href="index.html">홈</a><a href="phr.html">약수첩</a></nav>
+  </header>
+  <main>
+    <section class="page-heading">
+      <div><p class="eyebrow">DATA MANAGEMENT</p><h1>데이터 관리</h1><p class="muted">컬렉션을 탐색하고 문서를 조회·편집합니다.</p></div>
+      <div class="account"><span id="accountName">로그인 확인 중</span><span id="roleBadge" class="badge">연결 대기</span><button id="loginButton" type="button" class="primary">Google 로그인</button><button id="refreshSession" type="button" hidden>권한 새로고침</button><button id="logoutButton" type="button" hidden>로그아웃</button></div>
+    </section>
+    <p id="status" role="status" aria-live="polite" class="status">관리자 연결을 준비하고 있습니다.</p>
+    <div id="errorBox" class="error-box" role="alert" hidden><span id="errorText"></span><button id="dismissError" type="button" aria-label="오류 닫기">×</button></div>
+    <section id="accessGate" class="card access-gate">
+      <span class="gate-symbol" aria-hidden="true">⌘</span><div><h2 id="gateTitle">관리자 계정으로 로그인하세요</h2><p id="gateText">등록된 관리자만 Firestore 데이터를 볼 수 있습니다.</p><p id="accountUid" class="mono muted"></p><a href="https://github.com/Deflate76/StopAlcohol/blob/Rollback-version2/firestore-admin/README.md" target="_blank" rel="noopener noreferrer">처음 연결하기 · 관리자 설정 안내 ↗</a></div>
+    </section>
+    <fieldset id="workspace" class="workspace" hidden disabled>
+      <legend class="sr-only">Firestore 데이터 작업 공간</legend>
+      <div class="context-bar"><span class="project-dot" aria-hidden="true"></span><strong>alcoholaway</strong><span class="muted">/ (default)</span><span class="badge live">운영 데이터</span><span class="context-note">저장한 변경사항은 서비스에 바로 반영됩니다.</span></div>
+      <form id="pathForm" class="path-form"><label for="pathInput">전체 경로</label><input id="pathInput" placeholder="users 또는 users/사용자UID/prescription_records" autocomplete="off" spellcheck="false"><button type="submit" class="primary">열기</button></form>
+      <div id="breadcrumbs" class="breadcrumbs" aria-label="현재 경로"></div>
+      <div class="admin-grid">
+        <aside class="card collections-panel"><div class="panel-heading"><h2>컬렉션</h2><button id="rootButton" type="button" class="small">전체</button></div><p id="collectionContext" class="muted mono small-text">데이터베이스 루트</p><div id="collectionList" class="collection-list"></div><button id="moreCollections" type="button" class="wide" hidden>컬렉션 더 보기</button><div class="shortcuts"><h3>바로가기</h3><button type="button" data-path="users">사용자 · users</button><button type="button" data-path="drug_catalogs">의약품 · drug_catalogs</button><button type="button" data-path="posts">게시글 · posts</button><button type="button" data-path="_firestore_admin_audit">관리자 작업 이력</button></div></aside>
+        <section class="card documents-panel"><div class="panel-heading"><h2>문서</h2><button id="newDocument" type="button" class="small" disabled>+ 새 문서</button></div><p id="currentCollection" class="muted mono small-text">컬렉션을 선택하세요</p>
+          <details id="filterDetails"><summary>필드 값으로 검색</summary><form id="filterForm" class="filter-form"><label>필드 경로<input id="filterField" placeholder="email 또는 profile.name" autocomplete="off"></label><div class="two-columns"><label>조건<select id="filterOperator"><option value="EQUAL">같음 (=)</option><option value="LESS_THAN">작음 (&lt;)</option><option value="LESS_THAN_OR_EQUAL">작거나 같음 (≤)</option><option value="GREATER_THAN">큼 (&gt;)</option><option value="GREATER_THAN_OR_EQUAL">크거나 같음 (≥)</option><option value="ARRAY_CONTAINS">배열에 포함</option></select></label><label>타입<select id="filterType"><option value="stringValue">문자열</option><option value="integerValue">정수</option><option value="doubleValue">실수</option><option value="booleanValue">참/거짓</option><option value="timestampValue">날짜·시각</option><option value="nullValue">null</option><option value="referenceValue">문서 참조</option></select></label></div><label>검색 값<input id="filterValue" placeholder="검색할 값" autocomplete="off"></label><div class="actions"><button type="submit" class="primary">검색</button><button id="clearFilter" type="button">초기화</button></div><p class="small-text muted">현재 컬렉션의 단일 필드 조건으로 검색합니다. 하위 컬렉션과 본문 전체를 함께 검색하지 않습니다.</p></form></details>
+          <div id="documentList" class="document-list"><p class="empty">왼쪽에서 컬렉션을 선택해 주세요.</p></div><div class="pagination"><button id="previousPage" type="button" disabled>이전</button><span id="pageNumber">—</span><button id="nextPage" type="button" disabled>다음</button></div>
+        </section>
+        <section class="card editor-panel"><div class="panel-heading"><h2>문서 편집</h2><span id="dirtyBadge" class="badge changed" hidden>저장 전</span></div><div id="editorEmpty" class="empty editor-empty">문서를 선택하면<br>필드와 하위 컬렉션이 표시됩니다.</div><div id="editorContent" hidden>
+          <p id="documentPath" class="document-path mono"></p><p id="documentMeta" class="muted small-text"></p><p id="missingNotice" class="notice" hidden>이 경로에는 문서 본문이 없고 하위 컬렉션만 있을 수 있습니다. 본문을 만들거나 아래 하위 컬렉션을 열 수 있습니다.</p><p id="readOnlyNotice" class="notice" hidden>관리자 작업 이력은 조회만 가능합니다.</p>
+          <label id="newIdLabel" hidden>문서 ID<input id="newId" autocomplete="off" spellcheck="false" placeholder="비워 두면 자동 ID 생성"></label>
+          <div class="editor-toolbar"><button id="reloadDocument" type="button" class="small">새로 불러오기</button><button id="exportDocument" type="button" class="small">JSON 내보내기</button><label class="mode-switch"><input id="rawMode" type="checkbox">타입 JSON</label></div>
+          <p class="small-text muted">정수·날짜 등 원래 타입을 유지합니다. 객체와 배열은 타입이 포함된 JSON으로 편집합니다.</p><div id="fieldList" class="field-list"></div><div id="rawEditor" hidden><label for="rawFields">Firestore 타입 JSON</label><textarea id="rawFields" rows="18" spellcheck="false" autocomplete="off"></textarea><p class="small-text muted">예: {"name":{"stringValue":"이름"},"count":{"integerValue":"1"}}</p></div>
+          <button id="addField" type="button" class="wide">+ 필드 추가</button><div id="writeActions" class="save-actions"><button id="previewSave" type="button" class="primary">변경 확인 · 저장</button><button id="deleteDocument" type="button" class="danger">문서 삭제</button></div>
+          <section class="subcollections"><div class="panel-heading"><h3>하위 컬렉션</h3><button id="newSubcollection" type="button" class="small">경로 열기</button></div><div id="subcollectionList" class="collection-list"></div><button id="moreSubcollections" type="button" class="wide" hidden>하위 컬렉션 더 보기</button></section>
+        </div></section>
+      </div>
+    </fieldset>
+    <footer>관리자 전용 · 로그인 권한과 변경 이력을 서버에서 확인합니다.</footer>
+  </main>
+  <dialog id="confirmDialog" aria-labelledby="confirmTitle"><form method="dialog" id="confirmForm"><h2 id="confirmTitle">변경사항 확인</h2><p id="confirmDescription"></p><pre id="confirmPath" class="mono"></pre><div id="changeList" class="change-list"></div><label id="deleteConfirmLabel" hidden>삭제할 문서의 전체 경로를 입력하세요<input id="deleteConfirmInput" autocomplete="off" spellcheck="false"></label><div class="dialog-actions"><button id="cancelConfirm" type="button">취소</button><button id="acceptConfirm" type="submit" class="primary">저장</button></div></form></dialog>
+  <noscript><p>관리자 페이지를 사용하려면 JavaScript를 켜 주세요.</p></noscript>
+  <script type="module" src="firestore-admin/admin.js"></script>
+</body>
+</html>
