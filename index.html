@@ -11119,32 +11119,37 @@ function installOtcBarcodeScanner({ db, auth, doc, getDoc, onAuthStateChanged, d
       section.append(node('p', '주의정보 미확인 · 환자군별 검토 대기입니다. 등록된 정보가 없다는 뜻이며, 주의할 환자가 없다는 뜻은 아닙니다.', 'otc-unknown')); return section;
     }
     const source = info.referenceSource;
-    const sameProduct = Boolean(source.itemCode) && source.itemCode === product.itemCode;
-    section.append(node('span', '근거자료 정리 초안 · 임상 검토 전', 'otc-pill otc-pending'));
+    const sourceCode = String(source.itemCode || '').trim();
+    const sameProduct = Boolean(sourceCode) && sourceCode === String(product.itemCode || '').trim();
+    section.append(node('span', sameProduct ? '이 제품 참고자료 · 검토 초안' : '동일 성분 참고자료 · 검토 초안', 'otc-pill otc-pending'));
+    const sourceDetail = [source.route, source.form].map(value => String(value || '').trim()).filter(Boolean).join(' · ');
+    const sourceLabel = (source.productName || '출처 제품명 미등록') + (sourceDetail ? ` (${sourceDetail})` : '');
     const intro = sameProduct
-      ? `이 품목의 ${source.route} · ${source.form} 허가사항을 정리한 참고자료입니다.`
-      : `${source.productName} (${source.route} · ${source.form})의 자료입니다. 선택한 제품에 적용되는지는 검토되지 않았습니다.`;
-    const sourceBox = node('p', intro + ' ' + (source.notes || ''), 'otc-source');
-    sourceBox.append(dom.createTextNode(' '), externalLink('근거 허가사항 보기 ↗', source.url)); section.append(sourceBox);
-    // CSV references apply only to their exact source product, including combination-product labels.
-    if (!sameProduct) {
-      section.append(node('p', '이 제품의 주의환자 정보는 미확인입니다. 성분이 같아도 다른 품목의 규칙을 적용하지 않습니다.', 'otc-unknown'));
-      return section;
-    }
-    const exactRules = list => (Array.isArray(list) ? list : []).filter(r =>
-      r.sourceProductItemCode === product.itemCode && r.conditions?.sourceProductItemCode === product.itemCode && r.conditions?.requireExactProductMatch === true);
-    const references = exactRules(info.referenceRules), excipients = exactRules(info.excipientRules), sites = exactRules(info.applicationSiteRules);
+      ? `출처: ${sourceLabel}. 이 제품의 허가사항을 정리한 참고자료입니다.`
+      : `출처: ${sourceLabel}. ${name} 성분에 연결된 주의환자 정보를 표시합니다. 아래 금기·주의 조건은 출처 제품 기준이며, 선택 제품에 그대로 적용되는지는 확인이 필요합니다.`;
+    const sourceBox = node('p', intro, 'otc-source');
+    if (source.url) sourceBox.append(dom.createTextNode(' '), externalLink('근거 허가사항 보기 ↗', source.url));
+    section.append(sourceBox);
+    // ingredientIds already link the selected product to its ingredient documents.
+    // Display their rules even when source product codes differ. Exact-match flags
+    // remain source metadata; displaying a reference does not assert clinical applicability.
+    const ingredientRules = list => (Array.isArray(list) ? list : []).filter(r => r && typeof r === 'object');
+    const references = ingredientRules(info.referenceRules), excipients = ingredientRules(info.excipientRules), sites = ingredientRules(info.applicationSiteRules);
     const labels = [...new Map(references.map(r => [r.patientGroupCode, `[${r.patientGroupCode}] ${r.patientGroupLabel}`])).values()];
     if (references.length) {
-      section.append(node('p', '기준제품에 기재된 환자군: ' + labels.join(' · '), 'otc-meta'));
+      section.append(node('p', (sameProduct ? '주의환자군: ' : '주의환자군 (동일 성분 참고): ') + labels.join(' · '), 'otc-meta'));
       const detail = node('details'); detail.open = true;
-      detail.append(node('summary', `조건별 주의정보 ${references.length}건 보기`), ruleList(references)); section.append(detail);
+      detail.append(node('summary', `${sameProduct ? '조건별 주의정보' : '동일 성분 참고 주의정보'} ${references.length}건 보기`), ruleList(references)); section.append(detail);
     } else section.append(node('p', '환자군별 주의정보는 이 자료에서 확인되지 않았습니다. 주의할 환자가 없다는 뜻은 아닙니다.', 'otc-unknown'));
     if (excipients.length) {
-      const excipient = node('details'); excipient.append(node('summary', '기준제품의 첨가제 관련 조건 별도 확인'), ruleList(excipients)); section.append(excipient);
+      const excipient = node('details'); excipient.append(node('summary', '출처 제품의 첨가제 관련 조건 보기'), ruleList(excipients)); section.append(excipient);
     }
     if (sites.length) {
-      const site = node('details'); site.append(node('summary', '기준제품의 사용 부위 관련 조건 별도 확인'), ruleList(sites)); section.append(site);
+      const site = node('details'); site.append(node('summary', '출처 제품의 사용 부위 관련 조건 보기'), ruleList(sites)); section.append(site);
+    }
+    if (source.notes) {
+      const notes = node('details');
+      notes.append(node('summary', '출처 자료의 검토 메모'), node('p', source.notes, 'otc-muted')); section.append(notes);
     }
     return section;
   }
@@ -11203,7 +11208,7 @@ function installOtcBarcodeScanner({ db, auth, doc, getDoc, onAuthStateChanged, d
       const fragment = dom.createDocumentFragment();
       fragment.append(node('p', `바코드 ${code} · ${products.length}개 품목`, 'otc-count'));
       if (products.length > 1) fragment.append(node('p', '같은 바코드에 여러 품목이 연결되어 있습니다. 포장의 제품명·제조사와 대조해 주세요.', 'otc-note'));
-      fragment.append(node('p', '환자군 주의자료는 일부 성분의 기준제품에서 정리한 초안입니다. 성분이 같아도 함량·투여 경로·복합 성분에 따라 조건이 달라지며, 이 화면만으로 복용 가능 여부를 판단하지 마세요.', 'otc-note'));
+      fragment.append(node('p', '제품이 달라도 동일 성분에 연결된 주의환자 정보를 참고자료로 표시합니다. 자료는 검토 초안이며, 함량·투여 경로·복합 성분에 따라 조건이 달라질 수 있으므로 선택 제품의 최신 허가사항을 함께 확인하세요.', 'otc-note'));
       for (const product of products) {
         const info = await ingredientInfo(product.ingredientIds);
         if (!current(request, uid)) return;
