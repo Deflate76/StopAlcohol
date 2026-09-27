@@ -48,18 +48,30 @@ cd firestore-admin
 다운로드가 성공하고 `~/StopAlcohol-admin/firestore-admin` 폴더에 들어온 뒤 다음 명령을 실행합니다. 중간에 오류가 나면 해당 단계에서 멈추고 확인합니다. `StopAlcohol-admin`이 이미 있다는 오류가 나면 폴더를 삭제하지 말고 기존 다운로드 상태를 먼저 확인하세요.
 
 ```bash
-bash prepare-iam.sh
-cd functions
-npm ci
-npm test
-cd ..
-npx firebase-tools login --no-localhost
+bash prepare-iam.sh &&
+cd functions &&
+npm ci &&
+npm test &&
+cd .. &&
+npx firebase-tools login --no-localhost &&
 npx firebase-tools deploy --project alcoholaway --config firebase.json --only functions:firestore-admin
 ```
 
 `prepare-iam.sh`는 전용 실행 계정 `firestore-admin-console@alcoholaway.iam.gserviceaccount.com`을 만들고 Firestore 데이터 접근 및 Firebase Authentication 조회 역할만 부여합니다. 기존 사용자 IAM 역할은 수정하지 않습니다. 배포 계정에는 이 서비스 계정으로 함수를 실행할 `iam.serviceAccounts.actAs` 권한과 Cloud Functions 배포 권한이 필요합니다. 권한 오류가 나면 프로젝트 IAM 관리자가 배포 계정의 권한을 확인해야 합니다.
 
 별도 `codebase: firestore-admin`과 배포 대상을 사용하므로 다른 코드베이스의 기존 함수 삭제를 요청하지 않습니다. 이 폴더의 Firebase 설정에는 보안규칙이나 Hosting 배포 대상이 없습니다. 이 배포는 `firestoreAdminApi` 함수만 대상으로 합니다.
+
+서비스 계정 생성 직후에는 IAM 반영에 60초 이상 걸려 `Service account ... does not exist`가 일시적으로 나올 수 있습니다. 스크립트는 해당 오류와 알려진 일시적 오류에 한해 간격을 늘리며 최대 9회 시도합니다. 권한 부족이나 조건식 오류는 즉시 중단하고 원문을 표시합니다. 생성된 계정을 삭제할 필요는 없습니다. 공식 안내: [서비스 계정 생성 후 반영 지연](https://docs.cloud.google.com/iam/docs/service-accounts-create), [IAM 재시도](https://docs.cloud.google.com/iam/docs/retry-strategy).
+
+이미 이전 버전으로 실패했다면 다음 명령으로 수정본을 받고 다시 실행합니다.
+
+```bash
+cd ~/StopAlcohol-admin/firestore-admin &&
+git pull --ff-only &&
+bash prepare-iam.sh
+```
+
+`관리자 API 전용 실행 계정을 준비했습니다`가 나오면 위 설치 명령의 `cd functions`부터 이어서 실행합니다. `lint-condition`은 검사할 조건식을 입력받는 별도 명령이므로 계정 반영 지연을 해결하는 절차에는 필요하지 않습니다.
 
 ## 3. 관리자 계정 지정
 
