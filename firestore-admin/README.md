@@ -30,9 +30,24 @@
 
 [Google Cloud Shell](https://shell.cloud.google.com/?project=alcoholaway)을 열고 **프로젝트 관리자 계정**을 사용합니다. Node.js 22와 npm, gcloud가 필요합니다. 이미 저장소를 내려받았다면 해당 저장소를 최신 상태로 맞춘 뒤 폴더로 이동하세요.
 
+저장소에 대용량 자료가 있으므로 아래 명령으로 최신 버전의 관리자 파일만 받습니다. `--no-checkout`으로 전체 파일 다운로드를 미루고, 필요한 경로를 선택한 뒤 파일을 받습니다. 실패한 전체 다운로드와 구분하기 위해 `StopAlcohol-admin`이라는 새 폴더를 사용합니다.
+
 ```bash
-git clone --branch Rollback-version2 https://github.com/Deflate76/StopAlcohol.git
-cd StopAlcohol/firestore-admin
+cd ~ &&
+git -c http.version=HTTP/1.1 clone \
+  --depth 1 --single-branch --no-tags \
+  --filter=blob:none --no-checkout \
+  --branch Rollback-version2 \
+  https://github.com/Deflate76/StopAlcohol.git StopAlcohol-admin &&
+cd StopAlcohol-admin &&
+git sparse-checkout set --no-cone '/admin.html' '/firestore-admin/' &&
+git checkout Rollback-version2 &&
+cd firestore-admin
+```
+
+다운로드가 성공하고 `~/StopAlcohol-admin/firestore-admin` 폴더에 들어온 뒤 다음 명령을 실행합니다. 중간에 오류가 나면 해당 단계에서 멈추고 확인합니다. `StopAlcohol-admin`이 이미 있다는 오류가 나면 폴더를 삭제하지 말고 기존 다운로드 상태를 먼저 확인하세요.
+
+```bash
 bash prepare-iam.sh
 cd functions
 npm ci
@@ -103,6 +118,7 @@ API가 매 요청마다 Firebase Auth의 현재 사용자 상태와 클레임을
 
 | 화면/오류 | 확인할 항목 |
 | --- | --- |
+| Git 다운로드 중 `early EOF` / `invalid index-pack output` | 전송 도중 연결이 끊겼습니다. 위의 관리자 경로만 받는 명령으로 새 폴더에 다운로드합니다. |
 | 관리자로 등록된 계정만 접근 가능 | 같은 프로젝트·계정의 관리자 지정 여부, 권한 새로고침 |
 | 함수 연결 실패 / not-found | `firestoreAdminApi` 배포 완료 여부와 `asia-northeast3` 리전 |
 | 앱 인증 실패 / unauthenticated | App Check 웹 앱, Enterprise 키, 승인된 도메인 및 재로그인 |
