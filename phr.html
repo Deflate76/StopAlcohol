@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#116d64">
+<meta name="referrer" content="same-origin">
+<meta name="robots" content="noindex,nofollow">
+<meta name="app-build" content="2026-09-27-phr-multiformat-v1">
+<title>약수첩 · Alcoholaway</title>
+<style>
+:root{color-scheme:light;--ink:#203d40;--muted:#617476;--green:#116d64;--line:#d9e5e2;--wash:#f3f7f5}
+*{box-sizing:border-box}body{margin:0;background:var(--wash);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;line-height:1.65}
+[hidden]{display:none!important}button,input,select,textarea{font:inherit}button,a,input,select,textarea,summary{-webkit-tap-highlight-color:transparent}
+button,a{touch-action:manipulation}button{cursor:pointer}button:disabled{opacity:.55;cursor:wait}
+a{color:var(--green)}button:focus-visible,a:focus-visible,summary:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #4e9bcd;outline-offset:3px}
+.shell{width:min(980px,100%);margin:auto;padding:26px 22px 56px}.topbar,.row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.back{text-decoration:none;font-size:14px;font-weight:700}.account{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:10px;flex-wrap:wrap}.account span{max-width:200px;overflow-wrap:anywhere}
+.hero{padding:28px 0 20px}.eyebrow{font-size:11px;font-weight:800;letter-spacing:2px;color:var(--green);margin:0 0 8px}.hero h1{font-size:32px;letter-spacing:-1px;line-height:1.25;margin:0;display:flex;gap:12px;align-items:center}.book-icon{width:39px;height:39px;color:var(--green)}
+.intro{margin:12px 0 0;color:var(--muted);font-size:14px}.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:42px;padding:9px 16px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);font-size:14px;font-weight:700;text-decoration:none;line-height:1.5}
+.btn.primary{background:var(--green);color:#fff;border-color:var(--green)}.btn.danger{color:#ae3341;border-color:#e9b7be;background:#fff7f8}.btn.small{min-height:34px;padding:5px 10px;font-size:12px}
+.panel{background:white;border:1px solid var(--line);border-radius:18px;padding:22px}.login-panel{text-align:center;padding:36px 22px}.login-panel h2{font-size:20px;margin:0 0 8px}
+.notice{font-size:13px;color:#76571b;background:#fff9e9;border:1px solid #e8d9ad;border-radius:12px;padding:12px 15px;margin:0 0 20px}.notice p{margin:0}.muted{font-size:13px;color:var(--muted)}.status{min-height:23px;font-size:13px;color:var(--muted);overflow-wrap:anywhere;margin:14px 0}.status.error{color:#a62f3b}
+.toolbar{display:grid;grid-template-columns:minmax(160px,1fr) 160px;gap:12px;margin-bottom:16px}label{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:700}
+input,select,textarea{width:100%;min-width:0;color:var(--ink);background:#fff;border:1px solid #bdd1cb;border-radius:9px;padding:10px 11px;font-size:16px;line-height:1.5}textarea{resize:vertical;min-height:88px}input[type=checkbox]{width:18px;height:18px;flex:none;accent-color:var(--green)}
+.count{margin:0 0 12px;font-size:13px;color:var(--muted)}.record-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.record-card{height:100%;display:flex;flex-direction:column;gap:12px;background:#fff;border:1px solid var(--line);border-radius:15px;padding:19px;overflow-wrap:anywhere}.record-card h2{font-size:18px;line-height:1.5;margin:0}.record-open{text-align:left;border:0;background:transparent;padding:0;color:var(--ink);font-weight:800;font:inherit;cursor:pointer}.record-open:hover{color:var(--green)}.record-date{font-size:12px;color:var(--muted);margin:0}
+.badges,.chips{display:flex;flex-wrap:wrap;gap:6px}.badge{font-size:11px;padding:3px 8px;background:#edf4f2;border-radius:6px;color:#426760;font-weight:700}.badge.pending{background:#fff0ca;color:#7c5912}.badge.confirmed{background:#e3f3ec;color:#1b7055}.badge.taking{background:#e7f0fe;color:#335d94}
+.chips{list-style:none;padding:0;margin:0}.chips li{font-size:12px;background:#f0f5f4;padding:4px 9px;border-radius:6px}.card-bottom{margin-top:auto;display:flex;justify-content:flex-end}.empty{text-align:center;padding:36px 20px;color:var(--muted);border:1px dashed #bfcfc8;border-radius:14px;background:#fff}.empty strong{display:block;color:var(--ink);font-size:17px;margin-bottom:7px}.footer{font-size:12px;color:var(--muted);margin-top:26px}
+dialog{width:min(780px,calc(100vw - 24px));max-height:calc(100dvh - 24px);padding:0;border:1px solid var(--line);border-radius:18px;background:white;color:var(--ink);overflow:auto;overscroll-behavior:contain;box-shadow:0 25px 100px #18383050}dialog::backdrop{background:#173c43a3;backdrop-filter:blur(3px)}
+.dialog-head{position:sticky;top:0;z-index:2;display:flex;justify-content:space-between;gap:14px;align-items:flex-start;padding:18px 22px;background:#fff;border-bottom:1px solid var(--line)}.dialog-head h2{font-size:20px;line-height:1.5;margin:0;overflow-wrap:anywhere}.close{border:0;background:#edf3f1;border-radius:50%;min-width:36px;min-height:36px;font-size:23px;color:#3d645e;line-height:1}.dialog-body{padding:20px 22px}.dialog-actions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;padding-top:17px;border-top:1px solid var(--line);margin-top:20px}
+.detail-meta{display:grid;grid-template-columns:105px 1fr;gap:7px 12px;font-size:13px;margin:16px 0}.detail-meta dt{color:var(--muted)}.detail-meta dd{margin:0;overflow-wrap:anywhere}
+.photo-details{margin:16px 0;border:1px solid var(--line);border-radius:11px;padding:12px}.photo-details summary{color:var(--green);font-weight:700;font-size:14px;cursor:pointer}.photo-details img{display:block;max-width:100%;max-height:600px;object-fit:contain;margin:14px auto 0;border-radius:7px}.medicine-list{display:grid;gap:10px}.medicine{border:1px solid var(--line);border-radius:11px;overflow:hidden}.medicine summary{padding:12px 14px;font-weight:700;font-size:14px;cursor:pointer;background:#f4f8f6;overflow-wrap:anywhere}.medicine-body{padding:4px 14px 14px}.medicine-body p{font-size:13px;white-space:pre-wrap;overflow-wrap:anywhere}.medicine-body .detail-meta{grid-template-columns:90px 1fr}
+.warnings{font-size:12px;color:#805d1e;padding-left:20px}.evidence{font-size:12px;color:var(--muted);white-space:pre-wrap;overflow-wrap:anywhere}.section-title{font-size:16px;margin:20px 0 10px}.note{font-size:13px;white-space:pre-wrap;overflow-wrap:anywhere;background:#f4f7f6;padding:12px;border-radius:10px}
+fieldset{border:0;padding:0;margin:0;min-width:0}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.full{grid-column:1/-1}.edit-med{border:1px solid var(--line);border-radius:12px;margin:12px 0;padding:15px}.edit-med h3{font-size:15px;margin:0 0 14px}.check{display:flex;flex-direction:row;align-items:flex-start;gap:9px;font-size:13px;margin-top:17px}.check input{margin-top:3px}.edit-hint{font-size:12px;color:var(--muted);font-weight:400}
+@media(max-width:620px){.shell{padding:19px 15px 38px}.hero{padding:24px 0 18px}.hero h1{font-size:28px}.hero .btn{margin-top:14px}.toolbar{grid-template-columns:1fr}.record-list{grid-template-columns:1fr}.panel{padding:17px}.dialog-head{padding:16px}.dialog-body{padding:16px}.form-grid{grid-template-columns:1fr}.detail-meta{grid-template-columns:85px 1fr}.edit-med{padding:12px}.account span{max-width:130px}}
+</style>
+</head>
+<body>
+<main class="shell">
+  <nav class="topbar" aria-label="페이지 이동">
+    <a class="back" href="./index.html">← 건강기록</a>
+    <div class="account"><span id="accountName"></span><button id="logout" class="btn small" hidden>로그아웃</button></div>
+  </nav>
+  <header class="hero">
+    <p class="eyebrow">MY MEDICINE NOTEBOOK</p>
+    <div class="row">
+      <h1><svg class="book-icon" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="3" width="18" height="22" rx="3"/><path d="M10 3v22M3 8h5M3 14h5M3 20h5M14 12h6M17 9v6M14 20h6"/></svg>약수첩</h1>
+      <a class="btn primary" href="./index.html?phr=photos">＋ 처방전 사진에서 추가</a>
+    </div>
+    <p class="intro">처방기록을 한곳에 모아 보고, 약 이름으로 찾아보세요.</p>
+  </header>
+  <p id="pageStatus" class="status" role="status" aria-live="polite">계정 정보를 확인하고 있습니다…</p>
+  <section id="loginPanel" class="panel login-panel" hidden aria-labelledby="loginTitle">
+    <h2 id="loginTitle">내 계정의 약수첩</h2>
+    <p class="muted">건강기록에서 사용하는 계정으로 로그인해 주세요.</p>
+    <button id="login" class="btn primary">Google 계정으로 로그인</button>
+  </section>
+  <section id="notebook" hidden aria-label="내 처방기록">
+    <aside class="notice"><p><strong>AI 판독은 확인이 필요해요.</strong> 약 이름·용량·복용법을 원본과 비교한 뒤 ‘원본 확인 완료’로 표시해 주세요. 복용 변경은 처방 지시를 따르세요.</p></aside>
+    <div class="toolbar">
+      <label for="search">기록 검색<input id="search" type="search" placeholder="약 이름, 의료기관, 제목, 날짜, 메모" autocomplete="off" maxlength="200"></label>
+      <label for="filter">표시할 기록<select id="filter"><option value="all">전체 기록</option><option value="pending">원본 확인 전</option><option value="taking">복용 중</option><option value="completed">복용 완료</option><option value="archived">보관</option></select></label>
+    </div>
+    <p id="recordCount" class="count"></p>
+    <ul id="recordList" class="record-list"></ul>
+    <div id="empty" class="empty" hidden></div>
+    <p class="footer">처방전 사진 목록의 ‘약수첩에 기록하기’로 기록을 추가할 수 있습니다. 본인 계정에 저장되며 같은 사진으로 만든 기록은 중복 저장하지 않습니다.<br>사진을 삭제하면 연결된 약수첩 기록도 삭제됩니다. 사진 기록 동의 철회는 <a href="./index.html?phr=photos">처방전 사진 목록의 동의 관리</a>에서 할 수 있습니다.</p>
+  </section>
+</main>
+<dialog id="recordDialog" aria-labelledby="recordTitle">
+  <header class="dialog-head"><h2 id="recordTitle">처방기록</h2><button id="closeRecord" class="close" aria-label="처방기록 닫기">×</button></header>
+  <div class="dialog-body">
+    <p id="detailStatus" class="status" role="status" aria-live="polite"></p>
+    <div id="recordView"></div>
+    <form id="editForm" hidden>
+      <fieldset id="editFields">
+        <p class="muted">원본에 없는 내용은 빈칸으로 두세요. 복용법을 추측해서 채우지 마세요.</p>
+        <div class="form-grid">
+          <label class="full" for="editTitle">기록 제목<input id="editTitle" maxlength="100" required></label>
+          <label for="editPrescriptionDate">처방일<input id="editPrescriptionDate" type="date"></label>
+          <label for="editDispensingDate">조제일<input id="editDispensingDate" type="date"></label>
+          <label for="editFacility">의료기관·약국<input id="editFacility" maxlength="100"></label>
+          <label for="editStatus">관리 상태<select id="editStatus"><option value="recorded">기록됨</option><option value="taking">복용 중</option><option value="completed">복용 완료</option><option value="archived">보관</option></select></label>
+        </div>
+        <h3 class="section-title">약 목록</h3>
+        <div id="editMedicines"></div>
+        <button type="button" id="addMedicine" class="btn small">＋ 약 추가</button>
+        <label for="editNote" style="margin-top:18px">메모<textarea id="editNote" maxlength="2000" placeholder="기억할 내용이나 확인할 질문을 적어두세요"></textarea></label>
+        <label class="check"><input type="checkbox" id="editReviewed"><span>약 이름·용량·복용법을 원본과 대조했습니다.<br><span class="edit-hint">확인하면 ‘원본 확인 완료’로 표시합니다.</span></span></label>
+        <div class="dialog-actions"><button type="button" id="cancelEdit" class="btn">수정 취소</button><button type="submit" class="btn primary">변경 저장</button></div>
+      </fieldset>
+    </form>
+    <div id="recordActions" class="dialog-actions"><button id="deleteRecord" class="btn danger">기록 삭제</button><button id="editRecord" class="btn primary">내용 수정·확인</button></div>
+  </div>
+</dialog>
+<script type="module">
+const PHR_POLICY_VERSION='2026-09-19-v1';
+const PHR_STATUS={recorded:'기록됨',taking:'복용 중',completed:'복용 완료',archived:'보관'};
+const PHR_SCHEDULE={daily:'매일',as_needed:'필요시',weekly:'매주',alternate_days:'격일·며칠 간격',tapered:'단계별 증량·감량',interval:'시간 간격',unknown:'확인 필요'};
+const PHR_MEAL={'':'확인 필요',before:'식전',after:'식후',any:'식사 무관',bedtime:'취침 전'};
+const phrDate=value=>typeof value==='string' && /^\d{4}-\d{2}-\d{2}$/.test(value) && value>='2000-01-01' && Number.isFinite(Date.parse(value+'T00:00:00Z')) && new Date(value+'T00:00:00Z').toISOString().slice(0,10)===value;
+const phrText=(value,max=2000)=>typeof value==='string'?value.slice(0,max):'';
+const phrMedications=record=>Array.isArray(record.medications)?record.medications.filter(m=>m && typeof m==='object').slice(0,20):[];
+function phrMatches(record,search,filter) {
+  if(filter==='pending' && record.reviewStatus==='confirmed')return false;
+  if(filter!=='all' && filter!=='pending' && record.status!==filter)return false;
+  const haystack=[record.title,record.facilityName,record.note,record.prescriptionDate,record.dispensingDate,
+    ...phrMedications(record).flatMap(m=>[m.name,m.dose,m.instructions])].map(value=>phrText(value)).join(' ').normalize('NFKC').toLocaleLowerCase();
+  return search.normalize('NFKC').toLocaleLowerCase().trim().split(/\s+/).every(term=>haystack.includes(term));
+}
+function installPrescriptionNotebook({auth,db,storage,doc,collection,getDoc,onSnapshot,runTransaction,serverTimestamp,storageRef,getBlob,onAuthStateChanged,signInWithPopup,GoogleAuthProvider,signOut,dom=document,win=window}) {
+  const el=id=>dom.getElementById(id);
+  const node=(tag,text='',cls='')=>{const n=dom.createElement(tag);n.textContent=text;if(cls)n.className=cls;return n;};
+  const state={uid:null,generation:0,records:[],loaded:false,unsubscribe:null,selected:null,editing:false,dirty:false,busy:false,serial:0,photoSequence:0,photoUrl:null,photoNode:null,returnFocus:null};
+  const requested=new URLSearchParams(win.location.search).get('record');
+  let deepLink=/^[A-Za-z0-9_-]{1,160}$/.test(requested||'')?requested:null;
+  const status=(id,text='',error=false)=>{el(id).textContent=text;el(id).classList.toggle('error',error);};
+  const token=()=>({uid:state.uid,generation:state.generation});
+  const current=t=>!!t.uid && state.uid===t.uid && auth.currentUser?.uid===t.uid && state.generation===t.generation;
+  const reference=(uid,id)=>doc(db,'users',uid,'prescription_records',id);
+  const fail=code=>Object.assign(new Error(code),{code});
+  const errorText=error=>{
+    const code=String(error?.code||'');
+    if(code==='phr/conflict')return '다른 화면에서 기록이 변경되었습니다. 입력 내용을 확인한 뒤 수정 취소를 누르고 최신 기록에서 다시 수정해 주세요.';
+    if(code==='phr/missing')return '이 기록은 삭제되었습니다. 목록에서 다른 기록을 선택해 주세요.';
+    if(code==='phr/consent')return '사진 기록 동의가 없거나 철회되었습니다. 처방전 사진 목록의 동의 관리에서 확인해 주세요.';
+    if(/permission|unauthenticated|unauthorized/.test(code))return '기록에 접근할 수 없습니다. 로그인한 계정과 저장 권한을 확인해 주세요.';
+    if(/unavailable|network|offline/.test(code))return '인터넷 연결을 확인해 주세요. 저장 완료 전에는 이 화면을 닫지 마세요.';
+    if(code==='storage/object-not-found')return '원본 사진 파일을 찾을 수 없습니다.';
+    return '요청을 완료하지 못했습니다. 연결 상태를 확인하고 다시 시도해 주세요.';
+  };
+  function releasePhoto() {
+    state.photoSequence++;
+    if(state.photoNode)state.photoNode.removeAttribute('src');
+    state.photoNode=null;
+    if(state.photoUrl)win.URL.revokeObjectURL(state.photoUrl);
+    state.photoUrl=null;
+  }
+  function clearDetail() {
+    releasePhoto();state.selected=null;state.editing=false;state.dirty=false;
+    el('recordView').replaceChildren();el('editMedicines').replaceChildren();el('editForm').reset();
+    el('editForm').hidden=true;el('recordView').hidden=false;el('recordActions').hidden=false;
+    status('detailStatus');
+  }
+  function syncBusy(value) {
+    state.busy=value;el('editFields').disabled=value;
+    for(const id of ['deleteRecord','editRecord','closeRecord'])el(id).disabled=value;
+  }
+  function closeRecord(force=false) {
+    if(!force && state.busy)return;
+    if(!force && state.dirty && !win.confirm('저장하지 않은 수정을 닫을까요?'))return;
+    if(el('recordDialog').open)el('recordDialog').close();
+    clearDetail();
+    const url=new URL(win.location.href);url.searchParams.delete('record');win.history.replaceState(null,'',url.href);
+    state.returnFocus?.focus?.();
+  }
+  function renderList() {
+    const list=el('recordList');list.replaceChildren();
+    const rows=state.records.filter(r=>phrMatches(r,el('search').value,el('filter').value));
+    el('recordCount').textContent=state.loaded?rows.length+'개 표시 · 전체 '+state.records.length+'개':'';
+    el('empty').hidden=!state.loaded || !!rows.length;
+    if(!rows.length && state.loaded) {
+      el('empty').replaceChildren(node('strong',state.records.length?'검색 결과가 없습니다':'아직 저장한 처방기록이 없습니다'),
+        node('span',state.records.length?'검색어나 표시할 기록을 바꿔보세요.':'처방전 사진에서 ‘약수첩에 기록하기’를 눌러 시작하세요.'));
+    }
+    for(const record of rows) {
+      const item=node('li'),card=node('article','','record-card'),badges=node('div','','badges');
+      badges.append(node('span',record.reviewStatus==='confirmed'?'원본 확인 완료':'원본 확인 전','badge '+(record.reviewStatus==='confirmed'?'confirmed':'pending')),
+        node('span',PHR_STATUS[record.status]||'기록됨','badge '+(record.status==='taking'?'taking':'')));
+      const heading=node('h2'),open=node('button',phrText(record.title,100)||'처방기록','record-open');
+      open.type='button';open.addEventListener('click',()=>openRecord(record.id));heading.append(open);
+      const date=phrDate(record.prescriptionDate)?'처방일 '+record.prescriptionDate:'처방일 미확인';
+      card.append(badges,heading,node('p',date+(record.facilityName?' · '+phrText(record.facilityName,100):''),'record-date'));
+      const meds=phrMedications(record),chips=node('ul','','chips');
+      for(const med of meds.slice(0,5))chips.append(node('li',phrText(med.name,80)||'약 이름 확인 필요'));
+      if(meds.length>5)chips.append(node('li','외 '+(meds.length-5)+'개'));
+      card.append(chips);
+      const foot=node('div','','card-bottom'),button=node('button','기록 보기 →','btn small');
+      button.type='button';button.addEventListener('click',()=>openRecord(record.id));foot.append(button);card.append(foot);item.append(card);list.append(item);
+    }
+  }
+  function meta(items) {
+    const dl=node('dl','','detail-meta');for(const [label,value] of items)dl.append(node('dt',label),node('dd',value||'확인 필요'));return dl;
+  }
+  async function loadPhoto(record,details,image,note) {
+    if(!details.open || image.hasAttribute('src'))return;
+    const t=token(),sequence=++state.photoSequence;
+    const active=()=>current(t) && el('recordDialog').open && state.selected?.id===record.id && sequence===state.photoSequence;
+    note.textContent='원본 사진을 불러오고 있습니다…';
+    try {
+      if(!/^[A-Za-z0-9_-]+$/.test(record.sourcePhotoId||''))throw fail('storage/object-not-found');
+      const source=await getDoc(doc(db,'users',t.uid,'prescription_photos',record.sourcePhotoId));
+      if(!active())return;
+      if(!source.exists() || source.data().status!=='ready')throw fail('storage/object-not-found');
+      const blob=await getBlob(storageRef(storage,'health_records/'+t.uid+'/'+record.sourcePhotoId+'.jpg'),4*1024*1024+1);
+      if(!active())return;
+      const header=new Uint8Array(await blob.slice(0,3).arrayBuffer());
+      if(!blob.size || blob.size>4*1024*1024 || header[0]!==255 || header[1]!==216 || header[2]!==255)throw fail('photo/invalid');
+      if(!active())return;
+      if(state.photoUrl)win.URL.revokeObjectURL(state.photoUrl);
+      state.photoUrl=win.URL.createObjectURL(blob.slice(0,blob.size,'image/jpeg'));state.photoNode=image;
+      image.src=state.photoUrl;image.hidden=false;note.textContent='저장한 처방전·약봉투 원본';
+      image.onerror=()=>{if(active()){note.textContent='사진을 표시하지 못했습니다. 기록을 다시 열어 주세요.';image.hidden=true;}};
+    } catch(error){if(active())note.textContent=errorText(error);}
+  }
+  function renderDetail(record) {
+    releasePhoto();const view=el('recordView');view.replaceChildren();
+    el('recordTitle').textContent=phrText(record.title,100)||'처방기록';
+    const badges=node('div','','badges');
+    badges.append(node('span',record.reviewStatus==='confirmed'?'원본 확인 완료':'AI 판독 · 원본 확인 전','badge '+(record.reviewStatus==='confirmed'?'confirmed':'pending')),
+      node('span',PHR_STATUS[record.status]||'기록됨','badge'));
+    view.append(badges,meta([['처방일',record.prescriptionDate],['조제일',record.dispensingDate],['의료기관·약국',record.facilityName],
+      ['기록한 시각',record.createdAtClient && Number.isFinite(Date.parse(record.createdAtClient))?new Date(record.createdAtClient).toLocaleString('ko-KR'):'']]));
+    const photo=node('details','','photo-details'),image=node('img'),photoNote=node('p','','muted');
+    image.alt='처방기록의 원본 사진';image.hidden=true;
+    photo.append(node('summary','원본 사진과 대조하기'),photoNote,image);
+    photo.addEventListener('toggle',()=>{if(photo.open)void loadPhoto(record,photo,image,photoNote);});
+    view.append(photo,node('h3','약 목록 · '+phrMedications(record).length+'개','section-title'));
+    const list=node('div','','medicine-list');
+    for(const med of phrMedications(record)) {
+      const details=node('details','','medicine'),body=node('div','','medicine-body');
+      details.append(node('summary',phrText(med.name,80)||'약 이름 확인 필요'));
+      body.append(meta([['1회 복용량',med.dose],['복용 주기',PHR_SCHEDULE[med.schedule]||'확인 필요'],
+        ['1일 횟수',Number.isInteger(med.frequency)?med.frequency+'회':''],['투약일수',Number.isInteger(med.days)?med.days+'일':''],
+        ['식사 기준',(PHR_MEAL[med.meal]||'확인 필요')+(['before','after'].includes(med.meal)&&Number.isInteger(med.mealMinutes)?' '+med.mealMinutes+'분':'')],
+        ['시작·종료일',(med.start||'미확인')+' ~ '+(med.end||'미확인')],
+        ['명시된 시각',Array.isArray(med.times)?med.times.join(', '):'']]));
+      if(med.instructions)body.append(node('p',phrText(med.instructions,320)));
+      if(Array.isArray(med.warnings) && med.warnings.length) {
+        const warnings=node('ul','','warnings');for(const text of med.warnings.slice(0,12))warnings.append(node('li',phrText(text,500)));body.append(warnings);
+      }
+      if(med.evidence) {
+        const evidence=node('details');evidence.append(node('summary','AI가 읽은 원문'),node('p',phrText(med.evidence,2000),'evidence'));body.append(evidence);
+      }
+      details.append(body);list.append(details);
+    }
+    view.append(list);
+    if(record.note)view.append(node('h3','메모','section-title'),node('p',phrText(record.note),'note'));
+  }
+  function openRecord(id) {
+    const record=state.records.find(r=>r.id===id);if(!record || !current(token()) || state.busy)return;
+    state.returnFocus=dom.activeElement;clearDetail();state.selected=record;renderDetail(record);
+    if(!el('recordDialog').open)el('recordDialog').showModal();
+  }
+  function formField(parent,label,value,key,options={}) {
+    const wrap=node('label',label),input=node(options.choices?'select':options.multiline?'textarea':'input');
+    const id='med_'+(++state.serial)+'_'+key;input.id=id;input.dataset.key=key;wrap.htmlFor=id;
+    if(options.choices)for(const [v,title] of Object.entries(options.choices)){const option=node('option',title);option.value=v;input.append(option);}
+    else if(!options.multiline)input.type=options.type||'text';
+    if(options.maxLength)input.maxLength=options.maxLength;
+    if(options.type==='number'){input.min=options.min;input.max=options.max;input.step='1';input.inputMode='numeric';}
+    input.value=value??'';wrap.append(input);if(options.full)wrap.className='full';parent.append(wrap);return input;
+  }
+  function addMedicine(med={}) {
+    if(el('editMedicines').children.length>=20)return status('detailStatus','한 기록에 약은 최대 20개까지 저장할 수 있습니다.',true);
+    const block=node('section','','edit-med');block.original=med;const heading=node('h3',med.name||'약 정보');block.append(heading);
+    const grid=node('div','','form-grid');
+    formField(grid,'약 이름',med.name,'name',{maxLength:80,full:true});
+    formField(grid,'1회 복용량·단위',med.dose,'dose',{maxLength:80});
+    const schedule=formField(grid,'복용 주기',med.schedule||'unknown','schedule',{choices:PHR_SCHEDULE});
+    const frequency=formField(grid,'1일 횟수 (매일 복용 시)',med.frequency,'frequency',{type:'number',min:1,max:12});
+    formField(grid,'총 투약일수',med.days,'days',{type:'number',min:1,max:366});
+    const meal=formField(grid,'식사 기준',med.meal||'','meal',{choices:PHR_MEAL});
+    const minutes=formField(grid,'식전·식후 간격 (분)',med.mealMinutes,'mealMinutes',{type:'number',min:0,max:180});
+    formField(grid,'명시된 복용 시작일',med.start,'start',{type:'date'});
+    formField(grid,'명시된 복용 종료일',med.end,'end',{type:'date'});
+    formField(grid,'명시된 복용 시각 (예: 09:00, 18:00)',Array.isArray(med.times)?med.times.join(', '):'','times',{maxLength:120,full:true});
+    formField(grid,'원본의 복용 지시',med.instructions,'instructions',{maxLength:320,multiline:true,full:true});
+    const sync=()=>{frequency.disabled=schedule.value!=='daily';minutes.disabled=!['before','after'].includes(meal.value);};
+    schedule.addEventListener('change',sync);meal.addEventListener('change',sync);sync();
+    const remove=node('button','이 약 삭제','btn small danger');remove.type='button';remove.style.marginTop='12px';
+    remove.addEventListener('click',()=>{block.remove();state.dirty=true;});
+    block.append(grid,remove);el('editMedicines').append(block);
+  }
+  function startEdit() {
+    if(!state.selected || state.busy)return;
+    const r=state.selected;releasePhoto();el('editMedicines').replaceChildren();
+    el('editTitle').value=phrText(r.title,100);el('editPrescriptionDate').value=phrDate(r.prescriptionDate)?r.prescriptionDate:'';
+    el('editDispensingDate').value=phrDate(r.dispensingDate)?r.dispensingDate:'';
+    el('editFacility').value=phrText(r.facilityName,100);el('editStatus').value=PHR_STATUS[r.status]?r.status:'recorded';
+    el('editNote').value=phrText(r.note);el('editReviewed').checked=r.reviewStatus==='confirmed';
+    for(const med of phrMedications(r))addMedicine(med);
+    state.editing=true;state.dirty=false;
+    el('recordView').hidden=true;el('recordActions').hidden=true;el('editForm').hidden=false;
+    status('detailStatus','원본 대조 후 내용을 저장해 주세요.');
+    // Keep the source photo accessible while editing.
+    const photo=el('recordView').querySelector('.photo-details');
+    if(photo){photo.open=false;el('recordView').replaceChildren(photo);el('recordView').hidden=false;}
+    el('editTitle').focus();
+  }
+  function collectEdits() {
+    const text=(id,max)=>el(id).value.trim().slice(0,max);
+    const date=(value,label)=>{if(value && !phrDate(value))throw new Error(label+' 날짜를 확인해 주세요.');return value;};
+    const title=text('editTitle',100);if(!title)throw new Error('기록 제목을 입력해 주세요.');
+    const medications=[...el('editMedicines').children].map(block=>{
+      const value=key=>block.querySelector('[data-key="'+key+'"]').value.trim();
+      const integer=(key,min,max)=>{const v=value(key);if(!v)return null;const n=Number(v);if(!Number.isInteger(n)||n<min||n>max)throw new Error('복용 횟수·일수·간격은 입력란 범위의 정수로 입력해 주세요.');return n;};
+      const name=value('name').slice(0,80);if(!name)throw new Error('각 약의 이름을 입력해 주세요.');
+      const schedule=Object.hasOwn(PHR_SCHEDULE,value('schedule'))?value('schedule'):'unknown';
+      const start=date(value('start'),'복용 시작일'),end=date(value('end'),'복용 종료일');
+      if(start && end && end<start)throw new Error('복용 종료일은 시작일보다 빠를 수 없습니다.');
+      const times=value('times')?value('times').split(',').map(v=>v.trim()):[];
+      if(times.length>12 || times.some(t=>!/^([01]\d|2[0-3]):[0-5]\d$/.test(t)) || new Set(times).size!==times.length)throw new Error('복용 시각은 09:00, 18:00처럼 중복 없이 입력해 주세요.');
+      const meal=Object.hasOwn(PHR_MEAL,value('meal'))?value('meal'):'';
+      const frequency=schedule==='daily'?integer('frequency',1,12):null;
+      if(times.length && frequency && times.length!==frequency)throw new Error('명시된 복용 시각 수와 1일 횟수가 다릅니다. 원본을 확인해 주세요.');
+      return {name,dose:value('dose').slice(0,80),schedule,frequency,days:integer('days',1,366),meal,
+        mealMinutes:['before','after'].includes(meal)?integer('mealMinutes',0,180):null,start,end,times,
+        instructions:value('instructions').slice(0,320),unsupported:!['daily','unknown'].includes(schedule),
+        warnings:Array.isArray(block.original.warnings)?block.original.warnings.slice(0,12).map(w=>phrText(w,500)):[],
+        evidence:phrText(block.original.evidence,2000)};
+    });
+    if(!medications.length || medications.length>20)throw new Error('약 목록은 1~20개로 입력해 주세요.');
+    return {title,prescriptionDate:date(el('editPrescriptionDate').value,'처방일'),dispensingDate:date(el('editDispensingDate').value,'조제일'),
+      facilityName:text('editFacility',100),status:PHR_STATUS[el('editStatus').value]?el('editStatus').value:'recorded',
+      medications,note:text('editNote',2000),reviewStatus:el('editReviewed').checked?'confirmed':'pending'};
+  }
+  async function saveRecord(event) {
+    event?.preventDefault();if(state.busy || !state.selected || !current(token()))return;
+    let edits;try{edits=collectEdits();}catch(error){status('detailStatus',error.message,true);return;}
+    const t=token(),record=state.selected;syncBusy(true);status('detailStatus','변경 내용을 저장하고 있습니다…');
+    try {
+      await runTransaction(db,async tx=>{
+        const consent=await tx.get(doc(db,'users',t.uid,'health_consents','photos'));
+        const latest=await tx.get(reference(t.uid,record.id));
+        if(!current(t))throw fail('phr/account');
+        const c=consent.exists()?consent.data():null;
+        if(c?.status!=='granted' || c.version!==PHR_POLICY_VERSION || !c.personal || !c.sensitive || c.deletionPending)throw fail('phr/consent');
+        if(!latest.exists())throw fail('phr/missing');
+        if((latest.data().revision||1)!==(record.revision||1))throw fail('phr/conflict');
+        tx.update(reference(t.uid,record.id),{...edits,revision:(record.revision||1)+1,updatedAt:serverTimestamp()});
+      });
+      if(!current(t))return;
+      state.selected={...record,...edits,revision:(record.revision||1)+1};state.editing=false;state.dirty=false;
+      el('editForm').hidden=true;el('recordView').hidden=false;el('recordActions').hidden=false;renderDetail(state.selected);
+      status('detailStatus','변경 내용을 저장했습니다.');
+    } catch(error){if(current(t))status('detailStatus',errorText(error),true);}
+    finally{if(current(t))syncBusy(false);}
+  }
+  async function deleteRecord() {
+    if(state.busy || !state.selected || !current(token()))return;
+    if(!win.confirm('이 약수첩 기록을 삭제할까요? 원본 처방전 사진은 사진 목록에 유지됩니다.'))return;
+    const t=token(),record=state.selected;syncBusy(true);status('detailStatus','기록을 삭제하고 있습니다…');
+    try {
+      await runTransaction(db,async tx=>{
+        const latest=await tx.get(reference(t.uid,record.id));
+        if(!current(t))throw fail('phr/account');
+        if(latest.exists() && (latest.data().revision||1)!==(record.revision||1))throw fail('phr/conflict');
+        if(latest.exists())tx.delete(reference(t.uid,record.id));
+      });
+      if(current(t)){closeRecord(true);status('pageStatus','약수첩 기록을 삭제했습니다.');}
+    }catch(error){if(current(t))status('detailStatus',errorText(error),true);}
+    finally{if(current(t))syncBusy(false);}
+  }
+  function bindAccount(user) {
+    state.unsubscribe?.();state.unsubscribe=null;state.generation++;state.uid=user?.uid||null;
+    closeRecord(true);syncBusy(false);state.records=[];state.loaded=false;el('recordList').replaceChildren();el('recordCount').textContent='';
+    el('search').value='';el('filter').value='all';el('empty').hidden=true;
+    el('accountName').textContent=user?(user.displayName||'내 계정'):'';
+    el('loginPanel').hidden=!!user;el('notebook').hidden=!user;el('logout').hidden=!user;
+    if(!user){status('pageStatus','로그인하면 내 처방기록을 조회할 수 있습니다.');return;}
+    const t=token();status('pageStatus','처방기록을 불러오는 중입니다…');
+    state.unsubscribe=onSnapshot(collection(db,'users',user.uid,'prescription_records'),snapshot=>{
+      if(!current(t))return;
+      state.records=snapshot.docs.map(d=>({...d.data(),id:d.id})).sort((a,b)=>String(b.prescriptionDate||b.createdAtClient||'').localeCompare(String(a.prescriptionDate||a.createdAtClient||'')));
+      state.loaded=true;renderList();status('pageStatus',snapshot.metadata?.fromCache?'저장된 기기 캐시를 표시 중입니다. 연결되면 최신 기록으로 갱신됩니다.':'');
+      if(state.selected) {
+        const updated=state.records.find(r=>r.id===state.selected.id);
+        if(!updated){closeRecord(true);status('pageStatus','이 기록이 삭제되어 목록으로 돌아왔습니다.');}
+        else if(!state.editing && !state.busy){state.selected=updated;renderDetail(updated);}
+        else if(state.editing && (updated.revision||1)!==(state.selected.revision||1) && !state.busy)status('detailStatus',errorText(fail('phr/conflict')),true);
+      }
+      if(deepLink){
+        const id=deepLink;
+        if(state.records.some(r=>r.id===id)){deepLink=null;openRecord(id);}
+        else if(!snapshot.metadata?.fromCache){deepLink=null;status('pageStatus','요청한 기록을 이 계정에서 찾을 수 없습니다.',true);}
+      }
+    },error=>{
+      if(!current(t))return;
+      state.records=[];state.loaded=false;closeRecord(true);el('recordList').replaceChildren();el('recordCount').textContent='';el('empty').hidden=true;
+      status('pageStatus',errorText(error)+' 새로고침해 다시 불러올 수 있습니다.',true);
+    });
+  }
+  el('search').addEventListener('input',renderList);el('filter').addEventListener('change',renderList);
+  el('closeRecord').addEventListener('click',()=>closeRecord());
+  el('recordDialog').addEventListener('cancel',event=>{event.preventDefault();closeRecord();});
+  el('editRecord').addEventListener('click',startEdit);el('editForm').addEventListener('submit',saveRecord);
+  el('editForm').addEventListener('input',()=>{state.dirty=true;});
+  el('cancelEdit').addEventListener('click',()=>{
+    if(state.busy)return;if(state.dirty && !win.confirm('수정한 내용을 취소할까요?'))return;
+    const latest=state.records.find(r=>r.id===state.selected?.id);if(!latest){closeRecord(true);return;}
+    state.selected=latest;state.editing=false;state.dirty=false;el('editForm').hidden=true;el('recordView').hidden=false;el('recordActions').hidden=false;renderDetail(latest);status('detailStatus');
+  });
+  el('addMedicine').addEventListener('click',()=>{addMedicine();state.dirty=true;});
+  el('deleteRecord').addEventListener('click',deleteRecord);
+  el('login').addEventListener('click',async()=>{
+    el('login').disabled=true;
+    try{await signInWithPopup(auth,new GoogleAuthProvider());}catch(error){status('pageStatus',/popup-closed|cancelled/.test(error.code||'')?'로그인이 취소되었습니다.':errorText(error),true);}finally{el('login').disabled=false;}
+  });
+  el('logout').addEventListener('click',async()=>{
+    if(state.busy)return;
+    if(state.dirty && !win.confirm('저장하지 않은 수정을 닫고 로그아웃할까요?'))return;
+    try{await signOut(auth);}catch(error){status('pageStatus',errorText(error),true);}
+  });
+  win.addEventListener('beforeunload',event=>{if(state.busy || state.dirty){event.preventDefault();event.returnValue='';}});
+  onAuthStateChanged(auth,bindAccount);
+  return {state,bindAccount,renderList,openRecord,startEdit,collectEdits,saveRecord,deleteRecord,closeRecord,loadPhoto};
+}
+async function bootPrescriptionNotebook() {
+  const [appSdk,firestore,authSdk,storageSdk,check]=await Promise.all([
+    import('https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js'),
+    import('https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js'),
+    import('https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js'),
+    import('https://www.gstatic.com/firebasejs/12.19.0/firebase-storage.js'),
+    import('https://www.gstatic.com/firebasejs/12.19.0/firebase-app-check.js')
+  ]);
+  const app=appSdk.initializeApp({
+    apiKey:"AIzaSyBWDwueP3a0atxCqFIgqd96sgXc0EqYbEY",authDomain:"alcoholaway.firebaseapp.com",projectId:"alcoholaway",
+    storageBucket:"alcoholaway.firebasestorage.app",messagingSenderId:"1001199235857",appId:"1:1001199235857:web:362c4aae36b44c7eae12b0",measurementId:"G-JBE26PCZMF"
+  });
+  check.initializeAppCheck(app,{provider:new check.ReCaptchaEnterpriseProvider('6LfI28QtAAAAANzmGSBTvsJWCq4IKNmuxz8CqZ1D'),isTokenAutoRefreshEnabled:true});
+  installPrescriptionNotebook({...firestore,...authSdk,auth:authSdk.getAuth(app),db:firestore.getFirestore(app),
+    storage:storageSdk.getStorage(app),storageRef:storageSdk.ref,getBlob:storageSdk.getBlob});
+}
+bootPrescriptionNotebook().catch(()=>{
+  const status=document.getElementById('pageStatus');
+  status.textContent='약수첩을 시작하지 못했습니다. 인터넷 연결을 확인한 후 새로고침해 주세요.';
+  status.classList.add('error');
+});
+</script>
+</body>
+</html>
