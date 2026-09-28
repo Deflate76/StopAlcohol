@@ -68,13 +68,14 @@ export function createScheduleService({db, messaging, now = Date.now, uuid = ran
       await registerDevice(uid, data.pushToken);
       return {registered: true};
     }
-    if (data.action === 'list') {
-      if (!dateValue(data.from) || !dateValue(data.to) || data.to <= data.from || data.to - data.from > 2 * 86400000) {
+    if (data.action === 'list' || data.action === 'listAll') {
+      const all = data.action === 'listAll';
+      if (!all && (!dateValue(data.from) || !dateValue(data.to) || data.to <= data.from || data.to - data.from > 2 * 86400000)) {
         fail('invalid-argument', '조회 날짜를 확인해 주세요.');
       }
       // Order only by startAt: use the built-in single-field index, no index deployment.
       // Scan bounded pages and return the cursor even for an empty overlap page.
-      let query = events(uid).where('startAt', '<', data.to).orderBy('startAt', 'desc');
+      let query = all ? events(uid).orderBy('startAt', 'desc') : events(uid).where('startAt', '<', data.to).orderBy('startAt', 'desc');
       if (data.cursor) {
         if (!validId(data.cursor)) fail('invalid-argument', '조회 위치를 확인해 주세요.');
         const cursor = await events(uid).doc(data.cursor).get();
@@ -83,7 +84,7 @@ export function createScheduleService({db, messaging, now = Date.now, uuid = ran
       }
       const snapshot = await query.limit(pageSize).get();
       return {
-        events: snapshot.docs.map(doc => doc.data()).filter(event => event.endAt > data.from).map(publicEvent),
+        events: snapshot.docs.map(doc => doc.data()).filter(event => all || event.endAt > data.from).map(publicEvent),
         nextCursor: snapshot.size === pageSize ? snapshot.docs.at(-1).id : null
       };
     }
