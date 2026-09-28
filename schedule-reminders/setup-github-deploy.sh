@@ -62,6 +62,12 @@ for role in roles/datastore.user roles/firebasecloudmessaging.admin; do
 done
 allow_deployer_to_act_as "$SCHEDULE_RUNTIME_ACCOUNT"
 
+# The administrator codebase has a separate, already provisioned runtime identity.
+if gcloud iam service-accounts describe 'firestore-admin-console@alcoholaway.iam.gserviceaccount.com' \
+  --project="$SCHEDULE_PROJECT" >/dev/null 2>&1; then
+  allow_deployer_to_act_as 'firestore-admin-console@alcoholaway.iam.gserviceaccount.com'
+fi
+
 # Firebase CLI 15.31.0 checks the App Engine default account even for Gen 2.
 # Scope actAs to that account when it exists, instead of every project account.
 if gcloud iam service-accounts describe "${SCHEDULE_PROJECT}@appspot.gserviceaccount.com" \
@@ -138,6 +144,6 @@ cat <<'DONE'
 최초 연결 설정을 완료했습니다. 서비스 계정 키 파일이나 GitHub Secret 등록은 필요 없습니다.
 권한 전파에는 몇 분 걸릴 수 있습니다.
 PR #1을 Rollback-version2에 병합하면 GitHub Actions가 테스트 후 일정 함수를 배포합니다.
-이미 병합했다면 GitHub → Actions → Firebase schedule functions → Run workflow를 실행하세요.
+이미 병합했다면 GitHub → Actions → Firebase functions → Run workflow를 실행하세요.
 이 스크립트 자체는 함수 배포, PR 병합, Firestore 규칙 변경을 실행하지 않습니다.
 DONE

@@ -102,3 +102,24 @@ export function diffFields(before={},after={}) {
     key,kind:!Object.hasOwn(after,key)?'delete':!Object.hasOwn(before,key)?'add':'change',before:before[key],after:after[key]
   }));
 }
+
+// Expand edits inside arrays/maps so the final confirmation shows actual values.
+export function diffEntries(before={},after={},limit=100) {
+  const changes=[];let total=0;
+  const add=(key,a,b)=>{total++;if(changes.length<limit)changes.push({key,kind:a===undefined?'add':b===undefined?'delete':'change',before:a,after:b});};
+  function visit(a,b,path) {
+    if(canonical(a)===canonical(b))return;
+    const ta=Object.keys(a||{})[0],tb=Object.keys(b||{})[0];
+    if((!a||ta==='mapValue')&&(!b||tb==='mapValue')){
+      const fa=a?.mapValue.fields||{},fb=b?.mapValue.fields||{},keys=[...new Set([...Object.keys(fa),...Object.keys(fb)])];
+      if(!keys.length){add(path,a,b);return;}
+      for(const key of keys)visit(Object.hasOwn(fa,key)?fa[key]:undefined,Object.hasOwn(fb,key)?fb[key]:undefined,path+'['+JSON.stringify(key)+']');
+    }else if((!a||ta==='arrayValue')&&(!b||tb==='arrayValue')){
+      const va=a?.arrayValue.values||[],vb=b?.arrayValue.values||[];
+      if(!va.length&&!vb.length){add(path,a,b);return;}
+      for(let i=0;i<Math.max(va.length,vb.length);i++)visit(va[i],vb[i],path+'['+i+']');
+    }else add(path,a,b);
+  }
+  for(const key of new Set([...Object.keys(before),...Object.keys(after)]))visit(Object.hasOwn(before,key)?before[key]:undefined,Object.hasOwn(after,key)?after[key]:undefined,key);
+  return {changes,total};
+}
