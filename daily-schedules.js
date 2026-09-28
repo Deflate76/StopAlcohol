@@ -9,7 +9,8 @@ export function installDailySchedules({auth, functions, httpsCallable, onAuthSta
     const timeZone = () => Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Seoul';
     const uuid = () => crypto.randomUUID();
     const state = {uid: null, generation: 0, busy: false, id: null, revision: 0, original: null, request: null, pendingLink: null,
-        returnFocus: null, lists: {dialog: {day: null, seq: 0, events: [], cursor: null}, health: {day: null, seq: 0, events: [], cursor: null}}};
+        returnFocus: null, selectedId: null, allLoaded: false, allLoading: false,
+        lists: {dialog: {day: null, seq: 0, events: [], cursor: null}, health: {day: null, seq: 0, events: [], cursor: null}}};
     const current = (uid, generation) => !!uid && state.uid === uid && auth.currentUser?.uid === uid && state.generation === generation;
     const format = value => new Date(value).toLocaleString('ko-KR', {year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'});
     function status(id, message = '', error = false) { el(id).textContent = message; el(id).classList.toggle('is-error', error); }
@@ -88,16 +89,72 @@ export function installDailySchedules({auth, functions, httpsCallable, onAuthSta
         dialog.scrollTop = 0; el('dsTitle').focus({preventScroll: true});
     }
     const labels = {none: '알림 없음', pending: '알림 예약됨', sent: '알림 발송 완료', partial: '일부 기기에만 발송됨', failed: '알림 발송 실패 · 미래 시각으로 다시 설정해 주세요', missed: '알림 시각 경과 · 미발송'};
+    const ordered = events => [...events].sort((a, b) => a.startAt - b.startAt || a.id.localeCompare(b.id));
+    const scrollTo = node => {
+        node.focus({preventScroll: true});
+        node.scrollIntoView({behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center'});
+    };
+    function renderSelection() {
+        const select = el('dsListDate'), events = ordered(state.lists.dialog.events);
+        select.replaceChildren(new Option(`일정 선택 (${events.length}개)`, ''));
+        for (const event of events) select.add(new Option(`${format(event.startAt)} · ${event.title}`, event.id));
+        select.value = state.selectedId || '';
+    }
+    function selectSchedule(id, move = true) {
+        const event = state.lists.dialog.events.find(item => item.id === id);
+        state.selectedId = event?.id || null;
+        el('dsListDate').value = state.selectedId || '';
+        let selected;
+        el('dsList').querySelectorAll('.ds-saved').forEach(card => {
+            const active = card.dataset.scheduleId === state.selectedId;
+            card.classList.toggle('is-highlighted', active);
+            if (active) { card.setAttribute('aria-current', 'true'); selected = card; }
+            else card.removeAttribute('aria-current');
+        });
+        if (event) state.lists.dialog.day = dateKey(new Date(event.startAt));
+        if (move && selected) {
+            scrollTo(selected);
+            status('dsListStatus', `“${event.title}” 일정으로 이동했습니다.`);
+        }
+    }
+    function returnToSelection(event) {
+        if (state.busy) return;
+        if (!dialog.open && !open(dateKey(new Date(event.startAt)))) return;
+        selectSchedule(event.id, false);
+        scrollTo(el('dsListDate'));
+    }
+    // Keep the existing day-click/health-record behavior; only add a schedule marker.
+    // End times are exclusive, so an event ending at midnight does not mark the next day.
+    function decorateCalendar() {
+        document.querySelectorAll('#calendarDaysGrid [data-date]').forEach(cell => {
+            cell.querySelector('.cal-schedule-badge')?.remove();
+            cell.classList.remove('has-schedule');
+            if (cell.dataset.scheduleBaseLabel !== undefined) cell.setAttribute('aria-label', cell.dataset.scheduleBaseLabel);
+            if (!state.uid) return;
+            let range;
+            try { range = dayRange(cell.dataset.date); } catch { return; }
+            const {from, to} = range;
+            const count = state.lists.dialog.events.filter(event => event.startAt < to && event.endAt > from).length;
+            if (!count) return;
+            cell.dataset.scheduleBaseLabel = cell.getAttribute('aria-label') || cell.dataset.date;
+            cell.setAttribute('aria-label', `${cell.dataset.scheduleBaseLabel}, 일정 ${count}개`);
+            cell.classList.add('has-schedule');
+            const badge = document.createElement('span'); badge.className = 'cal-schedule-badge';
+            badge.textContent = `📅 ${count > 99 ? '99+' : count}`; badge.setAttribute('aria-hidden', 'true');
+            cell.append(badge);
+        });
+    }
     function renderList(scope) {
         const list = state.lists[scope], container = el(scope === 'dialog' ? 'dsList' : 'healthDaySchedules');
         container.replaceChildren();
         if (!list.events.length) {
             const empty = document.createElement('p'); empty.className = 'health-muted';
-            empty.textContent = list.cursor ? '현재 조회한 범위에 일정이 없습니다. 더 보기를 눌러 이전에 시작한 일정도 확인하세요.' : '이 날짜에 등록된 일정이 없습니다.';
+            empty.textContent = scope === 'dialog' ? '등록된 일정이 없습니다.' : list.cursor ? '현재 조회한 범위에 일정이 없습니다. 더 보기를 눌러 이전에 시작한 일정도 확인하세요.' : '이 날짜에 등록된 일정이 없습니다.';
             container.append(empty);
         }
-        [...list.events].sort((a, b) => a.startAt - b.startAt).forEach(event => {
+        ordered(list.events).forEach(event => {
             const card = document.createElement('article'); card.className = 'ds-saved';
+            card.dataset.scheduleId = event.id; card.tabIndex = -1;
             const title = document.createElement('strong'); title.textContent = event.title;
             const range = document.createElement('p'); range.textContent = `${format(event.startAt)} ~ ${format(event.endAt)}`;
             const reminder = document.createElement('p'); reminder.className = 'health-muted';
@@ -109,14 +166,51 @@ export function installDailySchedules({auth, functions, httpsCallable, onAuthSta
             edit.addEventListener('click', () => { if (state.busy) return; if (!dialog.open) open(list.day); fillForm(event); });
             const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'health-btn danger'; remove.textContent = '삭제'; remove.disabled = state.busy;
             remove.addEventListener('click', () => removeEvent(event));
-            actions.append(edit, remove); card.append(actions); container.append(card);
+            const back = document.createElement('button'); back.type = 'button'; back.className = 'health-btn ds-back-to-selection'; back.textContent = '일정 선택으로 가기'; back.disabled = state.busy;
+            back.addEventListener('click', () => returnToSelection(event));
+            actions.append(edit, remove, back); card.append(actions); container.append(card);
         });
         if (list.cursor) {
             const more = document.createElement('button'); more.type = 'button'; more.className = 'health-btn'; more.textContent = '이전에 시작한 일정 더 보기'; more.disabled = state.busy;
             more.addEventListener('click', () => loadList(scope, true)); container.append(more);
         }
+        if (scope === 'dialog') { renderSelection(); selectSchedule(state.selectedId, false); }
+    }
+    async function loadAllSchedules() {
+        if (!state.uid) return;
+        const list = state.lists.dialog, owner = state.uid, generation = state.generation, seq = ++list.seq;
+        const isCurrent = () => current(owner, generation) && list.seq === seq;
+        state.allLoading = true;
+        el('dsList').setAttribute('aria-busy', 'true');
+        status('dsListStatus', '전체 일정을 불러오고 있습니다…');
+        status('calScheduleStatus', '일정을 확인하고 있습니다…');
+        try {
+            // Drain every bounded server page; the picker never filters the saved cards.
+            const events = new Map(), cursors = new Set(); let cursor = null;
+            do {
+                const result = await call({action: 'listAll', cursor});
+                if (!isCurrent()) return;
+                result.events.forEach(event => events.set(event.id, event));
+                cursor = result.nextCursor;
+                if (cursor && cursors.has(cursor)) throw new Error('목록이 변경되었습니다. 새로고침해 주세요.');
+                if (cursor) cursors.add(cursor);
+                status('dsListStatus', `전체 일정을 불러오고 있습니다… ${events.size}개`);
+            } while (cursor);
+            list.events = [...events.values()]; list.cursor = null; state.allLoaded = true;
+            renderList('dialog'); decorateCalendar();
+            status('dsListStatus', `등록된 일정 ${events.size}개 · 일정을 선택하면 해당 카드로 이동합니다.`);
+            status('calScheduleStatus', '📅 일정이 있는 날 · 날짜를 누르면 일정을 확인할 수 있습니다.');
+        } catch (error) {
+            if (isCurrent()) {
+                status('dsListStatus', errorText(error), true);
+                status('calScheduleStatus', '일정을 불러오지 못했습니다. 일정 새로고침을 눌러 주세요.', true);
+            }
+        } finally {
+            if (isCurrent()) { state.allLoading = false; el('dsList').setAttribute('aria-busy', 'false'); }
+        }
     }
     async function loadList(scope, more = false) {
+        if (scope === 'dialog') return loadAllSchedules();
         const list = state.lists[scope], day = list.day;
         if (!state.uid || !day) return;
         const owner = state.uid, generation = state.generation, seq = ++list.seq;
@@ -132,7 +226,8 @@ export function installDailySchedules({auth, functions, httpsCallable, onAuthSta
         } catch (error) { if (isCurrent()) status(statusId, errorText(error), true); }
     }
     function refreshLists() {
-        for (const scope of ['dialog', 'health']) if (state.lists[scope].day) loadList(scope);
+        loadAllSchedules();
+        if (state.lists.health.day) loadList('health');
     }
     function open(day = dateKey(new Date())) {
         if (!state.uid || auth.currentUser?.uid !== state.uid) { alert('로그인 후 일정을 등록해 주세요.'); return false; }
@@ -140,7 +235,7 @@ export function installDailySchedules({auth, functions, httpsCallable, onAuthSta
         try { dayRange(day); } catch { day = dateKey(new Date()); }
         state.returnFocus = document.activeElement;
         resetForm(day); status('dsStatus');
-        state.lists.dialog.day = day; el('dsListDate').value = day;
+        state.lists.dialog.day = day; state.selectedId = null; renderList('dialog');
         if (!dialog.open) dialog.showModal();
         el('dailyScheduleFloatingButton').setAttribute('aria-expanded', 'true');
         el('healthDayScheduleButton').setAttribute('aria-expanded', 'true');
@@ -159,11 +254,9 @@ export function installDailySchedules({auth, functions, httpsCallable, onAuthSta
     el('dsNew').addEventListener('click', () => { resetForm(state.lists.dialog.day); status('dsStatus'); el('dsTitle').focus(); });
     form.addEventListener('input', preview);
     form.addEventListener('change', preview);
-    el('dsListDate').addEventListener('change', () => {
-        try { dayRange(el('dsListDate').value); } catch { return; }
-        state.lists.dialog.day = el('dsListDate').value; loadList('dialog');
-    });
+    el('dsListDate').addEventListener('change', () => selectSchedule(el('dsListDate').value));
     el('dsRefresh').addEventListener('click', () => loadList('dialog'));
+    el('calScheduleRefresh').addEventListener('click', () => loadAllSchedules());
     el('healthScheduleRefresh').addEventListener('click', () => loadList('health'));
     form.addEventListener('submit', async event => {
         event.preventDefault();
@@ -199,7 +292,7 @@ export function installDailySchedules({auth, functions, httpsCallable, onAuthSta
             const result = await call({action: 'save', event: payload, expectedRevision, requestId, ...(pushToken ? {pushToken} : {})});
             if (!current(owner, generation)) return;
             const day = dateKey(new Date(result.event.startAt));
-            state.lists.dialog.day = day; el('dsListDate').value = day;
+            state.lists.dialog.day = day; state.selectedId = result.event.id;
             resetForm(day); status('dsStatus', result.event.reminderAt === null ? '일정을 저장했습니다.' : `일정과 알림 설정을 저장했습니다. ${format(result.event.reminderAt)}`);
             refreshLists();
         } catch (error) { if (current(owner, generation)) status('dsStatus', errorText(error), true); }
@@ -229,7 +322,7 @@ export function installDailySchedules({auth, functions, httpsCallable, onAuthSta
             if (!current(owner, generation) || !dialog.open) return;
             fillForm(result.event);
             const day = dateKey(new Date(result.event.startAt));
-            state.lists.dialog.day = day; el('dsListDate').value = day; loadList('dialog');
+            state.lists.dialog.day = day; state.selectedId = result.event.id; loadList('dialog');
         } catch (error) { if (current(owner, generation)) status('dsStatus', errorText(error), true); }
         finally { if (current(owner, generation)) setBusy(false); }
     }
@@ -238,11 +331,12 @@ export function installDailySchedules({auth, functions, httpsCallable, onAuthSta
         const pendingLink = state.pendingLink;
         state.pendingLink = null;
         state.uid = user?.uid || null; state.generation++;
-        state.returnFocus = null;
+        state.returnFocus = null; state.selectedId = null; state.allLoaded = false; state.allLoading = false;
         if (dialog.open) dialog.close();
         setBusy(false); resetForm(); status('dsStatus'); status('dsListStatus'); status('healthScheduleStatus');
         for (const scope of ['dialog', 'health']) { const list = state.lists[scope]; list.seq++; list.events = []; list.cursor = null; list.day = null; }
         el('dsList').replaceChildren(); el('healthDaySchedules').replaceChildren();
+        el('dsList').setAttribute('aria-busy', 'false'); renderSelection(); decorateCalendar(); status('calScheduleStatus');
         if (!user) return;
         const owner = state.uid, generation = state.generation;
         if ('Notification' in window && Notification.permission === 'granted') {
@@ -261,6 +355,10 @@ export function installDailySchedules({auth, functions, httpsCallable, onAuthSta
         openLinkedEvent(event.data.id);
     });
     return {
+        paintCalendar() {
+            decorateCalendar();
+            if (state.uid && !state.allLoaded && !state.allLoading) loadAllSchedules();
+        },
         showDay(day) { state.lists.health.day = day; loadList('health'); },
         async showPush(payload) {
             if (!('Notification' in window) || Notification.permission !== 'granted') return;

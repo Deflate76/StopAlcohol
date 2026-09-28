@@ -63,6 +63,32 @@ test('pagination returns a cursor even when a scan page has no overlapping event
     const second = await app.api(request({action: 'list', from: BASE + 86400000, to: BASE + 2 * 86400000, cursor: first.nextCursor}));
     assert.equal(second.nextCursor, null);
 });
+test('listAll includes past and future dates across every page, including tied start times', async () => {
+    const app = setup();
+    for (let i = 0; i < 123; i++) {
+        const startAt = BASE + (Math.floor(i / 3) - 20) * 86400000;
+        await app.save(event({id: `schedule-${String(i).padStart(10, '0')}`, startAt, endAt: startAt + 3600000, reminderChoice: 'none'}));
+    }
+    const events = []; let cursor = null, pages = 0;
+    do {
+        const result = await app.api(request({action: 'listAll', cursor}));
+        assert.ok(result.events.length <= 50);
+        events.push(...result.events); cursor = result.nextCursor; pages++;
+        assert.ok(pages <= 3);
+    } while (cursor);
+    assert.equal(pages, 3); assert.equal(events.length, 123);
+    assert.equal(new Set(events.map(item => item.id)).size, 123);
+    assert.ok(events[0].startAt > BASE); assert.ok(events.at(-1).startAt < BASE);
+    assert.ok(events.every(item => !('lastRequestId' in item)));
+});
+test('listAll uses only the authenticated account and rejects foreign or deleted cursors', async () => {
+    const app = setup(); await app.save();
+    assert.deepEqual((await app.api(request({action: 'listAll', uid: 'owner-a'}, 'owner-b'))).events, []);
+    await assert.rejects(app.api(request({action: 'listAll', cursor: event().id}, 'owner-b')), {code: 'aborted'});
+    await assert.rejects(app.api(request({action: 'listAll', cursor: '../bad-cursor'})), {code: 'invalid-argument'});
+    await app.api(request({action: 'delete', id: event().id, expectedRevision: 1}));
+    await assert.rejects(app.api(request({action: 'listAll', cursor: event().id})), {code: 'aborted'});
+});
 test('rescheduling cancels the old reminder; deleting cancels pending delivery', async () => {
     const app = setup(); await app.save();
     await app.save(event({reminderChoice: '0'}), 1, 'request-0000000002');

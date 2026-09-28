@@ -11,7 +11,7 @@
     <meta name="google-adsense-account" content="ca-pub-4147840233181777">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>금주도전/건강기록</title>
-    <meta name="app-build" content="2026-09-28-daily-schedules-v1">
+    <meta name="app-build" content="2026-09-28-schedule-fan-v2">
     
     <meta name="description" content="금주 도전부터 건강 상태, 진단과 처방전까지. 나의 건강을 하루씩 기록하는 금주도전/건강기록." />
     <meta name="theme-color" content="#ffffff" />
@@ -1136,8 +1136,10 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
 .ds-heading,.ds-list-heading { display:flex; align-items:center; justify-content:space-between; gap:10px; }
 .ds-list-heading { flex-wrap:wrap; margin-top:12px; }
 .ds-list-heading h4 { margin:0; }
-.ds-list-heading input { max-width:180px; padding:8px; border:1px solid #cbd5e1; border-radius:8px; font:inherit; }
-.ds-saved { border:1px solid #cbded8; border-radius:12px; padding:12px; margin:8px 0; text-align:left; background:#f8fcfa; overflow-wrap:anywhere; }
+.ds-list-heading select { width:100%; min-width:0; padding:10px; border:1px solid #cbd5e1; border-radius:8px; font:inherit; font-size:.82rem; background:#fff; color:#334155; scroll-margin:18px; }
+.ds-saved { border:1px solid #cbded8; border-radius:12px; padding:12px; margin:8px 0; text-align:left; background:#f8fcfa; overflow-wrap:anywhere; scroll-margin:18px; transition:background .2s,box-shadow .2s; }
+.ds-saved.is-highlighted { background:#ecfdf5; border-color:#0d9488; box-shadow:0 0 0 3px #0d948844; }
+.ds-saved:focus-visible { outline:2px solid #0d9488; outline-offset:3px; }
 .ds-saved > strong { font-size:.88rem; color:#176f59; }
 .ds-saved p { margin:5px 0; font-size:.77rem; }
 .ds-note { white-space:pre-wrap; }
@@ -1146,6 +1148,32 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
 @media(max-width:480px) { .daily-schedule-floating { bottom:calc(350px + env(safe-area-inset-bottom,0px)); } .daily-schedule-dialog { padding:16px; } }
 @media(max-height:420px) { #dailyScheduleFloatingButton { bottom:298px; } }
 @media(max-height:360px) { #dailyScheduleFloatingButton { bottom:246px; right:calc(64px + env(safe-area-inset-right,0px)); } }
+</style>
+<style>
+/* Compact quick actions and left-hand page navigation. */
+#floatingQuickNav { left:calc(14px + env(safe-area-inset-left,0px)); right:auto; align-items:flex-start; }
+#floatingNavMenu { left:0; right:auto; transform-origin:bottom left; }
+.floating-action-menu { --fan-radius:min(192px,calc(100vw - 136px),calc(100dvh - 100px)); position:fixed; z-index:1510; right:calc(14px + env(safe-area-inset-right,0px)); bottom:calc(18px + env(safe-area-inset-bottom,0px)); width:62px; height:62px; pointer-events:none; }
+.floating-action-backdrop { position:fixed; inset:0; width:100%; height:100%; padding:0; border:0; background:rgba(15,23,42,.16); pointer-events:auto; cursor:default; }
+.floating-action-backdrop[hidden] { display:none; }
+.floating-action-items { position:absolute; inset:0; pointer-events:none; }
+#floatingActionMenu .floating-action-item { position:absolute; inset:auto 0 0 auto; width:100%; height:100%; margin:0; z-index:1; opacity:0; visibility:hidden; pointer-events:none; transform:translate(0,0) scale(.45); transition:transform .24s ease,opacity .18s ease,visibility .24s; touch-action:manipulation; }
+#floatingActionMenu.is-open .floating-action-item { opacity:1; visibility:visible; pointer-events:auto; transform:translate(calc(var(--fan-x) * var(--fan-radius)),calc(var(--fan-y) * var(--fan-radius))) scale(1); transition-delay:calc(var(--fan-order) * 25ms); }
+#floatingActionMenu .floating-action-item:nth-child(1) { --fan-x:0; --fan-y:-1; --fan-order:0; }
+#floatingActionMenu .floating-action-item:nth-child(2) { --fan-x:-.382683; --fan-y:-.923880; --fan-order:1; }
+#floatingActionMenu .floating-action-item:nth-child(3) { --fan-x:-.707107; --fan-y:-.707107; --fan-order:2; }
+#floatingActionMenu .floating-action-item:nth-child(4) { --fan-x:-.923880; --fan-y:-.382683; --fan-order:3; }
+#floatingActionMenu .floating-action-item:nth-child(5) { --fan-x:-1; --fan-y:0; --fan-order:4; }
+.floating-action-toggle { position:relative; z-index:2; width:100%; height:100%; padding:3px; border:0; border-radius:50%; background:linear-gradient(145deg,#2563eb,#0f766e); box-shadow:0 7px 24px #164e634d; cursor:pointer; pointer-events:auto; touch-action:manipulation; }
+.floating-action-toggle .floating-nav-toggle-inner { background:linear-gradient(145deg,#0f766e,#164e63); gap:3px; font-size:11px; font-weight:800; }
+.floating-action-toggle svg { transition:transform .24s ease; }
+.floating-action-menu.is-open .floating-action-toggle svg { transform:rotate(45deg); }
+.floating-action-toggle:focus-visible { outline:3px solid #2563eb; outline-offset:3px; }
+.cal-schedule-legend { display:flex; align-items:center; justify-content:space-between; gap:6px; margin:6px 0 9px; color:#176f59; font-size:.7rem; text-align:left; }
+.cal-schedule-legend .health-link { flex-shrink:0; font-size:.7rem; }
+#calendarModal .cal-schedule-badge { display:block; width:max-content; max-width:100%; box-sizing:border-box; margin:4px auto 0; padding:1px 3px; border-radius:5px; background:#e6f8ef; color:#146c50; font:800 9px/1.3 sans-serif; white-space:nowrap; pointer-events:none; }
+@media(max-width:480px) { #floatingQuickNav { left:calc(10px + env(safe-area-inset-left,0px)); bottom:calc(12px + env(safe-area-inset-bottom,0px)); } .floating-action-menu { right:calc(10px + env(safe-area-inset-right,0px)); bottom:calc(12px + env(safe-area-inset-bottom,0px)); width:56px; height:56px; } }
+@media(prefers-reduced-motion:reduce) { #floatingActionMenu .floating-action-item,.floating-action-toggle svg,.ds-saved { transition:none; } }
 </style>
 </head>
 <body>
@@ -1555,6 +1583,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
             <div class="cal-title" id="calMonthTitle">2026년 5월</div>
             <button class="cal-btn" onclick="changeCalMonth(1)">&#10095;</button>
         </div>
+        <div class="cal-schedule-legend"><span id="calScheduleStatus" role="status" aria-live="polite">📅 일정이 있는 날</span><button id="calScheduleRefresh" type="button" class="health-link">일정 새로고침</button></div>
         <div id="calMonthSuccessContainer" class="cal-month-success-container">
             <div id="calMonthSuccessText" class="cal-month-success-label">금주 성공률 계산 중</div>
             <div class="cal-month-success-progress"><div id="calMonthSuccessFill" class="cal-month-success-fill"></div></div>
@@ -2460,9 +2489,32 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
 })();
 </script>
 
-<button id="dailyScheduleFloatingButton" class="pill-id-floating daily-schedule-floating" type="button" aria-label="일정 등록" aria-haspopup="dialog" aria-controls="dailyScheduleModal" aria-expanded="false">
+
+<div id="floatingActionMenu" class="floating-action-menu">
+    <button id="floatingActionBackdrop" class="floating-action-backdrop" type="button" tabindex="-1" aria-label="빠른 기능 메뉴 닫기" hidden></button>
+    <div id="floatingActionItems" class="floating-action-items" role="group" aria-label="빠른 기능" aria-hidden="true" inert>
+<button id="dailyScheduleFloatingButton" class="floating-action-item pill-id-floating daily-schedule-floating" type="button" aria-label="일정 등록" aria-haspopup="dialog" aria-controls="dailyScheduleModal" aria-expanded="false">
     <span class="floating-nav-toggle-inner pill-id-floating-inner daily-schedule-floating-inner"><svg aria-hidden="true" viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4M17 3v4M3 10h18M12 13v5M9.5 15.5h5"/></svg><span>일정</span></span>
 </button>
+<button id="aiAssistantFloatingButton" class="floating-action-item pill-id-floating ai-assistant-floating" type="button" aria-label="AI 도우미에게 질문하기" aria-haspopup="dialog" aria-controls="aiAssistantModal" aria-expanded="false">
+    <span class="floating-nav-toggle-inner pill-id-floating-inner ai-assistant-floating-inner"><svg aria-hidden="true" viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v5a3 3 0 0 1-3 3H8l-5 2 1-5V7a3 3 0 0 1 3-3h6"/><path d="m18 2 1.1 3.9L23 7l-3.9 1.1L18 12l-1.1-3.9L13 7l3.9-1.1L18 2ZM8 11h3M8 15h7"/></svg><span>도우미</span></span>
+</button>
+<button id="communityFloatingButton" class="floating-action-item pill-id-floating community-floating" type="button" onclick="openSurvivorCommunity()" aria-label="생존자 통신 바로가기" aria-controls="communitySection">
+    <span class="floating-nav-toggle-inner pill-id-floating-inner community-floating-inner"><svg aria-hidden="true" viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11a8 8 0 0 1-8 8H7l-5 3 2-6a8 8 0 1 1 17-5Z"/><path d="M8 10h8M8 14h5"/></svg><span>통신</span></span>
+</button>
+<button id="coffeeFloatingButton" class="floating-action-item pill-id-floating coffee-floating" type="button" onclick="openCoffeeSleep()" aria-label="커피 섭취와 수면 기록" aria-haspopup="dialog" aria-controls="coffeeSleepModal">
+    <span class="floating-nav-toggle-inner pill-id-floating-inner coffee-floating-inner"><svg aria-hidden="true" viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h12v7a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V8Z"/><path d="M16 9h2a3 3 0 1 1 0 6h-2M8 3v2M12 2v3M3 22h16"/></svg><span>커피</span></span>
+</button>
+<button id="pillIdFloatingButton" class="floating-action-item pill-id-floating" type="button" aria-label="약식별: 알약 앞뒤 촬영" aria-haspopup="dialog">
+  <span class="floating-nav-toggle-inner pill-id-floating-inner"><svg aria-hidden="true" viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m9 5 10 10M5 19a6 6 0 0 1 0-8l6-6a6 6 0 0 1 8 8l-6 6a6 6 0 0 1-8 0Z"/><path d="m7 12 3-3" stroke-linecap="round"/></svg><span>약식별</span></span>
+</button>
+    </div>
+    <button id="floatingActionToggle" class="floating-action-toggle" type="button" aria-label="빠른 기능 메뉴 열기" aria-controls="floatingActionItems" aria-expanded="false">
+        <span class="floating-nav-toggle-inner"><svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 4v16M4 12h16"/></svg><span id="floatingActionLabel">메뉴</span></span>
+    </button>
+</div>
+<script type="module" src="./floating-actions.js?v=20260928-2"></script>
+
 <dialog id="dailyScheduleModal" class="daily-schedule-dialog" aria-labelledby="dsEditorTitle">
     <div class="ds-heading"><h2 id="dsEditorTitle">일정 등록</h2><button id="dsClose" type="button" class="pi-icon-close" aria-label="일정 팝업 닫기">×</button></div>
     <p id="dsTimeZone" class="health-muted"></p>
@@ -2482,13 +2534,11 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
     </form>
     <p id="dsStatus" class="health-status" role="status" aria-live="polite"></p>
     <button id="dsNew" type="button" class="health-link">＋ 새 일정 입력</button>
-    <div class="ds-list-heading"><label class="health-label" for="dsListDate">등록된 일정</label><input id="dsListDate" type="date" min="2000-01-01" max="2099-12-31"><button id="dsRefresh" type="button" class="health-link">새로고침</button></div>
+    <div class="ds-list-heading"><label class="health-label" for="dsListDate">일정 선택</label><button id="dsRefresh" type="button" class="health-link">새로고침</button><select id="dsListDate" aria-describedby="dsListStatus"><option value="">일정 선택 (0개)</option></select></div>
     <p id="dsListStatus" class="health-status" role="status" aria-live="polite"></p><div id="dsList"></div>
 </dialog>
 
-<button id="aiAssistantFloatingButton" class="pill-id-floating ai-assistant-floating" type="button" aria-label="AI 도우미에게 질문하기" aria-haspopup="dialog" aria-controls="aiAssistantModal" aria-expanded="false">
-    <span class="floating-nav-toggle-inner pill-id-floating-inner ai-assistant-floating-inner"><svg aria-hidden="true" viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v5a3 3 0 0 1-3 3H8l-5 2 1-5V7a3 3 0 0 1 3-3h6"/><path d="m18 2 1.1 3.9L23 7l-3.9 1.1L18 12l-1.1-3.9L13 7l3.9-1.1L18 2ZM8 11h3M8 15h7"/></svg><span>도우미</span></span>
-</button>
+
 <dialog id="aiAssistantModal" class="ai-assistant-dialog" aria-labelledby="firebaseAiTestTitle" aria-describedby="aiAssistantDescription">
     <header class="ai-assistant-heading"><div><h2 id="firebaseAiTestTitle" tabindex="-1">AI 도우미</h2><p id="aiAssistantDescription">궁금한 내용을 편하게 물어보세요</p></div><button id="aiAssistantClose" class="ai-assistant-close" type="button" aria-label="AI 도우미 닫기">×</button></header>
     <div id="firebaseAiTestCard" data-state="loading">
@@ -2555,12 +2605,8 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
 })();
 </script>
 
-<button id="communityFloatingButton" class="pill-id-floating community-floating" type="button" onclick="openSurvivorCommunity()" aria-label="생존자 통신 바로가기" aria-controls="communitySection">
-    <span class="floating-nav-toggle-inner pill-id-floating-inner community-floating-inner"><svg aria-hidden="true" viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11a8 8 0 0 1-8 8H7l-5 3 2-6a8 8 0 1 1 17-5Z"/><path d="M8 10h8M8 14h5"/></svg><span>통신</span></span>
-</button>
-<button id="coffeeFloatingButton" class="pill-id-floating coffee-floating" type="button" onclick="openCoffeeSleep()" aria-label="커피 섭취와 수면 기록" aria-haspopup="dialog" aria-controls="coffeeSleepModal">
-    <span class="floating-nav-toggle-inner pill-id-floating-inner coffee-floating-inner"><svg aria-hidden="true" viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h12v7a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V8Z"/><path d="M16 9h2a3 3 0 1 1 0 6h-2M8 3v2M12 2v3M3 22h16"/></svg><span>커피</span></span>
-</button>
+
+
 <div id="coffeeSleepModal" class="modal health-modal" role="dialog" aria-modal="true" aria-labelledby="coffeeSleepTitle" hidden>
     <div class="modal-content">
         <button type="button" class="close-btn-top" onclick="closeHealthDialog('coffeeSleepModal')" aria-label="커피·수면 기록 닫기">&times;</button>
@@ -2626,9 +2672,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
     </div>
 </div>
 
-<button id="pillIdFloatingButton" class="pill-id-floating" type="button" aria-label="약식별: 알약 앞뒤 촬영" aria-haspopup="dialog">
-  <span class="floating-nav-toggle-inner pill-id-floating-inner"><svg aria-hidden="true" viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m9 5 10 10M5 19a6 6 0 0 1 0-8l6-6a6 6 0 0 1 8 8l-6 6a6 6 0 0 1-8 0Z"/><path d="m7 12 3-3" stroke-linecap="round"/></svg><span>약식별</span></span>
-</button>
+
 <dialog id="pillIdDialog" class="pill-id-dialog" aria-labelledby="pillIdTitle">
   <div class="pi-heading"><div><span class="pi-eyebrow">PILL FINDER</span><h2 id="pillIdTitle">💊 사진으로 약식별</h2></div><button type="button" id="piClose" class="pi-icon-close" aria-label="약식별 닫기">×</button></div>
   <div class="pi-tabs" role="group" aria-label="약식별 화면"><button type="button" id="piNew" class="pi-tab is-active" data-pi-busy>새로 촬영</button><button type="button" id="piHistory" class="pi-tab" data-pi-busy>촬영 기록</button></div>
@@ -3049,7 +3093,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
 
 
     
-    import { installDailySchedules } from './daily-schedules.js';
+    import { installDailySchedules } from './daily-schedules.js?v=20260928-2';
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
     import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, deleteDoc, collection, addDoc, query, orderBy, limit, onSnapshot, getDocs, where, startAfter, serverTimestamp, writeBatch, runTransaction } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
@@ -3530,6 +3574,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
         const toggle = document.getElementById('floatingNavToggle');
         if (!nav) return;
         const nextOpen = !nav.classList.contains('is-open');
+        if (nextOpen) window.closeFloatingActionMenu?.();
         nav.classList.toggle('is-open', nextOpen);
         if (menu) {
             menu.setAttribute('aria-hidden', nextOpen ? 'false' : 'true');
@@ -8727,6 +8772,7 @@ initPillIdentification();
             const dateLabel = `aria-label="${iterDateStrCal}${calendarRangeDescription ? ', ' + calendarRangeDescription : ''}, 건강기록${hasHealthEntry ? ' 있음' : ' 추가'}"${calendarRangeDescription ? ` title="${calendarRangeDescription}"` : ''}`;
             grid.innerHTML += `<div class="${classList.join(' ')}" ${customStyle} ${onClickEvent} ${dateLabel} role="button" tabindex="0" data-date="${iterDateStrCal}" onpointerdown="startPress(event, this)" onpointermove="moveCalendarPress(event)" onpointerup="cancelPress()" onpointerleave="cancelPress()" onpointercancel="cancelCalendarGesture()" onkeydown="handleHealthDayKey(event, '${iterDateStrCal}')" oncontextmenu="event.preventDefault()">${day}${cravingBadge}${cBadge}${logBadge}${calendarRangeBadge}${healthBadge}</div>`;
         }
+        dailySchedules.paintCalendar();
     }
 
     window.openActionModal = function() {
