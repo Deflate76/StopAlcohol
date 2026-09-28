@@ -1,0 +1,95 @@
+name: Firebase schedule functions
+
+on:
+  pull_request:
+    branches: [Rollback-version2]
+    paths:
+      - schedule-reminders/**
+      - firebase-messaging-sw.js
+      - .github/workflows/deploy-firebase-functions.yml
+  push:
+    branches: [Rollback-version2]
+    paths:
+      - schedule-reminders/**
+      - firebase-messaging-sw.js
+      - .github/workflows/deploy-firebase-functions.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Never interrupt an active deployment. PR checks use a separate concurrency group.
+concurrency:
+  group: firebase-daily-schedules-${{ github.event_name == 'pull_request' && github.ref || 'production' }}
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /schedule-reminders/
+            /firebase-messaging-sw.js
+            /.github/workflows/deploy-firebase-functions.yml
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: schedule-reminders/functions/package-lock.json
+      - run: npm ci --prefix schedule-reminders/functions --ignore-scripts --no-audit --no-fund
+      - run: npm test --prefix schedule-reminders/functions
+      - run: bash -n schedule-reminders/setup-github-deploy.sh
+      - run: node --test schedule-reminders/test-setup.mjs
+
+  deploy:
+    needs: test
+    if: >-
+      github.repository_id == '1207749530' &&
+      github.ref == 'refs/heads/Rollback-version2' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      CI: 'true'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /schedule-reminders/
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: schedule-reminders/functions/package-lock.json
+      - run: npm ci --prefix schedule-reminders/functions --ignore-scripts --no-audit --no-fund
+      - run: npm install --global firebase-tools@15.31.0 --ignore-scripts --no-audit --no-fund
+      # Authenticate after installing dependencies so the short-lived identity is fresh.
+      - name: Authenticate to Firebase project
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
+        with:
+          project_id: alcoholaway
+          workload_identity_provider: projects/1001199235857/locations/global/workloadIdentityPools/alcoholaway-github/providers/stopalcohol
+          service_account: firebase-github-deploy@alcoholaway.iam.gserviceaccount.com
+          create_credentials_file: true
+          export_environment_variables: true
+      - name: Deploy schedule functions
+        working-directory: schedule-reminders
+        run: firebase deploy --config "$GITHUB_WORKSPACE/schedule-reminders/firebase.json" --project alcoholaway --only functions:daily-schedules --non-interactive
+      - name: Deployment result
+        if: success()
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<'SUMMARY'
+          일정 API와 푸시 리마인드 함수를 alcoholaway / asia-northeast3에 배포했습니다.
+          배포 대상: dailyScheduleApi, dispatchDailyScheduleReminders
+          프런트엔드는 기존 사이트 배포 방식으로 반영됩니다.
+          SUMMARY

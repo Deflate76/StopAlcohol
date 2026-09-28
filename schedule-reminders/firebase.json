@@ -3,6 +3,7 @@
     "source": "functions",
     "codebase": "daily-schedules",
     "runtime": "nodejs22",
+    "disallowLegacyRuntimeConfig": true,
     "ignore": ["node_modules", ".git", "*.log", "test"]
   }]
 }

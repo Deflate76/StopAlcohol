@@ -6,16 +6,31 @@
 
 프런트엔드와 Firebase 함수를 모두 배포해야 사용할 수 있습니다. `index.html`만 교체해서는 일정 저장/푸시가 동작하지 않습니다. 이 변경에서는 운영 Firebase에 배포하거나 실제 기기로 테스트 알림을 보내지 않았습니다.
 
-Firebase 프로젝트 `alcoholaway`를 배포할 수 있는 Cloud Shell 등에서, 이 브랜치를 받은 저장소의 `schedule-reminders` 디렉터리로 이동합니다.
+**자동 배포:** [최초 연결 안내](AUTOMATION.md)에 따라 Cloud Shell에서 `setup-github-deploy.sh`를 한 번 실행하고 PR을 `Rollback-version2`에 병합합니다. 이후 일정 함수 변경은 GitHub Actions에서 테스트 후 배포됩니다. 서비스 계정 키나 GitHub Secret 입력은 필요 없습니다.
+
+`cd StopAlcohol/schedule-reminders`에서 폴더가 없다는 오류가 나면 현재 위치에 저장소가 없거나, 아직 이 폴더가 없는 기본 브랜치를 받은 경우입니다. 현재 위치와 관계없이 아래 명령으로 작업 브랜치를 받습니다.
 
 ```bash
-cd StopAlcohol/schedule-reminders
-npm ci --prefix functions
-npm test --prefix functions
-firebase deploy --project alcoholaway --only functions:daily-schedules
+git clone --depth 1 --filter=blob:none --sparse --branch codex/daily-schedule-reminders https://github.com/Deflate76/StopAlcohol.git "$HOME/StopAlcohol-schedule-deploy"
+git -C "$HOME/StopAlcohol-schedule-deploy" sparse-checkout set schedule-reminders
+cd "$HOME/StopAlcohol-schedule-deploy/schedule-reminders"
+bash setup-github-deploy.sh
 ```
 
-Firebase CLI가 없는 환경에서는 먼저 `npm install -g firebase-tools`로 설치하고 로그인된 계정을 사용합니다. 로컬 컴퓨터에서는 필요할 때 `firebase login`을 실행합니다. 기존 `firestore-admin`이나 기존 금주/복약 함수를 덮어쓰지 않도록 별도 코드베이스 `daily-schedules`로 배포합니다. 해당 폴더의 `firebase.json`에는 Functions만 포함되어 있습니다.
+이 경로에 이미 복제했다면 새로 복제하지 말고 `git -C "$HOME/StopAlcohol-schedule-deploy" pull --ff-only`로 갱신합니다. 위 스크립트는 `alcoholaway` 프로젝트의 IAM/API를 설정할 수 있는 계정으로 실행해야 합니다.
+
+**수동 배포:** 최초 연결 스크립트로 실행 서비스 계정을 만든 뒤 같은 폴더에서 실행할 수도 있습니다.
+
+```bash
+(
+  set -e
+  npm ci --prefix "$HOME/StopAlcohol-schedule-deploy/schedule-reminders/functions"
+  npm test --prefix "$HOME/StopAlcohol-schedule-deploy/schedule-reminders/functions"
+  firebase deploy --config "$HOME/StopAlcohol-schedule-deploy/schedule-reminders/firebase.json" --project alcoholaway --only functions:daily-schedules
+)
+```
+
+Firebase CLI가 없는 환경에서는 먼저 `npm install -g firebase-tools@15.31.0`으로 설치하고 로그인된 계정을 사용합니다. 로컬 컴퓨터에서는 필요할 때 `firebase login`을 실행합니다. 기존 `firestore-admin`이나 기존 금주/복약 함수를 덮어쓰지 않도록 별도 코드베이스 `daily-schedules`로 배포합니다. 해당 폴더의 `firebase.json`에는 Functions만 포함되어 있습니다.
 
 배포되는 함수:
 

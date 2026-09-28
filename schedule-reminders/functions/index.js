@@ -8,9 +8,11 @@ import {createScheduleService, ScheduleError} from './service.mjs';
 
 const app = initializeApp();
 const service = createScheduleService({db: getFirestore(app), messaging: getMessaging(app), log: (message, data) => logger.warn(message, data)});
+const runtimeServiceAccount = 'daily-schedules-runtime@alcoholaway.iam.gserviceaccount.com';
 
 export const dailyScheduleApi = onCall({
   region: 'asia-northeast3', enforceAppCheck: true,
+  serviceAccount: runtimeServiceAccount,
   cors: ['https://www.alcoholaway.com', 'https://alcoholaway.com'],
   memory: '256MiB', timeoutSeconds: 60, minInstances: 0, maxInstances: 5
 }, async request => {
@@ -24,6 +26,7 @@ export const dailyScheduleApi = onCall({
 
 export const dispatchDailyScheduleReminders = onSchedule({
   schedule: 'every 1 minutes', timeZone: 'Asia/Seoul', region: 'asia-northeast3',
+  serviceAccount: runtimeServiceAccount,
   memory: '256MiB', timeoutSeconds: 120, maxInstances: 1, concurrency: 1,
   retryCount: 3, minBackoffSeconds: 30, maxBackoffSeconds: 120
 }, async () => { logger.info('daily-schedule-dispatch', await service.dispatch()); });
