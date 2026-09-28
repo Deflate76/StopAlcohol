@@ -1,5 +1,6 @@
 import {createHash} from 'node:crypto';
 import {pathParts,validateFields,validateValue,validTimestamp,canonical,summaryValue} from './value-codec.mjs';
+import {parseFieldPath,formatFieldPath,fieldValue,collectFieldPaths} from './field-paths.mjs';
 
 export class AdminError extends Error {
   constructor(code,message,details){super(message);this.code=code;this.details=details;}
@@ -23,13 +24,7 @@ function summary(document) {
     fieldCount:Object.keys(fields).length,preview:Object.entries(fields).slice(0,3).map(([name,value])=>({name:name.slice(0,80),value:summaryValue(value)}))};
 }
 function queryField(field) {
-  if(typeof field!=='string'||!field||field.length>512||/[\u0000-\u001f\u007f]/.test(field))fail('invalid-argument','검색할 필드 경로를 입력하세요.');
-  const parts=field.split('.');if(parts.some(p=>!p)||field==='__name__')fail('invalid-argument','문서 ID는 위의 전체 경로 입력으로 조회하세요.');
-  const quote=String.fromCharCode(96);
-  return parts.map(part=>/^[A-Za-z_][A-Za-z0-9_]*$/.test(part)?part:quote+part.split('\\').join('\\\\').split(quote).join('\\'+quote)+quote).join('.');
-}
-function fieldValue(fields,field) {
-  let value;for(const segment of field.split('.')){value=fields?.[segment];fields=value?.mapValue?.fields;}return value;
+  try{return formatFieldPath(parseFieldPath(field));}catch(error){fail('invalid-argument',error.message);}
 }
 export function createAdminService({authorize,request,now=()=>new Date().toISOString()}) {
   async function get(path) {return await request('GET',apiPath(path),undefined,{missing:true});}
@@ -54,26 +49,28 @@ export function createAdminService({authorize,request,now=()=>new Date().toISOSt
       const result=await collections(data.path,boundedToken(data.pageToken));
       return {collections:result.collectionIds||[],nextPageToken:result.nextPageToken||''};
     }
-    if(action==='documents') {
+    if(action==='documents'||action==='fieldPaths') {
       const parts=validatePath(data.path,'collection'),parent=parts.slice(0,-1).join('/'),id=parts.at(-1);
       const token=boundedToken(data.pageToken);
-      if(!data.filter) {
+      if(!data.filter||action==='fieldPaths') {
         const params=new URLSearchParams({pageSize:'25',showMissing:'true'});
         if(token)params.set('pageToken',token);
         const result=await request('GET',apiPath(parent)+'/'+encodeURIComponent(id)+'?'+params);
-        return {documents:(result.documents||[]).map(summary),nextPageToken:result.nextPageToken||'',filtered:false};
+        return {documents:action==='fieldPaths'?[]:(result.documents||[]).map(summary),nextPageToken:result.nextPageToken||'',filtered:false,...collectFieldPaths(result.documents||[])};
       }
       const filter=data.filter,field=queryField(filter.field);
-      const supported=['EQUAL','LESS_THAN','LESS_THAN_OR_EQUAL','GREATER_THAN','GREATER_THAN_OR_EQUAL','ARRAY_CONTAINS'];
+      const supported=['EQUAL','LESS_THAN','LESS_THAN_OR_EQUAL','GREATER_THAN','GREATER_THAN_OR_EQUAL','ARRAY_CONTAINS','STRING_CONTAINS'];
       if(!supported.includes(filter.op))fail('invalid-argument','지원하지 않는 검색 조건입니다.');
       try{validateValue(filter.value);}catch(e){fail('invalid-argument',e.message);}
       const type=Object.keys(filter.value)[0];
       if(['arrayValue','mapValue','bytesValue'].includes(type))fail('invalid-argument','검색 값은 문자열·숫자·날짜·참조 등의 단일 값으로 입력하세요.');
       const inequality=filter.op.includes('THAN'),context=hash({path:data.path,filter});
+      const contains=filter.op==='STRING_CONTAINS';
+      if(contains&&(type!=='stringValue'||!filter.value.stringValue.length||filter.value.stringValue.length>1000))fail('invalid-argument','포함 검색에는 1~1000자의 문자열을 입력하세요.');
       const special=type==='nullValue'?'IS_NULL':type==='doubleValue'&&filter.value.doubleValue==='NaN'?'IS_NAN':null;
       const where=special&&filter.op==='EQUAL'?{unaryFilter:{field:{fieldPath:field},op:special}}:{fieldFilter:{field:{fieldPath:field},op:filter.op,value:filter.value}};
-      const query={from:[{collectionId:id}],where,
-        orderBy:[...(inequality?[{field:{fieldPath:field},direction:'ASCENDING'}]:[]),{field:{fieldPath:'__name__'},direction:'ASCENDING'}],limit:26};
+      const query={from:[{collectionId:id}],...(contains?{select:{fields:[{fieldPath:field}]}}:{where}),
+        orderBy:[...(inequality?[{field:{fieldPath:field},direction:'ASCENDING'}]:[]),{field:{fieldPath:'__name__'},direction:'ASCENDING'}],limit:contains?201:26};
       if(token) {
         let cursor;try{cursor=JSON.parse(Buffer.from(token,'base64url').toString());}catch{fail('invalid-argument','검색 페이지 정보가 손상되었습니다. 처음부터 조회하세요.');}
         if(cursor.context!==context||!Array.isArray(cursor.values)||cursor.values.length!==(inequality?2:1))fail('invalid-argument','검색 조건이 변경되었습니다. 처음부터 조회하세요.');
@@ -83,9 +80,21 @@ export function createAdminService({authorize,request,now=()=>new Date().toISOSt
         query.startAt={values:cursor.values,before:false};
       }
       const response=await request('POST',apiPath(parent)+':runQuery',{structuredQuery:query});
+      if(contains) {
+        const candidates=response.map(row=>row.document).filter(Boolean),page=[];let scanned=0,last;
+        for(const document of candidates.slice(0,200)) {
+          scanned++;last=document;
+          const value=fieldValue(document.fields,filter.field)?.stringValue;
+          if(typeof value==='string'&&value.includes(filter.value.stringValue))page.push(document);
+          if(page.length===25)break;
+        }
+        const hasMore=scanned<candidates.length;
+        return {documents:page.map(summary),filtered:true,scan:{scanned,hasMore},
+          nextPageToken:hasMore?Buffer.from(JSON.stringify({context,values:[{referenceValue:last.name}]})).toString('base64url'):'',...collectFieldPaths(page)};
+      }
       const documents=response.map(row=>row.document).filter(Boolean),page=documents.slice(0,25),last=page.at(-1);
       const values=last?[...(inequality?[fieldValue(last.fields,filter.field)]:[]),{referenceValue:last.name}]:[];
-      return {documents:page.map(summary),nextPageToken:documents.length>25?Buffer.from(JSON.stringify({context,values})).toString('base64url'):'',filtered:true};
+      return {documents:page.map(summary),nextPageToken:documents.length>25?Buffer.from(JSON.stringify({context,values})).toString('base64url'):'',filtered:true,...collectFieldPaths(page)};
     }
     if(action==='get') {
       validatePath(data.path);const document=await get(data.path);

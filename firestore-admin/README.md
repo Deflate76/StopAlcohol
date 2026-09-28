@@ -7,8 +7,8 @@
 ## 제공 기능
 
 - 루트/하위 컬렉션 탐색, 문서 경로 바로 열기, 한 페이지 25개 문서 조회
-- 필드 값 검색: 같음, 크기 비교, 배열에 값 포함. 현재 컬렉션 대상이며 전체 텍스트 검색은 아닙니다.
-- 문서 생성, 필드 추가·수정·삭제, 타입 JSON 편집, 변경사항 확인 후 저장
+- 읽어온 문서의 필드 경로 선택 목록, 같음·크기 비교·배열에 값 포함·문자열 부분 포함 검색
+- 문서 생성, 필드 추가·수정·삭제, 객체·배열 표 편집과 타입 JSON 동기화, 중첩 변경 확인 후 저장
 - 정확한 문서 경로를 입력한 뒤 문서 삭제. 하위 컬렉션이 있으면 삭제 거부
 - 문서 JSON 내보내기, 관리자 작업 이력 조회
 - 다른 클라이언트에서 먼저 변경한 문서의 덮어쓰기 방지, 재시도 시 중복 작업 방지
@@ -103,7 +103,7 @@ API가 매 요청마다 Firebase Auth의 현재 사용자 상태와 클레임을
 5. 수정은 **변경 확인 · 저장**에서 바뀐 필드와 삭제될 필드를 확인한 후 확정합니다. 충돌이 나면 **새로 불러오기**로 최신 원본을 확인하고 필요한 편집을 다시 적용합니다.
 6. **관리자 작업 이력**에서 작업자 UID, 작업 종류, 문서 경로, 시각을 확인합니다. 이력은 이 화면에서 변경할 수 없습니다.
 
-정수는 64비트 숫자 문자열, 날짜는 UTC RFC3339 문자열로 취급하여 브라우저 숫자 변환/밀리초 변환으로 생기는 손실을 피합니다. 객체와 배열은 Firestore 타입 JSON으로 편집합니다. 저장 가능한 편집 내용은 타입 JSON 900KB 이하입니다. 원래 문서의 모든 필드를 불러온 후 저장하며, 편집기에서 삭제한 필드는 실제 문서에서도 제거됩니다.
+정수는 64비트 숫자 문자열, 날짜는 UTC RFC3339 문자열로 취급하여 브라우저 숫자 변환/밀리초 변환으로 생기는 손실을 피합니다. 객체와 배열은 **표로 편집**하거나 접힌 **타입 JSON 보기 · 편집**을 펼쳐 편집합니다. 저장 가능한 편집 내용은 타입 JSON 900KB 이하입니다. 원래 문서의 모든 필드를 불러온 후 저장하며, 편집기에서 삭제한 필드는 실제 문서에서도 제거됩니다.
 
 ```json
 {
@@ -150,3 +150,56 @@ npm test
 테스트는 모의 Auth/Firestore와 DOM을 사용하며 실제 운영 데이터는 변경하지 않습니다. 실제 로그인, App Check, IAM, 함수 배포 및 운영 데이터 연결은 배포 후 위 화면에서 별도로 확인해야 합니다.
 
 공식 문서: [관리자 커스텀 클레임](https://firebase.google.com/docs/auth/admin/custom-claims), [호출형 함수](https://firebase.google.com/docs/functions/callable), [App Check 적용](https://firebase.google.com/docs/app-check/cloud-functions), [함수 코드베이스](https://firebase.google.com/docs/functions/organize-functions), [Firestore REST commit](https://firebase.google.com/docs/firestore/reference/rest/v1/projects.databases.documents/commit).
+
+
+## 배열·객체 표 편집
+
+전체 경로에 `drug_catalogs/otc_review_20260926_33a241232f55/products/195700020`을 입력해 열고 객체/배열 필드의 **표로 편집**을 누릅니다.
+
+- 객체 배열은 객체 하나를 한 행으로, 각 필드를 한 열로 표시합니다. 행별로 다른 필드도 열을 합쳐 보여주며, 없는 필드와 null을 구분합니다.
+- **행 추가**, 행별 **삭제**, **행 편집**, **모든 행에 필드 추가**를 사용할 수 있습니다. 객체 표에서는 필드 이름·타입·값을 변경하고 필드를 추가/삭제합니다.
+- 중첩 객체·배열은 **열기**로 이동하고 상단 경로로 돌아옵니다. 많은 행은 25개씩 표시하며 나머지 데이터도 유지합니다.
+- 표 변경은 타입 JSON에 즉시 반영됩니다. **이 표의 변경 취소**는 표를 열기 전 내용으로 되돌립니다. 전체 타입 JSON을 수정한 뒤 표를 다시 열어도 변경된 내용이 표시됩니다.
+- **편집 마치기 → 변경 확인 · 저장**에서 바뀐 내부 필드·배열 항목을 확인하고 **변경 저장**을 눌러야 Firestore가 바뀝니다. 변경 확인은 최대 100개 항목과 전체 변경 개수를 표시합니다.
+- 잘못된 숫자·중복 필드 이름은 저장하지 않으며, 64비트 정수·나노초 날짜·문서 참조·바이너리 등 기존 타입을 유지합니다.
+
+특정 제품 ID에 한정되지 않으며 모든 drug_catalogs 하위 문서와 다른 일반 문서에서 사용할 수 있습니다. 감사 기록은 읽기 전용입니다.
+
+## 필드 목록과 포함 검색
+
+컬렉션을 열면 읽어온 문서의 필드 및 중첩 객체 필드가 **필드 경로** 선택 목록에 들어갑니다. 선택한 문서의 필드도 추가됩니다. 문서마다 구조가 다르므로 모든 문서의 필드가 처음부터 들어 있다고 가정하지 않습니다. **다음 문서의 필드 더 찾기**로 25개씩 더 읽어 목록을 보충하거나 **직접 입력**을 선택하세요. 컬렉션 변경/로그아웃 시 목록을 비웁니다. 화면에는 최대 1,000개 경로를 유지하며 초과 필드는 직접 입력할 수 있습니다.
+
+타입 **문자열**에서 **포함 (문자열)**을 선택하면 필드 값 중간에 검색어가 들어 있어도 찾습니다. 대소문자를 구분하는 실제 부분 문자열 검색이며 정규식이 아닙니다. 공백도 검색어의 일부입니다. 한글 및 120자 미리보기 뒤의 내용도 검색합니다. 기존 **배열에 포함**과는 별도 조건입니다.
+
+기존 Firestore Core 쿼리를 사용하며 별도 검색 서비스나 Enterprise 전환은 필요 없습니다. 서버가 선택한 필드만 읽어 한 번에 최대 200개를 검사하고 일치 문서를 최대 25개 반환합니다(다음 범위 확인을 위해 최대 201개 읽기). **다음 검색 범위**로 컬렉션 끝까지 이어서 검색합니다. 이번 범위에 일치 항목이 없어도 다음 범위가 있으면 안내와 버튼이 유지됩니다. 읽은 문서 수에 따른 Firestore 읽기 비용이 발생합니다. 하위 컬렉션은 별도로 열어 검색합니다.
+
+## 기존 GitHub 자동 배포에 관리자 API 추가
+
+포함 검색과 컬렉션 필드 목록에는 이번 관리자 API 업데이트도 필요합니다. 기존 일정 배포 워크플로는 **Firebase functions**라는 이름으로 관리자 API와 일정 함수의 테스트·배포를 함께 수행합니다. 인증 공급자나 서비스 계정 키는 새로 만들지 않습니다.
+
+기존 GitHub 배포 계정이 관리자 API 실행 계정을 사용할 수 있도록, 프로젝트 운영자가 Cloud Shell에서 아래 권한을 **최초 한 번** 연결합니다. 문서 데이터는 변경하지 않습니다.
+
+```bash
+gcloud iam service-accounts add-iam-policy-binding \
+  firestore-admin-console@alcoholaway.iam.gserviceaccount.com \
+  --project=alcoholaway \
+  --member=serviceAccount:firebase-github-deploy@alcoholaway.iam.gserviceaccount.com \
+  --role=roles/iam.serviceAccountUser \
+  --condition=None
+```
+
+동일한 작업을 프로젝트 번호와 두 계정의 존재를 확인한 뒤 실행하는 스크립트도 있습니다: `bash firestore-admin/enable-auto-deploy.sh` (저장소 최상위 기준).
+
+PR을 Rollback-version2에 병합하면 GitHub Pages와 Firebase functions가 실행됩니다. 이미 병합했다면 Actions → Firebase functions → Run workflow에서 Rollback-version2를 선택합니다. 관리자 API 단계에 actAs 권한 오류가 나면 위 연결 후 실패한 배포를 다시 실행하세요. 배포 계정은 관리자 API 실행 계정에 대한 Service Account User만 추가로 받고, 문서 관리자 커스텀 클레임은 받지 않습니다.
+
+수동 배포는 최신 브랜치를 받은 저장소의 `firestore-admin` 폴더에서 아래처럼 설정 경로를 명시해 실행합니다. 기존 관리자 UID/클레임을 다시 등록할 필요는 없습니다.
+
+```bash
+(
+  set -e
+  test -f firebase.json
+  npm ci --prefix functions
+  npm test --prefix functions
+  npx --yes firebase-tools@15.31.0 deploy --config ./firebase.json --project alcoholaway --only functions:firestore-admin
+)
+```

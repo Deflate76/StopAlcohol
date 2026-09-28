@@ -25,10 +25,10 @@ bash setup-github-deploy.sh
 ```
 
 3. 스크립트가 성공하면 [PR #1](https://github.com/Deflate76/StopAlcohol/pull/1)을 검토하여 `Rollback-version2`에 병합합니다. PR이 Draft 상태이면 Ready for review로 전환한 뒤 병합합니다. 저장소 Actions가 비활성화되어 있다면 GitHub Settings → Actions에서 활성화해야 합니다.
-4. GitHub → Actions → **Firebase schedule functions**의 `test`와 `deploy` 성공을 확인합니다. 인증 권한 전파에 몇 분 걸릴 수 있습니다. 이미 병합한 경우에는 **Run workflow**에서 `Rollback-version2`를 선택해 실행합니다.
+4. GitHub → Actions → **Firebase functions**의 `test`와 `deploy` 성공을 확인합니다. 인증 권한 전파에 몇 분 걸릴 수 있습니다. 이미 병합한 경우에는 **Run workflow**에서 `Rollback-version2`를 선택해 실행합니다.
 5. [데이터 접근 규칙과 실제 기기 확인](README.md#데이터-접근)을 완료합니다. 사이트의 `index.html`, `daily-schedules.js`, `firebase-messaging-sw.js`도 기존 사이트 배포 방식으로 반영되어 있어야 합니다.
 
-이 자동화는 Firebase Functions 두 개를 배포합니다. 웹사이트는 기존 GitHub Pages 배포를 사용하므로 Firebase Hosting 설정을 추가하지 않습니다. Firestore 규칙은 저장소에 없어 자동 교체하지 않습니다.
+이 자동화는 일정 함수 두 개와 Firestore 관리자 API를 배포합니다. 관리자 API의 최초 배포 권한 연결은 [관리자 배포 안내](../firestore-admin/README.md#기존-github-자동-배포에-관리자-api-추가)를 참고하세요. 웹사이트는 기존 GitHub Pages 배포를 사용하므로 Firebase Hosting 설정을 추가하지 않습니다. Firestore 규칙은 저장소에 없어 자동 교체하지 않습니다.
 
 ## 연결과 권한
 

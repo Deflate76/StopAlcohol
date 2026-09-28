@@ -8,6 +8,7 @@
   <meta name="color-scheme" content="light">
   <title>Firestore 관리자 · AlcoholAway</title>
   <link rel="stylesheet" href="firestore-admin/admin.css">
+  <link rel="stylesheet" href="firestore-admin/grid-editor.css">
 </head>
 <body>
   <header class="topbar">
@@ -33,14 +34,25 @@
       <div class="admin-grid">
         <aside class="card collections-panel"><div class="panel-heading"><h2>컬렉션</h2><button id="rootButton" type="button" class="small">전체</button></div><p id="collectionContext" class="muted mono small-text">데이터베이스 루트</p><div id="collectionList" class="collection-list"></div><button id="moreCollections" type="button" class="wide" hidden>컬렉션 더 보기</button><div class="shortcuts"><h3>바로가기</h3><button type="button" data-path="users">사용자 · users</button><button type="button" data-path="drug_catalogs">의약품 · drug_catalogs</button><button type="button" data-path="posts">게시글 · posts</button><button type="button" data-path="_firestore_admin_audit">관리자 작업 이력</button></div></aside>
         <section class="card documents-panel"><div class="panel-heading"><h2>문서</h2><button id="newDocument" type="button" class="small" disabled>+ 새 문서</button></div><p id="currentCollection" class="muted mono small-text">컬렉션을 선택하세요</p>
-          <details id="filterDetails"><summary>필드 값으로 검색</summary><form id="filterForm" class="filter-form"><label>필드 경로<input id="filterField" placeholder="email 또는 profile.name" autocomplete="off"></label><div class="two-columns"><label>조건<select id="filterOperator"><option value="EQUAL">같음 (=)</option><option value="LESS_THAN">작음 (&lt;)</option><option value="LESS_THAN_OR_EQUAL">작거나 같음 (≤)</option><option value="GREATER_THAN">큼 (&gt;)</option><option value="GREATER_THAN_OR_EQUAL">크거나 같음 (≥)</option><option value="ARRAY_CONTAINS">배열에 포함</option></select></label><label>타입<select id="filterType"><option value="stringValue">문자열</option><option value="integerValue">정수</option><option value="doubleValue">실수</option><option value="booleanValue">참/거짓</option><option value="timestampValue">날짜·시각</option><option value="nullValue">null</option><option value="referenceValue">문서 참조</option></select></label></div><label>검색 값<input id="filterValue" placeholder="검색할 값" autocomplete="off"></label><div class="actions"><button type="submit" class="primary">검색</button><button id="clearFilter" type="button">초기화</button></div><p class="small-text muted">현재 컬렉션의 단일 필드 조건으로 검색합니다. 하위 컬렉션과 본문 전체를 함께 검색하지 않습니다.</p></form></details>
+          <details id="filterDetails"><summary>필드 값으로 검색</summary>
+            <form id="filterForm" class="filter-form">
+              <label>필드 경로<select id="filterFieldSelect" aria-describedby="filterFieldHint"><option value="">필드를 선택하세요</option><option value="custom">직접 입력</option></select></label>
+              <label id="filterCustomLabel" hidden>필드 경로 직접 입력<input id="filterField" placeholder="email 또는 profile.name" autocomplete="off" spellcheck="false"></label>
+              <p id="filterFieldHint" class="small-text muted">읽은 문서의 필드가 목록에 표시됩니다.</p>
+              <button id="moreFilterFields" type="button" class="small" hidden>다음 문서의 필드 더 찾기</button>
+              <div class="two-columns"><label>조건<select id="filterOperator"><option value="EQUAL">같음 (=)</option><option value="STRING_CONTAINS">포함 (문자열)</option><option value="LESS_THAN">작음 (&lt;)</option><option value="LESS_THAN_OR_EQUAL">작거나 같음 (≤)</option><option value="GREATER_THAN">큼 (&gt;)</option><option value="GREATER_THAN_OR_EQUAL">크거나 같음 (≥)</option><option value="ARRAY_CONTAINS">배열에 포함</option></select></label><label>타입<select id="filterType"><option value="stringValue">문자열</option><option value="integerValue">정수</option><option value="doubleValue">실수</option><option value="booleanValue">참/거짓</option><option value="timestampValue">날짜·시각</option><option value="nullValue">null</option><option value="referenceValue">문서 참조</option></select></label></div>
+              <label>검색 값<input id="filterValue" placeholder="검색할 값" autocomplete="off"></label>
+              <div class="actions"><button type="submit" class="primary">검색</button><button id="clearFilter" type="button">초기화</button></div>
+              <p id="filterSearchHint" class="small-text muted">현재 컬렉션의 선택한 필드에서 검색합니다.</p>
+            </form>
+          </details>
           <div id="documentList" class="document-list"><p class="empty">왼쪽에서 컬렉션을 선택해 주세요.</p></div><div class="pagination"><button id="previousPage" type="button" disabled>이전</button><span id="pageNumber">—</span><button id="nextPage" type="button" disabled>다음</button></div>
         </section>
         <section class="card editor-panel"><div class="panel-heading"><h2>문서 편집</h2><span id="dirtyBadge" class="badge changed" hidden>저장 전</span></div><div id="editorEmpty" class="empty editor-empty">문서를 선택하면<br>필드와 하위 컬렉션이 표시됩니다.</div><div id="editorContent" hidden>
           <p id="documentPath" class="document-path mono"></p><p id="documentMeta" class="muted small-text"></p><p id="missingNotice" class="notice" hidden>이 경로에는 문서 본문이 없고 하위 컬렉션만 있을 수 있습니다. 본문을 만들거나 아래 하위 컬렉션을 열 수 있습니다.</p><p id="readOnlyNotice" class="notice" hidden>관리자 작업 이력은 조회만 가능합니다.</p>
           <label id="newIdLabel" hidden>문서 ID<input id="newId" autocomplete="off" spellcheck="false" placeholder="비워 두면 자동 ID 생성"></label>
           <div class="editor-toolbar"><button id="reloadDocument" type="button" class="small">새로 불러오기</button><button id="exportDocument" type="button" class="small">JSON 내보내기</button><label class="mode-switch"><input id="rawMode" type="checkbox">타입 JSON</label></div>
-          <p class="small-text muted">정수·날짜 등 원래 타입을 유지합니다. 객체와 배열은 타입이 포함된 JSON으로 편집합니다.</p><div id="fieldList" class="field-list"></div><div id="rawEditor" hidden><label for="rawFields">Firestore 타입 JSON</label><textarea id="rawFields" rows="18" spellcheck="false" autocomplete="off"></textarea><p class="small-text muted">예: {"name":{"stringValue":"이름"},"count":{"integerValue":"1"}}</p></div>
+          <p class="small-text muted">객체·배열의 ‘표로 편집’을 누르면 행과 필드를 편집할 수 있습니다. 표와 타입 JSON은 함께 바뀌며, ‘변경 확인 · 저장’에서 확정해야 서버에 저장됩니다.</p><div id="fieldList" class="field-list"></div><div id="rawEditor" hidden><label for="rawFields">Firestore 타입 JSON</label><textarea id="rawFields" rows="18" spellcheck="false" autocomplete="off"></textarea><p class="small-text muted">예: {"name":{"stringValue":"이름"},"count":{"integerValue":"1"}}</p></div>
           <button id="addField" type="button" class="wide">+ 필드 추가</button><div id="writeActions" class="save-actions"><button id="previewSave" type="button" class="primary">변경 확인 · 저장</button><button id="deleteDocument" type="button" class="danger">문서 삭제</button></div>
           <section class="subcollections"><div class="panel-heading"><h3>하위 컬렉션</h3><button id="newSubcollection" type="button" class="small">경로 열기</button></div><div id="subcollectionList" class="collection-list"></div><button id="moreSubcollections" type="button" class="wide" hidden>하위 컬렉션 더 보기</button></section>
         </div></section>
@@ -49,6 +61,14 @@
     <footer>관리자 전용 · 로그인 권한과 변경 이력을 서버에서 확인합니다.</footer>
   </main>
   <dialog id="confirmDialog" aria-labelledby="confirmTitle"><form method="dialog" id="confirmForm"><h2 id="confirmTitle">변경사항 확인</h2><p id="confirmDescription"></p><pre id="confirmPath" class="mono"></pre><div id="changeList" class="change-list"></div><label id="deleteConfirmLabel" hidden>삭제할 문서의 전체 경로를 입력하세요<input id="deleteConfirmInput" autocomplete="off" spellcheck="false"></label><div class="dialog-actions"><button id="cancelConfirm" type="button">취소</button><button id="acceptConfirm" type="submit" class="primary">저장</button></div></form></dialog>
+  <dialog id="gridDialog" class="grid-dialog" aria-labelledby="gridTitle">
+    <div class="panel-heading"><h2 id="gridTitle">표 편집</h2><span class="badge changed">문서 저장 전</span></div>
+    <p class="small-text muted">배열은 행으로, 객체는 필드로 표시합니다. 하위 객체·배열은 ‘열기’로 이동하세요. 입력은 JSON에 반영되며 서버 저장은 문서 화면에서 확인 후 진행합니다.</p>
+    <nav id="gridBreadcrumbs" class="breadcrumbs" aria-label="표 안의 위치"></nav><p id="gridLocation" class="small-text muted"></p>
+    <p id="gridError" class="error-box" role="alert" hidden></p>
+    <div id="gridContent" class="grid-scroll" tabindex="0" aria-label="데이터 편집 표"></div><div id="gridTools"></div>
+    <div class="dialog-actions"><button id="gridCancel" type="button">이 표의 변경 취소</button><button id="gridClose" type="button" class="primary">편집 마치기</button></div>
+  </dialog>
   <noscript><p>관리자 페이지를 사용하려면 JavaScript를 켜 주세요.</p></noscript>
   <script type="module" src="firestore-admin/admin.js"></script>
 </body>
