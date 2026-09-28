@@ -27,7 +27,7 @@ function getSafeUrl(rawUrl) {
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
-  const targetUrl = getSafeUrl(event.notification.data?.url);
+  const targetUrl = getSafeUrl(event.notification.data?.url || event.notification.data?.FCM_MSG?.data?.url || event.notification.data?.FCM_MSG?.fcmOptions?.link);
 
   event.waitUntil((async () => {
     const windowClients = await clients.matchAll({
@@ -40,6 +40,15 @@ self.addEventListener("notificationclick", (event) => {
         const clientUrl = new URL(client.url);
 
         if (clientUrl.origin === targetUrl.origin && "focus" in client) {
+          const scheduleId = targetUrl.searchParams.get('schedule');
+          if (scheduleId && /^[a-zA-Z0-9_-]{16,80}$/.test(scheduleId)) {
+            // Preserve an open diary/form; ask the existing index page to open the event.
+            if ((clientUrl.pathname === '/' || clientUrl.pathname === '/index.html') && 'postMessage' in client) {
+              client.postMessage({type: 'daily-schedule-open', id: scheduleId});
+            } else if ('navigate' in client) {
+              await client.navigate(targetUrl.href);
+            }
+          }
           return client.focus();
         }
       } catch (error) {
@@ -66,6 +75,8 @@ firebase.initializeApp({
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage((payload) => {
+  // Notification payloads are displayed by the SDK; displaying again duplicates them.
+  if (payload.notification) return;
   console.log("백그라운드 푸시 수신:", payload);
 
   const title =
@@ -88,13 +99,13 @@ messaging.onBackgroundMessage((payload) => {
   body,
   icon: "/favicon.ico",
   badge: "/icons/notification-badge-96.png",
-  tag: "alcoholaway-push",
-  renotify: true,
+  tag: payload.data?.kind === 'daily-schedule' ? payload.data.tag : "alcoholaway-push",
+  renotify: payload.data?.kind !== 'daily-schedule',
   requireInteraction: true,
   data: {
     url,
   },
 };
 
-  self.registration.showNotification(title, options);
+  return self.registration.showNotification(title, options);
 });

@@ -11,7 +11,7 @@
     <meta name="google-adsense-account" content="ca-pub-4147840233181777">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>금주도전/건강기록</title>
-    <meta name="app-build" content="2026-09-27-phr-multiformat-v1">
+    <meta name="app-build" content="2026-09-28-daily-schedules-v1">
     
     <meta name="description" content="금주 도전부터 건강 상태, 진단과 처방전까지. 나의 건강을 하루씩 기록하는 금주도전/건강기록." />
     <meta name="theme-color" content="#ffffff" />
@@ -1123,6 +1123,30 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
 @media(max-width:480px){.otc-ingredient-toggle{padding:10px;gap:6px}.otc-ingredient-body{padding:9px 10px}.otc-ingredient-name{font-size:13px}.otc-patient-overview{padding:10px}.otc-patient-row{gap:6px}.otc-subdialog .otc-heading{top:-16px}.otc-related-button{align-items:flex-start}.otc-related-button strong{overflow-wrap:anywhere}.otc-subdialog .otc-heading h2{font-size:17px}}
 </style>
 <!-- OTC barcode styles END -->
+<style>
+.daily-schedule-floating { bottom:calc(382px + env(safe-area-inset-bottom,0px)); background:linear-gradient(145deg,#3aa698,#167a6b); box-shadow:0 5px 18px #167a6b33; }
+.daily-schedule-floating .daily-schedule-floating-inner { background:linear-gradient(145deg,#fff,#e7f6ee)!important; color:#176f59!important; }
+.daily-schedule-dialog { width:min(540px,calc(100vw - 24px)); max-height:calc(100dvh - 24px); padding:20px; border:1px solid #cbded8; border-radius:20px; background:#fff; color:#334155; box-sizing:border-box; text-align:left; overflow:auto; overscroll-behavior:contain; font-family:inherit; }
+.daily-schedule-dialog:not([open]) { display:none; }
+.daily-schedule-dialog::backdrop { background:#142d3a99; }
+.daily-schedule-dialog [hidden] { display:none!important; }
+.daily-schedule-dialog h2 { margin:0; font-size:1.15rem; color:#176f59; }
+.daily-schedule-dialog h3 { font-size:.9rem; margin:18px 0 8px; }
+.daily-schedule-dialog fieldset { min-width:0; border:0; padding:0; margin:0; }
+.ds-heading,.ds-list-heading { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.ds-list-heading { flex-wrap:wrap; margin-top:12px; }
+.ds-list-heading h4 { margin:0; }
+.ds-list-heading input { max-width:180px; padding:8px; border:1px solid #cbd5e1; border-radius:8px; font:inherit; }
+.ds-saved { border:1px solid #cbded8; border-radius:12px; padding:12px; margin:8px 0; text-align:left; background:#f8fcfa; overflow-wrap:anywhere; }
+.ds-saved > strong { font-size:.88rem; color:#176f59; }
+.ds-saved p { margin:5px 0; font-size:.77rem; }
+.ds-note { white-space:pre-wrap; }
+#dsReminderPreview { padding:10px; border-radius:9px; background:#eef8f2; color:#176f59; font-size:.8rem; }
+#dsList:empty { display:none; }
+@media(max-width:480px) { .daily-schedule-floating { bottom:calc(350px + env(safe-area-inset-bottom,0px)); } .daily-schedule-dialog { padding:16px; } }
+@media(max-height:420px) { #dailyScheduleFloatingButton { bottom:298px; } }
+@media(max-height:360px) { #dailyScheduleFloatingButton { bottom:246px; right:calc(64px + env(safe-area-inset-right,0px)); } }
+</style>
 </head>
 <body>
 <div id="pageTopAnchor" class="page-scroll-anchor" aria-hidden="true"></div>
@@ -2258,6 +2282,14 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
             <button type="button" class="health-btn" onclick="openLegacyDayRecords()">식사·음주 등 기존 기록 보기</button>
             <button type="button" class="health-btn" onclick="openHealthPrivacy('health')">개인정보 처리 안내</button>
         </div>
+        <div class="health-actions">
+            <button id="healthDayScheduleButton" type="button" class="health-btn primary" aria-haspopup="dialog" aria-controls="dailyScheduleModal" aria-expanded="false" onclick="openDailyScheduleForHealthDay()">＋ 일정 등록</button>
+        </div>
+        <section aria-labelledby="healthDayScheduleTitle">
+            <div class="ds-list-heading"><h4 id="healthDayScheduleTitle">이날의 일정</h4><button id="healthScheduleRefresh" type="button" class="health-link">새로고침</button></div>
+            <p id="healthScheduleStatus" class="health-status" role="status" aria-live="polite"></p>
+            <div id="healthDaySchedules"></div>
+        </section>
         <form id="healthEntryForm" onsubmit="event.preventDefault(); saveHealthEntry()">
             <fieldset id="healthEntryFields" style="border:0; padding:0; margin:0; min-width:0;">
                 <label class="health-label" for="healthEntryTime">기록 시간</label>
@@ -2427,6 +2459,32 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
     });
 })();
 </script>
+
+<button id="dailyScheduleFloatingButton" class="pill-id-floating daily-schedule-floating" type="button" aria-label="일정 등록" aria-haspopup="dialog" aria-controls="dailyScheduleModal" aria-expanded="false">
+    <span class="floating-nav-toggle-inner pill-id-floating-inner daily-schedule-floating-inner"><svg aria-hidden="true" viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4M17 3v4M3 10h18M12 13v5M9.5 15.5h5"/></svg><span>일정</span></span>
+</button>
+<dialog id="dailyScheduleModal" class="daily-schedule-dialog" aria-labelledby="dsEditorTitle">
+    <div class="ds-heading"><h2 id="dsEditorTitle">일정 등록</h2><button id="dsClose" type="button" class="pi-icon-close" aria-label="일정 팝업 닫기">×</button></div>
+    <p id="dsTimeZone" class="health-muted"></p>
+    <form id="dailyScheduleForm">
+        <fieldset id="dsFields">
+            <label class="mr-label" for="dsTitle">일정 제목<input id="dsTitle" type="text" maxlength="100" required placeholder="예: 병원 진료, 운동, 가족 약속"></label>
+            <h3>시작</h3>
+            <div class="mr-grid"><label class="mr-label" for="dsStartDate">시작일<input id="dsStartDate" type="date" min="2000-01-01" max="2099-12-31" required></label><label class="mr-label" for="dsStartTime">시작 시각<input id="dsStartTime" type="time" required></label></div>
+            <h3>종료</h3>
+            <div class="mr-grid"><label class="mr-label" for="dsEndDate">종료일<input id="dsEndDate" type="date" min="2000-01-01" max="2099-12-31" required></label><label class="mr-label" for="dsEndTime">종료 시각<input id="dsEndTime" type="time" required></label></div>
+            <label class="mr-label" for="dsReminder">알림 받을 시점<select id="dsReminder"><option value="none">알림 없음</option><option value="0">시작 시각</option><option value="5">5분 전</option><option value="10">10분 전</option><option value="15">15분 전</option><option value="30">30분 전</option><option value="60">1시간 전</option><option value="120">2시간 전</option><option value="1440">1일 전</option><option value="10080">1주 전</option><option value="custom">날짜·시각 직접 지정</option></select></label>
+            <div id="dsCustomReminder" class="mr-grid" hidden><label class="mr-label" for="dsReminderDate">알림 날짜<input id="dsReminderDate" type="date" min="2000-01-01" max="2099-12-31"></label><label class="mr-label" for="dsReminderTime">알림 시각<input id="dsReminderTime" type="time"></label></div>
+            <p id="dsReminderPreview" aria-live="polite"></p><p id="dsNotificationHint" class="health-muted"></p>
+            <label class="mr-label" for="dsNote">메모 (선택)<textarea id="dsNote" rows="2" maxlength="2000" placeholder="장소나 준비할 내용을 적어 주세요."></textarea></label>
+            <div class="mr-actions"><button id="dsSave" type="submit" class="mr-btn mr-primary">일정 등록</button></div>
+        </fieldset>
+    </form>
+    <p id="dsStatus" class="health-status" role="status" aria-live="polite"></p>
+    <button id="dsNew" type="button" class="health-link">＋ 새 일정 입력</button>
+    <div class="ds-list-heading"><label class="health-label" for="dsListDate">등록된 일정</label><input id="dsListDate" type="date" min="2000-01-01" max="2099-12-31"><button id="dsRefresh" type="button" class="health-link">새로고침</button></div>
+    <p id="dsListStatus" class="health-status" role="status" aria-live="polite"></p><div id="dsList"></div>
+</dialog>
 
 <button id="aiAssistantFloatingButton" class="pill-id-floating ai-assistant-floating" type="button" aria-label="AI 도우미에게 질문하기" aria-haspopup="dialog" aria-controls="aiAssistantModal" aria-expanded="false">
     <span class="floating-nav-toggle-inner pill-id-floating-inner ai-assistant-floating-inner"><svg aria-hidden="true" viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v5a3 3 0 0 1-3 3H8l-5 2 1-5V7a3 3 0 0 1 3-3h6"/><path d="m18 2 1.1 3.9L23 7l-3.9 1.1L18 12l-1.1-3.9L13 7l3.9-1.1L18 2ZM8 11h3M8 15h7"/></svg><span>도우미</span></span>
@@ -2991,6 +3049,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
 
 
     
+    import { installDailySchedules } from './daily-schedules.js';
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
     import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, deleteDoc, collection, addDoc, query, orderBy, limit, onSnapshot, getDocs, where, startAfter, serverTimestamp, writeBatch, runTransaction } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
@@ -3695,6 +3754,10 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
     updatePushButtonState();
 
     onMessage(messaging, (payload) => {
+        if (payload.data?.kind === 'daily-schedule') {
+            dailySchedules.showPush(payload).catch(() => alert(`${payload.data.title}\n${payload.data.body}`));
+            return;
+        }
         console.log("포그라운드 메시지:", payload);
 
         const title = payload.notification?.title || payload.data?.title || "알림";
@@ -4671,7 +4734,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
         if (previous?.isConnected && previous.getClientRects().length) previous.focus({ preventScroll: true });
     };
     document.addEventListener('keydown', event => {
-        if (document.getElementById('pillIdDialog')?.open || document.getElementById('aiAssistantModal')?.open) return;
+        if (document.getElementById('pillIdDialog')?.open || document.getElementById('aiAssistantModal')?.open || document.getElementById('dailyScheduleModal')?.open) return;
         const id = hr.dialogs.at(-1); if (!id) return;
         const modal = hrEl(id);
         if (event.key === 'Escape') { event.preventDefault(); closeHealthDialog(id); return; }
@@ -5163,6 +5226,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
     window.openHealthDay = function(date) {
         if (!hrSameUser(hr.uid)) return alert('로그인 후 이용해 주세요.');
         if (!hrValidDate(date) || hr.busy) return;
+        dailySchedules.showDay(date);
         hr.day = date; hrEl('healthDayTitle').textContent = `📔 ${date} 건강기록`;
         resetHealthEntryForm(); hrRenderDayEntries(); hrSetStatus('healthDayStatus');
         const future = date > hrToday(); hrEl('healthEntryFields').disabled = future;
@@ -6487,6 +6551,9 @@ function initPillIdentification() {
 initPillIdentification();
 
 
+    const dailySchedules = installDailySchedules({auth, functions, httpsCallable, onAuthStateChanged, getPushToken: getPushTokenFromBrowser});
+    window.openDailyScheduleForHealthDay = () => window.openDailySchedule(hr.day || hrToday());
+    const scheduleEntry = /^[a-zA-Z0-9_-]{16,80}$/.test(new URLSearchParams(window.location.search).get('schedule') || '');
     const phrPhotoEntry=new URLSearchParams(window.location.search).get('phr')==='photos';
     onAuthStateChanged(auth, async (user) => {
         window.bindMedicationReminderAccount?.(user?.uid || null);
@@ -6510,14 +6577,14 @@ initPillIdentification();
 
                 // 음주 조절 모드에 한 번 진입한 로그인 세션은 로그아웃 전까지
                 // index.html을 열어도 자동으로 control.html로 복귀합니다.
-                if (userData.activeMode === APP_MODE.CONTROL && !phrPhotoEntry) {
+                if (userData.activeMode === APP_MODE.CONTROL && !phrPhotoEntry && !scheduleEntry) {
                     window.location.replace('control.html');
                     return;
                 }
 
                 // 기존 사용자처럼 activeMode 필드가 아직 없는 경우에는
                 // 현재 페이지의 기본 모드인 금주 모드로 초기화합니다.
-                if (userData.activeMode !== APP_MODE.ABSTINENCE && !phrPhotoEntry) {
+                if (userData.activeMode !== APP_MODE.ABSTINENCE && !phrPhotoEntry && !scheduleEntry) {
                     await saveActiveMode(APP_MODE.ABSTINENCE);
                     userData.activeMode = APP_MODE.ABSTINENCE;
                 }
