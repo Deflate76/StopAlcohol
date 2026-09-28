@@ -12,7 +12,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self';
         base-uri 'none';
         object-src 'none';
-        script-src 'self' https://www.gstatic.com/firebasejs/ https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/ https://apis.google.com/ https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js 'sha256-AIBL0tC4iNNoKKwFcVeQsj034glNRfVxuUyzuCSYSiQ=' 'sha256-REiFfq6OotUrXGWxp84XojcMHah8Xjofp2pgS2BjRbM=' 'sha256-ZBDKI+cJWffsd+cXDpbTFeoXNCPy8uQD4RUYNTiPRSQ=' 'sha256-igNn0IfnfgZlxhHRe4fMmA4BsvQT20kl/BVkyY68iPc=' 'sha256-utYYx5qVnylo2gMZULKmJG8hNLajcNpGYKJuaVzT2NA=';
+        script-src 'self' https://www.gstatic.com/firebasejs/ https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/ https://apis.google.com/ https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js 'sha256-42G/alb2GO6Do+PBF+4RzrWMTtLaDjopdyf7kCYYxmE=' 'sha256-AIBL0tC4iNNoKKwFcVeQsj034glNRfVxuUyzuCSYSiQ=' 'sha256-REiFfq6OotUrXGWxp84XojcMHah8Xjofp2pgS2BjRbM=' 'sha256-ZBDKI+cJWffsd+cXDpbTFeoXNCPy8uQD4RUYNTiPRSQ=' 'sha256-utYYx5qVnylo2gMZULKmJG8hNLajcNpGYKJuaVzT2NA=';
         script-src-attr 'unsafe-hashes'
         'sha256-+/PyyZxYlaRwGKBfLX4QqCPnBcKxzZ6EQ/FEMykrPlg='
         'sha256-+8Obkk1yhOE1TPaUpOo8d/udOL2qT2+5fc9UsR20blw='
@@ -254,7 +254,7 @@
     <meta name="google-adsense-account" content="ca-pub-4147840233181777">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>금주도전/건강기록</title>
-    <meta name="app-build" content="2026-09-28-security-v1">
+    <meta name="app-build" content="2026-09-28-diagnosis-progress-v1">
     
     <meta name="description" content="금주 도전부터 건강 상태, 진단과 처방전까지. 나의 건강을 하루씩 기록하는 금주도전/건강기록." />
     <meta name="theme-color" content="#ffffff" />
@@ -377,7 +377,9 @@
         .clickable-time-box:hover .time-unit { color: #c0392b; }
         .clickable-time-box:hover .sub-time-clickable { color: var(--danger-color); }
         
-        #subTime { font-size: 1.2rem; font-weight: 600; color: #555; margin-top: 10px; }
+        #subTime { font-size: 1.2rem; font-weight: 600; color: #555; }
+        .sub-time-row { display: flex; align-items: baseline; justify-content: center; flex-wrap: wrap; gap: 4px 8px; margin-top: 10px; }
+        .day-progress-percent { color: #b45309; font-size: .85rem; font-weight: 800; white-space: nowrap; font-variant-numeric: tabular-nums; }
         
         /* 시간/분/초 바 스타일 */
         .time-bar-container { width: 100%; max-width: 300px; margin: 15px auto 5px; display: flex; flex-direction: column; gap: 8px; }
@@ -391,7 +393,9 @@
         .time-bar-text { position: absolute; width: 100%; text-align: center; line-height: 22px; font-size: 0.8rem; font-weight: 800; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.6); z-index: 2; }
 
         .sub-progress-container { width: 100%; max-width: 300px; margin: 12px auto 0; }
-        .sub-percent-text { font-size: 0.9rem; color: #e74c3c; font-weight: 700; display: block; margin-bottom: 8px; margin-top: 0; }
+        .sub-percent-text { font-size: 0.9rem; color: #e74c3c; font-weight: 700; }
+        .sub-progress-label { display: flex; align-items: baseline; justify-content: center; flex-wrap: wrap; gap: 4px 8px; margin-bottom: 8px; }
+        .sub-progress-label .day-progress-percent { color: #c0392b; }
         .sub-progress-bg { background: #ffe3e3; height: 12px; border-radius: 6px; overflow: hidden; position: relative; margin-bottom: 6px; }
         .sub-progress-fill { background: var(--danger-color); height: 100%; width: 0%; transition: width 1s linear; position: absolute; left: 0; top: 0; z-index: 1; }
         
@@ -762,6 +766,28 @@
         .inline-collapsible-summary span {
             flex: 1 1 auto;
             min-width: 0;
+        }
+        .section-new-badge { display: inline-flex; align-items: center; vertical-align: middle; margin-left: 6px; padding: 2px 6px; border: 1px solid #fed7aa; border-radius: 999px; background: #fff7ed; color: #9a3412; font-size: .65rem; font-weight: 800; line-height: 1.3; white-space: nowrap; }
+        .section-new-badge[hidden] { display: none; }
+        .diagnosis-summary-heading { display: flex; align-items: center; gap: 8px; overflow: hidden; }
+        .inline-collapsible-summary .diagnosis-summary-title { flex: 0 0 auto; white-space: nowrap; }
+        .inline-collapsible-summary .diagnosis-summary-names { display: block; flex: 1 1 0; min-width: 0; overflow: hidden; color: #0f766e; font-size: .82rem; font-weight: 700; line-height: 1.5; }
+        .diagnosis-summary-names.is-empty { color: #64748b; font-weight: 500; }
+        .diagnosis-summary-names .diagnosis-summary-track { display: flex; gap: 24px; width: max-content; max-width: none; }
+        .diagnosis-summary-track > span { display: block; flex: 0 0 auto; white-space: nowrap; }
+        .diagnosis-summary-track > span[hidden] { display: none; }
+        .diagnosis-summary-names.is-overflowing .diagnosis-summary-track { animation: diagnosis-names-flow var(--diagnosis-scroll-duration, 16s) linear infinite; }
+        .diagnosis-section > .inline-collapsible-summary:hover .diagnosis-summary-track,
+        .diagnosis-section > .inline-collapsible-summary:focus-within .diagnosis-summary-track { animation-play-state: paused; }
+        @keyframes diagnosis-names-flow { to { transform: translateX(calc(-1 * var(--diagnosis-scroll-distance, 0px))); } }
+        @media (max-width: 440px) {
+            .diagnosis-summary-heading { flex-direction: column; align-items: stretch; gap: 2px; }
+            .inline-collapsible-summary .diagnosis-summary-names { flex: 0 1 auto; width: 100%; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .diagnosis-summary-names.is-overflowing { overflow-x: auto; }
+            .diagnosis-summary-names.is-overflowing .diagnosis-summary-track { animation: none; }
+            .diagnosis-summary-track > span[aria-hidden="true"] { display: none; }
         }
 
 
@@ -1526,7 +1552,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
                 <!-- JS에서 동적으로 달력 호버 UI를 생성합니다 -->
             </div>
             
-            <div id="subTime">0시간 0분 0초</div>
+            <div class="sub-time-row"><div id="subTime">0시간 0분 0초</div><span id="subTimePercent" class="day-progress-percent" title="도전 경과시간의 24시간 주기 진행률" aria-label="도전 24시간 주기 진행률">0.0%</span></div>
             
             <div class="time-bar-container">
                 <div class="time-bar-bg">
@@ -1544,7 +1570,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
             </div>
             
             <div class="sub-progress-container">
-                <span class="sub-percent-text" id="subPercent">현재 시각: -</span>
+                <div class="sub-progress-label"><span id="subDayPercent" class="day-progress-percent" title="오늘 0시부터의 24시간 진행률" aria-label="오늘의 24시간 진행률">0.0%</span><span class="sub-percent-text" id="subPercent">현재 시각: -</span></div>
                 
                 <div style="position: relative;">
                     <div class="sub-progress-bg">
@@ -1566,7 +1592,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
         </div>
 
         <section id="diagnosisRecordSection" class="inline-collapsible-section active-summary-collapsible diagnosis-section" data-collapsed="false">
-            <button type="button" class="inline-collapsible-summary" onclick="toggleInlineCollapsible('diagnosisRecordSection')" aria-expanded="true" aria-controls="diagnosisRecordContent"><span>🩺 질환진단 기록 <small id="diagnosisRecordCount" class="health-muted"></small></span></button>
+            <button type="button" class="inline-collapsible-summary" onclick="toggleInlineCollapsible('diagnosisRecordSection')" aria-expanded="true" aria-controls="diagnosisRecordContent"><span class="diagnosis-summary-heading"><span class="diagnosis-summary-title">🩺 질환진단 기록</span><span id="diagnosisActiveNames" class="diagnosis-summary-names is-empty"><span id="diagnosisActiveNamesTrack" class="diagnosis-summary-track"><span id="diagnosisActiveNamesText">회복 중인 질환 없음</span><span id="diagnosisActiveNamesRepeat" aria-hidden="true" hidden></span></span></span></span></button>
             <div id="diagnosisRecordContent" class="inline-collapsible-content">
                 <div id="diagnosisRecordList" class="diagnosis-list health-muted" role="region" aria-label="질환 진단 기록 목록" tabindex="0">달력 날짜를 눌러 진단명을 추가해 보세요.</div>
                 <p class="health-muted" style="margin:8px 0 0;">진단 당일은 +0일 · 1일째로 표시합니다.</p>
@@ -1578,7 +1604,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
 
         <!-- Section 1: 고비 관리 -->
         <details id="sectionCraving" class="main-section highlight" open>
-            <summary>🔥 고비 관리 및 기록</summary>
+            <summary><span>🔥 고비 관리 및 기록 <span class="section-new-badge" data-section-new="sectionCraving" aria-label="최근 기능 업데이트" hidden>New</span></span></summary>
             <div class="section-content">
                 <div style="display: flex; gap: 8px; margin-bottom: 12px;">
                     <button class="craving-btn calm-btn calm-blue" style="flex:1; margin:0; padding:15px;" onclick="openModal('stateModal')">📝 몸상태</button>
@@ -1610,7 +1636,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
 
         <!-- Section 2: 통계 (차트) -->
         <details id="sectionStats" class="main-section" open>
-            <summary>📈 생존 현황 및 통계</summary>
+            <summary><span>📈 생존 현황 및 통계 <span class="section-new-badge" data-section-new="sectionStats" aria-label="최근 기능 업데이트" hidden>New</span></span></summary>
             <div class="section-content">
                 <div class="chart-container">
                     <canvas id="survivalChart"></canvas>
@@ -1636,7 +1662,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
 
         <!-- Section 3: 신체 회복 및 커뮤니티 -->
         <details id="sectionRecovery" class="main-section" open>
-            <summary>🌱 신체 회복 및 생존자 통신</summary>
+            <summary><span>🌱 신체 회복 및 생존자 통신 <span class="section-new-badge" data-section-new="sectionRecovery" aria-label="최근 기능 업데이트" hidden>New</span></span></summary>
             <div class="section-content">
                 <div class="tab-container">
                     <button class="tab-btn active" onclick="switchTab(this, 'physical')">신체<br>회복</button>
@@ -3337,6 +3363,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
 
     
     import { installDailySchedules } from './daily-schedules.js?v=20260928-2';
+    import { installRecordSectionUI } from './record-section-ui.js?v=20260928-1';
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
     import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, deleteDoc, collection, addDoc, query, orderBy, limit, onSnapshot, getDocs, where, startAfter, serverTimestamp, writeBatch, runTransaction } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
@@ -3344,6 +3371,8 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
     import { initializeAppCheck, ReCaptchaEnterpriseProvider, getToken as getAppCheckToken } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app-check.js";
     import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-functions.js";
     import { getStorage, ref as storageRef, uploadBytesResumable, getBlob, getMetadata, deleteObject } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-storage.js";
+
+    const recordSectionUI = installRecordSectionUI();
 
     const stages = [ { d: 1, t: "1일: 알코올 완전 배출", desc: "혈중 알코올이 0이 되며, 몸이 본격적인 해독 스위치를 켭니다." }, { d: 2, t: "2일: 숙취 및 갈증 해소", desc: "체내 수분 밸런스가 정상화되고 극심한 피로감과 두통이 사라집니다." }, { d: 3, t: "3일: 금단 증상 완화", desc: "초기 불안감과 손떨림이 잦아들며, 신체가 알코올 없는 상태에 적응하기 시작합니다." }, { d: 5, t: "5일: 피부 톤 및 탄력 개선", desc: "탈수 증상이 회복되어 푸석했던 피부가 맑아지고 생기가 돕니다." }, { d: 7, t: "1주: 깊은 수면(REM) 회복", desc: "수면의 질이 극적으로 향상되어 아침에 일어날 때 진짜 '개운함'을 느낍니다." }, { d: 10, t: "10일: 브레인 포그 걷힘", desc: "머릿속 안개가 걷힌 듯 인지 능력이 맑아지고 집중력이 상승합니다." }, { d: 14, t: "2주: 위장 및 소화력 회복", desc: "위점막이 재생되어 속쓰림, 역류성 식도염, 더부룩함이 크게 개선됩니다." }, { d: 21, t: "3주: 혈압 및 심박수 안정화", desc: "고혈압 수치가 제자리를 찾기 시작하며 심혈관계의 부담이 확 줄어듭니다." }, { d: 30, t: "1개월: 간 지방 수치 대폭 감소", desc: "지방간이 최대 15~20% 감소하며, 간 수치 정상화로 피로회복력이 급증합니다." }, { d: 60, t: "2개월: 강력한 면역력 형성", desc: "백혈구 기능이 완전히 회복되어 감기 등 외부 바이러스에 대한 저항력이 강해집니다." }, { d: 90, t: "3개월: 도파민 시스템 정상화", desc: "술 없이도 일상에서 자연스러운 행복과 스트레스 해소를 온전히 느낄 수 있게 됩니다." }, { d: 180, t: "6개월: 눈에 띄는 체형 변화", desc: "불필요한 '빈 칼로리' 섭취가 사라져 뱃살이 줄어들고 얼굴선이 뚜렷해집니다." }, { d: 365, t: "1년: 중증 질환 위험 급감", desc: "간경화, 유방암, 구강암 등 알코올 관련 치명적 질환의 위험이 비약적으로 떨어집니다." }, { d: 730, t: "2년: 뇌세포 용적 회복", desc: "알코올로 인해 위축되었던 뇌의 회백질이 건강한 비음주자 수준으로 재생됩니다." }, { d: 1825, t: "5년: 소화기계 완벽한 리셋", desc: "식도암, 위암 등의 발생 확률이 금주 전의 절반 수준으로 대폭 낮아집니다." }, { d: 3650, t: "10년: 완전한 리셋 및 자유", desc: "신체의 거의 모든 지표가 평생 술을 마시지 않은 사람과 유사한 수준으로 건강해집니다." } ];
     const liverStages = [ { d: 1, t: "1일: 해독 공장 가동", desc: "간이 알코올 분해 업무를 끝내고, 쌓여있던 독소를 처리하는 본래 업무에 집중합니다." }, { d: 7, t: "1주: 염증 수치 하락", desc: "알코올로 인한 간의 미세한 염증들이 가라앉으며 혈액 검사상 간 수치가 하락하기 시작합니다." }, { d: 14, t: "2주: 지방 대사 재개", desc: "알코올 대신 지방을 연소하기 시작하여 간에 끼어있던 기름기가 빠져나가기 시작합니다." }, { d: 30, t: "1개월: 지방간 20% 감소", desc: "지방간 수치가 급격히 떨어지며, 간의 크기가 정상으로 돌아오고 혈색이 좋아집니다." }, { d: 90, t: "3개월: 단백질 합성 최적화", desc: "알부민 등 필수 단백질 합성이 원활해져 만성 피로가 사라지고 근육 성장이 효율적으로 변합니다." }, { d: 180, t: "6개월: 간 섬유화 억제", desc: "딱딱하게 굳으려던 간 조직의 손상이 멈추고, 건강한 간 세포가 그 자리를 대체합니다." }, { d: 365, t: "1년: 해독 능력 극대화", desc: "간의 정화 능력이 정점에 도달하여 약물 대사나 독소 배출 속도가 비약적으로 빨라집니다." }, { d: 1825, t: "5년: 간암 발생률 급감", desc: "간세포의 변이 가능성이 차단되어, 간암 및 간경변 위험이 일반인 수준에 근접합니다." }, { d: 3650, t: "10년: 완벽한 재생 완료", desc: "오랜 기간 손상받았던 간 조직이 완전히 새것처럼 리모델링되어 최상의 상태를 유지합니다." } ];
@@ -5157,11 +5186,13 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
         hrRefreshMinAbstinenceProgress();
         const list = hrEl('diagnosisRecordList'); if (!list) return;
         list.replaceChildren();
-        if (hr.errors.health) { list.textContent = hr.errors.health; return; }
+        if (hr.errors.health) { recordSectionUI.setDiagnosisNames([], '진단 기록 확인 필요'); list.textContent = hr.errors.health; return; }
         const records = hr.entries.flatMap(entry => (Array.isArray(entry.diagnoses) ? entry.diagnoses : [])
             .map((d, index) => ({ ...d, entry, index })).filter(d => hrValidDate(d.date)));
         records.sort((a, b) => b.date.localeCompare(a.date) || String(a.name).localeCompare(String(b.name), 'ko'));
-        hrEl('diagnosisRecordCount').textContent = records.length ? `${records.length}개` : '';
+        const today = hrToday();
+        const activeNames = records.filter(record => record.date <= today && !hrRecoveryDetails(record)).map(record => record.name);
+        recordSectionUI.setDiagnosisNames(activeNames, hr.uid && !hr.loaded.health ? '진단 기록을 불러오는 중…' : '회복 중인 질환 없음');
         if (!records.length) { list.textContent = hr.uid && !hr.loaded.health ? '진단 기록을 불러오는 중입니다…' : '달력 날짜를 눌러 진단명을 추가해 보세요.'; return; }
         for (const record of records) {
             const recovery = hrRecoveryDetails(record);
@@ -7048,6 +7079,7 @@ initPillIdentification();
                 const summaryToggle = document.querySelector('#activeMotivationalSummary [data-collapsible-target]');
                 summaryToggle?.addEventListener('click', () => toggleInlineCollapsible(summaryToggle.dataset.collapsibleTarget));
                 document.getElementById('activeMotivationalSummary').style.display = 'block';
+                recordSectionUI.refreshFeatureBadges();
                 updateMainSectionControlState();
             } else {
                 document.getElementById('motivationalSummary').style.display = 'none';
@@ -7062,7 +7094,7 @@ initPillIdentification();
     function buildInlineCollapsibleHtml(id, title, bodyHtml, collapsed = false) {
         return `
             <div class="inline-collapsible-section active-summary-collapsible" id="${id}" data-collapsed="${collapsed ? 'true' : 'false'}">
-                <button type="button" class="inline-collapsible-summary" data-collapsible-target="${escapeHtml(id)}" aria-expanded="${collapsed ? 'false' : 'true'}" aria-label="${title} 접기 또는 펼치기"><span>${title}</span></button>
+                <button type="button" class="inline-collapsible-summary" data-collapsible-target="${escapeHtml(id)}" aria-expanded="${collapsed ? 'false' : 'true'}" aria-label="${title} 접기 또는 펼치기"><span>${title}${id === 'activeRecoverySummary' ? '<span class="section-new-badge" data-section-new="activeRecoverySummary" aria-label="최근 기능 업데이트" hidden>New</span>' : ''}</span></button>
                 <div class="inline-collapsible-content">${bodyHtml}</div>
             </div>
         `;
@@ -10857,6 +10889,7 @@ initPillIdentification();
     window.startApp = function(startISO) {
         localStorage.setItem('quitDrinkingDateTime_server', startISO);
         updateCurrentChallengeSummary(startISO);
+        recordSectionUI.updateDayProgress(Date.now() - new Date(startISO).getTime());
         document.getElementById('setupArea').style.display = 'none';
         document.getElementById('displayArea').style.display = 'block';
         updatePushButtonState();
@@ -10876,6 +10909,7 @@ initPillIdentification();
             const now = new Date();
             const diff = now - start;
             updateCurrentChallengeSummary(startISO, now.getTime());
+            recordSectionUI.updateDayProgress(diff, now);
             if (diff < 0) return;
 
             const days = diff / 86400000;
