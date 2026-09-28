@@ -1,0 +1,34 @@
+name: Index security checks
+
+on:
+  pull_request:
+    branches: [Rollback-version2]
+    paths: [index.html, scripts/update-index-csp.py, security-tests/**, .github/workflows/index-security.yml]
+  push:
+    branches: [Rollback-version2]
+    paths: [index.html, scripts/update-index-csp.py, security-tests/**, .github/workflows/index-security.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /index.html
+            /scripts/update-index-csp.py
+            /security-tests/
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: security-tests/package-lock.json
+      - run: npm ci --prefix security-tests --ignore-scripts --no-audit --no-fund
+      - run: npm test --prefix security-tests
