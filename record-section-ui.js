@@ -7,7 +7,7 @@ export const SECTION_FEATURE_UPDATES = Object.freeze({
     activeRecoverySummary: '2026-09-28T23:21:30+09:00',
     sectionCraving: '2026-09-28T23:21:30+09:00',
     sectionStats: '2026-09-28T23:21:30+09:00',
-    sectionRecovery: '2026-09-28T23:21:30+09:00'
+    sectionRecovery: '2026-09-30T07:19:11+09:00'
 });
 
 export function isRecentSectionUpdate(updatedAt, nowMs = Date.now()) {
@@ -91,11 +91,11 @@ export function installRecordSectionUI({
         const elapsed = doc.getElementById('subTimePercent');
         const today = doc.getElementById('subDayPercent');
         if (elapsed) {
-            elapsed.textContent = `${progress.elapsed.toFixed(1)}%`;
+            elapsed.textContent = `(${progress.elapsed.toFixed(1)}%)`;
             elapsed.setAttribute('aria-label', `도전 24시간 주기 진행률 ${elapsed.textContent}`);
         }
         if (today) {
-            today.textContent = `${progress.today.toFixed(1)}%`;
+            today.textContent = `(${progress.today.toFixed(1)}%)`;
             today.setAttribute('aria-label', `오늘의 24시간 진행률 ${today.textContent}`);
         }
     }

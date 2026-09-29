@@ -46,7 +46,7 @@ async function fixture(t) {
     return {w, doc, ui, flushFrames, timers, setTime:value => {time=value;}};
 }
 
-test('diagnosis heading lists only current unrecovered names, comma-separated and deduplicated', async t => {
+test('diagnosis heading includes diagnosis dates and inclusive day counts for current unrecovered episodes', async t => {
     const {w, doc} = await fixture(t);
     w.hr.entries = [{id:'one', date:'2026-09-28', diagnoses:[
         {name:'전정신경염',date:'2026-09-25'},
@@ -56,12 +56,12 @@ test('diagnosis heading lists only current unrecovered names, comma-separated an
         {name:'미래 진단',date:'2026-10-01'}
     ]}];
     w.hrRenderDiagnoses();
-    assert.equal(doc.getElementById('diagnosisActiveNamesText').textContent,'전정신경염, 대상포진');
+    assert.equal(doc.getElementById('diagnosisActiveNamesText').textContent,'전정신경염 (4일째 · 2026-09-25 진단), 대상포진 (5일째 · 2026-09-24 진단), 전정신경염 (6일째 · 2026-09-23 진단)');
     assert.equal(doc.querySelectorAll('#diagnosisRecordList .diagnosis-row').length,5,'the full history remains available');
     w.hr.entries[0].diagnoses[0].recoveredDate = '2026-09-28';
     w.hr.entries[0].diagnoses[2].recoveredDate = '2026-09-28';
     w.hrRenderDiagnoses();
-    assert.equal(doc.getElementById('diagnosisActiveNamesText').textContent,'대상포진');
+    assert.equal(doc.getElementById('diagnosisActiveNamesText').textContent,'대상포진 (5일째 · 2026-09-24 진단)');
 });
 
 test('diagnosis text is inert HTML and clears on account reset, loading and errors', async t => {
@@ -69,7 +69,7 @@ test('diagnosis text is inert HTML and clears on account reset, loading and erro
     const name = '<img src=x onerror="alert(1)">';
     w.hr.entries = [{id:'one',date:'2026-09-28',diagnoses:[{name,date:'2026-09-28'}]}];
     w.hrRenderDiagnoses();
-    assert.equal(doc.getElementById('diagnosisActiveNamesText').textContent,name);
+    assert.equal(doc.getElementById('diagnosisActiveNamesText').textContent,`${name} (1일째 · 2026-09-28 진단)`);
     assert.equal(doc.querySelectorAll('img').length,0);
     w.hr.errors.health = '조회 실패'; w.hrRenderDiagnoses();
     assert.equal(doc.getElementById('diagnosisActiveNamesText').textContent,'진단 기록 확인 필요');
@@ -128,17 +128,17 @@ test('24-hour percentages distinguish challenge remainder from local clock time'
     assert.equal(dayProgress(DAY,noon).elapsed,0);
     assert.equal(dayProgress(-1000,noon).elapsed,0);
     ui.updateDayProgress(25.25*3600000,new Date(2026,8,28,18,0,0));
-    assert.equal(doc.getElementById('subTimePercent').textContent,'5.2%');
-    assert.equal(doc.getElementById('subDayPercent').textContent,'75.0%');
+    assert.equal(doc.getElementById('subTimePercent').textContent,'(5.2%)');
+    assert.equal(doc.getElementById('subDayPercent').textContent,'(75.0%)');
     ui.updateDayProgress(0,new Date(2026,8,29,0,0,0));
-    assert.equal(doc.getElementById('subDayPercent').textContent,'0.0%');
+    assert.equal(doc.getElementById('subDayPercent').textContent,'(0.0%)');
 });
 
 test('index places percentages on the requested sides and removes the diagnosis count', () => {
     const dom=new JSDOM(html), doc=dom.window.document;
     assert.equal(doc.getElementById('diagnosisRecordCount'),null);
     assert.equal(doc.getElementById('subTime').nextElementSibling.id,'subTimePercent');
-    assert.equal(doc.getElementById('subPercent').previousElementSibling.id,'subDayPercent');
+    assert.equal(doc.getElementById('subPercent').nextElementSibling.id,'subDayPercent');
     for (const id of ['sectionCraving','sectionStats','sectionRecovery']) assert(doc.querySelector(`#${id} > summary [data-section-new="${id}"]`));
     dom.window.close();
 });
