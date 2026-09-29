@@ -12,7 +12,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self';
         base-uri 'none';
         object-src 'none';
-        script-src 'self' https://www.gstatic.com/firebasejs/ https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/ https://apis.google.com/ https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js 'sha256-42G/alb2GO6Do+PBF+4RzrWMTtLaDjopdyf7kCYYxmE=' 'sha256-AIBL0tC4iNNoKKwFcVeQsj034glNRfVxuUyzuCSYSiQ=' 'sha256-REiFfq6OotUrXGWxp84XojcMHah8Xjofp2pgS2BjRbM=' 'sha256-ZBDKI+cJWffsd+cXDpbTFeoXNCPy8uQD4RUYNTiPRSQ=' 'sha256-utYYx5qVnylo2gMZULKmJG8hNLajcNpGYKJuaVzT2NA=';
+        script-src 'self' https://www.gstatic.com/firebasejs/ https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/ https://apis.google.com/ https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js 'sha256-AIBL0tC4iNNoKKwFcVeQsj034glNRfVxuUyzuCSYSiQ=' 'sha256-J1/xmp2rOeK874VYOBTR8CUluy3PaqFA4zUREFHYu/Y=' 'sha256-REiFfq6OotUrXGWxp84XojcMHah8Xjofp2pgS2BjRbM=' 'sha256-ZBDKI+cJWffsd+cXDpbTFeoXNCPy8uQD4RUYNTiPRSQ=' 'sha256-utYYx5qVnylo2gMZULKmJG8hNLajcNpGYKJuaVzT2NA=';
         script-src-attr 'unsafe-hashes'
         'sha256-+/PyyZxYlaRwGKBfLX4QqCPnBcKxzZ6EQ/FEMykrPlg='
         'sha256-+8Obkk1yhOE1TPaUpOo8d/udOL2qT2+5fc9UsR20blw='
@@ -332,6 +332,26 @@
         .clickable-time-box { display: flex; flex-direction: column; align-items: center; padding: 10px 20px; border-radius: 16px; transition: all 0.2s ease; cursor: pointer; border: 2px solid transparent; text-decoration: none; }
         .clickable-time-box:hover { background-color: rgba(255, 255, 255, 0.8); border-color: #ffcccc; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(231, 76, 60, 0.1); }
         .cal-hint { font-size: 0.75rem; color: var(--danger-color); font-weight: bold; opacity: 0.8; margin-bottom: 4px; display: flex; align-items: center; justify-content: center; gap: 4px; width: 100%; text-align: center; }
+        .daily-wisdom-hint { appearance:none; font-family:inherit; background:none; border:0; padding:0; cursor:pointer; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.7; min-width:0; }
+        .daily-wisdom-hint:focus-visible { outline:2px solid var(--danger-color); outline-offset:3px; border-radius:4px; }
+        .streak-record-info { display:flex; flex-direction:column; align-items:center; gap:4px; min-width:0; }
+        .streak-current-rank { font-size:.67rem; font-weight:700; color:#64748b; line-height:1.4; white-space:nowrap; }
+        .wisdom-dialog { box-sizing:border-box; width:min(520px,calc(100% - 24px)); max-height:85dvh; overflow:auto; border:0; border-radius:20px; padding:22px; color:var(--text-color,#263238); box-shadow:0 16px 60px #0003; text-align:left; }
+        .wisdom-dialog::backdrop { background:#0f172a80; }
+        .wisdom-heading { display:flex; justify-content:space-between; align-items:center; gap:12px; }
+        .wisdom-heading h2 { margin:0; font-size:1.12rem; }
+        .wisdom-close { border:0; background:transparent; font-size:1.7rem; cursor:pointer; color:inherit; min-width:40px; min-height:40px; }
+        .wisdom-dialog h3 { font-size:.88rem; margin:20px 0 8px; }
+        .wisdom-entry { padding:14px 0; border-bottom:1px solid #e2e8f0; }
+        #dailyWisdomCurrent .wisdom-entry { padding:14px; border:1px solid #fde2e2; background:#fffafa; border-radius:12px; }
+        .wisdom-entry time { color:#64748b; font-size:.72rem; }
+        .wisdom-quote { margin:9px 0; font-size:.9rem; line-height:1.65; overflow-wrap:anywhere; }
+        .wisdom-rating { display:flex; flex-wrap:wrap; gap:3px; }
+        .wisdom-star { border:0; background:transparent; color:#94a3b8; font-size:1.8rem; padding:0; min-width:40px; min-height:40px; cursor:pointer; }
+        .wisdom-star.is-selected { color:#b86e05; }
+        .wisdom-star:focus-visible { outline:2px solid #b86e05; border-radius:6px; }
+        .wisdom-star:disabled { cursor:wait; opacity:.6; }
+        .wisdom-rating-label { font-size:.75rem; color:#64748b; }
         .cumulative-success-row { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; }
         .success-rate-box { display: inline-flex; align-items: center; gap: 5px; font-size: 0.72rem; font-weight: 800; color: #2f855a; background: #f0fff4; border: 1px solid #c6f6d5; border-radius: 999px; padding: 3px 7px; white-space: nowrap; }
         .success-rate-progress { width: 46px; height: 7px; border-radius: 999px; background: #c6f6d5; overflow: hidden; }
@@ -1552,7 +1572,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
                 <!-- JS에서 동적으로 달력 호버 UI를 생성합니다 -->
             </div>
             
-            <div class="sub-time-row"><div id="subTime">0시간 0분 0초</div><span id="subTimePercent" class="day-progress-percent" title="도전 경과시간의 24시간 주기 진행률" aria-label="도전 24시간 주기 진행률">0.0%</span></div>
+            <div class="sub-time-row"><div id="subTime">0시간 0분 0초</div><span id="subTimePercent" class="day-progress-percent" title="도전 경과시간의 24시간 주기 진행률" aria-label="도전 24시간 주기 진행률">(0.0%)</span></div>
             
             <div class="time-bar-container">
                 <div class="time-bar-bg">
@@ -1570,7 +1590,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
             </div>
             
             <div class="sub-progress-container">
-                <div class="sub-progress-label"><span id="subDayPercent" class="day-progress-percent" title="오늘 0시부터의 24시간 진행률" aria-label="오늘의 24시간 진행률">0.0%</span><span class="sub-percent-text" id="subPercent">현재 시각: -</span></div>
+                <div class="sub-progress-label"><span class="sub-percent-text" id="subPercent">현재 시각: -</span><span id="subDayPercent" class="day-progress-percent" title="오늘 0시부터의 24시간 진행률" aria-label="오늘의 24시간 진행률">(0.0%)</span></div>
                 
                 <div style="position: relative;">
                     <div class="sub-progress-bg">
@@ -1662,7 +1682,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
 
         <!-- Section 3: 신체 회복 및 커뮤니티 -->
         <details id="sectionRecovery" class="main-section" open>
-            <summary><span>🌱 신체 회복 및 생존자 통신 <span class="section-new-badge" data-section-new="sectionRecovery" aria-label="최근 기능 업데이트" hidden>New</span></span></summary>
+            <summary><span>🌱 회복 및 커뮤니티 <span class="section-new-badge" data-section-new="sectionRecovery" aria-label="최근 기능 업데이트" hidden>New</span></span></summary>
             <div class="section-content">
                 <div class="tab-container">
                     <button class="tab-btn active" onclick="switchTab(this, 'physical')">신체<br>회복</button>
@@ -1783,7 +1803,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
             <button type="button" class="floating-nav-item" data-nav-target="timerDisplaySection" data-nav-number="02" onclick="scrollToPageTarget('timerDisplaySection')"><span class="floating-nav-number">02</span><span>현재 도전 타이머</span></button>
             <button type="button" class="floating-nav-item" data-nav-target="sectionCraving" data-nav-number="03" onclick="scrollToPageTarget('sectionCraving')"><span class="floating-nav-number">03</span><span>고비 관리 및 기록</span></button>
             <button type="button" class="floating-nav-item" data-nav-target="sectionStats" data-nav-number="04" onclick="scrollToPageTarget('sectionStats')"><span class="floating-nav-number">04</span><span>생존 현황 및 통계</span></button>
-            <button type="button" class="floating-nav-item" data-nav-target="sectionRecovery" data-nav-number="05" onclick="scrollToPageTarget('sectionRecovery')"><span class="floating-nav-number">05</span><span>신체 회복 및 통신</span></button>
+            <button type="button" class="floating-nav-item" data-nav-target="sectionRecovery" data-nav-number="05" onclick="scrollToPageTarget('sectionRecovery')"><span class="floating-nav-number">05</span><span>회복 및 커뮤니티</span></button>
             <button type="button" class="floating-nav-item" data-nav-target="pageBottomAnchor" data-nav-number="06" onclick="scrollToPageTarget('pageBottomAnchor')"><span class="floating-nav-number">06</span><span>맨 아래로</span></button>
             <button type="button" class="floating-nav-item game-link" onclick="goToFunGame()"><span class="floating-nav-number">🎮</span><span>게임하기</span></button>
         </div>
@@ -2808,6 +2828,18 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
 </dialog>
 
 
+<dialog id="dailyWisdomModal" class="wisdom-dialog" aria-labelledby="dailyWisdomTitle" aria-describedby="dailyWisdomDescription">
+    <div class="wisdom-heading"><h2 id="dailyWisdomTitle">오늘의 격언과 조언</h2><button type="button" id="dailyWisdomClose" class="wisdom-close" aria-label="오늘의 조언 닫기">×</button></div>
+    <p id="dailyWisdomDescription" class="health-muted">AI가 최근 건강·컨디션·생활 기록과 본인이 쓴 커뮤니티 글을 참고해 만든 한 줄입니다. 진료를 대신하지 않습니다.</p>
+    <h3>현재 조언 · 별점으로 만족도를 알려 주세요</h3>
+    <div id="dailyWisdomCurrent"></div>
+    <p id="dailyWisdomStatus" class="health-status" role="status" aria-live="polite"></p>
+    <button type="button" id="dailyWisdomRetry" class="health-btn" hidden>다시 시도</button>
+    <h3>그동안의 조언과 나의 만족도</h3>
+    <div id="dailyWisdomHistory"></div>
+    <button type="button" id="dailyWisdomMore" class="health-btn wide" hidden>이전 조언 더 보기</button>
+</dialog>
+
 <dialog id="aiAssistantModal" class="ai-assistant-dialog" aria-labelledby="firebaseAiTestTitle" aria-describedby="aiAssistantDescription">
     <header class="ai-assistant-heading"><div><h2 id="firebaseAiTestTitle" tabindex="-1">AI 도우미</h2><p id="aiAssistantDescription">궁금한 내용을 편하게 물어보세요</p></div><button id="aiAssistantClose" class="ai-assistant-close" type="button" aria-label="AI 도우미 닫기">×</button></header>
     <div id="firebaseAiTestCard" data-state="loading">
@@ -3363,7 +3395,8 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
 
     
     import { installDailySchedules } from './daily-schedules.js?v=20260928-2';
-    import { installRecordSectionUI } from './record-section-ui.js?v=20260928-1';
+    import { installRecordSectionUI } from './record-section-ui.js?v=20260930-1';
+    import { installDailyWisdom, WISDOM_SYSTEM_INSTRUCTION } from './daily-wisdom.js?v=20260930-1';
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
     import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, deleteDoc, collection, addDoc, query, orderBy, limit, onSnapshot, getDocs, where, startAfter, serverTimestamp, writeBatch, runTransaction } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
@@ -4615,8 +4648,9 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
 
     function buildStreakRecordBadgeHtml(currentDays) {
         const recordInfo = getCurrentStreakRecordInfo(currentDays);
-        if (!recordInfo) return '';
-        return `<button type="button" class="streak-record-badge" data-streak-days="${recordInfo.targetDays}" aria-haspopup="dialog" aria-controls="streakRecordsModal" aria-label="역대 ${recordInfo.ordinal}번째 기록, 연속 ${recordInfo.targetDays}일 이상 달성한 1번째부터 ${recordInfo.ordinal}번째 기록 보기" title="연속 ${recordInfo.targetDays}일 이상 달성한 기록 보기">역대 ${recordInfo.ordinal}번째 기록</button>`;
+        const rank = Math.max(1, Math.round(1000 * Math.exp(-0.04 * Math.max(0, (Date.now() - Date.parse(userQuitDate)) / 86400000 || currentDays))));
+        const badge = recordInfo ? `<button type="button" class="streak-record-badge" data-streak-days="${recordInfo.targetDays}" aria-haspopup="dialog" aria-controls="streakRecordsModal" aria-label="역대 ${recordInfo.ordinal}번째 기록, 연속 ${recordInfo.targetDays}일 이상 달성한 1번째부터 ${recordInfo.ordinal}번째 기록 보기" title="연속 ${recordInfo.targetDays}일 이상 달성한 기록 보기">역대 ${recordInfo.ordinal}번째 기록</button>` : '';
+        return `<div class="streak-record-info">${badge}<span id="streakCurrentRank" class="streak-current-rank" title="기존 생존율 모델로 계산한 추정 순위이며 실제 이용자 순위가 아닙니다.">1,000명 중 ${rank.toLocaleString('ko-KR')}위 (추정)</span></div>`;
     }
 
     function buildMainDaysRenderKey(currentDays, totalCumul, successRate) {
@@ -4647,7 +4681,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
         const alcoholDementiaRiskBoxHtml = buildAlcoholDementiaRiskBoxHtml();
         const alcoholDiseaseRiskStackHtml = buildAlcoholDiseaseRiskStackHtml();
         return `
-                <div class="cal-hint">👇 클릭하여 달력 보기</div>
+                <button type="button" class="cal-hint daily-wisdom-hint" data-daily-wisdom-open aria-haspopup="dialog" aria-controls="dailyWisdomModal">오늘의 조언을 준비하고 있어요…</button>
                 <div class="clickable-time-box" onclick="openCalendarModal('current')">
                     <div class="time-unit-row"><div class="time-unit">${currentDays}일</div>${buildStreakRecordBadgeHtml(currentDays)}</div>
                 </div>
@@ -4679,6 +4713,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
         }
 
         container.innerHTML = buildMainDaysContainerHtml(currentDays, totalCumul, successRate);
+        dailyWisdom.renderTrigger();
         const streakButton = container.querySelector('[data-streak-days]');
         streakButton?.addEventListener('click', event => openStreakRecordsModal(Number(streakButton.dataset.streakDays), event));
         container.setAttribute('data-render-key', renderKey);
@@ -5182,6 +5217,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
     function hrRecordConflict(message) {
         const error = new Error(message); error.code = 'health/record-conflict'; return error;
     }
+    let lastDiagnosisSummaryDay = '';
     function hrRenderDiagnoses() {
         hrRefreshMinAbstinenceProgress();
         const list = hrEl('diagnosisRecordList'); if (!list) return;
@@ -5191,7 +5227,9 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
             .map((d, index) => ({ ...d, entry, index })).filter(d => hrValidDate(d.date)));
         records.sort((a, b) => b.date.localeCompare(a.date) || String(a.name).localeCompare(String(b.name), 'ko'));
         const today = hrToday();
-        const activeNames = records.filter(record => record.date <= today && !hrRecoveryDetails(record)).map(record => record.name);
+        const activeNames = records.filter(record => record.date <= today && !hrRecoveryDetails(record))
+            .map(record => `${record.name} (${hrDayNumber(today) - hrDayNumber(record.date) + 1}일째 · ${record.date} 진단)`);
+        lastDiagnosisSummaryDay = today;
         recordSectionUI.setDiagnosisNames(activeNames, hr.uid && !hr.loaded.health ? '진단 기록을 불러오는 중…' : '회복 중인 질환 없음');
         if (!records.length) { list.textContent = hr.uid && !hr.loaded.health ? '진단 기록을 불러오는 중입니다…' : '달력 날짜를 눌러 진단명을 추가해 보세요.'; return; }
         for (const record of records) {
@@ -6873,13 +6911,31 @@ initPillIdentification();
 
 
     const dailySchedules = installDailySchedules({auth, functions, httpsCallable, onAuthStateChanged, getPushToken: getPushTokenFromBrowser});
+    const callWisdomApi = httpsCallable(functions, 'dailyWisdomApi', {timeout:30000});
+    const dailyWisdom = installDailyWisdom({
+        api:async data => (await callWisdomApi(data)).data,
+        loadContext:loadDailyWisdomContext,
+        generate:generateDailyWisdom
+    });
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden && lastDiagnosisSummaryDay !== hrToday()) hrRenderDiagnoses();
+    });
     window.openDailyScheduleForHealthDay = () => window.openDailySchedule(hr.day || hrToday());
     const scheduleEntry = /^[a-zA-Z0-9_-]{16,80}$/.test(new URLSearchParams(window.location.search).get('schedule') || '');
     const phrPhotoEntry=new URLSearchParams(window.location.search).get('phr')==='photos';
     onAuthStateChanged(auth, async (user) => {
         window.bindMedicationReminderAccount?.(user?.uid || null);
+        dailyWisdom.bindAccount(user?.uid || null);
         if (user) {
+            if (userId !== user.uid) {
+                if (timerInterval) clearInterval(timerInterval);
+                userQuitDate = null; currentChallengeId = null;
+                cravingData = []; allChallengesData = []; dailyLogsData = {};
+                document.getElementById('displayArea').style.display = 'none';
+                invalidateMainDaysContainerRender();
+            }
             userId = user.uid;
+            const isCurrentAccount = () => auth.currentUser?.uid === user.uid && userId === user.uid;
             hrBindAccount(user.uid);
             if(phrPhotoEntry)window.openPrescriptionGallery();
             document.getElementById('loginArea').style.display = 'none';
@@ -6888,12 +6944,14 @@ initPillIdentification();
                 // 식사량/체중 기록 글로벌 로드
                 const logsQ = query(collection(db, "users", userId, "daily_logs"));
                 const logsSnap = await getDocs(logsQ);
+                if (!isCurrentAccount()) return;
                 dailyLogsData = {};
                 logsSnap.forEach(doc => {
                     dailyLogsData[doc.id] = doc.data();
                 });
 
                 const userDoc = await getDoc(doc(db, "users", userId));
+                if (!isCurrentAccount()) return;
                 let userData = userDoc.exists() ? userDoc.data() : {};
 
                 // 음주 조절 모드에 한 번 진입한 로그인 세션은 로그아웃 전까지
@@ -6907,6 +6965,7 @@ initPillIdentification();
                 // 현재 페이지의 기본 모드인 금주 모드로 초기화합니다.
                 if (userData.activeMode !== APP_MODE.ABSTINENCE && !phrPhotoEntry && !scheduleEntry) {
                     await saveActiveMode(APP_MODE.ABSTINENCE);
+                    if (!isCurrentAccount()) return;
                     userData.activeMode = APP_MODE.ABSTINENCE;
                 }
 
@@ -6935,6 +6994,7 @@ initPillIdentification();
                     await setDoc(doc(db, "users", userId), {
                         totalVisits, todayVisits, lastVisitDate
                     }, { merge: true });
+                    if (!isCurrentAccount()) return;
                 }
 
                 userProfile.totalVisits = totalVisits;
@@ -6955,6 +7015,7 @@ initPillIdentification();
 
                 const q = query(collection(db, "users", userId, "challenges"), where("status", "==", "active"));
                 const snapshot = await getDocs(q);
+                if (!isCurrentAccount()) return;
                 
                 if (!snapshot.empty) {
                     const activeDoc = snapshot.docs[0];
@@ -6973,13 +7034,15 @@ initPillIdentification();
                     document.getElementById('setupArea').style.display = 'flex';
                 }
                 
-                loadMotivationalStats();
+                await loadMotivationalStats();
+                if (isCurrentAccount()) void dailyWisdom.start(user.uid);
             } catch (e) { console.error("데이터 로드 에러:", e); }
         } else {
             userId = null;
             hrBindAccount(null);
             userQuitDate = null;
             currentChallengeId = null;
+            cravingData = []; allChallengesData = [];
             updateCurrentChallengeSummary(null);
             cautionDays = [];
             dailyLogsData = {};
@@ -6996,9 +7059,11 @@ initPillIdentification();
 
     async function loadMotivationalStats() {
         if (!userId) return;
+        const owner = userId;
         try {
             const q = query(collection(db, "users", userId, "challenges"));
             const snapshot = await getDocs(q);
+            if (userId !== owner || auth.currentUser?.uid !== owner) return;
             if (snapshot.empty) {
                 document.getElementById('motivationalSummary').style.display = 'none';
                 document.getElementById('activeMotivationalSummary').style.display = 'none';
@@ -10910,6 +10975,7 @@ initPillIdentification();
             const diff = now - start;
             updateCurrentChallengeSummary(startISO, now.getTime());
             recordSectionUI.updateDayProgress(diff, now);
+            if (lastDiagnosisSummaryDay !== hrToday()) hrRenderDiagnoses();
             if (diff < 0) return;
 
             const days = diff / 86400000;
@@ -10961,6 +11027,8 @@ initPillIdentification();
 
             document.getElementById('survivors').innerText = survivors.toLocaleString();
             document.getElementById('myRank').innerText = survivors.toLocaleString();
+            const streakRank = document.getElementById('streakCurrentRank');
+            if (streakRank) streakRank.textContent = `1,000명 중 ${survivors.toLocaleString('ko-KR')}위 (추정)`;
 
             const rankChangeEl = document.getElementById('rankChange');
             if (rankUp > 0) rankChangeEl.innerHTML = `<span style="color: var(--danger-color);">▲ ${rankUp.toLocaleString()}</span>`;
@@ -11382,6 +11450,41 @@ initPillIdentification();
     window.closeModal = (id) => document.getElementById(id).style.display = 'none';
     window.toggleEtc = (val) => document.getElementById('etcReason').style.display = (val === '기타') ? 'block' : 'none';
 
+
+    async function loadDailyWisdomContext(uid, signal) {
+        if (auth.currentUser?.uid !== uid || signal.aborted) throw new Error('Account changed');
+        // Fresh private reads avoid a race with the asynchronous health listener.
+        const results = await Promise.allSettled([
+            getDocs(collection(db, 'users', uid, 'health_entries')),
+            getDocs(query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(50)))
+        ]);
+        if (auth.currentUser?.uid !== uid || userId !== uid || signal.aborted) throw new Error('Account changed');
+        const rows = index => results[index].status === 'fulfilled' ? results[index].value.docs.map(item => item.data()) : [];
+        return {uid, today:hrToday(), quitDate:userQuitDate, health:rows(0), posts:rows(1),
+            challenges:allChallengesData.length ? allChallengesData : [{cravings:cravingData}],
+            dailyLogs:dailyLogsData,
+            unavailable:results.flatMap((result,index) => result.status === 'rejected' ? [index === 0 ? '건강 기록' : '커뮤니티 기록'] : [])};
+    }
+
+    async function generateDailyWisdom(context, signal) {
+        const deadline = promise => new Promise((resolve, reject) => {
+            const timer = setTimeout(() => reject(new Error('AI timeout')), 45000);
+            Promise.resolve(promise).then(value => {clearTimeout(timer);resolve(value);}, error => {clearTimeout(timer);reject(error);});
+        });
+        if (!appCheck || signal.aborted) throw appCheckInitError || new Error('AI unavailable');
+        await deadline(getAppCheckToken(appCheck, false));
+        if (signal.aborted) throw new Error('Cancelled');
+        const {getAI,getGenerativeModel,GoogleAIBackend,AgentPlatformBackend} = await deadline(import('https://www.gstatic.com/firebasejs/12.19.0/firebase-ai.js'));
+        if (signal.aborted) throw new Error('Cancelled');
+        const backend = hrEl('aiTestProvider').value === 'agent' ? new AgentPlatformBackend(hrEl('aiTestLocation').value.trim()) : new GoogleAIBackend();
+        const model = getGenerativeModel(getAI(app, {backend}), {
+            model:hrEl('aiTestModel').value.trim(), systemInstruction:WISDOM_SYSTEM_INSTRUCTION,
+            generationConfig:{maxOutputTokens:2048, temperature:0.9}
+        }, {timeout:45000, signal});
+        const result = await deadline(model.generateContent({contents:[{role:'user',parts:[{text:JSON.stringify(context)}]}]}));
+        if (signal.aborted) throw new Error('Cancelled');
+        return result.response.text();
+    }
 
     // Free-form chat stays in this page's memory and is isolated from health/photo records.
     function initFirebaseAiAssistant() {
