@@ -5,7 +5,7 @@ const NEW_BADGE_MS = 7 * DAY_MS;
 // Change only the affected section's date when its features are updated.
 export const SECTION_FEATURE_UPDATES = Object.freeze({
     activeRecoverySummary: '2026-09-28T23:21:30+09:00',
-    sectionCraving: '2026-09-28T23:21:30+09:00',
+    sectionCraving: '2026-10-01T07:53:11+09:00',
     sectionStats: '2026-09-28T23:21:30+09:00',
     sectionRecovery: '2026-09-30T07:19:11+09:00'
 });
