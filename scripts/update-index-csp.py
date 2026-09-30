@@ -48,7 +48,7 @@ def render(source):
         "img-src 'self' data: blob: https://raw.githubusercontent.com https://www.gstatic.com https://www.google.com",
         "connect-src 'self' https://*.googleapis.com https://*.cloudfunctions.net "
         "https://*.firebaseio.com wss://*.firebaseio.com https://alcoholaway.firebaseapp.com "
-        "https://www.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/ https://www.gstatic.com",
+        "https://www.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/ https://www.gstatic.com https://api.open-meteo.com",
         "frame-src https://alcoholaway.firebaseapp.com https://www.google.com/recaptcha/ "
         "https://recaptcha.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/",
         "worker-src 'self' blob:",
