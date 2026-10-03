@@ -12,7 +12,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self';
         base-uri 'none';
         object-src 'none';
-        script-src 'self' https://www.gstatic.com/firebasejs/ https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/ https://apis.google.com/ https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js 'sha256-AIBL0tC4iNNoKKwFcVeQsj034glNRfVxuUyzuCSYSiQ=' 'sha256-REiFfq6OotUrXGWxp84XojcMHah8Xjofp2pgS2BjRbM=' 'sha256-ZBDKI+cJWffsd+cXDpbTFeoXNCPy8uQD4RUYNTiPRSQ=' 'sha256-hzqCDfcLnLj4fsZ1f6IwGkby+xvSEoSc8A7EK+DytSA=' 'sha256-utYYx5qVnylo2gMZULKmJG8hNLajcNpGYKJuaVzT2NA=';
+        script-src 'self' https://www.gstatic.com/firebasejs/ https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/ https://apis.google.com/ https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js 'sha256-AIBL0tC4iNNoKKwFcVeQsj034glNRfVxuUyzuCSYSiQ=' 'sha256-REiFfq6OotUrXGWxp84XojcMHah8Xjofp2pgS2BjRbM=' 'sha256-ZBDKI+cJWffsd+cXDpbTFeoXNCPy8uQD4RUYNTiPRSQ=' 'sha256-utYYx5qVnylo2gMZULKmJG8hNLajcNpGYKJuaVzT2NA=' 'sha256-zHFMEtnoByLLbfuo3nb4FP1v3fZyxBRMdx34RlECpBc=';
         script-src-attr 'unsafe-hashes'
         'sha256-+/PyyZxYlaRwGKBfLX4QqCPnBcKxzZ6EQ/FEMykrPlg='
         'sha256-+8Obkk1yhOE1TPaUpOo8d/udOL2qT2+5fc9UsR20blw='
@@ -1687,7 +1687,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
         <details id="sectionStats" class="main-section" open>
             <summary><span>📈 생존 현황 및 통계 <span class="section-new-badge" data-section-new="sectionStats" aria-label="최근 기능 업데이트" hidden>New</span></span></summary>
             <div class="section-content">
-                <div class="chart-container">
+                <div class="chart-container" style="height: 318px;">
                     <canvas id="survivalChart"></canvas>
                 </div>
                 
@@ -1703,7 +1703,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
                 <div class="chart-divider"></div>
 
                 <div style="font-size: 0.9rem; font-weight: 700; color: #4a5568; margin-bottom: 5px; text-align: left; padding-left: 10px;">📊 전체 도전자 중 나의 위치 (상대 분포)</div>
-                <div class="chart-container" style="height: 180px;">
+                <div class="chart-container" style="height: 216px;">
                     <canvas id="distributionChart"></canvas>
                 </div>
             </div>
@@ -9199,10 +9199,21 @@ initPillIdentification();
                     else if (isStart) classList.push('range-curr-start');
                     else if (isEnd) classList.push('range-curr-end');
                     else classList.push('range-curr-mid');
-                    if (isEnd) {
+                    if (isStart || isEnd) {
+                        const labels = [];
+                        const descriptions = [];
                         classList.push('cal-range-marker');
-                        calendarRangeBadge = '<span class="cal-range-badge cal-ongoing-badge" aria-hidden="true">진행중</span>';
-                        calendarRangeDescription = '현재 단주 도전 진행중';
+                        if (isStart) {
+                            labels.push('시작');
+                            descriptions.push('현재 단주 도전 시작일');
+                        }
+                        if (isEnd) {
+                            labels.push('진행중');
+                            descriptions.push('현재 단주 도전 진행중');
+                        }
+                        if (labels.length > 1) classList.push('cal-range-multiple');
+                        calendarRangeBadge = `<span class="cal-range-badge cal-ongoing-badge" aria-hidden="true">${labels.join('<br>')}</span>`;
+                        calendarRangeDescription = descriptions.join(' · ');
                     }
                 }
             } 
@@ -10453,12 +10464,39 @@ initPillIdentification();
         chart.$goalGapBadgeState = { currentDays, maxDays, remainingDays, visible: showGap };
     }
 
+    // Reserve a label row below the legend and above every in-plot badge.
+    // The containers include this extra height so the plot keeps its original size.
+    const currentPositionBadgePlugin = {
+        id: 'current-position-badge-row',
+        beforeInit(chart) {
+            const rowHeight = chart.canvas.id === 'survivalChart' ? 68 : 36;
+            const row = {
+                position: 'top', weight: 0, fullSize: false, options: {},
+                isHorizontal: () => true,
+                update(width) { this.width = width; this.height = rowHeight; },
+                draw() {}
+            };
+            chart.$currentPositionBadgeRow = row;
+            Chart.layouts.addBox(chart, row);
+        },
+        afterDestroy(chart) {
+            Chart.layouts.removeBox(chart, chart.$currentPositionBadgeRow);
+            delete chart.$currentPositionBadgeRow;
+        }
+    };
+
+    function currentPositionBadgeYAdjust({ chart }) {
+        const row = chart.$currentPositionBadgeRow;
+        const area = chart.chartArea;
+        return row && area ? row.top + row.height / 2 - (area.top + area.bottom) / 2 : 0;
+    }
+
     function initSurvivalChart() {
         if (mainChart) mainChart.destroy();
         const ctx = document.getElementById('survivalChart').getContext('2d');
         mainChart = new Chart(ctx, {
             type: 'line',
-            plugins: [goalGapBadgePlugin],
+            plugins: [goalGapBadgePlugin, currentPositionBadgePlugin],
             data: { datasets: [
                 { label: '탈락 영역 (과거)', data: [], borderColor: '#e74c3c', backgroundColor: 'rgba(231, 76, 60, 0.4)', fill: true, pointRadius: 0, tension: 0.3 },
                 { label: '생존 영역 (잠재)', data: [], borderColor: '#2ecc71', backgroundColor: 'rgba(46, 204, 113, 0.4)', fill: true, pointRadius: 0, tension: 0.3 }
@@ -10476,9 +10514,10 @@ initPillIdentification();
                 }, 
                 plugins: { 
                     legend: { display: true, position: 'top', labels: { boxWidth: 12, font: { size: 11, weight: 'bold' }, padding: 15 } }, 
-                    annotation: { 
+                    annotation: {
+                        clip: false,
                         annotations: { 
-                            line1: { type: 'line', xMin: 0, xMax: 0, borderColor: '#2d3748', borderWidth: 2, borderDash: [4, 4], label: { display: true, content: '현재 경과', position: 'center', rotation: 90, backgroundColor: '#2d3748', color: '#fff', font: { size: 10 }, padding: { top: 4, bottom: 4, left: 6, right: 6 }, borderRadius: 4 } },
+                            line1: { type: 'line', xMin: 0, xMax: 0, borderColor: '#2d3748', borderWidth: 2, borderDash: [4, 4], label: { display: true, content: '현재 경과', position: 'center', rotation: 90, yAdjust: currentPositionBadgeYAdjust, backgroundColor: '#2d3748', color: '#fff', font: { size: 10 }, padding: { top: 4, bottom: 4, left: 6, right: 6 }, borderRadius: 4 } },
                             line2: { type: 'line', yMin: 0, yMax: 0, borderColor: '#e74c3c', borderWidth: 1.5, borderDash: [4, 4], label: { display: true, content: '생존', position: 'start', backgroundColor: '#e74c3c', font: { size: 10 } } },
                             line3: { type: 'line', xMin: 0, xMax: 0, borderColor: '#f39c12', borderWidth: 1.5, borderDash: [2, 2], label: { display: true, content: '최장 기록', position: 'center', backgroundColor: '#f39c12', font: { size: 10 } } },
                             ...createGoalGapAnnotations()
@@ -10495,7 +10534,7 @@ initPillIdentification();
         
         distChart = new Chart(ctx, {
             type: 'line',
-            plugins: [goalGapBadgePlugin],
+            plugins: [goalGapBadgePlugin, currentPositionBadgePlugin],
             data: { 
                 datasets: [
                     { 
@@ -10534,9 +10573,10 @@ initPillIdentification();
                 }, 
                 plugins: { 
                     legend: { display: false }, 
-                    annotation: { 
+                    annotation: {
+                        clip: false,
                         annotations: { 
-                            myPosition: { type: 'line', xMin: 0, xMax: 0, borderColor: '#e74c3c', borderWidth: 2, label: { display: true, content: '나의 위치', position: 'top', backgroundColor: '#e74c3c', font: { size: 10 } } },
+                            myPosition: { type: 'line', xMin: 0, xMax: 0, borderColor: '#e74c3c', borderWidth: 2, label: { display: true, content: '나의 위치', position: 'center', yAdjust: currentPositionBadgeYAdjust, backgroundColor: '#e74c3c', font: { size: 10 } } },
                             maxPosition: { type: 'line', xMin: 0, xMax: 0, borderColor: '#f39c12', borderWidth: 2, borderDash: [2, 2], label: { display: true, content: '최장 기록', position: 'center', backgroundColor: '#f39c12', font: { size: 10 } } },
                             ...createGoalGapAnnotations(true)
                         } 
