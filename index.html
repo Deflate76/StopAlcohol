@@ -12,7 +12,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self';
         base-uri 'none';
         object-src 'none';
-        script-src 'self' https://www.gstatic.com/firebasejs/ https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/ https://apis.google.com/ https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js 'sha256-AIBL0tC4iNNoKKwFcVeQsj034glNRfVxuUyzuCSYSiQ=' 'sha256-REiFfq6OotUrXGWxp84XojcMHah8Xjofp2pgS2BjRbM=' 'sha256-ZBDKI+cJWffsd+cXDpbTFeoXNCPy8uQD4RUYNTiPRSQ=' 'sha256-utYYx5qVnylo2gMZULKmJG8hNLajcNpGYKJuaVzT2NA=' 'sha256-zHFMEtnoByLLbfuo3nb4FP1v3fZyxBRMdx34RlECpBc=';
+        script-src 'self' https://www.gstatic.com/firebasejs/ https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/ https://apis.google.com/ https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js 'sha256-AIBL0tC4iNNoKKwFcVeQsj034glNRfVxuUyzuCSYSiQ=' 'sha256-REiFfq6OotUrXGWxp84XojcMHah8Xjofp2pgS2BjRbM=' 'sha256-ZBDKI+cJWffsd+cXDpbTFeoXNCPy8uQD4RUYNTiPRSQ=' 'sha256-tje76GW2VIgf7VtsxCtZZ3kzSqf2FfT0VumelFrLGB0=' 'sha256-utYYx5qVnylo2gMZULKmJG8hNLajcNpGYKJuaVzT2NA=';
         script-src-attr 'unsafe-hashes'
         'sha256-+/PyyZxYlaRwGKBfLX4QqCPnBcKxzZ6EQ/FEMykrPlg='
         'sha256-+8Obkk1yhOE1TPaUpOo8d/udOL2qT2+5fc9UsR20blw='
@@ -764,6 +764,17 @@
             box-shadow: 0 0 8px rgba(59, 130, 246, 0.3); animation: none;
         }
         .cal-best-record-note { flex-basis: 100%; color: #92400e; font-size: 0.75rem; font-weight: 800; text-align: center; }
+        #calendarModal .cal-record-break-notice { margin: 8px 0; padding: 10px; border: 2px solid #d97706; border-radius: 12px; background: #fffbeb; color: #78350f; text-align: left; }
+        #calendarModal .cal-record-break-notice[hidden], #calRecordBreakJump[hidden] { display: none; }
+        #calRecordBreakTitle { display: block; font-size: .82rem; line-height: 1.5; }
+        #calRecordBreakDetail { margin-top: 3px; font-size: .72rem; line-height: 1.5; }
+        #calRecordBreakJump { margin-top: 6px; padding: 5px 9px; border: 1px solid #d97706; border-radius: 7px; background: #fff; color: #92400e; font-family: inherit; font-size: .72rem; font-weight: 800; cursor: pointer; }
+        #calendarModal .cal-day.cal-record-break-day { padding-bottom: 18px; border-radius: 8px; outline: 2px solid #b45309; outline-offset: -2px; background: #fef3c7 !important; color: #78350f !important; animation: none; }
+        #calendarModal .cal-day.cal-record-break-upcoming { outline-style: dashed; }
+        #calendarModal .cal-record-break-stack { display: flex; flex-direction: column; align-items: center; gap: 3px; margin: 5px 2px 0; }
+        #calendarModal .cal-record-break-stack > .cal-range-badge,
+        #calendarModal .cal-record-break-stack > .cal-best-start-badge { position: static; transform: none; max-width: 100%; }
+        #calendarModal .cal-record-break-badge { display: block; box-sizing: border-box; max-width: 100%; padding: 2px 3px; border-radius: 5px; background: #92400e; color: #fff; -webkit-text-fill-color: #fff; font-size: 9px; font-weight: 900; line-height: 1.25; white-space: nowrap; pointer-events: none; }
         @keyframes longestStartCellGlow {
             0%, 100% { outline-color: #f59e0b; box-shadow: 0 0 12px rgba(245, 158, 11, 0.8); }
             50% { outline-color: #fcd34d; box-shadow: 0 0 2px rgba(245, 158, 11, 0.25); }
@@ -1687,7 +1698,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
         <details id="sectionStats" class="main-section" open>
             <summary><span>📈 생존 현황 및 통계 <span class="section-new-badge" data-section-new="sectionStats" aria-label="최근 기능 업데이트" hidden>New</span></span></summary>
             <div class="section-content">
-                <div class="chart-container" style="height: 318px;">
+                <div class="chart-container" style="height: 286px;">
                     <canvas id="survivalChart"></canvas>
                 </div>
                 
@@ -1900,6 +1911,11 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
             <button class="cal-btn" onclick="changeCalMonth(-1)">&#10094;</button>
             <div class="cal-title" id="calMonthTitle">2026년 5월</div>
             <button class="cal-btn" onclick="changeCalMonth(1)">&#10095;</button>
+        </div>
+        <div id="calRecordBreakNotice" class="cal-record-break-notice" hidden>
+            <strong id="calRecordBreakTitle"></strong>
+            <div id="calRecordBreakDetail"></div>
+            <button id="calRecordBreakJump" type="button" hidden>갱신일로 이동</button>
         </div>
         <div class="cal-schedule-legend"><span id="calScheduleStatus" role="status" aria-live="polite">📅 일정이 있는 날</span><button id="calScheduleRefresh" type="button" class="health-link">일정 새로고침</button></div>
         <div id="calMonthSuccessContainer" class="cal-month-success-container">
@@ -4326,6 +4342,27 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
         globalBestStartDate = best ? new Date(best.startMs).toISOString() : null;
         globalBestEndDate = best ? new Date(best.effectiveEndMs).toISOString() : null;
         return best;
+    }
+
+    function getChallengeRecordBreak(challenge, challenges = allChallengesData, nowMs = Date.now()) {
+        if (!challenge) return null;
+        const range = getChallengeRecordRange(challenge, nowMs);
+        if (range.durationMs === null) return null;
+        // Freeze the target to completed attempts before this attempt began.
+        // Never compare an active attempt against its own growing record.
+        const previous = getLongestChallengeRecord(challenges.filter(item => {
+            if (item === challenge || (challenge.id && item.id === challenge.id)) return false;
+            const prior = getChallengeRecordRange(item, nowMs);
+            return !prior.isActive && prior.durationMs !== null && prior.durationMs > 0
+                && prior.effectiveEndMs <= range.startMs;
+        }), nowMs);
+        if (!previous) return null;
+        const achieved = range.durationMs > previous.durationMs;
+        if (!range.isActive && !achieved) return null;
+        // Equal duration is a tie; the first millisecond beyond it is a new record.
+        const timestamp = range.startMs + previous.durationMs + 1;
+        const dateKey = dateToKey(timestamp);
+        return dateKey ? { timestamp, dateKey, achieved, previousDurationMs: previous.durationMs } : null;
     }
 
     async function ensureAllChallengesLoaded(force = false) {
@@ -9088,9 +9125,44 @@ initPillIdentification();
         renderCalendar(currentCalDate.getFullYear(), currentCalDate.getMonth(), currentCalMode);
     };
 
+    function renderCalendarRecordBreakNotice(recordBreak, challenge, year, month, mode) {
+        const notice = document.getElementById('calRecordBreakNotice');
+        const jump = document.getElementById('calRecordBreakJump');
+        notice.hidden = !challenge;
+        notice.dataset.recordAt = recordBreak ? String(recordBreak.timestamp) : '';
+        notice.dataset.achieved = recordBreak ? String(recordBreak.achieved) : '';
+        jump.hidden = true;
+        jump.onclick = null;
+        if (!challenge) return;
+        const title = document.getElementById('calRecordBreakTitle');
+        const detail = document.getElementById('calRecordBreakDetail');
+        if (!recordBreak) {
+            title.textContent = '최장 금주 기록 갱신일';
+            detail.textContent = '비교할 이전 완료 기록이 없어 갱신일을 표시하지 않습니다.';
+            return;
+        }
+        title.textContent = `${recordBreak.achieved ? '🏆 최장 금주 기록 갱신일' : '🎯 최장 금주 기록 갱신 예정일'} · ${formatDateShortKo(recordBreak.timestamp)}`;
+        const targetDate = new Date(recordBreak.timestamp);
+        const timeText = targetDate.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+        detail.textContent = `이전 최장 ${formatAccumulatedDuration(recordBreak.previousDurationMs)} 초과 기준 · ${timeText}`;
+        jump.hidden = year === targetDate.getFullYear() && month === targetDate.getMonth();
+        jump.onclick = () => {
+            currentCalDate = new Date(targetDate.getFullYear(), targetDate.getMonth(), 1);
+            renderCalendar(currentCalDate.getFullYear(), currentCalDate.getMonth(), mode);
+            document.querySelector(`#calendarDaysGrid [data-date="${recordBreak.dateKey}"]`)?.focus({ preventScroll: true });
+        };
+    }
+
     function renderCalendar(year, month, mode) {
         const calendarNow = new Date();
         const bestRecord = mode === 'longest' ? refreshLongestChallengeRecord(calendarNow.getTime()) : null;
+        const recordChallenge = mode === 'longest'
+            ? allChallengesData.find(challenge => challenge.id === bestRecord?.id)
+            : mode === 'current' && userQuitDate
+                ? allChallengesData.find(challenge => challenge.id === currentChallengeId && challenge.status === 'active')
+                : null;
+        const recordBreak = getChallengeRecordBreak(recordChallenge, allChallengesData, calendarNow.getTime());
+        renderCalendarRecordBreakNotice(recordBreak, recordChallenge, year, month, mode);
         document.getElementById('calMonthTitle').innerText = `${year}년 ${month + 1}월`;
         updateCalendarMonthSuccessUI(year, month);
         updateCalendarMonthAlcoholCompareUI(year, month);
@@ -9271,6 +9343,16 @@ initPillIdentification();
                         if (!classList.includes('fail-mark')) classList.push('fail-mark');
                     }
                 });
+            }
+
+            if (recordBreak?.dateKey === iterDateStrCal) {
+                classList.push('cal-record-break-day');
+                if (!recordBreak.achieved) classList.push('cal-record-break-upcoming');
+                const label = recordBreak.achieved ? '최장<br>갱신' : '갱신<br>예정';
+                calendarRangeBadge = `<span class="cal-record-break-stack">${calendarRangeBadge}<span class="cal-record-break-badge" aria-hidden="true">${label}</span></span>`;
+                calendarRangeDescription = [calendarRangeDescription,
+                    recordBreak.achieved ? '최장 금주 기록 갱신일' : '최장 금주 기록 갱신 예정일'
+                ].filter(Boolean).join(' · ');
             }
 
             if (failedChallengeForDay) {
@@ -10469,7 +10551,7 @@ initPillIdentification();
     const currentPositionBadgePlugin = {
         id: 'current-position-badge-row',
         beforeInit(chart) {
-            const rowHeight = chart.canvas.id === 'survivalChart' ? 68 : 36;
+            const rowHeight = 36;
             const row = {
                 position: 'top', weight: 0, fullSize: false, options: {},
                 isHorizontal: () => true,
@@ -10517,7 +10599,7 @@ initPillIdentification();
                     annotation: {
                         clip: false,
                         annotations: { 
-                            line1: { type: 'line', xMin: 0, xMax: 0, borderColor: '#2d3748', borderWidth: 2, borderDash: [4, 4], label: { display: true, content: '현재 경과', position: 'center', rotation: 90, yAdjust: currentPositionBadgeYAdjust, backgroundColor: '#2d3748', color: '#fff', font: { size: 10 }, padding: { top: 4, bottom: 4, left: 6, right: 6 }, borderRadius: 4 } },
+                            line1: { type: 'line', xMin: 0, xMax: 0, borderColor: '#2d3748', borderWidth: 2, borderDash: [4, 4], label: { display: true, content: '현재 경과', position: 'center', rotation: 0, yAdjust: currentPositionBadgeYAdjust, backgroundColor: '#2d3748', color: '#fff', font: { size: 10 }, padding: { top: 4, bottom: 4, left: 6, right: 6 }, borderRadius: 4 } },
                             line2: { type: 'line', yMin: 0, yMax: 0, borderColor: '#e74c3c', borderWidth: 1.5, borderDash: [4, 4], label: { display: true, content: '생존', position: 'start', backgroundColor: '#e74c3c', font: { size: 10 } } },
                             line3: { type: 'line', xMin: 0, xMax: 0, borderColor: '#f39c12', borderWidth: 1.5, borderDash: [2, 2], label: { display: true, content: '최장 기록', position: 'center', backgroundColor: '#f39c12', font: { size: 10 } } },
                             ...createGoalGapAnnotations()
@@ -11299,6 +11381,12 @@ initPillIdentification();
             }
 
             updateChart(days, survivors);
+            const recordBreakNotice = document.getElementById('calRecordBreakNotice');
+            if (document.getElementById('calendarModal').style.display === 'flex'
+                    && recordBreakNotice.dataset.achieved === 'false'
+                    && now.getTime() >= Number(recordBreakNotice.dataset.recordAt)) {
+                renderCalendar(currentCalDate.getFullYear(), currentCalDate.getMonth(), currentCalMode);
+            }
             if(currentTabName !== 'community') updateRoadmap(days); 
 
             checkCautionAlerts();
