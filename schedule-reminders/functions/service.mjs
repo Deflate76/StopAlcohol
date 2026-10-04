@@ -1,4 +1,5 @@
 import {createHash, randomUUID} from 'node:crypto';
+import {deletionJobRef} from './account-deletion.mjs';
 
 export class ScheduleError extends Error {
   constructor(code, message) { super(message); this.code = code; }
@@ -140,6 +141,7 @@ export function createScheduleService({db, messaging, now = Date.now, uuid = ran
       if (!snapshot.exists) return null;
       const job = snapshot.data();
       if (job.dueAt > now() || job.leaseUntil > now()) return null;
+      if ((await tx.get(deletionJobRef(db,job.uid))).exists) { tx.delete(ref); return null; }
       const eventRef = events(job.uid).doc(job.eventId), eventSnapshot = await tx.get(eventRef);
       const event = eventSnapshot.exists ? eventSnapshot.data() : null;
       if (!event || event.revision !== job.revision || event.reminderAt === null || ['sent', 'partial', 'none', 'failed', 'missed'].includes(event.reminderStatus)) {
@@ -166,6 +168,7 @@ export function createScheduleService({db, messaging, now = Date.now, uuid = ran
       if (!snapshot.size) retry = true;
       const startText = new Intl.DateTimeFormat('ko-KR', {timeZone: event.timeZone, month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'}).format(event.startAt);
       for (let offset = 0; offset < recipients.length; offset += 500) {
+        if ((await deletionJobRef(db,job.uid).get()).exists) break;
         const batch = recipients.slice(offset, offset + 500);
         const result = await messaging.sendEachForMulticast({
           tokens: batch.map(doc => doc.data().token),

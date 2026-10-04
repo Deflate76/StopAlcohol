@@ -52,6 +52,7 @@ jobs:
       - run: npm ci --prefix schedule-reminders/functions --ignore-scripts --no-audit --no-fund
       - run: npm test --prefix schedule-reminders/functions
       - run: bash -n schedule-reminders/setup-github-deploy.sh
+      - run: bash -n schedule-reminders/setup-account-deletion.sh
       - run: node --test schedule-reminders/test-setup.mjs
       - run: npm ci --prefix firestore-admin/functions --ignore-scripts --no-audit --no-fund
       - run: npm test --prefix firestore-admin/functions
@@ -97,6 +98,10 @@ jobs:
           service_account: firebase-github-deploy@alcoholaway.iam.gserviceaccount.com
           create_credentials_file: true
           export_environment_variables: true
+      - name: Configure narrowly scoped account deletion permissions
+        id: account_permissions
+        continue-on-error: true
+        run: bash schedule-reminders/setup-account-deletion.sh
       - name: Deploy schedule functions
         working-directory: schedule-reminders
         run: firebase deploy --config "$GITHUB_WORKSPACE/schedule-reminders/firebase.json" --project alcoholaway --only functions:daily-schedules --non-interactive
@@ -108,6 +113,10 @@ jobs:
         run: |
           cat >> "$GITHUB_STEP_SUMMARY" <<'SUMMARY'
           일정 API·푸시 리마인드·Firestore 관리자 API를 alcoholaway / asia-northeast3에 배포했습니다.
-          배포 대상: dailyScheduleApi, dispatchDailyScheduleReminders, firestoreAdminApi
+          배포 대상: dailyScheduleApi, dispatchDailyScheduleReminders, dailyWisdomApi, deleteMyAccount, retryAccountDeletions, firestoreAdminApi
           프런트엔드는 기존 사이트 배포 방식으로 반영됩니다.
           SUMMARY
+      - name: Account deletion setup required
+        if: steps.account_permissions.outcome == 'failure'
+        run: |
+          echo '회원탈퇴 IAM 설정이 필요합니다. 프로젝트 IAM 관리자가 Cloud Shell에서 bash schedule-reminders/setup-account-deletion.sh를 실행해야 합니다. 설정 전에는 API가 데이터 삭제를 시작하지 않습니다.' >> "$GITHUB_STEP_SUMMARY"

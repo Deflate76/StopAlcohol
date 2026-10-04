@@ -119,3 +119,23 @@ npm test --prefix functions
 총 19개 단위 테스트로 인증/계정 분리, 날짜 경계, 전체 목록의 여러 페이지와 같은 시작 시각 처리, 동일 요청 재시도, 동시 수정 충돌, 일정 수정·삭제와 알림 큐의 일관성, 스케줄러 중복 실행, 일부 기기 실패 재시도, 만료 토큰·지난 일정 처리를 테스트합니다. 단위 테스트는 메모리 Firestore 대역과 FCM 대역을 사용하며 운영 프로젝트에 접근하지 않습니다. 이번 전체 목록·부채 메뉴 변경은 실제 HTML과 스크립트에 서버 대역을 연결한 DOM 검사 32개로 확인했습니다. 브라우저의 로컬 미리보기 접근 제한으로 이번 변경의 실제 화면 렌더링은 검증하지 못했습니다. 실제 기기 푸시 수신도 배포 후 확인 대상입니다.
 
 Firebase 공식 문서: [예약 함수](https://firebase.google.com/docs/functions/schedule-functions), [웹 메시지 수신](https://firebase.google.com/docs/cloud-messaging/js/receive), [Admin SDK 발송](https://firebase.google.com/docs/cloud-messaging/send/admin-sdk).
+# 회원탈퇴
+
+`deleteMyAccount`는 App Check와 5분 이내의 Google 본인 인증, 명시적 확인을 요구합니다.
+대상 UID는 인증 토큰에서만 얻으며 클라이언트가 보낸 UID/경로는 받지 않습니다.
+`users/{uid}` 전체 하위 기록, 일정·조언 기록, 음주 기록, FCM/일정 기기·대기열,
+본인 게시글과 다른 글의 본인 댓글, `health_records/{uid}/` 및
+`pill_identification/{uid}/` 사진을 정리한 뒤 Firebase Auth 계정을 삭제합니다.
+
+기존 서버 전용 `daily_schedule_queue`에 삭제 작업을 저장합니다. 이 컬렉션은 기존과
+동일하게 클라이언트 직접 읽기·쓰기를 허용하지 않아야 합니다. 새 Firestore 규칙으로
+기존 규칙을 대체하지 않습니다. 접수 후 계정 로그인/토큰 갱신을 막으며, 일시적인 오류나
+창 닫기에도 `retryAccountDeletions`가 5분 간격으로 재시도합니다. 이미 발급된 토큰의
+만료를 기다려 70분 뒤 한 번 더 정리하고 UID가 남은 작업 문서도 삭제합니다.
+이미 외부 개인 캘린더에 내보낸 복약 일정이나 직접 내려받은 파일은 앱 서버의 데이터가 아닙니다.
+
+런타임의 Auth 및 사진 삭제 권한은 `setup-account-deletion.sh`로 설정합니다.
+Auth 사용자 조회·갱신·삭제만 가진 프로젝트 역할과, 해당 Storage 버킷의 목록·삭제만
+가진 역할을 사용합니다. 자동 배포에서 설정 권한이 부족하면 프로젝트 IAM 관리자가
+Cloud Shell에서 이 스크립트를 한 번 실행해야 합니다. API는 필요한 권한을 먼저 확인하므로,
+설정이 누락된 상태에서 일부 데이터만 삭제되거나 계정이 비활성화되지 않습니다.
