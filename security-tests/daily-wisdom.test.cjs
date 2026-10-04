@@ -11,6 +11,23 @@ const now=Date.parse('2026-09-30T07:00:00+09:00');
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
 const pending=()=>{let resolve;const promise=new Promise(r=>resolve=r);return {promise,resolve};};
 
+test('advice scrolls only when overflowing and remeasures after width/text changes',async t=>{
+  const f=await fixture(t);
+  const button=f.doc.querySelector('[data-daily-wisdom-open]');
+  let width=100,textWidth=280;
+  Object.defineProperty(button,'clientWidth',{get:()=>width});
+  Object.defineProperty(button.querySelector('.daily-wisdom-text'),'scrollWidth',{get:()=>textWidth});
+  f.ui.renderTrigger();
+  assert(button.classList.contains('is-overflowing'));
+  assert.equal(button.style.getPropertyValue('--wisdom-distance'),'-180px');
+  assert.equal(button.querySelectorAll('.daily-wisdom-text').length,1);
+  assert(button.getAttribute('aria-label').includes(button.textContent));
+  width=320;button.ownerDocument.defaultView.dispatchEvent(new button.ownerDocument.defaultView.Event('resize'));
+  assert(!button.classList.contains('is-overflowing'));
+  width=0;f.ui.renderTrigger();assert(!button.classList.contains('is-overflowing'),'hidden buttons are not animated');
+  width=100;textWidth=80;f.ui.renderTrigger();assert(!button.classList.contains('is-overflowing'));
+});
+
 async function fixture(t,overrides={}) {
   const modal=html.match(/<dialog id="dailyWisdomModal"[\s\S]*?<\/dialog>/)[0];
   const dom=new JSDOM(`<button data-daily-wisdom-open></button>${modal}`,{url:'https://fixture.invalid/'});

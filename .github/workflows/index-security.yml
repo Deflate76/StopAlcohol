@@ -3,10 +3,10 @@ name: Index security checks
 on:
   pull_request:
     branches: [Rollback-version2]
-    paths: [index.html, record-section-ui.js, daily-wisdom.js, daily-health-tools.js, scripts/update-index-csp.py, security-tests/**, .github/workflows/index-security.yml]
+    paths: [index.html, record-section-ui.js, daily-wisdom.js, daily-health-tools.js, calendar-environment.js, korean-calendar.js, vendor/suncalc-1.9.0.js, scripts/update-index-csp.py, security-tests/**, .github/workflows/index-security.yml]
   push:
     branches: [Rollback-version2]
-    paths: [index.html, record-section-ui.js, daily-wisdom.js, daily-health-tools.js, scripts/update-index-csp.py, security-tests/**, .github/workflows/index-security.yml]
+    paths: [index.html, record-section-ui.js, daily-wisdom.js, daily-health-tools.js, calendar-environment.js, korean-calendar.js, vendor/suncalc-1.9.0.js, scripts/update-index-csp.py, security-tests/**, .github/workflows/index-security.yml]
   workflow_dispatch:
 
 permissions:
@@ -26,6 +26,9 @@ jobs:
             /record-section-ui.js
             /daily-wisdom.js
             /daily-health-tools.js
+            /calendar-environment.js
+            /korean-calendar.js
+            /vendor/suncalc-1.9.0.js
             /scripts/update-index-csp.py
             /security-tests/
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6

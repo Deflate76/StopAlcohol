@@ -91,6 +91,22 @@ export function installDailyWisdom({document:doc = document, window:win = window
   let uid = null, epoch = 0, started = false, busy = false, loading = false;
   let items = [], current = null, cursor = null, message = '', failed = false, historyFailed = false, controller = null;
   const ratingPending = new Set();
+  const observedTriggers = new Set();
+  function measureTrigger(button) {
+    const line = button.querySelector('.daily-wisdom-text');
+    if (!line) return;
+    const overflow = Math.max(0, line.scrollWidth - button.clientWidth);
+    const scrolls = button.clientWidth > 0 && overflow > 1;
+    button.classList.toggle('is-overflowing', scrolls);
+    button.style.setProperty('--wisdom-distance', `${-overflow}px`);
+    button.style.setProperty('--wisdom-duration', `${Math.max(10, overflow / 24 + 4)}s`);
+  }
+  const triggerObserver = win.ResizeObserver ? new win.ResizeObserver(entries => {
+    for (const {target} of entries) measureTrigger(target);
+  }) : null;
+  function measureTriggers() { for (const button of observedTriggers) if (button.isConnected) measureTrigger(button); }
+  win.addEventListener('resize', measureTriggers);
+  doc.fonts?.ready.then(measureTriggers);
   const valid = (owner, version) => !!owner && owner === uid && version === epoch;
   const deadline = (promise, signal, timeout = 45000) => new Promise((resolve, reject) => {
     const cancel = () => finish(reject, new Error('Cancelled'));
@@ -107,10 +123,15 @@ export function installDailyWisdom({document:doc = document, window:win = window
   };
   function renderTrigger() {
     const text = current?.text || (busy ? '오늘의 조언을 준비하고 있어요…' : uid ? FALLBACK : '로그인하면 오늘의 조언을 볼 수 있어요.');
+    for (const button of observedTriggers) if (!button.isConnected) { triggerObserver?.unobserve(button); observedTriggers.delete(button); }
     for (const button of doc.querySelectorAll('[data-daily-wisdom-open]')) {
-      button.textContent = text;
+      let line = button.querySelector('.daily-wisdom-text');
+      if (!line) { line = doc.createElement('span'); line.className = 'daily-wisdom-text'; button.replaceChildren(line); }
+      if (line.textContent !== text) line.textContent = text;
       button.title = `${text}\n눌러서 전체 문장·이전 조언·별점 보기`;
       button.setAttribute('aria-label', `${text}, 오늘의 조언 목록과 만족도 열기`);
+      if (!observedTriggers.has(button)) { observedTriggers.add(button); triggerObserver?.observe(button); }
+      measureTrigger(button);
     }
   }
   function card(item, isCurrent = false) {

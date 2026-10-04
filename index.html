@@ -12,7 +12,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self';
         base-uri 'none';
         object-src 'none';
-        script-src 'self' https://www.gstatic.com/firebasejs/ https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/ https://apis.google.com/ https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js 'sha256-AIBL0tC4iNNoKKwFcVeQsj034glNRfVxuUyzuCSYSiQ=' 'sha256-REiFfq6OotUrXGWxp84XojcMHah8Xjofp2pgS2BjRbM=' 'sha256-ZBDKI+cJWffsd+cXDpbTFeoXNCPy8uQD4RUYNTiPRSQ=' 'sha256-tje76GW2VIgf7VtsxCtZZ3kzSqf2FfT0VumelFrLGB0=' 'sha256-utYYx5qVnylo2gMZULKmJG8hNLajcNpGYKJuaVzT2NA=';
+        script-src 'self' https://www.gstatic.com/firebasejs/ https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/ https://apis.google.com/ https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js 'sha256-AIBL0tC4iNNoKKwFcVeQsj034glNRfVxuUyzuCSYSiQ=' 'sha256-PvNnh63iecFC8KM2ApT2wStT09TekeSGIBvQ6PagUFU=' 'sha256-REiFfq6OotUrXGWxp84XojcMHah8Xjofp2pgS2BjRbM=' 'sha256-ZBDKI+cJWffsd+cXDpbTFeoXNCPy8uQD4RUYNTiPRSQ=' 'sha256-utYYx5qVnylo2gMZULKmJG8hNLajcNpGYKJuaVzT2NA=';
         script-src-attr 'unsafe-hashes'
         'sha256-+/PyyZxYlaRwGKBfLX4QqCPnBcKxzZ6EQ/FEMykrPlg='
         'sha256-+8Obkk1yhOE1TPaUpOo8d/udOL2qT2+5fc9UsR20blw='
@@ -337,7 +337,16 @@
         .clickable-time-box { display: flex; flex-direction: column; align-items: center; padding: 10px 20px; border-radius: 16px; transition: all 0.2s ease; cursor: pointer; border: 2px solid transparent; text-decoration: none; }
         .clickable-time-box:hover { background-color: rgba(255, 255, 255, 0.8); border-color: #ffcccc; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(231, 76, 60, 0.1); }
         .cal-hint { font-size: 0.75rem; color: var(--danger-color); font-weight: bold; opacity: 0.8; margin-bottom: 4px; display: flex; align-items: center; justify-content: center; gap: 4px; width: 100%; text-align: center; }
-        .daily-wisdom-hint { appearance:none; font-family:inherit; background:none; border:0; padding:0; cursor:pointer; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.7; min-width:0; }
+        .daily-wisdom-hint { appearance:none; font-family:inherit; background:none; border:0; padding:0; cursor:pointer; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.7; min-width:0; max-width:100%; }
+        .daily-wisdom-text { display:inline-block; white-space:nowrap; vertical-align:top; }
+        .daily-wisdom-hint.is-overflowing { text-align:left; text-overflow:clip; }
+        .daily-wisdom-hint.is-overflowing .daily-wisdom-text { animation:wisdomMarquee var(--wisdom-duration,14s) linear infinite; }
+        .daily-wisdom-hint:hover .daily-wisdom-text, .daily-wisdom-hint:focus-visible .daily-wisdom-text { animation-play-state:paused; }
+        @keyframes wisdomMarquee { 0%,12% { transform:translateX(0); } 88%,100% { transform:translateX(var(--wisdom-distance,0px)); } }
+        @media (prefers-reduced-motion:reduce) {
+            .daily-wisdom-hint.is-overflowing { text-overflow:ellipsis; }
+            .daily-wisdom-hint.is-overflowing .daily-wisdom-text { display:inline; animation:none; }
+        }
         .daily-wisdom-hint:focus-visible { outline:2px solid var(--danger-color); outline-offset:3px; border-radius:4px; }
         .streak-record-info { display:flex; flex-direction:column; align-items:center; gap:4px; min-width:0; }
         .streak-current-rank { font-size:.67rem; font-weight:700; color:#64748b; line-height:1.4; white-space:nowrap; }
@@ -1057,7 +1066,7 @@
         .prescription-record-btn { border-color: #0d9488; color: #0f766e; background: #f0fdfa; }
         .prescription-view-btn { border-color: #0284c7; color: #0369a1; background: #f0f9ff; }
         #calendarModal { padding-bottom: min(16px, 3vh); box-sizing: border-box; }
-        #calendarModal .modal-content { max-width: 400px; padding: 14px 16px 16px; max-height: 92vh; max-height: 92dvh; }
+        #calendarModal .modal-content { max-width: 680px; padding: 14px 16px 16px; max-height: 92vh; max-height: 92dvh; }
         #calendarModal .close-btn-top { top: 4px; right: 16px; }
         #calendarModal .cal-header { margin: 12px 0 9px; padding: 0 21px 0 0; }
         #calendarModal .cal-month-success-container { margin: 0 0 8px; }
@@ -1068,6 +1077,38 @@
         #calendarModal .calendar-close-btn { margin-top: 10px; padding: 10px; max-width: none; width: 100%; font-size: 1rem; background: #e2e8f0; color: #4a5568; box-shadow: none; }
         #calendarModal .cal-day:not(.empty) { cursor: pointer; touch-action: pan-y; }
         #calendarModal .cal-day:focus-visible { outline: 2px solid #0f766e; outline-offset: 1px; z-index: 26; }
+        .cal-environment-panel { margin:10px 0; padding:10px; border:1px solid #dbe7f0; border-radius:12px; background:#f8fafc; text-align:left; }
+        .cal-environment-controls { display:flex; align-items:center; flex-wrap:wrap; gap:6px 10px; font-size:.75rem; color:#334155; }
+        .cal-environment-controls label { display:flex; align-items:center; gap:8px; font-weight:800; }
+        #calEnvironmentRegion { width:auto; max-width:155px; margin:0; padding:6px 8px; border:1px solid #cbd5e1; border-radius:7px; background:white; color:#334155; font:inherit; }
+        #calEnvironmentRefresh { margin-left:auto; font-size:.72rem; }
+        #calEnvironmentRefresh[hidden] { display:none; }
+        #calEnvironmentStatus { margin-top:7px; font-size:.71rem; line-height:1.5; color:#475569; }
+        #calEnvironmentStatus.is-error { color:#b91c1c; }
+        .cal-environment-key { margin-top:4px; color:#64748b; font-size:.68rem; line-height:1.5; }
+        .cal-environment-help { margin-top:5px; font-size:.68rem; line-height:1.6; color:#64748b; }
+        .cal-environment-help summary { cursor:pointer; width:fit-content; }
+        .cal-environment-help p { margin:4px 0 0; }
+        .cal-environment-help a { color:#0369a1; }
+        #calendarModal .cal-days { grid-template-columns:repeat(7,minmax(0,1fr)); row-gap:8px; }
+        #calendarModal .cal-day { min-width:0; }
+        #calendarModal .cal-day-number { display:inline-block; min-width:20px; border-radius:5px; }
+        #calendarModal .cal-holiday .cal-day-number { color:#b91c1c; background:#fff1f2; }
+        #calendarModal .cal-environment { display:flex; flex-direction:column; gap:3px; margin:5px 2px 0; padding:4px 1px; border-radius:5px; background:rgba(255,255,255,.92); color:#334155; font-size:10px; font-weight:600; line-height:1.35; pointer-events:none; }
+        #calendarModal .cal-holiday-name { display:block; color:#b91c1c; font-size:9px; font-weight:800; overflow-wrap:anywhere; line-height:1.4; }
+        #calendarModal .cal-weather { display:flex; flex-direction:column; justify-content:center; min-height:30px; }
+        #calendarModal .cal-weather-icon { font-size:16px; line-height:1.2; }
+        #calendarModal .cal-weather-temp { display:flex; justify-content:center; font-variant-numeric:tabular-nums; white-space:nowrap; font-size:9px; }
+        #calendarModal .cal-temp-low { color:#0369a1; }
+        #calendarModal .cal-temp-high { color:#b45309; }
+        #calendarModal .cal-weather-missing { color:#64748b; font-size:9px; }
+        #calendarModal .cal-sun-times { display:flex; flex-direction:column; gap:1px; white-space:nowrap; font-variant-numeric:tabular-nums; letter-spacing:-.3px; }
+        #calendarModal .cal-sunrise { color:#92400e; }
+        #calendarModal .cal-sunset { color:#4338ca; }
+        #calendarModal .cal-moon { font-size:15px; line-height:1.2; }
+        @media (min-width:600px) { #calendarModal .cal-environment { font-size:11px; } #calendarModal .cal-holiday-name, #calendarModal .cal-weather-temp { font-size:10px; } }
+        @media (max-width:420px) { #calendarModal .cal-environment { font-size:9px; } #calendarModal .cal-weather-temp { flex-direction:column; } #calendarModal .cal-temp-divider { display:none; } }
+        @media (max-width:360px) { #calendarModal .modal-content { padding-left:10px; padding-right:10px; } #calendarModal .cal-days { column-gap:2px; } #calendarModal .cal-environment { margin-left:0; margin-right:0; padding-left:0; padding-right:0; font-size:9px; letter-spacing:-.4px; } }
         .cal-health-dot { position: absolute; bottom: 5px; left: 50%; width: 5px; height: 5px; border-radius: 50%; background: #0f766e; pointer-events: none; }
         .diagnosis-section { background: #f0fdfa; border: 1px solid #99f6e4; }
         .diagnosis-list { max-height: 255px; overflow-y: auto; overscroll-behavior: contain; display: grid; gap: 8px; }
@@ -1918,6 +1959,20 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
             <button id="calRecordBreakJump" type="button" hidden>갱신일로 이동</button>
         </div>
         <div class="cal-schedule-legend"><span id="calScheduleStatus" role="status" aria-live="polite">📅 일정이 있는 날</span><button id="calScheduleRefresh" type="button" class="health-link">일정 새로고침</button></div>
+        <section class="cal-environment-panel" aria-label="한국 달력과 날씨 설정">
+            <div class="cal-environment-controls">
+                <label for="calEnvironmentRegion">🇰🇷 기준 지역 <select id="calEnvironmentRegion"></select></label>
+                <button id="calEnvironmentRefresh" type="button" class="health-link">예보 새로고침</button>
+            </div>
+            <div id="calEnvironmentStatus" role="status" aria-live="polite">한국 시각(KST) 기준</div>
+            <div class="cal-environment-key">↑ 일출 · ↓ 일몰 · 🌙 달 모양 · 기온은 최저/최고 °C</div>
+            <details class="cal-environment-help">
+                <summary>정보 기준</summary>
+                <p>날씨는 오늘부터 최대 16일 예보이며 지난 날짜와 예보 범위 밖의 날씨는 제공하지 않습니다. 일출·일몰은 선택 지역의 계산값, 달 모양은 한국 정오 기준 근사값입니다.</p>
+                <p id="calHolidayNote"></p>
+                <p><a href="https://www.mpm.go.kr/mpm/info/infoService/BizService02/" target="_blank" rel="noopener noreferrer">한국 공휴일 기준</a> · 날씨: <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a> · 천문: <a href="https://github.com/mourner/suncalc" target="_blank" rel="noopener noreferrer">SunCalc</a></p>
+            </details>
+        </section>
         <div id="calMonthSuccessContainer" class="cal-month-success-container">
             <div id="calMonthSuccessText" class="cal-month-success-label">금주 성공률 계산 중</div>
             <div class="cal-month-success-progress"><div id="calMonthSuccessFill" class="cal-month-success-fill"></div></div>
@@ -3480,7 +3535,8 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
     import { installDailySchedules } from './daily-schedules.js?v=20260928-2';
     import { installRecordSectionUI } from './record-section-ui.js?v=20261001-1';
     import { renderFailureTimeRisk, installTodayWeather } from './daily-health-tools.js?v=20261001-1';
-    import { installDailyWisdom, WISDOM_SYSTEM_INSTRUCTION } from './daily-wisdom.js?v=20260930-1';
+    import { installDailyWisdom, WISDOM_SYSTEM_INSTRUCTION } from './daily-wisdom.js?v=20261004-1';
+    import { installCalendarEnvironment } from './calendar-environment.js?v=20261004-1';
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
     import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, deleteDoc, collection, addDoc, query, orderBy, limit, onSnapshot, getDocs, where, startAfter, serverTimestamp, writeBatch, runTransaction } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
@@ -3491,6 +3547,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
 
     const recordSectionUI = installRecordSectionUI();
     const todayWeather = installTodayWeather();
+    const calendarEnvironment = installCalendarEnvironment();
 
     const stages = [ { d: 1, t: "1일: 알코올 완전 배출", desc: "혈중 알코올이 0이 되며, 몸이 본격적인 해독 스위치를 켭니다." }, { d: 2, t: "2일: 숙취 및 갈증 해소", desc: "체내 수분 밸런스가 정상화되고 극심한 피로감과 두통이 사라집니다." }, { d: 3, t: "3일: 금단 증상 완화", desc: "초기 불안감과 손떨림이 잦아들며, 신체가 알코올 없는 상태에 적응하기 시작합니다." }, { d: 5, t: "5일: 피부 톤 및 탄력 개선", desc: "탈수 증상이 회복되어 푸석했던 피부가 맑아지고 생기가 돕니다." }, { d: 7, t: "1주: 깊은 수면(REM) 회복", desc: "수면의 질이 극적으로 향상되어 아침에 일어날 때 진짜 '개운함'을 느낍니다." }, { d: 10, t: "10일: 브레인 포그 걷힘", desc: "머릿속 안개가 걷힌 듯 인지 능력이 맑아지고 집중력이 상승합니다." }, { d: 14, t: "2주: 위장 및 소화력 회복", desc: "위점막이 재생되어 속쓰림, 역류성 식도염, 더부룩함이 크게 개선됩니다." }, { d: 21, t: "3주: 혈압 및 심박수 안정화", desc: "고혈압 수치가 제자리를 찾기 시작하며 심혈관계의 부담이 확 줄어듭니다." }, { d: 30, t: "1개월: 간 지방 수치 대폭 감소", desc: "지방간이 최대 15~20% 감소하며, 간 수치 정상화로 피로회복력이 급증합니다." }, { d: 60, t: "2개월: 강력한 면역력 형성", desc: "백혈구 기능이 완전히 회복되어 감기 등 외부 바이러스에 대한 저항력이 강해집니다." }, { d: 90, t: "3개월: 도파민 시스템 정상화", desc: "술 없이도 일상에서 자연스러운 행복과 스트레스 해소를 온전히 느낄 수 있게 됩니다." }, { d: 180, t: "6개월: 눈에 띄는 체형 변화", desc: "불필요한 '빈 칼로리' 섭취가 사라져 뱃살이 줄어들고 얼굴선이 뚜렷해집니다." }, { d: 365, t: "1년: 중증 질환 위험 급감", desc: "간경화, 유방암, 구강암 등 알코올 관련 치명적 질환의 위험이 비약적으로 떨어집니다." }, { d: 730, t: "2년: 뇌세포 용적 회복", desc: "알코올로 인해 위축되었던 뇌의 회백질이 건강한 비음주자 수준으로 재생됩니다." }, { d: 1825, t: "5년: 소화기계 완벽한 리셋", desc: "식도암, 위암 등의 발생 확률이 금주 전의 절반 수준으로 대폭 낮아집니다." }, { d: 3650, t: "10년: 완전한 리셋 및 자유", desc: "신체의 거의 모든 지표가 평생 술을 마시지 않은 사람과 유사한 수준으로 건강해집니다." } ];
     const liverStages = [ { d: 1, t: "1일: 해독 공장 가동", desc: "간이 알코올 분해 업무를 끝내고, 쌓여있던 독소를 처리하는 본래 업무에 집중합니다." }, { d: 7, t: "1주: 염증 수치 하락", desc: "알코올로 인한 간의 미세한 염증들이 가라앉으며 혈액 검사상 간 수치가 하락하기 시작합니다." }, { d: 14, t: "2주: 지방 대사 재개", desc: "알코올 대신 지방을 연소하기 시작하여 간에 끼어있던 기름기가 빠져나가기 시작합니다." }, { d: 30, t: "1개월: 지방간 20% 감소", desc: "지방간 수치가 급격히 떨어지며, 간의 크기가 정상으로 돌아오고 혈색이 좋아집니다." }, { d: 90, t: "3개월: 단백질 합성 최적화", desc: "알부민 등 필수 단백질 합성이 원활해져 만성 피로가 사라지고 근육 성장이 효율적으로 변합니다." }, { d: 180, t: "6개월: 간 섬유화 억제", desc: "딱딱하게 굳으려던 간 조직의 손상이 멈추고, 건강한 간 세포가 그 자리를 대체합니다." }, { d: 365, t: "1년: 해독 능력 극대화", desc: "간의 정화 능력이 정점에 도달하여 약물 대사나 독소 배출 속도가 비약적으로 빨라집니다." }, { d: 1825, t: "5년: 간암 발생률 급감", desc: "간세포의 변이 가능성이 차단되어, 간암 및 간경변 위험이 일반인 수준에 근접합니다." }, { d: 3650, t: "10년: 완벽한 재생 완료", desc: "오랜 기간 손상받았던 간 조직이 완전히 새것처럼 리모델링되어 최상의 상태를 유지합니다." } ];
@@ -9411,13 +9468,14 @@ initPillIdentification();
             const hasHealthEntry = hr.entries.some(entry => entry.date === iterDateStrCal);
             const healthBadge = hasHealthEntry ? '<span class="cal-health-dot" aria-hidden="true"></span>' : '';
             const dateLabel = `aria-label="${iterDateStrCal}${calendarRangeDescription ? ', ' + calendarRangeDescription : ''}, 건강기록${hasHealthEntry ? ' 있음' : ' 추가'}"${calendarRangeDescription ? ` title="${calendarRangeDescription}"` : ''}`;
-            grid.innerHTML += `<div class="${classList.join(' ')}" ${customStyle} ${dateLabel} role="button" tabindex="0" data-date="${iterDateStrCal}" onpointerdown="startPress(event, this)" onpointermove="moveCalendarPress(event)" onpointerup="cancelPress()" onpointerleave="cancelPress()" onpointercancel="cancelCalendarGesture()" oncontextmenu="event.preventDefault()">${day}${cravingBadge}${cBadge}${logBadge}${calendarRangeBadge}${healthBadge}</div>`;
+            grid.innerHTML += `<div class="${classList.join(' ')}" ${customStyle} ${dateLabel} role="button" tabindex="0" data-date="${iterDateStrCal}" onpointerdown="startPress(event, this)" onpointermove="moveCalendarPress(event)" onpointerup="cancelPress()" onpointerleave="cancelPress()" onpointercancel="cancelCalendarGesture()" oncontextmenu="event.preventDefault()"><span class="cal-day-number">${day}</span>${cravingBadge}${cBadge}${logBadge}${calendarRangeBadge}${healthBadge}</div>`;
         }
         grid.querySelectorAll('.cal-day[data-date]').forEach(cell => {
             const date = cell.dataset.date;
             cell.addEventListener('click', event => openCalendarDayContentFromClick(event, date));
             cell.addEventListener('keydown', event => handleHealthDayKey(event, date));
         });
+        void calendarEnvironment.render(year, month);
         dailySchedules.paintCalendar();
     }
 
