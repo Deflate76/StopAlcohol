@@ -1,0 +1,42 @@
+.app-version-label { display:inline-flex; align-items:center; margin-left:7px; padding:5px 10px; border:1px solid #cbd5e1; border-radius:999px; background:#fff; color:#0f766e; font-family:inherit; font-size:.74rem; font-weight:800; line-height:1.4; cursor:pointer; vertical-align:middle; }
+.app-version-label:hover { background:#ecfdf5; border-color:#5eead4; }
+.app-version-label:focus-visible { outline:2px solid #0f766e; outline-offset:3px; }
+.release-dialog { width:min(640px,calc(100vw - 28px)); max-height:88dvh; box-sizing:border-box; padding:0; border:0; border-radius:22px; background:#f8fafc; color:#334155; box-shadow:0 24px 80px #0f172a50; text-align:left; }
+.release-dialog::backdrop { background:#0f172a88; backdrop-filter:blur(3px); }
+.release-dialog *, .release-dialog *::before, .release-dialog *::after { box-sizing:border-box; }
+.release-dialog [hidden] { display:none!important; }
+.release-dialog button, .release-dialog input { font-family:inherit; }
+.release-heading { position:sticky; top:0; z-index:1; display:flex; justify-content:space-between; align-items:flex-start; gap:12px; padding:22px 22px 15px; background:#fff; border-bottom:1px solid #e2e8f0; }
+.release-heading h2 { margin:0; font-size:1.2rem; color:#134e4a; }
+.release-heading p { margin:6px 0 0; color:#64748b; font-size:.77rem; line-height:1.6; }
+.release-close { flex-shrink:0; width:36px; height:36px; padding:0; border:0; border-radius:50%; background:#edf2f7; color:#475569; font-size:24px; cursor:pointer; }
+.release-body { padding:18px 22px 24px; }
+.release-search-label { display:block; margin-bottom:7px; color:#475569; font-size:.76rem; font-weight:700; }
+.release-dialog .release-search { width:100%; margin:0; padding:11px 13px; border:1px solid #cbd5e1; border-radius:11px; background:#fff; font-size:.86rem; }
+.release-toolbar { display:flex; align-items:center; justify-content:space-between; gap:10px; margin:10px 0; color:#64748b; font-size:.75rem; }
+.release-secondary { border:1px solid #cbd5e1; border-radius:9px; padding:7px 10px; background:#fff; color:#0f766e; font-size:.75rem; font-weight:700; cursor:pointer; }
+.release-secondary:disabled { opacity:.6; cursor:wait; }
+.release-status { min-height:1em; margin:8px 0 15px; color:#64748b; font-size:.73rem; line-height:1.6; }
+.release-card { margin-bottom:14px; padding:17px; border:1px solid #dbe5eb; border-radius:15px; background:#fff; }
+.release-card-heading { display:flex; align-items:center; gap:7px; flex-wrap:wrap; }
+.release-version { padding:3px 9px; border-radius:7px; background:#e6f7f2; color:#0f766e; font-size:.8rem; font-weight:900; }
+.release-current-badge { color:#047857; font-size:.7rem; font-weight:800; }
+.release-card time { margin-left:auto; color:#64748b; font-size:.7rem; }
+.release-card h3 { margin:12px 0 8px; font-size:.98rem; line-height:1.5; color:#1e293b; overflow-wrap:anywhere; }
+.release-changes { margin:0 0 12px; padding-left:18px; font-size:.82rem; line-height:1.8; word-break:keep-all; overflow-wrap:anywhere; }
+.release-changes li+li { margin-top:5px; }
+.release-expand { border-top:1px dashed #e2e8f0; padding-top:11px; }
+.release-expand > summary, .release-files > summary { color:#0f766e; font-size:.8rem; font-weight:700; cursor:pointer; }
+.release-detail-content { padding-top:12px; overflow-wrap:anywhere; }
+.release-detail-content h4 { margin:0 0 8px; font-size:.83rem; }
+.release-message { white-space:pre-wrap; font-size:.78rem; line-height:1.7; margin:0 0 8px; }
+.release-commit { padding:11px; border-radius:9px; background:#f8fafc; margin-bottom:10px; }
+.release-detail-content a { display:inline-block; color:#0369a1; font-size:.74rem; padding:4px 0; }
+.release-links { display:flex; gap:14px; flex-wrap:wrap; margin-top:12px; }
+.release-files { margin-top:14px; }
+.release-files ul { padding:0; list-style:none; }
+.release-files li { display:flex; flex-direction:column; gap:4px; margin:8px 0; padding:8px; background:#f8fafc; border-radius:7px; font-size:.74rem; overflow-wrap:anywhere; }
+.release-files small, .release-muted { color:#64748b; font-size:.74rem; line-height:1.7; }
+.release-more { display:block; width:100%; margin-top:14px; padding:11px; }
+.release-empty { padding:22px 0; color:#64748b; text-align:center; font-size:.86rem; }
+@media(max-width:440px) { .release-heading { padding:18px 16px 13px; } .release-body { padding:14px 14px 20px; } .release-card { padding:14px; } .release-card time { flex-basis:100%; margin:3px 0 0; } }

@@ -249,7 +249,7 @@
         'sha256-ztg5JA+bwZtt9sDRgPC5Z/lOwo7AdhVJlcrnmPJlaRU=';
         style-src 'self' 'unsafe-inline';
         img-src 'self' data: blob: https://raw.githubusercontent.com https://www.gstatic.com https://www.google.com;
-        connect-src 'self' https://*.googleapis.com https://*.cloudfunctions.net https://*.firebaseio.com wss://*.firebaseio.com https://alcoholaway.firebaseapp.com https://www.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/ https://www.gstatic.com https://api.open-meteo.com;
+        connect-src 'self' https://*.googleapis.com https://*.cloudfunctions.net https://*.firebaseio.com wss://*.firebaseio.com https://alcoholaway.firebaseapp.com https://www.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/ https://www.gstatic.com https://api.open-meteo.com https://raw.githubusercontent.com/Deflate76/StopAlcohol/deployment-history/;
         frame-src https://alcoholaway.firebaseapp.com https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/;
         worker-src 'self' blob:;
         font-src 'self' data:;
@@ -1612,6 +1612,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
 @media(max-width:440px) { .main-section > summary .diagnosis-summary-names { flex:0 1 auto; width:100%; } }
 @media(prefers-reduced-motion:reduce) { .main-section > summary .diagnosis-summary-names.is-overflowing { overflow-x:auto; } }
 </style>
+<link rel="stylesheet" href="./release-history.css?v=20261005-1">
 </head>
 <body>
 <div id="pageTopAnchor" class="page-scroll-anchor" aria-hidden="true"></div>
@@ -1970,8 +1971,21 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
 </nav>
 
 <footer>
-    &copy; 2026 Alcoholaway.com All rights reserved. <span id="appVersionLabel" class="app-version-label">v14</span>
+    &copy; 2026 Alcoholaway.com All rights reserved. <button id="appVersionLabel" class="app-version-label" type="button" aria-haspopup="dialog" aria-controls="releaseHistoryModal">버전 이력</button>
 </footer>
+
+<dialog id="releaseHistoryModal" class="release-dialog" aria-labelledby="releaseHistoryTitle">
+    <div class="release-heading"><div><h2 id="releaseHistoryTitle">버전별 업데이트 이력</h2><p id="releaseHistoryCurrent">배포 정보를 불러오는 중…</p></div><button id="releaseHistoryClose" class="release-close" type="button" aria-label="버전 이력 닫기" autofocus>×</button></div>
+    <div class="release-body">
+        <label class="release-search-label" for="releaseHistorySearch">버전·날짜·업데이트 내용 검색</label>
+        <input id="releaseHistorySearch" class="release-search" type="search" placeholder="예: 달력, 갈망, v305" autocomplete="off">
+        <div class="release-toolbar"><span id="releaseHistoryCount"></span><button id="releaseHistoryRefresh" class="release-secondary" type="button">다시 불러오기</button></div>
+        <p id="releaseHistoryStatus" class="release-status" role="status">버전 번호는 성공한 GitHub 배포 순서입니다.</p>
+        <div id="releaseHistoryList"></div>
+        <button id="releaseHistoryMore" class="release-secondary release-more" type="button" hidden>이전 배포 더 보기</button>
+    </div>
+</dialog>
+<script type="module" src="./release-history.js?v=20261005-1"></script>
 
 <!-- 닉네임 설정 모달 -->
 <div id="nicknameModal" class="modal" style="z-index: 3000;">

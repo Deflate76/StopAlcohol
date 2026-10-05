@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "releases": [
+    {
+      "id": "37257286890-1",
+      "version": "v304",
+      "number": 304,
+      "attempt": 1,
+      "runId": 37257286890,
+      "commit": "57a74a03c4451a6bf5e5da7f67766c221d27bc16",
+      "deployedAt": "2026-10-05T02:59:57Z",
+      "title": "갈망 바로가기와 실시간 기록 요약",
+      "changes": [
+        "메뉴 위에 갈망 플로팅 버튼을 추가하고 기록·대처 팝업을 연결했습니다.",
+        "현재 단주 기록과 앞선 기록의 유지기간 차이를 일·시간·분·초로 갱신하고 기록 사이 공백을 표시했습니다.",
+        "누적 단주·최장 생존·고비 횟수, 오늘 입력한 내용, 현재 순위와 어제 대비 변화, 최신 생존자 통신을 제목 옆에 표시했습니다.",
+        "오늘 입력한 항목의 버튼에 NEW를 표시하고 한국 자정에 해제합니다. 긴 요약은 오른쪽에서 왼쪽으로 흐릅니다.",
+        "차트의 움직이는 줄무늬를 경과 구간의 곡선 아래로 제한했습니다."
+      ],
+      "message": "Add craving shortcuts, live streak comparison and activity summaries\n\nShow today's saved records and per-action NEW badges until Korean midnight, replace release badges with live cumulative/rank/community text, and clip animated chart stripes below the plotted curves.\n\nValidated with 59 regression tests and browser checks at 360, 390 and 768 pixels.",
+      "runUrl": "https://github.com/Deflate76/StopAlcohol/actions/runs/37257286890",
+      "detailPath": "versions/37257286890-1.json"
+    },
+    {
+      "id": "37196490603-1",
+      "version": "v303",
+      "number": 303,
+      "attempt": 1,
+      "runId": 37196490603,
+      "commit": "b53ccf7c9045f1fc07b6e06b96ee5c6475dda8db",
+      "deployedAt": "2026-10-04T10:51:14Z",
+      "title": "회원탈퇴 사진 삭제 권한 설정 보완",
+      "changes": [
+        "사진 삭제 역할을 프로젝트에 연결하고 회원 사진 경로로 권한 범위를 제한하도록 설정 스크립트를 수정했습니다.",
+        "이미 완료한 계정 삭제 권한 설정은 유지하면서 사진 권한만 복구할 수 있는 옵션을 추가했습니다.",
+        "일반 배포에서는 IAM 설정을 변경하지 않도록 배포 절차를 정리했습니다."
+      ],
+      "message": "Repair account deletion IAM setup with verified bucket ownership and scoped project binding",
+      "runUrl": "https://github.com/Deflate76/StopAlcohol/actions/runs/37196490603",
+      "detailPath": "versions/37196490603-1.json"
+    },
+    {
+      "id": "37195204982-1",
+      "version": "v302",
+      "number": 302,
+      "attempt": 1,
+      "runId": 37195204982,
+      "commit": "4ff744800fb3927eb05cdf62620af0e8434af681",
+      "deployedAt": "2026-10-04T10:27:44Z",
+      "title": "차트 진행 효과와 회원탈퇴 기능",
+      "changes": [
+        "현재 경과·나의 위치 배지에서 경과일수 직선을 정확히 가리키는 수직 화살표를 추가했습니다.",
+        "순위·최고 순위·순위 상승·역대 기록 배지에 반짝임 효과를 적용하고 최고 기록의 시작일과 종료일을 표시했습니다.",
+        "회원탈퇴 확인과 본인 재인증을 거쳐 계정, 개인 기록, 관련 사진을 삭제하는 기능을 추가했습니다.",
+        "삭제 작업 재시도와 잔여 데이터 정리를 서버에서 처리하도록 연결했습니다."
+      ],
+      "message": "Add exact chart pointers, animated progress and ranks, and confirmed account deletion",
+      "runUrl": "https://github.com/Deflate76/StopAlcohol/actions/runs/37195204982",
+      "detailPath": "versions/37195204982-1.json"
+    },
+    {
+      "id": "37188158179-1",
+      "version": "v301",
+      "number": 301,
+      "attempt": 1,
+      "runId": 37188158179,
+      "commit": "1b935b2e7b149da53c8d119fba2360b36146986c",
+      "deployedAt": "2026-10-04T08:18:51Z",
+      "title": "Add calendar month swipes and persistent compact view",
+      "changes": [],
+      "message": "Add calendar month swipes and persistent compact view",
+      "runUrl": "https://github.com/Deflate76/StopAlcohol/actions/runs/37188158179",
+      "detailPath": "versions/37188158179-1.json"
+    },
+    {
+      "id": "37183125005-1",
+      "version": "v300",
+      "number": 300,
+      "attempt": 1,
+      "runId": 37183125005,
+      "commit": "b15428c14a05a8d0f2254df6ca44369fee5f01c9",
+      "deployedAt": "2026-10-04T06:37:35Z",
+      "title": "Add Korean holidays, astronomy and weather to calendar; scroll overflowing advice",
+      "changes": [],
+      "message": "Add Korean holidays, astronomy and weather to calendar; scroll overflowing advice",
+      "runUrl": "https://github.com/Deflate76/StopAlcohol/actions/runs/37183125005",
+      "detailPath": "versions/37183125005-1.json"
+    },
+    {
+      "id": "37107286262-1",
+      "version": "v299",
+      "number": 299,
+      "attempt": 1,
+      "runId": 37107286262,
+      "commit": "41a69c068de8fc7bfddee901c7e602e5355ef1fa",
+      "deployedAt": "2026-10-03T07:48:33Z",
+      "title": "Show horizontal elapsed badge and highlight record-breaking dates in calendar",
+      "changes": [],
+      "message": "Show horizontal elapsed badge and highlight record-breaking dates in calendar",
+      "runUrl": "https://github.com/Deflate76/StopAlcohol/actions/runs/37107286262",
+      "detailPath": "versions/37107286262-1.json"
+    },
+    {
+      "id": "37105718210-1",
+      "version": "v298",
+      "number": 298,
+      "attempt": 1,
+      "runId": 37105718210,
+      "commit": "ec5866e64cf37fb4f2047d3e88e1dfab07c2f462",
+      "deployedAt": "2026-10-03T07:20:15Z",
+      "title": "Fix chart badge overlap and show current challenge start in calendar",
+      "changes": [],
+      "message": "Fix chart badge overlap and show current challenge start in calendar",
+      "runUrl": "https://github.com/Deflate76/StopAlcohol/actions/runs/37105718210",
+      "detailPath": "versions/37105718210-1.json"
+    }
+  ]
+}
