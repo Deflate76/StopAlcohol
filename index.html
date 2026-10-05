@@ -12,7 +12,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self';
         base-uri 'none';
         object-src 'none';
-        script-src 'self' https://www.gstatic.com/firebasejs/ https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/ https://apis.google.com/ https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js 'sha256-AIBL0tC4iNNoKKwFcVeQsj034glNRfVxuUyzuCSYSiQ=' 'sha256-REiFfq6OotUrXGWxp84XojcMHah8Xjofp2pgS2BjRbM=' 'sha256-ZBDKI+cJWffsd+cXDpbTFeoXNCPy8uQD4RUYNTiPRSQ=' 'sha256-alP85I1SvVMNqwG1yg7UREhMxrw3TUw6F5CkAtKp0ac=' 'sha256-utYYx5qVnylo2gMZULKmJG8hNLajcNpGYKJuaVzT2NA=';
+        script-src 'self' https://www.gstatic.com/firebasejs/ https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/ https://apis.google.com/ https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js 'sha256-AIBL0tC4iNNoKKwFcVeQsj034glNRfVxuUyzuCSYSiQ=' 'sha256-REiFfq6OotUrXGWxp84XojcMHah8Xjofp2pgS2BjRbM=' 'sha256-ZBDKI+cJWffsd+cXDpbTFeoXNCPy8uQD4RUYNTiPRSQ=' 'sha256-pcSWHOnjn71OPPDHXW3I2ul3n8T+X2tCo4cMGRuhaFg=' 'sha256-utYYx5qVnylo2gMZULKmJG8hNLajcNpGYKJuaVzT2NA=';
         script-src-attr 'unsafe-hashes'
         'sha256-+/PyyZxYlaRwGKBfLX4QqCPnBcKxzZ6EQ/FEMykrPlg='
         'sha256-+8Obkk1yhOE1TPaUpOo8d/udOL2qT2+5fc9UsR20blw='
@@ -80,6 +80,7 @@
         'sha256-Gv4guL0PZaHKSDHDZtXgJWXrIh6zn7PlNpypeb+7vuY='
         'sha256-H9QRX2csnYF1X6k5dAi+0ilK2432sL1F33oEnnAVK6I='
         'sha256-HS0z7FIdAv3vqRAfuIKEdeKo38Ud4MTFP32FRBZU7bY='
+        'sha256-Hbj0AGnep7DUQ8Jn1Il2rGCNow1PEpt7y5MpYsN4OgE='
         'sha256-He96UVQVagVqOxD+fF+2N64DHLawCaJoba+rWmrrdKo='
         'sha256-Hr4kvzt4LOTwKoDtU/goUe2X/H7D1Hf664waL8LyWEo='
         'sha256-IePJhHVpryVaL2lHXn3OlCDhkzQ/BqeNoS7AdhEbpXA='
@@ -96,6 +97,7 @@
         'sha256-JqV8bu0XQ9kvnKfHLK+YwUUqr7ozPhCZyju2WkQ8QNs='
         'sha256-K6mJ7URrQAVqolZb1GbyjJ/OrSonXkm27jFj6RKi4z8='
         'sha256-KCT56aFbLNqBrhAmffgkSN5OlCK2Y79Q6lCy9U9XvgA='
+        'sha256-KWbS9ov0mtJmKTaMUyjE5Yk87QG7VNSY+0EeDPf3rus='
         'sha256-KilHWFu3KcxsETpwgOHI5yqDGCcovO8WzypTIsvB8bw='
         'sha256-KsD1KO1wDXcKZ//uYPP5MZaE6ouiKCfCiHCTtwci/i8='
         'sha256-LIypCrbttQcN6T7UCseIom2J3LjD5vVC5/cPAVRIpqU='
@@ -1564,8 +1566,8 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
 .floating-action-backdrop { position:fixed; inset:0; width:100%; height:100%; padding:0; border:0; background:rgba(15,23,42,.16); pointer-events:auto; cursor:default; }
 .floating-action-backdrop[hidden] { display:none; }
 .floating-action-items { position:absolute; inset:0; pointer-events:none; }
-#floatingActionMenu .floating-action-item { position:absolute; inset:auto 0 0 auto; width:100%; height:100%; margin:0; z-index:1; opacity:0; visibility:hidden; pointer-events:none; transform:translate(0,0) scale(.45); transition:transform .24s ease,opacity .18s ease,visibility .24s; touch-action:manipulation; }
-#floatingActionMenu.is-open .floating-action-item { opacity:1; visibility:visible; pointer-events:auto; transform:translate(calc(var(--fan-x) * var(--fan-radius)),calc(var(--fan-y) * var(--fan-radius))) scale(1); transition-delay:calc(var(--fan-order) * 25ms); }
+:is(#floatingActionMenu, #floatingCravingMenu) .floating-action-item { position:absolute; inset:auto 0 0 auto; width:100%; height:100%; margin:0; z-index:1; opacity:0; visibility:hidden; pointer-events:none; transform:translate(0,0) scale(.45); transition:transform .24s ease,opacity .18s ease,visibility .24s; touch-action:manipulation; }
+:is(#floatingActionMenu, #floatingCravingMenu).is-open .floating-action-item { opacity:1; visibility:visible; pointer-events:auto; transform:translate(calc(var(--fan-x) * var(--fan-radius)),calc(var(--fan-y) * var(--fan-radius))) scale(1); transition-delay:calc(var(--fan-order) * 25ms); }
 #floatingActionMenu .floating-action-item:nth-child(1) { --fan-x:0; --fan-y:-1; --fan-order:0; }
 #floatingActionMenu .floating-action-item:nth-child(2) { --fan-x:-.382683; --fan-y:-.923880; --fan-order:1; }
 #floatingActionMenu .floating-action-item:nth-child(3) { --fan-x:-.707107; --fan-y:-.707107; --fan-order:2; }
@@ -1580,7 +1582,35 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
 .cal-schedule-legend .health-link { flex-shrink:0; font-size:.7rem; }
 #calendarModal .cal-schedule-badge { display:block; width:max-content; max-width:100%; box-sizing:border-box; margin:4px auto 0; padding:1px 3px; border-radius:5px; background:#e6f8ef; color:#146c50; font:800 9px/1.3 sans-serif; white-space:nowrap; pointer-events:none; }
 @media(max-width:480px) { #floatingQuickNav { left:calc(10px + env(safe-area-inset-left,0px)); bottom:calc(12px + env(safe-area-inset-bottom,0px)); } .floating-action-menu { right:calc(10px + env(safe-area-inset-right,0px)); bottom:calc(12px + env(safe-area-inset-bottom,0px)); width:56px; height:56px; } }
-@media(prefers-reduced-motion:reduce) { #floatingActionMenu .floating-action-item,.floating-action-toggle svg,.ds-saved { transition:none; } }
+@media(prefers-reduced-motion:reduce) { :is(#floatingActionMenu, #floatingCravingMenu) .floating-action-item,.floating-action-toggle svg,.ds-saved { transition:none; } }
+
+/* Live previews use the same flowing text as the diagnosis heading. */
+.record-summary-heading { flex:1; min-width:0; text-align:left; margin-right:6px; }
+.main-section > summary .diagnosis-summary-title { flex:0 0 auto; white-space:nowrap; }
+.main-section > summary .diagnosis-summary-names { display:block; flex:1 1 0; min-width:0; overflow:hidden; color:#0f766e; font-size:.8rem; font-weight:700; line-height:1.5; }
+.main-section > summary .diagnosis-summary-names.is-empty { color:#64748b; font-weight:500; }
+.record-summary-heading:hover .diagnosis-summary-track,
+.record-summary-heading:focus-within .diagnosis-summary-track { animation-play-state:paused; }
+.streak-gap-row td { padding:0 6px 10px; white-space:normal; }
+.streak-comparison-gap { margin:0 0 0 16px; flex-direction:column; align-items:flex-start; gap:4px; background:#f0fdfa; border-left-color:#14b8a6; border-radius:0 8px 8px 0; font-variant-numeric:tabular-nums; }
+.streak-comparison-gap::before { content:none; }
+.streak-records-table .accumulated-record-duration { display:inline-block; word-break:keep-all; overflow-wrap:normal; line-height:1.6; }
+.streak-comparison-gap { text-align:left; word-break:keep-all; }
+.streak-comparison-gap strong { color:#0f766e; font-size:.8rem; }
+.streak-comparison-gap small { line-height:1.6; }
+.floating-action-menu.is-open { z-index:1512; }
+#floatingCravingMenu { bottom:calc(92px + env(safe-area-inset-bottom,0px)); --fan-radius:min(112px,calc(100vw - 100px),calc(100dvh - 190px)); }
+#floatingCravingMenu .floating-action-toggle,
+#floatingCravingMenu .floating-action-item { padding:3px; border:0; border-radius:50%; background:conic-gradient(#f97316,#eab308,#22c55e,#06b6d4,#6366f1,#ec4899,#f97316); box-shadow:0 7px 22px #9f123940; cursor:pointer; font-family:inherit; }
+#floatingCravingToggle .floating-nav-toggle-inner { background:linear-gradient(145deg,#e85d48,#be3154); }
+#floatingCravingMenu .floating-action-item .floating-nav-toggle-inner { font-family:inherit; font-weight:800; font-size:12px; line-height:1.2; gap:5px; }
+#floatingCravingMenu .floating-action-item:nth-child(1) { --fan-x:-.3; --fan-y:-.954; --fan-order:0; }
+#floatingCravingMenu .floating-action-item:nth-child(2) { --fan-x:-.954; --fan-y:-.3; --fan-order:1; }
+#floatingCravingMenu .craving-record-inner { background:linear-gradient(145deg,#c2410c,#ea580c); }
+#floatingCravingMenu .craving-action-inner { background:linear-gradient(145deg,#0f766e,#15803d); }
+@media(max-width:480px) { #floatingCravingMenu { bottom:calc(80px + env(safe-area-inset-bottom,0px)); } }
+@media(max-width:440px) { .main-section > summary .diagnosis-summary-names { flex:0 1 auto; width:100%; } }
+@media(prefers-reduced-motion:reduce) { .main-section > summary .diagnosis-summary-names.is-overflowing { overflow-x:auto; } }
 </style>
 </head>
 <body>
@@ -1745,39 +1775,39 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
 
         <!-- Section 1: 고비 관리 -->
         <details id="sectionCraving" class="main-section highlight" open>
-            <summary><span>🔥 고비 관리 및 기록 <span class="section-new-badge" data-section-new="sectionCraving" aria-label="최근 기능 업데이트" hidden>New</span></span></summary>
+            <summary><span class="diagnosis-summary-heading record-summary-heading"><span class="diagnosis-summary-title">🔥 고비 관리 및 기록</span><span id="sectionCravingPreview" class="diagnosis-summary-names is-empty"><span class="diagnosis-summary-track"><span></span><span aria-hidden="true" hidden></span></span></span></span></summary>
             <div class="section-content">
                 <div style="display: flex; gap: 8px; margin-bottom: 12px;">
-                    <button class="craving-btn calm-btn calm-blue" style="flex:1; margin:0; padding:15px;" onclick="openModal('stateModal')">📝 몸상태</button>
-                    <button class="craving-btn calm-btn calm-teal" style="flex:1; margin:0; padding:15px;" onclick="openBodyInfoModal()">⚖️ 신체계측</button>
+                    <button class="craving-btn calm-btn calm-blue" style="flex:1; margin:0; padding:15px;" data-activity-categories="state health" onclick="openModal('stateModal')">📝 몸상태</button>
+                    <button class="craving-btn calm-btn calm-teal" style="flex:1; margin:0; padding:15px;" data-activity-categories="body" onclick="openBodyInfoModal()">⚖️ 신체계측</button>
                 </div>
                 
                 <div class="craving-split-row">
-                    <button class="craving-btn calm-btn calm-amber" onclick="openModal('cravingModal')">🔥 갈망 기록</button>
-                    <button class="craving-btn calm-btn calm-slate" onclick="openSmokingLogModal()">🚬 흡연량 기록</button>
+                    <button class="craving-btn calm-btn calm-amber" data-activity-categories="craving" onclick="openModal('cravingModal')">🔥 갈망 기록</button>
+                    <button class="craving-btn calm-btn calm-slate" data-activity-categories="smoking" onclick="openSmokingLogModal()">🚬 흡연량 기록</button>
                 </div>
-                <button class="craving-btn calm-btn calm-green" style="margin-bottom: 12px;" onclick="openActionModal()">🛡️ 고비 극복 행동 개시!</button>
-                <button class="craving-btn calm-btn calm-purple" style="margin-bottom: 15px;" onclick="openMedModal()">💊 약물 복용 기록</button>
+                <button class="craving-btn calm-btn calm-green" style="margin-bottom: 12px;" data-activity-categories="action" onclick="openActionModal()">🛡️ 고비 극복 행동 개시!</button>
+                <button class="craving-btn calm-btn calm-purple" style="margin-bottom: 15px;" data-activity-categories="medication" onclick="openMedModal()">💊 약물 복용 기록</button>
                 
-                <button class="craving-btn calm-btn calm-rust" style="margin-bottom: 15px; font-size: 0.95rem;" onclick="openCautionModal()">🚨 요주의 날 기록</button>
+                <button class="craving-btn calm-btn calm-rust" style="margin-bottom: 15px; font-size: 0.95rem;" data-activity-categories="caution" onclick="openCautionModal()">🚨 요주의 날 기록</button>
                 
                 <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
-                    <button class="stat-btn" style="width:100%; padding:10px 5px;" onclick="openStats()">📈 고비(<span id="cravingCount">0</span>)</button>
-                    <button class="stat-btn" style="width:100%; padding:10px 5px; border-color: #3498db; color: #3498db;" onclick="openStateStats()">📊 몸상태 추이</button>
-                    <button class="stat-btn" style="width:100%; padding:10px 5px; border-color: #8e44ad; color: #8e44ad;" onclick="openMedListModal()">💊 복용 내역</button>
-                    <button class="stat-btn" style="width:100%; padding:10px 5px; border-color: #718096; color: #718096;" onclick="openHistoryList()">📚 단주 기록</button>
+                    <button class="stat-btn" style="width:100%; padding:10px 5px;" data-activity-categories="craving action" onclick="openStats()">📈 고비(<span id="cravingCount">0</span>)</button>
+                    <button class="stat-btn" style="width:100%; padding:10px 5px; border-color: #3498db; color: #3498db;" data-activity-categories="state" onclick="openStateStats()">📊 몸상태 추이</button>
+                    <button class="stat-btn" style="width:100%; padding:10px 5px; border-color: #8e44ad; color: #8e44ad;" data-activity-categories="medication" onclick="openMedListModal()">💊 복용 내역</button>
+                    <button class="stat-btn" style="width:100%; padding:10px 5px; border-color: #718096; color: #718096;" data-activity-categories="history craving state action medication" onclick="openHistoryList()">📚 단주 기록</button>
                 </div>
                 
                 <div style="display: flex; gap: 8px; margin-top: 8px;">
-                    <button class="stat-btn" style="flex: 1; border-color:#9b59b6; color:#9b59b6;" onclick="openControlHistoryList()">🍷 음주 조절 기록</button>
-                    <button class="stat-btn" style="flex: 1; border-color:#16a085; color:#16a085;" onclick="openMealWeightLogList()">🥗 식사/체중 조회</button>
+                    <button class="stat-btn" style="flex: 1; border-color:#9b59b6; color:#9b59b6;" data-activity-categories="control" onclick="openControlHistoryList()">🍷 음주 조절 기록</button>
+                    <button class="stat-btn" style="flex: 1; border-color:#16a085; color:#16a085;" data-activity-categories="daily body smoking" onclick="openMealWeightLogList()">🥗 식사/체중 조회</button>
                 </div>
             </div>
         </details>
 
         <!-- Section 2: 통계 (차트) -->
         <details id="sectionStats" class="main-section" open>
-            <summary><span>📈 생존 현황 및 통계 <span class="section-new-badge" data-section-new="sectionStats" aria-label="최근 기능 업데이트" hidden>New</span></span></summary>
+            <summary><span class="diagnosis-summary-heading record-summary-heading"><span class="diagnosis-summary-title">📈 생존 현황 및 통계</span><span id="sectionStatsPreview" class="diagnosis-summary-names is-empty"><span class="diagnosis-summary-track"><span></span><span aria-hidden="true" hidden></span></span></span></span></summary>
             <div class="section-content">
                 <div class="chart-container" style="height: 286px;">
                     <canvas id="survivalChart"></canvas>
@@ -1803,7 +1833,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
 
         <!-- Section 3: 신체 회복 및 커뮤니티 -->
         <details id="sectionRecovery" class="main-section" open>
-            <summary><span>🌱 회복 및 커뮤니티 <span class="section-new-badge" data-section-new="sectionRecovery" aria-label="최근 기능 업데이트" hidden>New</span></span></summary>
+            <summary><span class="diagnosis-summary-heading record-summary-heading"><span class="diagnosis-summary-title">🌱 회복 및 커뮤니티</span><span id="sectionRecoveryPreview" class="diagnosis-summary-names is-empty"><span class="diagnosis-summary-track"><span></span><span aria-hidden="true" hidden></span></span></span></span></summary>
             <div class="section-content">
                 <div class="tab-container">
                     <button class="tab-btn active" onclick="switchTab(this, 'physical')">신체<br>회복</button>
@@ -2562,7 +2592,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
                 <tbody id="streakRecordsBody"></tbody>
             </table>
         </div>
-        <p class="accumulated-records-help">현재 도전 일수 이상을 유지한 기록을 첫 번째부터 현재 기록까지 표시합니다. 진행 중인 기록의 유지기간은 팝업을 연 시각 기준입니다.</p>
+        <p class="accumulated-records-help">현재 도전 일수 이상을 유지한 기록을 첫 번째부터 현재 기록까지 표시합니다. 진행 중인 유지기간과 앞선 기록과의 차이는 초마다 갱신됩니다. 기록 사이에는 이전 종료일부터 이번 시작일까지의 공백도 표시합니다.</p>
         <button type="button" class="stat-btn" style="margin-top: 12px;" onclick="closeHealthDialog('streakRecordsModal')">닫기</button>
     </div>
 </div>
@@ -2975,6 +3005,14 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
 </script>
 
 
+<div id="floatingCravingMenu" class="floating-action-menu">
+    <button id="floatingCravingBackdrop" class="floating-action-backdrop" type="button" tabindex="-1" aria-label="갈망 메뉴 닫기" hidden></button>
+    <div id="floatingCravingItems" class="floating-action-items" role="group" aria-label="갈망 기록과 대처" aria-hidden="true" inert>
+        <button id="floatingCravingRecord" class="floating-action-item" type="button" onclick="openCravingQuickAction('record')" aria-label="갈망 기록" aria-haspopup="dialog" aria-controls="cravingModal"><span class="floating-nav-toggle-inner craving-record-inner"><svg aria-hidden="true" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 4 5 5M4 20l5-1L21 7a2 2 0 0 0-5-5L4 14l-1 7ZM13 21h8"/></svg><span>기록</span></span></button>
+        <button id="floatingCravingAction" class="floating-action-item" type="button" onclick="openCravingQuickAction('action')" aria-label="갈망 대처" aria-haspopup="dialog" aria-controls="actionModal"><span class="floating-nav-toggle-inner craving-action-inner"><svg aria-hidden="true" viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 3 7v5c0 5 9 10 9 10s9-5 9-10V7Z"/><path d="m8 12 3 3 5-6"/></svg><span>대처</span></span></button>
+    </div>
+    <button id="floatingCravingToggle" class="floating-action-toggle" type="button" aria-label="갈망 메뉴 열기" aria-controls="floatingCravingItems" aria-expanded="false"><span class="floating-nav-toggle-inner"><svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2c1 6-4 6-4 11-2-1-3-3-3-5-4 6-1 14 6 14s10-8 6-14c0 3-2 4-3 5 1-5 0-8-2-11Z"/></svg><span id="floatingCravingLabel">갈망</span></span></button>
+</div>
 <div id="floatingActionMenu" class="floating-action-menu">
     <button id="floatingActionBackdrop" class="floating-action-backdrop" type="button" tabindex="-1" aria-label="빠른 기능 메뉴 닫기" hidden></button>
     <div id="floatingActionItems" class="floating-action-items" role="group" aria-label="빠른 기능" aria-hidden="true" inert>
@@ -2998,7 +3036,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
         <span class="floating-nav-toggle-inner"><svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 4v16M4 12h16"/></svg><span id="floatingActionLabel">메뉴</span></span>
     </button>
 </div>
-<script type="module" src="./floating-actions.js?v=20260928-2"></script>
+<script type="module" src="./floating-actions.js?v=20261005-1"></script>
 
 <dialog id="dailyScheduleModal" class="daily-schedule-dialog" aria-labelledby="dsEditorTitle">
     <div class="ds-heading"><h2 id="dsEditorTitle">일정 등록</h2><button id="dsClose" type="button" class="pi-icon-close" aria-label="일정 팝업 닫기">×</button></div>
@@ -3591,12 +3629,13 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
 
     
     import { installDailySchedules } from './daily-schedules.js?v=20260928-2';
-    import { installRecordSectionUI } from './record-section-ui.js?v=20261001-1';
+    import { formatRecordDuration, compareStreakRecords } from './record-activity.js?v=20261005-1';
+    import { installRecordSectionUI } from './record-section-ui.js?v=20261005-1';
     import { renderFailureTimeRisk, installTodayWeather } from './daily-health-tools.js?v=20261001-1';
     import { installDailyWisdom, WISDOM_SYSTEM_INSTRUCTION } from './daily-wisdom.js?v=20261004-1';
     import { installCalendarEnvironment } from './calendar-environment.js?v=20261004-1';
     import { installAccountDeletion } from './account-deletion.js?v=20261004-1';
-    import { createProgressChartPlugin, formatBestRankRange } from './progress-chart.js?v=20261004-1';
+    import { createProgressChartPlugin, formatBestRankRange } from './progress-chart.js?v=20261005-1';
     import { installCalendarNavigation } from './calendar-navigation.js?v=20261004-1';
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
     import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, deleteDoc, collection, addDoc, query, orderBy, limit, onSnapshot, getDocs, where, startAfter, serverTimestamp, writeBatch, runTransaction } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
@@ -3729,6 +3768,9 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
     let currentTabName = 'physical';
     let unsubscribePosts = null; 
     let totalPastDays = 0;
+    let totalCravingCount = 0;
+    let controlActivitySessions = [];
+    let unsubscribeCommunityPreview = null;
     let globalFailedDayCount = 0;
     let alcoholRiskStackExpanded = false;
     try {
@@ -4083,7 +4125,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
         const toggle = document.getElementById('floatingNavToggle');
         if (!nav) return;
         const nextOpen = !nav.classList.contains('is-open');
-        if (nextOpen) window.closeFloatingActionMenu?.();
+        if (nextOpen) { window.closeFloatingActionMenu?.(); window.closeFloatingCravingMenu?.(); }
         nav.classList.toggle('is-open', nextOpen);
         if (menu) {
             menu.setAttribute('aria-hidden', nextOpen ? 'false' : 'true');
@@ -5154,12 +5196,17 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
         return allChallengesData.find(c => c.status === 'failed' && c.endDate && dateToKey(c.endDate) === dateStr) || null;
     }
 
-    async function mergeDailyLog(dateStr, partialData) {
+    async function mergeDailyLog(dateStr, partialData, enteredFields = Object.keys(partialData)) {
         if (!userId || !dateStr) return null;
+        const uid = userId, savedAt = Date.now();
         const existing = dailyLogsData[dateStr] || {};
-        const nextData = { ...existing, ...partialData, updatedAt: new Date().getTime() };
-        await setDoc(doc(db, "users", userId, "daily_logs", dateStr), nextData, { merge: true });
+        const fieldRecordedAt = { ...(existing.fieldRecordedAt || {}) };
+        for (const key of enteredFields) if (partialData[key] !== null && partialData[key] !== undefined) fieldRecordedAt[key] = savedAt;
+        const nextData = { ...existing, ...partialData, fieldRecordedAt, updatedAt: savedAt };
+        await setDoc(doc(db, "users", uid, "daily_logs", dateStr), nextData, { merge: true });
+        if (userId !== uid) return null;
         dailyLogsData[dateStr] = nextData;
+        refreshActivitySummaries();
         invalidateMainDaysContainerRender();
         return nextData;
     }
@@ -5438,6 +5485,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
         });
     }
     function hrRefreshHealthUI() {
+        refreshActivitySummaries();
         hrRenderDiagnoses(); if (hr.day) hrRenderDayEntries();
         if (hr.diaryTarget) hrRenderDiagnosisDiary();
         csRefresh();
@@ -7291,6 +7339,8 @@ initPillIdentification();
             if (timerInterval) clearInterval(timerInterval);
             if (unsubscribePosts) { unsubscribePosts(); unsubscribePosts = null; }
             hrBindAccount(null);
+            bindCommunityPreview(null);
+            recordSectionUI.setActivityData({});
             dailyWisdom.bindAccount(null);
             window.bindMedicationReminderAccount?.(null);
         }
@@ -7305,11 +7355,16 @@ initPillIdentification();
                 if (timerInterval) clearInterval(timerInterval);
                 userQuitDate = null; currentChallengeId = null;
                 cravingData = []; allChallengesData = []; dailyLogsData = {};
+                userProfile.bodyInfoLogs = []; cautionDays = []; controlActivitySessions = []; totalCravingCount = 0;
+                recordSectionUI.setActivityData({});
+                recordSectionUI.setSummary('sectionStatsPreview', '', '순위를 계산하는 중…');
+                if (unsubscribePosts) { unsubscribePosts(); unsubscribePosts = null; }
                 renderFailureTimeRisk(document, [], {loading: true});
                 document.getElementById('displayArea').style.display = 'none';
                 invalidateMainDaysContainerRender();
             }
             userId = user.uid;
+            bindCommunityPreview(user.uid);
             const isCurrentAccount = () => !accountDeletion.isDeleting() && auth.currentUser?.uid === user.uid && userId === user.uid;
             hrBindAccount(user.uid);
             if(phrPhotoEntry)window.openPrescriptionGallery();
@@ -7410,10 +7465,23 @@ initPillIdentification();
                 }
                 
                 await loadMotivationalStats();
-                if (isCurrentAccount()) void dailyWisdom.start(user.uid);
+                if (isCurrentAccount()) {
+                    refreshActivitySummaries(); void dailyWisdom.start(user.uid);
+                    void getDocs(query(collection(db, 'drinking_sessions'), where('userId', '==', user.uid))).then(snapshot => {
+                        if (!isCurrentAccount()) return;
+                        controlActivitySessions = snapshot.docs.map(item => item.data());
+                        refreshActivitySummaries();
+                    }).catch(() => {});
+                }
             } catch (e) { console.error("데이터 로드 에러:", e); }
         } else {
             userId = null;
+            bindCommunityPreview(null);
+            recordSectionUI.setActivityData({});
+            recordSectionUI.setSummary('sectionStatsPreview', '');
+            recordSectionUI.setSummary('activeRecoveryNames', '');
+            totalCravingCount = 0; userProfile.bodyInfoLogs = []; controlActivitySessions = [];
+            if (unsubscribePosts) { unsubscribePosts(); unsubscribePosts = null; }
             hrBindAccount(null);
             userQuitDate = null;
             currentChallengeId = null;
@@ -7433,6 +7501,36 @@ initPillIdentification();
         }
     });
 
+    function refreshActivitySummaries() {
+        recordSectionUI.setActivityData(userId ? {
+            challenges: allChallengesData, currentId: currentChallengeId, cravings: cravingData,
+            bodyLogs: userProfile.bodyInfoLogs || [], dailyLogs: dailyLogsData,
+            cautions: cautionDays, controlSessions: controlActivitySessions, healthEntries: hr.uid === userId && !hr.errors.health ? hr.entries : []
+        } : {});
+    }
+
+    function bindCommunityPreview(uid) {
+        if (unsubscribeCommunityPreview) unsubscribeCommunityPreview();
+        unsubscribeCommunityPreview = null;
+        recordSectionUI.setSummary('sectionRecoveryPreview', '', uid ? '최근 통신을 불러오는 중…' : '로그인 후 생존자 통신을 확인하세요');
+        if (!uid) return;
+        unsubscribeCommunityPreview = onSnapshot(query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(1)), snapshot => {
+            if (userId !== uid || auth.currentUser?.uid !== uid) return;
+            const post = snapshot.docs[0]?.data();
+            const content = String(post?.content ?? '').trim();
+            recordSectionUI.setSummary('sectionRecoveryPreview', content ? `생존자 통신 · ${post.author || '익명의 생존자'}: ${content}` : '', '아직 발송된 통신이 없습니다');
+        }, () => {
+            if (userId === uid) recordSectionUI.setSummary('sectionRecoveryPreview', '', '최근 통신을 불러오지 못했습니다');
+        });
+    }
+
+    window.openCravingQuickAction = function(kind) {
+        if (!userId || !auth.currentUser) return alert('로그인 후 갈망을 기록할 수 있습니다.');
+        if (!currentChallengeId) return alert('단주 도전을 시작한 뒤 갈망을 기록할 수 있습니다.');
+        if (kind === 'record') openModal('cravingModal');
+        else if (kind === 'action') openActionModal();
+    };
+
     async function loadMotivationalStats() {
         if (!userId) return;
         const owner = userId;
@@ -7445,7 +7543,8 @@ initPillIdentification();
                 document.getElementById('activeMotivationalSummary').style.display = 'none';
                 allChallengesData = [];
                 globalFailedDayCount = 0;
-                totalPastDays = 0;
+                totalPastDays = 0; totalCravingCount = 0;
+                refreshActivitySummaries();
                 refreshLongestChallengeRecord();
                 return;
             }
@@ -7480,6 +7579,8 @@ initPillIdentification();
                 challengeCount++;
             });
 
+            totalCravingCount = totalCravings;
+            refreshActivitySummaries();
             refreshLongestChallengeRecord(statsNowMs);
             const maxDays = globalMaxDays;
             globalFailedDayCount = failedDateKeys.size;
@@ -7520,7 +7621,7 @@ initPillIdentification();
                 const summaryToggle = document.querySelector('#activeMotivationalSummary [data-collapsible-target]');
                 summaryToggle?.addEventListener('click', () => toggleInlineCollapsible(summaryToggle.dataset.collapsibleTarget));
                 document.getElementById('activeMotivationalSummary').style.display = 'block';
-                recordSectionUI.refreshFeatureBadges();
+                recordSectionUI.setSummary('activeRecoveryNames', `누적 단주 ${totalDays}일, 최장 생존 ${maxDays}일, 고비 ${totalCravings}번`);
                 updateMainSectionControlState();
             } else {
                 document.getElementById('motivationalSummary').style.display = 'none';
@@ -7535,7 +7636,7 @@ initPillIdentification();
     function buildInlineCollapsibleHtml(id, title, bodyHtml, collapsed = false) {
         return `
             <div class="inline-collapsible-section active-summary-collapsible" id="${id}" data-collapsed="${collapsed ? 'true' : 'false'}">
-                <button type="button" class="inline-collapsible-summary" data-collapsible-target="${escapeHtml(id)}" aria-expanded="${collapsed ? 'false' : 'true'}" aria-label="${title} 접기 또는 펼치기"><span>${title}${id === 'activeRecoverySummary' ? '<span class="section-new-badge" data-section-new="activeRecoverySummary" aria-label="최근 기능 업데이트" hidden>New</span>' : ''}</span></button>
+                <button type="button" class="inline-collapsible-summary" data-collapsible-target="${escapeHtml(id)}" aria-expanded="${collapsed ? 'false' : 'true'}" aria-label="${title} 접기 또는 펼치기"><span class="diagnosis-summary-heading record-summary-heading"><span class="diagnosis-summary-title">${title}</span>${id === 'activeRecoverySummary' ? '<span id="activeRecoveryNames" class="diagnosis-summary-names is-empty"><span class="diagnosis-summary-track"><span></span><span aria-hidden="true" hidden></span></span></span>' : ''}</span></button>
                 <div class="inline-collapsible-content">${bodyHtml}</div>
             </div>
         `;
@@ -7726,7 +7827,12 @@ initPillIdentification();
         };
 
         try {
-            await mergeDailyLog(dateStr, logData);
+            const enteredFields = ['breakfast','lunch','dinner','snack','alcohol','blackout','smoking','alcoholCost','alcoholTime'].filter(key => {
+                const id = 'log' + key[0].toUpperCase() + key.slice(1) + 'Range';
+                return document.getElementById(id)?.getAttribute('data-touched') === 'true';
+            });
+            if (logData.weight !== null) enteredFields.push('weight');
+            await mergeDailyLog(dateStr, logData, enteredFields);
             await syncFailureAlcoholFromDailyLog(dateStr, logData.alcohol, alcoholTouched);
 
             // 최신 체중 갱신
@@ -8018,6 +8124,7 @@ initPillIdentification();
             }, { merge: true });
             
             cautionDays.push(entry);
+            refreshActivitySummaries();
             alert("요주의 날이 기록되었습니다.\n지정된 날짜에 4번의 경고 알림이 팝업됩니다.");
             closeModal('cautionDayModal');
             
@@ -9154,14 +9261,17 @@ initPillIdentification();
         hrEl('streakRecordsSummary').textContent = rows.length
             ? `연속 ${streakRecordsTargetDays}일 이상 유지 · 1번째부터 ${rows.length}번째까지, 총 ${rows.length}개 기록`
             : '현재 도전에 해당하는 달성 기록이 없습니다. 도전 기록을 확인해 주세요.';
+        const comparison = compareStreakRecords(streakRecordsRows);
         hrEl('streakRecordsBody').innerHTML = rows.map(row => `
+            ${row.isCurrent && comparison ? `<tr class="streak-gap-row"><td colspan="4"><div class="history-gap streak-comparison-gap"><small>${comparison.previous.ordinal}번째 기록 ↔ 현재 기록</small><strong id="streakDurationDifference"></strong>${comparison.gapMs !== null ? `<small>이전 종료 → 이번 시작 · ${formatRecordDuration(comparison.gapMs)} 공백</small>` : ''}</div></td></tr>` : ''}
             <tr${row.isCurrent ? ' class="is-current"' : ''}>
                 <td><span class="streak-record-number">${row.ordinal}번째</span>${row.isCurrent ? '<span class="accumulated-record-active">현재</span>' : ''}</td>
                 <td>${formatAccumulatedRecordDate(row.startMs)}</td>
                 <td>${row.isActive ? '<span class="accumulated-record-active">진행 중</span>' : formatAccumulatedRecordDate(row.endMs)}</td>
-                <td><span class="accumulated-record-duration">${formatAccumulatedDuration(row.durationMs)}</span></td>
+                <td><span class="accumulated-record-duration"${row.isActive ? ` data-streak-live="${row.ordinal}"` : ''}>${formatRecordDuration(row.durationMs)}</span></td>
             </tr>
         `).join('');
+        refreshStreakLiveRows();
         const labels = { ordinal: '기록 순서', start: '시작일', end: '종료일', duration: '유지기간' };
         hrEl('streakRecordsModal').querySelectorAll('th[data-sort-key]').forEach(header => {
             const selected = header.dataset.sortKey === key;
@@ -9171,6 +9281,19 @@ initPillIdentification();
             const nextOrder = selected && ascending ? '내림차순' : '오름차순';
             header.querySelector('button').setAttribute('aria-label', `${labels[header.dataset.sortKey]} ${nextOrder}으로 정렬`);
         });
+    }
+
+    function refreshStreakLiveRows(nowMs = Date.now()) {
+        if (hrEl('streakRecordsModal').hidden) return;
+        for (const row of streakRecordsRows) {
+            if (!row.isActive) continue;
+            row.durationMs = Math.max(0, nowMs - row.startMs);
+            const cell = hrEl('streakRecordsBody').querySelector(`[data-streak-live="${row.ordinal}"]`);
+            if (cell) cell.textContent = formatRecordDuration(row.durationMs);
+        }
+        const comparison = compareStreakRecords(streakRecordsRows, nowMs);
+        const label = hrEl('streakDurationDifference');
+        if (label && comparison) label.textContent = comparison.differenceText;
     }
 
     window.sortStreakRecords = function(key) {
@@ -10343,9 +10466,13 @@ initPillIdentification();
         const container = document.getElementById('controlHistoryListContainer');
         container.innerHTML = '<div style="text-align:center; padding:20px;">기록을 불러오는 중입니다...</div>';
 
+        const owner = userId;
         try {
             const q = query(collection(db, "drinking_sessions"), where("userId", "==", userId), orderBy("startTime", "desc"));
             const snapshot = await getDocs(q);
+            if (userId !== owner) return;
+            controlActivitySessions = snapshot.docs.map(item => item.data());
+            refreshActivitySummaries();
             
             if (snapshot.empty) {
                 container.innerHTML = '<div style="text-align:center; padding:20px; color:#666;">아직 생성된 음주 조절 기록이 없습니다.</div>';
@@ -11329,6 +11456,8 @@ initPillIdentification();
                 bodyInfoUpdatedAt: bodyInfoLog.recordedAt,
                 bodyInfoLogs: arrayUnion(bodyInfoLog)
             }, { merge: true });
+            userProfile.bodyInfoLogs = [...(userProfile.bodyInfoLogs || []), bodyInfoLog];
+            refreshActivitySummaries();
             if (measuredDateKey) {
                 await mergeDailyLog(measuredDateKey, {
                     weight,
@@ -11386,6 +11515,7 @@ initPillIdentification();
             const challengeRef = doc(db, "users", userId, "challenges", currentChallengeId);
             await updateDoc(challengeRef, { cravings: arrayUnion(entry) });
             cravingData.push(entry);
+            refreshActivitySummaries();
             const currentChallenge = (allChallengesData || []).find(challenge => challenge.id === currentChallengeId);
             if (currentChallenge) currentChallenge.cravings = [...(currentChallenge.cravings || []), entry];
             closeModal('medModal');
@@ -11439,6 +11569,7 @@ initPillIdentification();
             const diff = now - start;
             updateCurrentChallengeSummary(startISO, now.getTime());
             recordSectionUI.updateDayProgress(diff, now);
+            refreshStreakLiveRows(now.getTime());
             if (lastDiagnosisSummaryDay !== hrToday()) hrRenderDiagnoses();
             if (diff < 0) return;
 
@@ -11470,6 +11601,7 @@ initPillIdentification();
             
             document.querySelectorAll('.dynamic-total-days').forEach(el => el.innerText = `${totalCumul}일`);
             document.querySelectorAll('.dynamic-max-days').forEach(el => el.innerText = `${currentMax}일`);
+            recordSectionUI.setSummary('activeRecoveryNames', `누적 단주 ${totalCumul}일, 최장 생존 ${currentMax}일, 고비 ${totalCravingCount}번`);
 
             document.getElementById('subTime').innerText = `${hoursPassed}시간 ${minutesPassed}분 ${secondsPassed}초`;
             
@@ -11488,6 +11620,7 @@ initPillIdentification();
             const survivors = Math.max(1, Math.round(1000 * Math.exp(-0.04 * days)));
             const yesterdaySurvivors = Math.max(1, Math.round(1000 * Math.exp(-0.04 * Math.max(0, days - 1))));
             const rankUp = yesterdaySurvivors - survivors;
+            recordSectionUI.setSummary('sectionStatsPreview', `전체 1,000명 중 ${survivors.toLocaleString('ko-KR')}위 · 어제 대비 ${rankUp > 0 ? '▲ ' + rankUp.toLocaleString('ko-KR') + '위 상승' : '변동 없음'} (추정)`);
 
             document.getElementById('survivors').innerText = survivors.toLocaleString();
             document.getElementById('myRank').innerText = survivors.toLocaleString();
@@ -11634,6 +11767,7 @@ initPillIdentification();
             const challengeRef = doc(db, "users", userId, "challenges", currentChallengeId);
             await updateDoc(challengeRef, { cravings: arrayUnion(entry) });
             cravingData.push(entry);
+            refreshActivitySummaries();
             const actualCravings = cravingData.filter(d => !['action', 'state', 'eval', 'medication'].includes(d.type)).length;
             document.getElementById('cravingCount').innerText = actualCravings;
             closeModal('cravingModal');
@@ -11650,6 +11784,7 @@ initPillIdentification();
             const challengeRef = doc(db, "users", userId, "challenges", currentChallengeId);
             await updateDoc(challengeRef, { cravings: arrayUnion(entry) });
             cravingData.push(entry);
+            refreshActivitySummaries();
             const actualCravings = cravingData.filter(d => !['action', 'state', 'eval', 'medication'].includes(d.type)).length;
             document.getElementById('cravingCount').innerText = actualCravings;
             closeModal('actionModal');
@@ -11691,6 +11826,7 @@ initPillIdentification();
             const challengeRef = doc(db, "users", userId, "challenges", currentChallengeId);
             await updateDoc(challengeRef, { cravings: arrayUnion(entry) });
             cravingData.push(entry);
+            refreshActivitySummaries();
             const actualCravings = cravingData.filter(d => !['action', 'state', 'eval', 'medication'].includes(d.type)).length;
             document.getElementById('cravingCount').innerText = actualCravings;
             closeModal('stateModal');
@@ -11709,6 +11845,7 @@ initPillIdentification();
             const challengeRef = doc(db, "users", userId, "challenges", currentChallengeId);
             await updateDoc(challengeRef, { cravings: arrayUnion(entry) });
             cravingData.push(entry);
+            refreshActivitySummaries();
             const actualCravings = cravingData.filter(d => !['action', 'state', 'eval', 'medication'].includes(d.type)).length;
             document.getElementById('cravingCount').innerText = actualCravings;
             closeModal('evalModal');

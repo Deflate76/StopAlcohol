@@ -37,7 +37,7 @@ function fixture(t) {
     Object.assign(w, {
         userId: 'offline-user', currentChallengeId: 'offline-challenge', editingChallengeId: null,
         db: {}, cravingData: [], cravingsCurrentPage: 0, allCravingsList: [], __auditProbe: 0,
-        closeModal() {}, openModal() {}, alert() {}, setTimeout() {}, loadMotivationalStats() {},
+        closeModal() {}, openModal() {}, alert() {}, setTimeout() {}, loadMotivationalStats() {}, refreshActivitySummaries() {},
         openHistoryList() {}, auditMark() { w.__auditProbe++; return 0; },
         clampNumber: (v, lo, hi) => Math.min(hi, Math.max(lo, v)),
         doc: (...args) => args, collection: (...args) => args, query: (...args) => args,

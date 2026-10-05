@@ -49,9 +49,19 @@ export function createProgressChartPlugin(Chart, win = window, dom = document) {
             if (!state || !area || !Number.isFinite(x)) return;
             const right = Math.min(area.right, Math.max(area.left, x));
             if (right <= area.left) return;
+            const line = chart.getDatasetMeta(0)?.dataset;
+            const first = line?.first(), last = line?.last();
+            if (!chart.isDatasetVisible(0) || !first || !last || typeof line.path !== 'function') return;
             const ctx = chart.ctx, height = area.bottom - area.top;
             ctx.save();
             ctx.beginPath(); ctx.rect(area.left, area.top, right-area.left, height); ctx.clip();
+            // Reuse the rendered Bézier path, so the stripe edge follows the
+            // actual curve at every canvas size and during chart animation.
+            line.updateControlPoints(area, 'x');
+            ctx.beginPath();
+            line.path(ctx);
+            ctx.lineTo(last.x, area.bottom); ctx.lineTo(first.x, area.bottom);
+            ctx.closePath(); ctx.clip();
             ctx.fillStyle = 'rgba(231, 76, 60, 0.035)';
             ctx.fillRect(area.left, area.top, right-area.left, height);
             ctx.strokeStyle = 'rgba(231, 76, 60, 0.18)'; ctx.lineWidth = 6;

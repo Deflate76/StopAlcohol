@@ -20,10 +20,10 @@ function extractFunction(name) {
 
 async function fixture(t) {
     const dom = new JSDOM(`<!doctype html><body>
-      <button><span id="diagnosisActiveNames"><span id="diagnosisActiveNamesTrack"><span id="diagnosisActiveNamesText"></span><span id="diagnosisActiveNamesRepeat" aria-hidden="true" hidden></span></span></span></button>
+      <button><span id="diagnosisActiveNames"><span id="diagnosisActiveNamesTrack" class="diagnosis-summary-track"><span id="diagnosisActiveNamesText"></span><span id="diagnosisActiveNamesRepeat" aria-hidden="true" hidden></span></span></span></button>
       <div id="diagnosisRecordList"></div><span id="subTimePercent"></span><span id="subDayPercent"></span>
-      <span data-section-new="sectionCraving" hidden>New</span><span data-section-new="sectionStats" hidden>New</span>
-      <span data-section-new="sectionRecovery" hidden>New</span></body>`, {url:'https://fixture.invalid/', runScripts:'dangerously', virtualConsole:new VirtualConsole()});
+      <span id="sectionCravingPreview"><span class="diagnosis-summary-track"><span></span><span aria-hidden="true" hidden></span></span></span>
+      <button data-activity-categories="craving">갈망 기록</button><button data-activity-categories="body">신체계측</button></body>`, {url:'https://fixture.invalid/', runScripts:'dangerously', virtualConsole:new VirtualConsole()});
     t.after(() => dom.window.close());
     const w = dom.window, doc = w.document, frames = [], timers = new Map();
     let time = releasedMs, timerId = 0;
@@ -96,28 +96,31 @@ test('diagnosis ticker starts only on overflow and stops when resized to fit', a
     assert.equal(doc.getElementById('diagnosisActiveNamesRepeat').hidden,true);
 });
 
-test('New badge has an exact seven-day release window and ignores invalid/future dates', async () => {
-    const {isRecentSectionUpdate} = await uiModule;
-    assert.equal(isRecentSectionUpdate(releasedAt,releasedMs-1),false);
-    assert.equal(isRecentSectionUpdate(releasedAt,releasedMs),true);
-    assert.equal(isRecentSectionUpdate(releasedAt,releasedMs+7*DAY-1),true);
-    assert.equal(isRecentSectionUpdate(releasedAt,releasedMs+7*DAY),false);
-    assert.equal(isRecentSectionUpdate('invalid',releasedMs),false);
+test('record text and NEW expire at Korean midnight, including when the page stays open', async t => {
+    const {doc,ui,timers,setTime} = await fixture(t);
+    const at = Date.parse('2026-09-28T23:59:59+09:00');
+    setTime(at);
+    ui.setActivityData({cravings:[{timestamp:at,strength:6,reason:'저녁 모임'}]});
+    const badge = doc.querySelector('[data-activity-categories="craving"] .record-new-badge');
+    assert.equal(badge.hidden,false);
+    assert.equal(doc.querySelector('[data-activity-categories="body"] .record-new-badge').hidden,true);
+    assert.match(doc.getElementById('sectionCravingPreview').textContent,/저녁 모임/);
+    const timer = [...timers.values()][0]; assert.equal(timer.delay,1000);
+    setTime(at+1000); timer.callback();
+    assert.equal(badge.hidden,true);
+    assert.equal(doc.getElementById('sectionCravingPreview').textContent,'오늘 입력한 기록 없음');
+    ui.setActivityData({cravings:[{timestamp:at,strength:6,reason:'저녁 모임'}]});
+    assert.equal(badge.hidden,true,'rerender cannot revive yesterday');
 });
 
-test('New expires while the page is open and rerendering cannot restart its week', async t => {
-    const {doc,ui,timers,setTime} = await fixture(t);
-    assert([...doc.querySelectorAll('[data-section-new]')].every(badge => !badge.hidden));
-    setTime(releasedMs+6*DAY);
-    const summaryBadge=doc.createElement('span'); summaryBadge.dataset.sectionNew='activeRecoverySummary';doc.body.append(summaryBadge);
-    ui.refreshFeatureBadges();
-    assert.equal(summaryBadge.hidden,false);
-    const timer=[...timers.values()][0]; assert.equal(timer.delay,DAY);
-    setTime(releasedMs+7*DAY); timer.callback();
-    assert([...doc.querySelectorAll('[data-section-new]')].every(badge => badge.hidden));
-    ui.refreshFeatureBadges();
-    assert([...doc.querySelectorAll('[data-section-new]')].every(badge => badge.hidden));
-    assert.equal(timers.size,0);
+test('all section previews keep input as text and clear when the account changes', async t => {
+    const {doc,ui} = await fixture(t);
+    const input = '<img src=x onerror="alert(1)">';
+    ui.setSummary('sectionCravingPreview',input);
+    assert.equal(doc.querySelectorAll('img').length,0);
+    assert.equal(doc.querySelector('#sectionCravingPreview .diagnosis-summary-track > span').textContent,input);
+    ui.setActivityData({});
+    assert(!doc.getElementById('sectionCravingPreview').textContent.includes(input));
 });
 
 test('24-hour percentages distinguish challenge remainder from local clock time', async t => {
@@ -139,6 +142,10 @@ test('index places percentages on the requested sides and removes the diagnosis 
     assert.equal(doc.getElementById('diagnosisRecordCount'),null);
     assert.equal(doc.getElementById('subTime').nextElementSibling.id,'subTimePercent');
     assert.equal(doc.getElementById('subPercent').nextElementSibling.id,'subDayPercent');
-    for (const id of ['sectionCraving','sectionStats','sectionRecovery']) assert(doc.querySelector(`#${id} > summary [data-section-new="${id}"]`));
+    for (const id of ['sectionCraving','sectionStats','sectionRecovery']) {
+        assert(doc.querySelector(`#${id} > summary #${id}Preview`));
+        assert.equal(doc.querySelector(`#${id} > summary [data-section-new]`),null);
+    }
     dom.window.close();
 });
+
