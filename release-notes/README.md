@@ -1,7 +1,8 @@
 # 배포 버전과 업데이트 이력
 
 `app-build.json`은 기존 GitHub Pages/Jekyll 빌드에서 배포 소스 SHA를 자동으로 담습니다.
-`Archive deployment history` 워크플로는 `Rollback-version2`의 Pages 배포 성공 후 이력을
+`Archive deployment history` 워크플로는 `Rollback-version2`에 게시할 때 자동 실행되고,
+해당 커밋의 Pages 배포 결과를 기다린 뒤 성공한 이력을
 `deployment-history` 브랜치에 보관합니다. 실패·취소 배포는 제외하며, 이력 브랜치에는 공개된
 배포 설명과 변경 파일만 저장합니다. 서비스 데이터나 회원 정보는 저장하지 않습니다.
 
@@ -17,3 +18,5 @@
 
 이력 갱신만 재실행하려면 Actions에서 `Archive deployment history`를 수동 실행하면 됩니다.
 운영 소스 브랜치에 자동 커밋을 만들지 않으며, 이력 저장 때문에 사이트가 재배포되지 않습니다.
+Pages 기본 워크플로가 완료 이벤트를 보내지 않는 경우에도 push 방식으로 처리합니다.
+누락된 완료 이벤트와 수동 재배포는 매시간 보완 확인하며, 새 성공 배포가 없으면 이력을 쓰지 않습니다.

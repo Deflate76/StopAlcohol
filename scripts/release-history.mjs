@@ -110,6 +110,16 @@ export async function collectSuccessfulRuns(api) {
     }
     return mergeReleases([],rows);
 }
+export async function waitForDeployment(api, commit, {wait=ms=>new Promise(resolve=>setTimeout(resolve,ms)),attempts=90}={}) {
+    if(!SHA.test(commit))throw new Error('Invalid deployment revision');
+    for(let attempt=0;attempt<attempts;attempt++) {
+        const result=await api(`/actions/workflows/${PAGES_WORKFLOW}/runs?branch=${SOURCE_BRANCH}&head_sha=${commit}&per_page=100`);
+        const run=result.workflow_runs?.filter(row=>row.head_sha===commit).sort((a,b)=>b.id-a.id)[0];
+        if(run?.status==='completed')return run.conclusion==='success';
+        if(attempt+1<attempts)await wait(10000);
+    }
+    throw new Error('Pages deployment is still pending; the next archive run will retry');
+}
 export async function publishHistory(api, {legacyNotes={}, now=()=>new Date().toISOString()}={}) {
     const ref=await api(`/git/ref/heads/${HISTORY_BRANCH}`,{allow404:true});
     let index={schemaVersion:1,releases:[]}, baseTree;
@@ -147,6 +157,12 @@ export async function publishHistory(api, {legacyNotes={}, now=()=>new Date().to
 if(process.argv[1] && import.meta.url===pathToFileURL(process.argv[1]).href) {
     if(process.env.GITHUB_REPOSITORY!==REPOSITORY || !process.env.GH_TOKEN) throw new Error('Repository-scoped Actions token is required');
     const notes=JSON.parse(await readFile(new URL('../release-notes/legacy.json',import.meta.url),'utf8'));
-    const result=await publishHistory(createAPI(process.env.GH_TOKEN),{legacyNotes:notes});
+    const api=createAPI(process.env.GH_TOKEN);
+    if(process.env.GITHUB_EVENT_NAME==='push') {
+        console.log(`Waiting for Pages deployment ${process.env.GITHUB_SHA?.slice(0,7)}.`);
+        const success=await waitForDeployment(api,process.env.GITHUB_SHA);
+        console.log(success?'Pages deployment succeeded.':'Pages deployment did not succeed; preserving successful deployments only.');
+    }
+    const result=await publishHistory(api,{legacyNotes:notes});
     console.log(`Archived ${result.added} new deployments; ${result.total} total.`);
 }

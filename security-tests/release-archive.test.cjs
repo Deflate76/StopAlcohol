@@ -90,3 +90,11 @@ test('failed collection never publishes a partial archive; transient reads retry
     let posts=0;const writer=createAPI('fixture-token',async()=>{posts++;return{ok:false,status:503};},async()=>{});
     await assert.rejects(writer('/git/commits',{method:'POST',body:{}}),/503/);assert.equal(posts,1);
 });
+
+test('push-triggered archive waits for the matching Pages deployment and never treats failures as success',async()=>{
+    const {waitForDeployment}=await modulePromise;let calls=0,waits=0;
+    const complete=await waitForDeployment(async()=>({workflow_runs:++calls===1?[]:calls===2?[run(9,{head_sha:oldSha}),run(8,{status:'in_progress',conclusion:null})]:[run(8)]}),sha,{wait:async()=>{waits++;},attempts:3});
+    assert.equal(complete,true);assert.equal(waits,2);
+    assert.equal(await waitForDeployment(async()=>({workflow_runs:[run(9,{conclusion:'failure'})]}),sha,{attempts:1}),false);
+    await assert.rejects(waitForDeployment(async()=>({workflow_runs:[]}),sha,{attempts:1}),/still pending/);
+});

@@ -1,10 +1,14 @@
 name: Archive deployment history
 on:
+  push:
+    branches: [Rollback-version2]
   workflow_run:
     workflows: [pages build and deployment]
     types: [completed]
     branches: [Rollback-version2]
   workflow_dispatch:
+  schedule:
+    - cron: '17 * * * *'
 permissions:
   contents: write
   actions: read
@@ -13,7 +17,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   archive:
-    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_repository.full_name == github.repository)
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_repository.full_name == github.repository)
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
