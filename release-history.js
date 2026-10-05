@@ -13,7 +13,7 @@ export function normalizeHistory(value) {
         && Number.isFinite(Date.parse(row.deployedAt))).filter(row => {
             if (ids.has(row.id)) return false; ids.add(row.id); return true;
         }).map(row => ({...row,title:text(row.title),message:text(row.message),changes:Array.isArray(row.changes) ? row.changes.filter(x => typeof x === 'string') : [],
-            detailPath:`versions/${row.id}.json`})).sort((a,b) => b.number-a.number || b.attempt-a.attempt);
+            detailPath:`versions/${row.id}.json`})).sort((a,b) => Date.parse(b.deployedAt)-Date.parse(a.deployedAt) || b.number-a.number || b.attempt-a.attempt);
 }
 export function formatReleaseDate(value) {
     return new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(value));

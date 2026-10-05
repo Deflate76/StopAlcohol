@@ -6,7 +6,7 @@ export const SOURCE_BRANCH = 'Rollback-version2';
 export const HISTORY_BRANCH = 'deployment-history';
 export const PAGES_WORKFLOW = 259376052;
 const SHA = /^[0-9a-f]{40}$/;
-const sortReleases = (a,b) => b.number-a.number || b.attempt-a.attempt;
+const sortReleases = (a,b) => Date.parse(b.deployedAt)-Date.parse(a.deployedAt) || b.number-a.number || b.attempt-a.attempt;
 export function summarizeRun(run) {
     if (run.workflow_id !== PAGES_WORKFLOW || run.head_branch !== SOURCE_BRANCH || run.conclusion !== 'success'
         || run.status !== 'completed' || !SHA.test(run.head_sha) || !Number.isSafeInteger(run.run_number)

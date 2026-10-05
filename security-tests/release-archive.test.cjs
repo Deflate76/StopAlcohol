@@ -15,6 +15,8 @@ test('only successful Pages deployments become versions, and archived descriptio
     const row=summarizeRun(run(9,{run_attempt:2}));assert.equal(row.version,'v9.2');
     const merged=mergeReleases([{...row,title:'한국어 설명',detailPath:'versions/9-2.json'}],[row,summarizeRun(run(10))]);
     assert.deepEqual(merged.map(r=>r.version),['v10','v9.2']);assert.equal(merged[1].title,'한국어 설명');
+    const rerun=summarizeRun(run(9,{run_attempt:3,updated_at:'2026-10-06T08:00:00Z'}));
+    assert.equal(mergeReleases(merged,[rerun])[0].version,'v9.3','an older run redeployed today is the latest actual deployment');
 });
 
 test('backfill paginates Pages runs and recovers successful attempts before a failed rerun',async()=>{
