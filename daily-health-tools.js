@@ -1,4 +1,74 @@
 // Daily clock risk and on-demand weather. No health or account data is sent to the weather provider.
+import { recordTimeMs } from './record-activity.js?v=20261005-1';
+
+const timeBinLabel = index => `${String(index * 2).padStart(2, '0')}~${String(index * 2 + 2).padStart(2, '0')}시`;
+const percentLabel = value => value > 0 && value < .1 ? '<0.1%' : `${Number(value.toFixed(1))}%`;
+
+export function cravingTimeStats({challenges = [], currentId = null, cravings = []} = {}, nowMs = Date.now()) {
+    // The current challenge's in-memory list is authoritative after additions/deletions.
+    const entries = challenges.filter(item => !currentId || item.id !== currentId)
+        .flatMap(item => Array.isArray(item.cravings) ? item.cravings : []).concat(cravings);
+    const counts = Array(12).fill(0);
+    let skipped = 0;
+    for (const entry of entries) {
+        if (!entry || (entry.type && entry.type !== 'craving')) continue;
+        if (entry.strength == null && !entry.reason) continue;
+        const value = entry.timestamp;
+        // A save time or yearless display date cannot tell us when the craving occurred.
+        const ms = typeof value === 'string' && !/T\d{2}:\d{2}/.test(value) ? NaN : recordTimeMs(value);
+        const date = new Date(ms);
+        if (!Number.isFinite(date.getTime()) || ms > nowMs) { skipped++; continue; }
+        counts[Math.floor(date.getHours() / 2)]++;
+    }
+    const total = counts.reduce((a, b) => a + b, 0);
+    return {counts, total, skipped, percentages:counts.map(count => total ? count / total * 100 : 0)};
+}
+
+const cravingLayouts = new WeakMap();
+function layoutCravingMarkers(track) {
+    const width = track.clientWidth || 234, rows = [];
+    for (const marker of track.children) {
+        const label = marker.querySelector('button'), arrow = marker.querySelector('.sub-craving-arrow');
+        const x = (Number(marker.dataset.bin) + .5) / 12 * width;
+        const labelWidth = label.offsetWidth || 34;
+        const left = Math.max(0, Math.min(width - labelWidth, x - labelWidth / 2));
+        let row = rows.findIndex(right => right + 5 <= left);
+        if (row < 0) row = rows.length;
+        rows[row] = left + labelWidth;
+        label.style.left = `${left}px`; label.style.top = `${row * 24}px`;
+        arrow.style.top = `${row * 24 + 20}px`;
+    }
+    track.style.height = `${rows.length * 24 + 8}px`;
+}
+
+export function renderCravingTimeRisk(document, data = {}, {error = false, loading = false, nowMs = Date.now()} = {}) {
+    const track = document.getElementById('subCravingMarkers'), summary = document.getElementById('subCravingSummary');
+    if (!track || !summary) return;
+    const stats = cravingTimeStats(error || loading ? {} : data, nowMs);
+    track.replaceChildren(); track.hidden = !stats.total;
+    summary.textContent = error ? '갈망 시간대를 불러오지 못했습니다.' : loading ? '갈망 시간대를 불러오는 중…'
+        : stats.total ? `🟣 갈망 ${stats.total}건 · 2시간별 비율 (화살표 선택)` : '시각이 확인되는 갈망 기록이 없습니다.';
+    if (stats.skipped) summary.textContent += ` (시각 미확인 등 ${stats.skipped}건 제외)`;
+    summary.title = '전체 도전의 갈망 기록 중 시각이 확인된 기록만 집계합니다. 대처·몸상태·평가·복용 기록은 제외합니다. 기기 현지 시각 기준이며 화살표는 2시간 구간의 가운데를 가리킵니다. 반올림한 비율의 합은 100%와 조금 다를 수 있습니다.';
+    stats.counts.forEach((count, index) => {
+        if (!count) return;
+        const marker = document.createElement('span'), button = document.createElement('button'), arrow = document.createElement('span');
+        marker.className = 'sub-craving-marker'; marker.dataset.bin = index;
+        const detail = `${timeBinLabel(index)} · ${count}/${stats.total}건 (${percentLabel(stats.percentages[index])}) · 전체 갈망 기준`;
+        button.type = 'button'; button.className = 'sub-craving-percent'; button.textContent = percentLabel(stats.percentages[index]);
+        button.title = detail; button.setAttribute('aria-label', detail);
+        button.addEventListener('click', () => { summary.textContent = `🟣 ${detail}`; });
+        arrow.className = 'sub-craving-arrow'; arrow.style.left = `${(index + .5) / 12 * 100}%`;
+        arrow.setAttribute('aria-hidden', 'true'); marker.append(arrow, button); track.append(marker);
+    });
+    layoutCravingMarkers(track);
+    if (!cravingLayouts.has(track) && document.defaultView?.ResizeObserver) {
+        const observer = new document.defaultView.ResizeObserver(() => layoutCravingMarkers(track));
+        observer.observe(track); cravingLayouts.set(track, observer);
+    }
+    return stats;
+}
+
 export function failureTimeStats(challenges, nowMs = Date.now()) {
     const counts = Array(12).fill(0);
     let skipped = 0;
@@ -35,7 +105,7 @@ export function renderFailureTimeRisk(document, challenges, { error = false, loa
     const layer = document.getElementById('subFailureSegments'), summary = document.getElementById('subFailureSummary');
     if (!layer || !summary) return;
     const stats = failureTimeStats(error || loading ? [] : challenges);
-    const label = index => `${String(index * 2).padStart(2, '0')}~${String(index * 2 + 2).padStart(2, '0')}시`;
+    const label = timeBinLabel;
     layer.replaceChildren();
     stats.counts.forEach((count, index) => {
         const cell = document.createElement('span');

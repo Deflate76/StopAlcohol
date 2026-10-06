@@ -12,7 +12,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self';
         base-uri 'none';
         object-src 'none';
-        script-src 'self' https://www.gstatic.com/firebasejs/ https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/ https://apis.google.com/ https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js 'sha256-AIBL0tC4iNNoKKwFcVeQsj034glNRfVxuUyzuCSYSiQ=' 'sha256-REiFfq6OotUrXGWxp84XojcMHah8Xjofp2pgS2BjRbM=' 'sha256-ZBDKI+cJWffsd+cXDpbTFeoXNCPy8uQD4RUYNTiPRSQ=' 'sha256-lNCmwZarxAUSx7C8P0EqL3Xc9CJcjBtaio7la+niIho=' 'sha256-utYYx5qVnylo2gMZULKmJG8hNLajcNpGYKJuaVzT2NA=';
+        script-src 'self' https://www.gstatic.com/firebasejs/ https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/ https://apis.google.com/ https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js 'sha256-AIBL0tC4iNNoKKwFcVeQsj034glNRfVxuUyzuCSYSiQ=' 'sha256-REiFfq6OotUrXGWxp84XojcMHah8Xjofp2pgS2BjRbM=' 'sha256-SMe2NgMC+EGJDtC1fjx4aY2Ll0N/V8MwL7W7jcV0COM=' 'sha256-ZBDKI+cJWffsd+cXDpbTFeoXNCPy8uQD4RUYNTiPRSQ=' 'sha256-utYYx5qVnylo2gMZULKmJG8hNLajcNpGYKJuaVzT2NA=';
         script-src-attr 'unsafe-hashes'
         'sha256-+/PyyZxYlaRwGKBfLX4QqCPnBcKxzZ6EQ/FEMykrPlg='
         'sha256-+8Obkk1yhOE1TPaUpOo8d/udOL2qT2+5fc9UsR20blw='
@@ -457,6 +457,15 @@
         .sub-failure-segment.is-peak.is-current { background: linear-gradient(to right, #ef6b2e 0 var(--clock-fill, 0%), #f59e0b var(--clock-fill, 0%) 100%); }
         .sub-failure-segments::after { content: ''; position: absolute; top: 0; bottom: 0; left: var(--clock-position, 0%); width: 2px; transform: translateX(-50%); background: #9f1239; box-shadow: 0 0 0 1px #fff9; pointer-events: none; }
         .sub-failure-summary { margin: 5px 0 0; font-size: .7rem; line-height: 1.5; color: #92400e; overflow-wrap: anywhere; }
+        .sub-craving-markers { position: relative; width: 100%; margin-top: 4px; }
+        .sub-craving-markers[hidden] { display: none; }
+        .sub-craving-percent { position: absolute; z-index: 2; box-sizing: border-box; width: 34px; height: 20px; padding: 0 1px; border: 1px solid #ddd6fe; border-radius: 5px; background: #f5f3ff; color: #6d28d9; font: 800 9px/18px -apple-system, sans-serif; white-space: nowrap; cursor: pointer; }
+        .sub-craving-percent:focus-visible { outline: 2px solid #7c3aed; outline-offset: 2px; }
+        .sub-craving-arrow { position: absolute; bottom: 0; width: 0; border-left: 1.5px solid #8b5cf6; transform: translateX(-.75px); pointer-events: none; }
+        .sub-craving-arrow::after { content: ''; position: absolute; bottom: 0; left: -.75px; transform: translateX(-50%); border-left: 3.5px solid transparent; border-right: 3.5px solid transparent; border-top: 5px solid #7c3aed; }
+        .sub-craving-summary { margin: 5px 0 0; color: #6d28d9; font-size: .7rem; line-height: 1.5; overflow-wrap: anywhere; }
+        .chart-density-note { margin: 3px 10px 0; text-align: left; color: #64748b; font-size: .68rem; line-height: 1.6; word-break: keep-all; overflow-wrap: anywhere; }
+        .chart-density-reading { margin-bottom: 8px; padding: 7px 9px; border-radius: 8px; color: #6d28d9; background: #f5f3ff; }
         .header-name-weather { display: flex; align-items: center; flex-wrap: wrap; gap: 5px 8px; width: 100%; }
         .header-name-weather .user-display-name { overflow-wrap: anywhere; min-width: 0; }
         .weather-open { border: 1px solid #dbeafe; border-radius: 12px; background: #eff6ff; color: #1e40af; font: inherit; font-size: .7rem; padding: 5px 8px; cursor: pointer; max-width: 100%; }
@@ -1776,7 +1785,8 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
                 <div class="sub-progress-label"><span class="sub-percent-text" id="subPercent">현재 시각: -</span><span id="subDayPercent" class="day-progress-percent" title="오늘 0시부터의 24시간 진행률" aria-label="오늘의 24시간 진행률">(0.0%)</span></div>
                 
                 <div style="position: relative;">
-                    <div class="sub-progress-bg" aria-describedby="subFailureSummary">
+                    <div id="subCravingMarkers" class="sub-craving-markers" role="group" aria-label="2시간 구간별 갈망 발생 비율" hidden></div>
+                    <div class="sub-progress-bg" aria-describedby="subCravingSummary subFailureSummary">
                         <div class="sub-progress-fill" id="subFill"></div>
                         <div id="subFailureSegments" class="sub-failure-segments" aria-hidden="true"></div>
                         <div class="tick-mark" style="left: 25%;"></div>
@@ -1790,6 +1800,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
                     </div>
                 </div>
                 
+                <p id="subCravingSummary" class="sub-craving-summary" role="status">갈망 시간대를 불러오는 중…</p>
                 <p id="subFailureSummary" class="sub-failure-summary" role="status">실패 시간대를 불러오는 중…</p>
                 <div style="font-size: 0.8rem; color: #999; margin-top: 15px;">도전 시작 일시: <button type="button" id="displaySettingDate" onclick="openHistoryList()" title="현재 진행 중인 단주 기록 보기" aria-label="도전 시작 일시, 단주 기록 열기">-</button></div>
             </div>
@@ -1858,10 +1869,12 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
 
                 <div class="chart-divider"></div>
 
-                <div style="font-size: 0.9rem; font-weight: 700; color: #4a5568; margin-bottom: 5px; text-align: left; padding-left: 10px;">📊 전체 도전자 중 나의 위치 (상대 분포)</div>
+                <div style="font-size: 0.9rem; font-weight: 700; color: #4a5568; margin-bottom: 5px; text-align: left; padding-left: 10px;">📊 경과 일수별 포기 시점 분포 (예시)</div>
                 <div class="chart-container" style="height: 216px;">
-                    <canvas id="distributionChart"></canvas>
+                    <canvas id="distributionChart" aria-describedby="distributionExplanation"></canvas>
                 </div>
+                <p id="distributionReading" class="chart-density-note chart-density-reading" role="status" hidden></p>
+                <p id="distributionExplanation" class="chart-density-note">위 생존 곡선과 별도인 예시 모형이며 실제 회원 통계가 아닙니다. y축은 하루당 확률밀도(%/일), 구간 아래 면적은 그 기간에 포기할 확률입니다. 화면 밖까지 포함한 전체 면적은 100%입니다.</p>
             </div>
         </details>
 
@@ -3681,11 +3694,11 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
     import { installDailySchedules } from './daily-schedules.js?v=20260928-2';
     import { formatRecordDuration, compareStreakRecords } from './record-activity.js?v=20261005-1';
     import { installRecordSectionUI } from './record-section-ui.js?v=20261005-1';
-    import { renderFailureTimeRisk, updateFailureTimeProgress, installTodayWeather } from './daily-health-tools.js?v=20261006-1';
+    import { renderFailureTimeRisk, renderCravingTimeRisk, updateFailureTimeProgress, installTodayWeather } from './daily-health-tools.js?v=20261007-1';
     import { installDailyWisdom, WISDOM_SYSTEM_INSTRUCTION } from './daily-wisdom.js?v=20261004-1';
     import { installCalendarEnvironment } from './calendar-environment.js?v=20261004-1';
     import { installAccountDeletion } from './account-deletion.js?v=20261004-1';
-    import { createProgressChartPlugin, formatBestRankRange } from './progress-chart.js?v=20261005-1';
+    import { createProgressChartPlugin, formatBestRankRange, distributionDensityPercent, distributionDayProbabilityPercent } from './progress-chart.js?v=20261007-1';
     import { installCalendarNavigation } from './calendar-navigation.js?v=20261004-1';
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
     import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, deleteDoc, collection, addDoc, query, orderBy, limit, onSnapshot, getDocs, where, startAfter, serverTimestamp, writeBatch, runTransaction } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
@@ -3813,6 +3826,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
     let calWeeklyAlcoholTrendChart = null;
     let calendarDayDetailDate = null;
     let cravingData = [];
+    let cravingHistoryStatus = 'loading';
     let dailyLogsData = {}; // 달력 배지 표시를 위한 전역 데이터
     let timerInterval = null;
     let currentTabName = 'physical';
@@ -4579,10 +4593,14 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
     async function ensureAllChallengesLoaded(force = false) {
         if (!userId) return [];
         if (!force && Array.isArray(allChallengesData) && allChallengesData.length > 0) return allChallengesData;
+        const owner = userId;
         const snapshot = await getDocs(collection(db, "users", userId, "challenges"));
+        if (userId !== owner || auth.currentUser?.uid !== owner) return [];
         allChallengesData = [];
         snapshot.forEach(docSnap => allChallengesData.push(normalizeChallengeDoc(docSnap.id, docSnap.data())));
         allChallengesData.sort((a, b) => a.startDate - b.startDate);
+        cravingHistoryStatus = 'ready';
+        refreshActivitySummaries();
         renderFailureTimeRisk(document, allChallengesData);
         return allChallengesData;
     }
@@ -7405,11 +7423,13 @@ initPillIdentification();
                 if (timerInterval) clearInterval(timerInterval);
                 userQuitDate = null; currentChallengeId = null;
                 cravingData = []; allChallengesData = []; dailyLogsData = {};
+                cravingHistoryStatus = 'loading';
                 userProfile.bodyInfoLogs = []; cautionDays = []; controlActivitySessions = []; totalCravingCount = 0;
                 recordSectionUI.setActivityData({});
                 recordSectionUI.setSummary('sectionStatsPreview', '', '순위를 계산하는 중…');
                 if (unsubscribePosts) { unsubscribePosts(); unsubscribePosts = null; }
                 renderFailureTimeRisk(document, [], {loading: true});
+                renderCravingTimeRisk(document, {}, {loading: true});
                 document.getElementById('displayArea').style.display = 'none';
                 invalidateMainDaysContainerRender();
             }
@@ -7536,7 +7556,9 @@ initPillIdentification();
             userQuitDate = null;
             currentChallengeId = null;
             cravingData = []; allChallengesData = [];
+            cravingHistoryStatus = 'loading';
             renderFailureTimeRisk(document, []);
+            renderCravingTimeRisk(document);
             updateCurrentChallengeSummary(null);
             cautionDays = [];
             dailyLogsData = {};
@@ -7552,6 +7574,8 @@ initPillIdentification();
     });
 
     function refreshActivitySummaries() {
+        renderCravingTimeRisk(document, userId ? {challenges:allChallengesData, currentId:currentChallengeId, cravings:cravingData} : {},
+            {loading:!!userId && cravingHistoryStatus === 'loading', error:!!userId && cravingHistoryStatus === 'error'});
         recordSectionUI.setActivityData(userId ? {
             challenges: allChallengesData, currentId: currentChallengeId, cravings: cravingData,
             bodyLogs: userProfile.bodyInfoLogs || [], dailyLogs: dailyLogsData,
@@ -7588,6 +7612,7 @@ initPillIdentification();
             const q = query(collection(db, "users", userId, "challenges"));
             const snapshot = await getDocs(q);
             if (userId !== owner || auth.currentUser?.uid !== owner) return;
+            cravingHistoryStatus = 'ready';
             if (snapshot.empty) {
                 document.getElementById('motivationalSummary').style.display = 'none';
                 document.getElementById('activeMotivationalSummary').style.display = 'none';
@@ -7680,7 +7705,14 @@ initPillIdentification();
                 activeSummaryContainer.innerHTML = '';
                 updateMainSectionControlState();
             }
-        } catch(e) { console.error(e); if (userId === owner) renderFailureTimeRisk(document, [], {error: true}); }
+        } catch(e) {
+            console.error(e);
+            if (userId === owner) {
+                cravingHistoryStatus = 'error';
+                renderCravingTimeRisk(document, {}, {error:true});
+                renderFailureTimeRisk(document, [], {error:true});
+            }
+        }
     }
 
     function buildInlineCollapsibleHtml(id, title, bodyHtml, collapsed = false) {
@@ -10954,19 +10986,37 @@ initPillIdentification();
             options: { 
                 responsive: true, 
                 maintainAspectRatio: false, 
+                interaction: {mode:'nearest', axis:'x', intersect:false},
                 scales: { 
                     x: { type: 'linear', min: 0, max: 100, title: { display:true, text:'경과 일수', font:{size:10} } }, 
                     y: { 
                         display: true, 
                         beginAtZero: true,
-                        title: { display:true, text:'생존자 분포 밀도', font:{size:10} },
-                        ticks: { display: false },
+                        title: { display:true, text:'포기 확률밀도 (%/일)', font:{size:9} },
+                        ticks: { display:true, maxTicksLimit:5, font:{size:9}, padding:2, callback:value => `${Number(Number(value).toFixed(1))}%` },
                         border: { display: true },
                         afterFit: function(scale) { scale.width = 55; }
                     } 
                 }, 
                 plugins: { 
                     legend: { display: false }, 
+                    tooltip: { enabled:false, external:({tooltip}) => {
+                        const reading = document.getElementById('distributionReading');
+                        // Keep the selected value readable after a touch ends or the pointer leaves.
+                        if (!reading || !tooltip.opacity) return;
+                        reading.hidden = false;
+                        reading.textContent = [
+                            ...(tooltip.title || []),
+                            ...(tooltip.body || []).flatMap(body => [...(body.lines || []), ...(body.after || [])])
+                        ].join(' · ');
+                    }, callbacks: {
+                        title: items => items.length ? `경과 ${items[0].parsed.x.toFixed(1)}일` : '',
+                        label: item => `확률밀도: ${item.parsed.y.toFixed(2)}%/일 (예시)`,
+                        afterLabel: item => {
+                            const day = Math.floor(item.parsed.x);
+                            return `${day}~${day + 1}일 사이 확률: ${distributionDayProbabilityPercent(day).toFixed(2)}%`;
+                        }
+                    } },
                     annotation: {
                         clip: false,
                         annotations: { 
@@ -11025,11 +11075,11 @@ initPillIdentification();
             const distFuture = [];
             const distStep = Math.max(2, sampleStep);
             for(let i = 0; i <= axisMaxDays; i += distStep) {
-                const y = (1 / (i + 5)) * Math.exp(-Math.pow(Math.log((i+1)/15), 2) / (2 * Math.pow(0.8, 2))) * 1000;
+                const y = distributionDensityPercent(i);
                 if (i <= chartDays) distPast.push({x: i, y: y});
                 else distFuture.push({x: i, y: y});
             }
-            const currentY = (1 / (chartDays + 5)) * Math.exp(-Math.pow(Math.log((chartDays+1)/15), 2) / (2 * Math.pow(0.8, 2))) * 1000;
+            const currentY = distributionDensityPercent(chartDays);
             
             distPast.push({x: chartDays, y: currentY});
             distFuture.unshift({x: chartDays, y: currentY});

@@ -1,3 +1,21 @@
+// Preserve the original illustrative curve, but normalize its area over t >= 0.
+// Integral of exp(-log((t+1)/15)^2/(2*0.8^2))/(t+5) dt = 1.5298947783354058.
+// Evaluated in log coordinates u=log((t+1)/15); this is NOT fitted member data
+// and is separate from the exponential example used by the survival chart.
+const DISTRIBUTION_AREA = 1.5298947783354058;
+export function distributionDensityPercent(days) {
+    if (!Number.isFinite(days) || days < 0) return 0;
+    return Math.exp(-Math.pow(Math.log((days + 1) / 15), 2) / (2 * .8 ** 2)) / (days + 5) / DISTRIBUTION_AREA * 100;
+}
+
+export function distributionDayProbabilityPercent(day) {
+    if (!Number.isFinite(day) || day < 0) return 0;
+    const start = Math.floor(day), steps = 32;
+    let sum = distributionDensityPercent(start) + distributionDensityPercent(start + 1);
+    for (let i = 1; i < steps; i++) sum += (i % 2 ? 4 : 2) * distributionDensityPercent(start + i / steps);
+    return sum / (3 * steps);
+}
+
 // Draw-only effects: never change scales, padding, canvas size, or layout boxes.
 export function createProgressChartPlugin(Chart, win = window, dom = document) {
     const states = new WeakMap();
