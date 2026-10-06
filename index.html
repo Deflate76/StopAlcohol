@@ -12,7 +12,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self';
         base-uri 'none';
         object-src 'none';
-        script-src 'self' https://www.gstatic.com/firebasejs/ https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/ https://apis.google.com/ https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js 'sha256-AIBL0tC4iNNoKKwFcVeQsj034glNRfVxuUyzuCSYSiQ=' 'sha256-REiFfq6OotUrXGWxp84XojcMHah8Xjofp2pgS2BjRbM=' 'sha256-ZBDKI+cJWffsd+cXDpbTFeoXNCPy8uQD4RUYNTiPRSQ=' 'sha256-pcSWHOnjn71OPPDHXW3I2ul3n8T+X2tCo4cMGRuhaFg=' 'sha256-utYYx5qVnylo2gMZULKmJG8hNLajcNpGYKJuaVzT2NA=';
+        script-src 'self' https://www.gstatic.com/firebasejs/ https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/ https://apis.google.com/ https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js 'sha256-AIBL0tC4iNNoKKwFcVeQsj034glNRfVxuUyzuCSYSiQ=' 'sha256-REiFfq6OotUrXGWxp84XojcMHah8Xjofp2pgS2BjRbM=' 'sha256-ZBDKI+cJWffsd+cXDpbTFeoXNCPy8uQD4RUYNTiPRSQ=' 'sha256-lNCmwZarxAUSx7C8P0EqL3Xc9CJcjBtaio7la+niIho=' 'sha256-utYYx5qVnylo2gMZULKmJG8hNLajcNpGYKJuaVzT2NA=';
         script-src-attr 'unsafe-hashes'
         'sha256-+/PyyZxYlaRwGKBfLX4QqCPnBcKxzZ6EQ/FEMykrPlg='
         'sha256-+8Obkk1yhOE1TPaUpOo8d/udOL2qT2+5fc9UsR20blw='
@@ -454,11 +454,13 @@
         .sub-failure-segment { min-width: 0; border-right: 1px solid rgba(255,255,255,.85); box-sizing: border-box; }
         .sub-failure-segment:last-child { border-right: 0; }
         .sub-failure-segment.is-peak { background: #f59e0b; box-shadow: inset 0 0 0 1px #b45309; }
+        .sub-failure-segment.is-peak.is-current { background: linear-gradient(to right, #ef6b2e 0 var(--clock-fill, 0%), #f59e0b var(--clock-fill, 0%) 100%); }
+        .sub-failure-segments::after { content: ''; position: absolute; top: 0; bottom: 0; left: var(--clock-position, 0%); width: 2px; transform: translateX(-50%); background: #9f1239; box-shadow: 0 0 0 1px #fff9; pointer-events: none; }
         .sub-failure-summary { margin: 5px 0 0; font-size: .7rem; line-height: 1.5; color: #92400e; overflow-wrap: anywhere; }
         .header-name-weather { display: flex; align-items: center; flex-wrap: wrap; gap: 5px 8px; width: 100%; }
         .header-name-weather .user-display-name { overflow-wrap: anywhere; min-width: 0; }
         .weather-open { border: 1px solid #dbeafe; border-radius: 12px; background: #eff6ff; color: #1e40af; font: inherit; font-size: .7rem; padding: 5px 8px; cursor: pointer; max-width: 100%; }
-        .weather-dialog { width: min(440px, calc(100% - 24px)); max-height: 90dvh; padding: 22px 18px; border: 1px solid #dbeafe; border-radius: 20px; box-sizing: border-box; color: #334155; }
+        .weather-dialog { width: min(440px, calc(100% - 24px)); max-height: 90dvh; padding: 22px 18px; border: 1px solid #dbeafe; border-radius: 20px; box-sizing: border-box; color: #334155; touch-action: pan-y pinch-zoom; }
         .weather-dialog::backdrop { background: rgba(15,23,42,.55); }
         .weather-dialog h3 { margin: 0 30px 14px 0; }
         .weather-dialog select { width: 100%; box-sizing: border-box; margin: 8px 0; }
@@ -467,6 +469,13 @@
         .weather-range .weather-low { color: #1d4ed8; }
         .weather-range .weather-high { color: #b91c1c; }
         .weather-dialog .is-error { color: #b91c1c; }
+        #weatherStatus:empty { display: none; }
+        .weather-day-nav { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 14px 0 8px; }
+        .weather-day-nav button { min-height: 40px; flex: 1; font-size: .8rem; white-space: nowrap; padding: 8px; }
+        .weather-day-nav button:disabled { opacity: .4; cursor: default; }
+        #weatherPlace { margin: 14px 0 5px; }
+        .weather-day-label { font-size: .95rem; font-weight: 800; color: #1e40af; margin: 0 0 12px; }
+        .weather-swipe-hint { margin: 7px 0; color: #64748b; font-size: .72rem; line-height: 1.5; text-align: center; }
         .weather-dialog button:focus-visible, .weather-open:focus-visible, .diagnosis-diary-btn:focus-visible { outline: 2px solid #2563eb; outline-offset: 3px; }
         .diagnosis-diary-btn { flex-shrink: 0; border: 1px solid #bae6fd; border-radius: 8px; background: #f0f9ff; color: #075985; font: inherit; font-size: .75rem; font-weight: 800; padding: 7px 9px; cursor: pointer; }
         #diagnosisDiaryList { display: grid; gap: 8px; max-height: 32vh; overflow-y: auto; }
@@ -480,6 +489,30 @@
         .rank-info { background: #e3f2fd; padding: 20px 15px; border-radius: 20px; margin: 15px 0; border: 1px solid #bbdefb; display: flex; flex-direction: column; gap: 8px; }
         .rank-item { display: flex; justify-content: center; align-items: baseline; gap: 6px; }
         .rank-number { font-size: 1.5rem; font-weight: 800; color: #1976d2; }
+        .rank-population { flex-wrap: wrap; gap: 3px 6px; font-size: .85rem; }
+        .rank-population > span { white-space: nowrap; }
+        .rank-population-value { display: inline-flex; align-items: baseline; gap: 4px; }
+        .rank-current { flex-wrap: nowrap; min-width: 0; gap: 5px; }
+        .rank-current-label { font-size: .85rem; white-space: nowrap; }
+        .rank-current-value { display: inline-flex; align-items: baseline; gap: 2px; white-space: nowrap; flex-shrink: 0; }
+        #rankChange { font-size: .75rem; font-weight: 800; line-height: 1.3; margin: 0; white-space: nowrap; flex-shrink: 0; }
+        @media (max-width: 480px) {
+            .rank-info { padding: 16px 10px; }
+            .rank-population { font-size: .78rem; }
+            .rank-population .rank-number { font-size: 1.25rem; }
+            .rank-current { gap: 4px; }
+            .rank-current-label { font-size: .73rem; }
+            .rank-current-value { font-size: .76rem; }
+            .rank-current .rank-number { font-size: 1.18rem; padding: 1px 5px; }
+            #rankChange { font-size: .66rem; }
+            #rankChange.rank-change-active { padding: 1px 4px; }
+        }
+        @media (max-width: 359px) {
+            .rank-info { padding-inline: 5px; }
+            .rank-current { gap: 3px; }
+            .rank-current-label { font-size: .68rem; }
+            .rank-current .rank-number { font-size: 1rem; padding: 1px 4px; }
+        }
         
         details.main-section { margin-top: 20px; background: #fff; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.03); padding: 0 20px 20px 20px; text-align: center; transition: all 0.3s ease; }
         details.main-section.highlight { background: #fff9f0; border: 1px dashed var(--warning-color); }
@@ -1815,8 +1848,8 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
                 </div>
                 
                 <div class="rank-info">
-                    <div class="rank-item">현재 1,000명 중 <span class="rank-number" id="survivors">1,000</span>명 생존</div>
-                    <div class="rank-item">나의 현재 순위 : <span class="rank-number" id="myRank">1</span>위 <span id="rankChange" style="font-size: 0.95rem; font-weight: 800; margin-left: 8px;"></span></div>
+                    <div class="rank-item rank-population"><span>현재 1,000명 중</span><span class="rank-population-value"><span class="rank-number" id="survivors">1,000</span>명 생존</span></div>
+                    <div class="rank-item rank-current"><span class="rank-current-label">나의 현재 순위:</span><span class="rank-current-value"><span class="rank-number" id="myRank">1</span>위</span><span id="rankChange"></span></div>
                     <div class="rank-item" style="font-size: 0.85rem; color: #666; margin-top: 4px; flex-direction: column; gap: 2px; align-items: center; text-align: center;">
                         <div>(나의 최고 순위: <span id="myBestRank">-</span>위)</div>
                         <div id="myBestRankDate"></div>
@@ -2784,7 +2817,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
 
 <dialog id="todayWeatherModal" class="weather-dialog" aria-labelledby="todayWeatherTitle">
     <button type="button" id="weatherClose" class="close-btn-top" aria-label="날씨 닫기">&times;</button>
-    <h3 id="todayWeatherTitle">🌤 오늘의 날씨</h3>
+    <h3 id="todayWeatherTitle">🌤 날짜별 날씨</h3>
     <button type="button" id="weatherLocate" class="health-btn primary">📍 현재 위치로 조회</button>
     <p class="health-muted">현재 위치 조회 시 주변 지역의 위치를 날씨 제공처에 전달합니다.</p>
     <label class="health-label" for="weatherRegion">지역 선택</label>
@@ -2792,9 +2825,12 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
     <div class="health-actions"><button type="button" id="weatherLookup" class="health-btn">선택 지역 조회</button><button type="button" id="weatherRefresh" class="health-btn">새로고침</button></div>
     <p id="weatherStatus" class="health-status" role="status" aria-live="polite">현재 위치 또는 지역을 선택해 주세요.</p>
     <section id="weatherResult" hidden aria-label="조회한 날씨">
-        <h4 id="weatherPlace"></h4><p id="weatherCurrent"></p>
+        <div class="weather-day-nav" role="group" aria-label="날씨 날짜 이동"><button id="weatherPrevious" type="button" class="health-btn" aria-label="전날 날씨">‹ 전날</button><button id="weatherToday" type="button" class="health-btn">오늘</button><button id="weatherNext" type="button" class="health-btn" aria-label="다음날 날씨">다음날 ›</button></div>
+        <p class="weather-swipe-hint">← 왼쪽으로 밀면 다음날 · 오른쪽으로 밀면 전날 →</p>
+        <h4 id="weatherPlace"></h4><p id="weatherDayLabel" class="weather-day-label" aria-live="polite"></p><p id="weatherCurrent"></p>
         <div class="weather-range"><div>최저<strong id="weatherMin" class="weather-low"></strong></div><div>최고<strong id="weatherMax" class="weather-high"></strong></div></div>
         <p id="weatherCondition"></p><p id="weatherUpdated" class="health-muted"></p>
+        <p id="weatherAvailableDates" class="weather-swipe-hint"></p>
     </section>
     <p class="health-muted">예보 제공: <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a> · 지역 현지 날짜 기준</p>
 </dialog>
@@ -3645,7 +3681,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
     import { installDailySchedules } from './daily-schedules.js?v=20260928-2';
     import { formatRecordDuration, compareStreakRecords } from './record-activity.js?v=20261005-1';
     import { installRecordSectionUI } from './record-section-ui.js?v=20261005-1';
-    import { renderFailureTimeRisk, installTodayWeather } from './daily-health-tools.js?v=20261001-1';
+    import { renderFailureTimeRisk, updateFailureTimeProgress, installTodayWeather } from './daily-health-tools.js?v=20261006-1';
     import { installDailyWisdom, WISDOM_SYSTEM_INSTRUCTION } from './daily-wisdom.js?v=20261004-1';
     import { installCalendarEnvironment } from './calendar-environment.js?v=20261004-1';
     import { installAccountDeletion } from './account-deletion.js?v=20261004-1';
@@ -11622,9 +11658,7 @@ initPillIdentification();
             const nowH = now.getHours();
             const nowM = now.getMinutes();
             const nowS = now.getSeconds();
-            const dailyProgress = ((nowH * 3600 + nowM * 60 + nowS) / 86400) * 100;
-            
-            document.getElementById('subFill').style.width = dailyProgress + '%';
+            updateFailureTimeProgress(document, now);
             
             const ampm = nowH >= 12 ? '오후' : '오전';
             const displayH = nowH % 12 || 12;
