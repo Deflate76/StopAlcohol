@@ -1,3 +1,5 @@
+
+async function waitFor(check) { for (let i=0;i<200;i++) { if(check())return; await new Promise(r=>setTimeout(r,5)); } assert.fail('async result did not arrive'); }
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
@@ -35,7 +37,7 @@ test('missing daily values do not reuse another day; refresh preserves the selec
     const values=data();values.daily.temperature_2m_min[2]=null;
     const api=installTodayWeather({document:d,window:w,now:()=>time,fetch:async()=>{requests++;return response(values);}});
     await api.lookup(place);api.navigate(1);assert.equal(el('weatherMin').textContent,'—');assert.match(el('weatherCondition').textContent,/자료가 없습니다/);
-    values.daily.temperature_2m_min[2]=5;el('weatherRefresh').click();await tick();
+    values.daily.temperature_2m_min[2]=5;el('weatherRefresh').click();await waitFor(()=>requests===2);await tick();
     assert.match(el('weatherDayLabel').textContent,/10월 2일/);assert.equal(el('weatherMin').textContent,'5.0°C');assert.equal(requests,2);
     time+=86400000;api.navigate(-1);assert.match(el('weatherDayLabel').textContent,/10월 2일/,'expired forecast does not pretend to be current');
 });

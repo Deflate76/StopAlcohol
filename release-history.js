@@ -1,3 +1,4 @@
+import {afterPaint} from './app-loading.js?v=20261008-1';
 const ARCHIVE = 'https://raw.githubusercontent.com/Deflate76/StopAlcohol/deployment-history/';
 const CACHE_KEY = 'alcoholaway:public-release-history:v1';
 const SHA = /^[a-f0-9]{40}$/;
@@ -136,7 +137,9 @@ export function installReleaseHistory({doc=document,win=window,fetcher=fetch,now
     doc.addEventListener('visibilitychange',()=>{if(!doc.hidden)void refreshHistory();});
     const ready=(async()=>{
         releases=cached();
-        const [build,seed]=await Promise.allSettled([json('./app-build.json'),json('./release-history-seed.json')]);
+        render();
+        await afterPaint(win);
+        const [build,seed]=await Promise.allSettled([json('./app-build.json'),releases.length ? Promise.resolve(null) : json('./release-history-seed.json')]);
         if(build.status==='fulfilled' && SHA.test(build.value?.commit))currentCommit=build.value.commit;
         if(!releases.length && seed.status==='fulfilled'){try{releases=normalizeHistory(seed.value);}catch{}}
         render();await refreshHistory(true);

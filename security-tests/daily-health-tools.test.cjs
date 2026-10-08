@@ -1,3 +1,5 @@
+
+async function waitFor(check) { for (let i=0;i<200;i++) { if(check())return; await new Promise(r=>setTimeout(r,5)); } assert.fail('async result did not arrive'); }
 const {test} = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -127,11 +129,11 @@ test('weather is on demand, supports location denial, caches and drops out-of-or
     assert.equal(calls,0);assert.equal(locations,0);
     w.document.querySelector('[data-weather-open]').click();assert(dialog.open);assert.equal(locations,0);
     api.locate();assert.equal(locations,1);assert.match(w.document.getElementById('weatherStatus').textContent,/지역을 선택/);
-    const a=api.lookup({key:'seoul',label:'서울',lat:37.57,lon:126.98});const b=api.lookup({key:'busan',label:'부산',lat:35.18,lon:129.08});
+    const a=api.lookup({key:'seoul',label:'서울',lat:37.57,lon:126.98});await waitFor(()=>pending.length===1);const b=api.lookup({key:'busan',label:'부산',lat:35.18,lon:129.08});await waitFor(()=>pending.length===2);
     pending[1]({ok:true,json:async()=>weatherData()});await b;pending[0]({ok:true,json:async()=>weatherData()});await a;
     assert.match(w.document.getElementById('weatherPlace').textContent,/부산/);
     await api.lookup({key:'busan',label:'부산',lat:35.18,lon:129.08});assert.equal(calls,2);
-    time+=86400000;const c=api.lookup({key:'busan',label:'부산',lat:35.18,lon:129.08});assert.equal(calls,3);
+    time+=86400000;const c=api.lookup({key:'busan',label:'부산',lat:35.18,lon:129.08});await waitFor(()=>calls===3);assert.equal(calls,3);
     pending[2]({ok:false});await c;assert(w.document.getElementById('weatherResult').hidden);assert.match(w.document.getElementById('weatherStatus').textContent,/못했습니다/);
 });
 test('weather CSP is narrowly allowed and both user headers have a weather button',t=>{

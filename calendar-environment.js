@@ -1,5 +1,6 @@
 import SunCalc from './vendor/suncalc-1.9.0.js';
-import {WEATHER_REGIONS, weatherDescription} from './daily-health-tools.js?v=20261001-1';
+import {WEATHER_REGIONS, weatherDescription} from './daily-health-tools.js?v=20261008-1';
+import {afterPaint} from './app-loading.js?v=20261008-1';
 import {getKoreanHolidays, koreanDateKey, shiftCalendarDate} from './korean-calendar.js?v=20261004-1';
 
 const CLOCK = new Intl.DateTimeFormat('en-GB', {timeZone:'Asia/Seoul',hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
@@ -111,13 +112,21 @@ export function installCalendarEnvironment({document:doc = globalThis.document, 
     async function render(year, month, {force=false} = {}) {
         view={year,month};
         const request=++sequence;controller?.abort();controller=null;
+        await afterPaint(win);
+        if (request!==sequence) return;
         select.value=savedRegion();
         const [key,label,lat,lon]=region(), today=koreanDateKey(now());
         const monthPrefix=`${year}-${String(month+1).padStart(2,'0')}`;
         const end=shiftCalendarDate(today,15), eligible=monthPrefix>=today.slice(0,7)&&monthPrefix<=end.slice(0,7);
         latest=null; state=eligible?'loading':'idle';retry.hidden=!eligible;
         if (!eligible) {statusText(`${label} · 한국 시각(KST) · 이 달은 현재 예보 제공 범위 밖입니다.`);paint();return;}
-        const cached=cache.get(key);
+        let cached=cache.get(key);
+        if (!cached) {
+            try {
+                const saved=JSON.parse(win.sessionStorage.getItem(`alcoholaway-calendar-weather-${key}`));
+                if (saved?.today===today && Number.isFinite(saved.fetchedAt)) cached={...saved,dates:parseCalendarForecast(saved.data,today)};
+            } catch {}
+        }
         if (!force && fresh(cached,today)) {latest=cached;state='ready';paint();showLoaded(label);return;}
         statusText(`${label} · 한국 시각(KST) · 날씨 예보를 불러오는 중…`);paint();
         const ownController=new win.AbortController();controller=ownController;
@@ -134,6 +143,7 @@ export function installCalendarEnvironment({document:doc = globalThis.document, 
             if (today!==koreanDateKey(now())) {void render(year,month);return;}
             latest={today,dates:parseCalendarForecast(data,today),fetchedAt:now()};
             cache.set(key,latest);state='ready';paint();showLoaded(label);
+            try { win.sessionStorage.setItem(`alcoholaway-calendar-weather-${key}`,JSON.stringify({today,data,fetchedAt:latest.fetchedAt})); } catch {}
         } catch {
             if (request!==sequence) return;
             state='error';latest=null;paint();statusText(`${label} · 날씨를 불러오지 못했어요. 예보 새로고침을 눌러 주세요.`,true);

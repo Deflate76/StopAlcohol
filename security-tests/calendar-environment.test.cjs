@@ -1,3 +1,5 @@
+
+async function waitFor(check) { for (let i=0;i<200;i++) { if(check())return; await new Promise(r=>setTimeout(r,5)); } assert.fail('async result did not arrive'); }
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
@@ -124,9 +126,9 @@ test('region changes ignore late responses and still work without local storage'
     const f=await fixture(t,()=>++count===1?older.promise:newer.promise,{setup:win=>{
         Object.defineProperty(win,'localStorage',{get(){throw new Error('Disabled storage');}});
     }});
-    const first=f.ui.render(2026,9);
+    const first=f.ui.render(2026,9);await waitFor(()=>f.requests.length===1);
     const select=f.doc.getElementById('calEnvironmentRegion');select.value='busan';select.dispatchEvent(new f.win.Event('change'));
-    newer.resolve(response(forecast(10)));await tick();
+    await waitFor(()=>f.requests.length===2);newer.resolve(response(forecast(10)));await tick();
     older.resolve(response(forecast(1)));await first;
     assert.match(f.cell('2026-10-04').textContent,/10°\/24°/);
     assert.match(f.doc.getElementById('calEnvironmentStatus').textContent,/부산/);
@@ -142,7 +144,7 @@ test('network failure preserves holidays and astronomy and allows a successful r
     assert(f.cell('2026-10-05').querySelector('.cal-holiday-name'));
     assert(f.cell('2026-10-04').querySelector('.cal-sunset'));
     assert.match(f.cell('2026-10-04').textContent,/조회 실패/);
-    offline=false;f.doc.getElementById('calEnvironmentRefresh').click();await tick();
+    offline=false;f.doc.getElementById('calEnvironmentRefresh').click();await waitFor(()=>f.requests.length===2);await tick();
     assert.match(f.cell('2026-10-04').textContent,/12°\/24°/);
     assert.equal(f.doc.getElementById('calEnvironmentStatus').classList.contains('is-error'),false);
 });

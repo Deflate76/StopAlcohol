@@ -30,8 +30,8 @@ export function createProgressChartPlugin(Chart, win = window, dom = document) {
         state.frame = win.requestAnimationFrame(time => {
             state.frame = 0;
             if (state.destroyed || state.motion.matches || dom.hidden || !state.visible) return;
-            // 30 fps keeps the light stripe effect inexpensive on mobile.
-            if (time - state.last >= 33 && chart.canvas?.clientWidth && chart.canvas?.clientHeight) {
+            // 20 fps is enough for slow-moving stripes without redrawing both charts 60 times/second.
+            if (time - state.last >= 50 && chart.canvas?.clientWidth && chart.canvas?.clientHeight) {
                 state.last = time;
                 state.offset = (time / 65) % 24;
                 chart.draw();

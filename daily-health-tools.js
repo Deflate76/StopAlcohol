@@ -1,5 +1,6 @@
 // Daily clock risk and on-demand weather. No health or account data is sent to the weather provider.
 import { recordTimeMs } from './record-activity.js?v=20261005-1';
+import { afterPaint } from './app-loading.js?v=20261008-1';
 
 const timeBinLabel = index => `${String(index * 2).padStart(2, '0')}~${String(index * 2 + 2).padStart(2, '0')}시`;
 const percentLabel = value => value > 0 && value < .1 ? '<0.1%' : `${Number(value.toFixed(1))}%`;
@@ -24,21 +25,79 @@ export function cravingTimeStats({challenges = [], currentId = null, cravings = 
     return {counts, total, skipped, percentages:counts.map(count => total ? count / total * 100 : 0)};
 }
 
+const bodyFields = ['withdrawal', 'mood', 'thirst', 'fatigue', 'stress', 'sleep', 'hunger', 'brainFog'];
+export function bodyStateScore(entry) {
+    if (entry?.type !== 'state') return null;
+    const values = bodyFields.filter(key => typeof entry[key] === 'number' && Number.isFinite(entry[key]) && entry[key] >= 0 && entry[key] <= 10)
+        .map(key => key === 'mood' ? 10 - entry[key] : entry[key]);
+    return values.length ? {score:100 - values.reduce((a,b) => a+b, 0) / values.length * 10, fields:values.length} : null;
+}
+
+export function bodyTimeStats({challenges = [], currentId = null, cravings = []} = {}, nowMs = Date.now()) {
+    const bins = Array.from({length:12}, () => ({total:0, low:0, sum:0}));
+    let skipped = 0;
+    const entries = challenges.filter(item => !currentId || item.id !== currentId)
+        .flatMap(item => Array.isArray(item.cravings) ? item.cravings : []).concat(cravings);
+    for (const entry of entries) {
+        if (entry?.type !== 'state') continue;
+        const result = bodyStateScore(entry), value = entry.timestamp;
+        const ms = typeof value === 'string' && !/T\d{2}:\d{2}/.test(value) ? NaN : recordTimeMs(value), date = new Date(ms);
+        if (!result || !Number.isFinite(date.getTime()) || ms > nowMs) { skipped++; continue; }
+        const bin = bins[Math.floor(date.getHours()/2)];
+        bin.total++; bin.sum += result.score; if (result.score <= 40) bin.low++;
+    }
+    return {bins, skipped, total:bins.reduce((n,b) => n+b.total, 0), low:bins.reduce((n,b) => n+b.low, 0)};
+}
+
 const cravingLayouts = new WeakMap();
 function layoutCravingMarkers(track) {
-    const width = track.clientWidth || 234, rows = [];
+    const width = track.clientWidth || 234, rows = [], below = track.id === 'subBodyMarkers';
     for (const marker of track.children) {
-        const label = marker.querySelector('button'), arrow = marker.querySelector('.sub-craving-arrow');
+        const label = marker.querySelector('button'), arrow = marker.querySelector('.sub-craving-arrow, .sub-body-arrow');
         const x = (Number(marker.dataset.bin) + .5) / 12 * width;
         const labelWidth = label.offsetWidth || 34;
         const left = Math.max(0, Math.min(width - labelWidth, x - labelWidth / 2));
         let row = rows.findIndex(right => right + 5 <= left);
         if (row < 0) row = rows.length;
         rows[row] = left + labelWidth;
-        label.style.left = `${left}px`; label.style.top = `${row * 24}px`;
-        arrow.style.top = `${row * 24 + 20}px`;
+        label.style.left = `${left}px`; label.style.top = `${row * 24 + (below ? 8 : 0)}px`;
+        arrow.style.top = below ? '0px' : `${row * 24 + 20}px`;
+        if (below) arrow.style.height = `${row * 24 + 8}px`;
     }
     track.style.height = `${rows.length * 24 + 8}px`;
+}
+
+function observeTimeMarkers(track, document) {
+    layoutCravingMarkers(track);
+    if (!cravingLayouts.has(track) && document.defaultView?.ResizeObserver) {
+        const observer = new document.defaultView.ResizeObserver(() => layoutCravingMarkers(track));
+        observer.observe(track); cravingLayouts.set(track, observer);
+    }
+}
+
+export function renderBodyTimeRisk(document, data = {}, {error = false, loading = false, nowMs = Date.now()} = {}) {
+    const track = document.getElementById('subBodyMarkers'), summary = document.getElementById('subBodySummary');
+    if (!track || !summary) return;
+    const stats = bodyTimeStats(error || loading ? {} : data, nowMs);
+    track.replaceChildren(); track.hidden = !stats.low;
+    summary.textContent = error ? '몸상태 시간대를 불러오지 못했습니다.' : loading ? '몸상태 시간대를 불러오는 중…'
+        : !stats.total ? '시각이 확인되는 몸상태 기록이 없습니다.'
+        : `몸상태 ${stats.total}건 중 낮은 상태 ${stats.low}건${stats.low ? ' · 시간대 내 비율 (아래 화살표 선택)' : ' · 40점 이하 기록 없음'}`;
+    if (stats.skipped) summary.textContent += ` (시각·항목 미확인 등 ${stats.skipped}건 제외)`;
+    stats.bins.forEach((bin, index) => {
+        if (!bin.low) return;
+        const marker = document.createElement('span'), button = document.createElement('button'), arrow = document.createElement('span');
+        const percent = percentLabel(bin.low / bin.total * 100);
+        const detail = `${timeBinLabel(index)} · 이 시간대 ${bin.total}건 중 낮은 상태 ${bin.low}건 (${percent}) · 평균 종합상태 ${Math.round(bin.sum/bin.total)}점/100`;
+        marker.dataset.bin = index;
+        button.type = 'button'; button.className = 'sub-craving-percent sub-body-percent'; button.textContent = percent;
+        button.title = detail; button.setAttribute('aria-label', detail);
+        button.addEventListener('click', () => { summary.textContent = detail; });
+        arrow.className = 'sub-body-arrow'; arrow.style.left = `${(index+.5)/12*100}%`; arrow.setAttribute('aria-hidden', 'true');
+        marker.append(arrow, button); track.append(marker);
+    });
+    observeTimeMarkers(track, document);
+    return stats;
 }
 
 export function renderCravingTimeRisk(document, data = {}, {error = false, loading = false, nowMs = Date.now()} = {}) {
@@ -61,11 +120,7 @@ export function renderCravingTimeRisk(document, data = {}, {error = false, loadi
         arrow.className = 'sub-craving-arrow'; arrow.style.left = `${(index + .5) / 12 * 100}%`;
         arrow.setAttribute('aria-hidden', 'true'); marker.append(arrow, button); track.append(marker);
     });
-    layoutCravingMarkers(track);
-    if (!cravingLayouts.has(track) && document.defaultView?.ResizeObserver) {
-        const observer = new document.defaultView.ResizeObserver(() => layoutCravingMarkers(track));
-        observer.observe(track); cravingLayouts.set(track, observer);
-    }
+    observeTimeMarkers(track, document);
     return stats;
 }
 
@@ -212,7 +267,7 @@ export function installTodayWeather({ document = globalThis.document, window = g
     try { select.value = window.localStorage.getItem('alcoholaway-weather-region') || ''; } catch {}
     const region = () => { const row = WEATHER_REGIONS.find(r => r[0] === select.value); return row ? {key:row[0],label:row[1],lat:row[2],lon:row[3]} : null; };
     const status = (text, error = false) => { get('weatherStatus').textContent = text; get('weatherStatus').classList.toggle('is-error', error); };
-    const fresh = item => item && now() - item.fetchedAt < 20 * 60 * 1000 && item.weather.date === weatherDate(now(), item.weather.offset);
+    const fresh = item => item && now() - item.fetchedAt >= 0 && now() - item.fetchedAt < 20 * 60 * 1000 && item.weather.date === weatherDate(now(), item.weather.offset);
     function resetSummary() { buttons.forEach(button => { button.textContent = '🌤 오늘 날씨'; button.title = '오늘 날씨 조회'; }); }
     function render(item, date = item.weather.date) {
         latest = item;
@@ -249,9 +304,21 @@ export function installTodayWeather({ document = globalThis.document, window = g
         const request = ++sequence;
         controller?.abort(); controller = new window.AbortController();
         activePlace = place; latest = null; get('weatherResult').hidden = true; resetSummary();
-        const cached = cache.get(place.key);
+        let cached = cache.get(place.key);
+        // Public, manually selected regions only; never persist geolocation or health data.
+        if (!cached && WEATHER_REGIONS.some(row => row[0] === place.key)) {
+            try {
+                const saved = JSON.parse(window.sessionStorage.getItem(`alcoholaway-public-weather-${place.key}`));
+                if (saved && Number.isFinite(saved.fetchedAt)) {
+                    cached = {place, data:saved.data, fetchedAt:saved.fetchedAt,
+                        weather:parseTodayWeather(saved.data, saved.fetchedAt), dates:saved.data.daily.time.filter(value => /^\d{4}-\d{2}-\d{2}$/.test(value)).sort()};
+                }
+            } catch {}
+        }
         if (!force && fresh(cached)) { render(cached, date || cached.weather.date); status('최근 조회한 날씨입니다.'); return; }
         status(`${place.label} 날씨를 불러오는 중…`);
+        await afterPaint(window);
+        if (request !== sequence) return;
         const ownController = controller;
         const timeout = window.setTimeout(() => ownController.abort(), 12000);
         try {
@@ -266,6 +333,9 @@ export function installTodayWeather({ document = globalThis.document, window = g
             const item = {place, data, weather:parseTodayWeather(data, now()), fetchedAt:now(),
                 dates:data.daily.time.filter(value => /^\d{4}-\d{2}-\d{2}$/.test(value)).sort()};
             cache.set(place.key, item); render(item, date || item.weather.date); status('');
+            if (WEATHER_REGIONS.some(row => row[0] === place.key)) {
+                try { window.sessionStorage.setItem(`alcoholaway-public-weather-${place.key}`, JSON.stringify({data, fetchedAt:item.fetchedAt})); } catch {}
+            }
         } catch (error) {
             if (request === sequence) status(error.name === 'AbortError' ? '날씨 조회 시간이 초과되었습니다. 다시 조회해 주세요.' : '날씨를 불러오지 못했습니다. 인터넷 연결을 확인하고 다시 조회해 주세요.', true);
         } finally { window.clearTimeout(timeout); }
