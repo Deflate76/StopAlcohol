@@ -142,10 +142,11 @@ test('index places percentages on the requested sides and removes the diagnosis 
     assert.equal(doc.getElementById('diagnosisRecordCount'),null);
     assert.equal(doc.getElementById('subTime').nextElementSibling.id,'subTimePercent');
     assert.equal(doc.getElementById('subPercent').nextElementSibling.id,'subDayPercent');
-    for (const id of ['sectionCraving','sectionStats','sectionRecovery']) {
+    for (const id of ['sectionCraving','sectionStats','sectionCommunity']) {
         assert(doc.querySelector(`#${id} > summary #${id}Preview`));
         assert.equal(doc.querySelector(`#${id} > summary [data-section-new]`),null);
     }
+    assert.equal(doc.getElementById('sectionRecoveryPreview'),null);
     dom.window.close();
 });
 

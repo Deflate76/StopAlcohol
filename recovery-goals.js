@@ -13,7 +13,9 @@ export function currentRecoveryGoals(groups, elapsedDays) {
 }
 
 export function recoveryGoalsHtml(goals) {
-    return `<div class="alcohol-risk-stack current-recovery-stack" aria-label="현재 진행 중인 회복 목표">
+    return `<details class="alcohol-risk-stack current-recovery-stack">
+        <summary class="current-recovery-summary"><span>🌱 현재 회복 목표</span><small>신체 · 간 · 뇌</small></summary>
+        <div class="current-recovery-content">
         ${goals.map(goal => `<article class="alcohol-dementia-risk-box current-recovery-goal" data-recovery-goal="${escape(goal.key)}">
             <div class="current-recovery-heading"><strong>${escape(goal.icon)} ${escape(goal.label)}</strong><span>${goal.complete ? '목표 달성' : `${goal.from}~${goal.stage.d}일 구간 · 진행 중`}</span></div>
             <div class="current-recovery-title">${escape(goal.stage.t)}</div>
@@ -21,5 +23,6 @@ export function recoveryGoalsHtml(goals) {
             <div class="current-recovery-progress" role="progressbar" aria-label="${escape(goal.label)} ${goal.stage.d}일 목표까지의 금주 경과" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${goal.percent}"><span style="width:${goal.percent}%"></span><b>${goal.percent}%</b></div>
         </article>`).join('')}
         <p class="current-recovery-note">금주 경과에 따른 목표 안내입니다. 진행률은 금주 기간 기준이며 개인의 실제 회복 정도를 측정한 값은 아닙니다.</p>
-    </div>`;
+        </div>
+    </details>`;
 }

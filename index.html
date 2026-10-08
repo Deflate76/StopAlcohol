@@ -12,7 +12,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self';
         base-uri 'none';
         object-src 'none';
-        script-src 'self' https://www.gstatic.com/firebasejs/ https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/ https://apis.google.com/ https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js 'sha256-AIBL0tC4iNNoKKwFcVeQsj034glNRfVxuUyzuCSYSiQ=' 'sha256-QaIGrh8f43jOi7uBziR2MUlup4PIRErhozYQIJZxRnI=' 'sha256-REiFfq6OotUrXGWxp84XojcMHah8Xjofp2pgS2BjRbM=' 'sha256-ZBDKI+cJWffsd+cXDpbTFeoXNCPy8uQD4RUYNTiPRSQ=' 'sha256-utYYx5qVnylo2gMZULKmJG8hNLajcNpGYKJuaVzT2NA=';
+        script-src 'self' https://www.gstatic.com/firebasejs/ https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/ https://apis.google.com/ https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js 'sha256-3tm/nIMzMo3dyBgkr995iJelhzFC5h54QA3R8E4AOpc=' 'sha256-AIBL0tC4iNNoKKwFcVeQsj034glNRfVxuUyzuCSYSiQ=' 'sha256-REiFfq6OotUrXGWxp84XojcMHah8Xjofp2pgS2BjRbM=' 'sha256-ZBDKI+cJWffsd+cXDpbTFeoXNCPy8uQD4RUYNTiPRSQ=' 'sha256-utYYx5qVnylo2gMZULKmJG8hNLajcNpGYKJuaVzT2NA=';
         script-src-attr 'unsafe-hashes'
         'sha256-+/PyyZxYlaRwGKBfLX4QqCPnBcKxzZ6EQ/FEMykrPlg='
         'sha256-+8Obkk1yhOE1TPaUpOo8d/udOL2qT2+5fc9UsR20blw='
@@ -82,7 +82,6 @@
         'sha256-H9QRX2csnYF1X6k5dAi+0ilK2432sL1F33oEnnAVK6I='
         'sha256-HS0z7FIdAv3vqRAfuIKEdeKo38Ud4MTFP32FRBZU7bY='
         'sha256-Hbj0AGnep7DUQ8Jn1Il2rGCNow1PEpt7y5MpYsN4OgE='
-        'sha256-He96UVQVagVqOxD+fF+2N64DHLawCaJoba+rWmrrdKo='
         'sha256-Hr4kvzt4LOTwKoDtU/goUe2X/H7D1Hf664waL8LyWEo='
         'sha256-IePJhHVpryVaL2lHXn3OlCDhkzQ/BqeNoS7AdhEbpXA='
         'sha256-IhgwGE2nTWDL9oy5NNagDd3sYGoon7NeWkrgu9eK7PY='
@@ -246,6 +245,7 @@
         'sha256-zMgGIb4s6b5AFdURYboF7mkztb4zhFvglR1mLlj9UXQ='
         'sha256-zN7TUjnnbKNjepXp8+I+YDMw7/SJ6b3ymvQWoigINrA='
         'sha256-zQ5xAuMT51lIeKTZsFiZqGckGRFe2hbmaGLly2xgxqQ='
+        'sha256-zTN8k3I2t3dM+22/le/zUKyIx6yHTmshVzwsLM4BA88='
         'sha256-zTgcKBTLvyGdk9/5daNHtTV01SqKsg1lPGDDJYi2wZI='
         'sha256-ztg5JA+bwZtt9sDRgPC5Z/lOwo7AdhVJlcrnmPJlaRU=';
         style-src 'self' 'unsafe-inline';
@@ -1664,7 +1664,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
 @media(prefers-reduced-motion:reduce) { .main-section > summary .diagnosis-summary-names.is-overflowing { overflow-x:auto; } }
 </style>
 <link rel="stylesheet" href="./release-history.css?v=20261005-1">
-<link rel="stylesheet" href="./community-recovery.css?v=20261009-1">
+<link rel="stylesheet" href="./community-recovery.css?v=20261009-2">
 </head>
 <body>
 <div id="pageTopAnchor" class="page-scroll-anchor" aria-hidden="true"></div>
@@ -1893,24 +1893,11 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
             </div>
         </details>
 
-        <!-- Section 3: 신체 회복 및 커뮤니티 -->
-        <details id="sectionRecovery" class="main-section" open>
-            <summary><span class="diagnosis-summary-heading record-summary-heading"><span class="diagnosis-summary-title">🌱 회복 및 커뮤니티 <button type="button" id="communityUnreadBtn" class="community-unread-badge" hidden>🔔 새 댓글</button></span><span id="sectionRecoveryPreview" class="diagnosis-summary-names is-empty"><span class="diagnosis-summary-track"><span></span><span aria-hidden="true" hidden></span></span></span></span></summary>
+        <!-- Section 3: 생존자 통신 -->
+        <details id="sectionCommunity" class="main-section">
+            <summary id="survivorCommunityHeading"><span class="diagnosis-summary-heading record-summary-heading"><span class="diagnosis-summary-title">📡 생존자 통신 <button type="button" id="communityUnreadBtn" class="community-unread-badge" hidden>🔔 새 댓글</button></span><span id="sectionCommunityPreview" class="diagnosis-summary-names is-empty"><span class="diagnosis-summary-track"><span></span><span aria-hidden="true" hidden></span></span></span></span></summary>
             <div class="section-content">
-                <div class="tab-container">
-                    <button class="tab-btn active" onclick="switchTab(this, 'physical')">신체<br>회복</button>
-                    <button class="tab-btn" onclick="switchTab(this, 'liver')">간<br>기능</button>
-                    <button class="tab-btn" onclick="switchTab(this, 'brain')">뇌<br>기능</button>
-                    <button id="alcoholDiseaseTab" type="button" class="tab-btn" onclick="switchTab(this, 'diseases')">알콜성<br>질환</button>
-                    <button id="survivorCommunityTab" type="button" class="tab-btn" style="color: var(--warning-color);" onclick="switchTab(this, 'community')">생존자<br>통신</button>
-                </div>
-
-                <div class="change-section" id="changeSection">
-                    <div id="changeList"></div>
-                </div>
-                <div id="alcoholDiseaseSection" style="display: none;"></div>
-                
-                <div class="community-section" id="communitySection" style="display: none; text-align: left;">
+                <div class="community-section" id="communitySection" style="text-align: left;">
                     <section class="community-filters" aria-labelledby="communitySearchTitle">
                         <h4 id="communitySearchTitle">통신 검색</h4>
                         <div class="community-filter-grid">
@@ -1933,6 +1920,24 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
                     <div id="postList" style="display: flex; flex-direction: column; gap: 0px;"></div>
                     <button type="button" id="communityMore" hidden>글 더 보기</button>
                 </div>
+            </div>
+        </details>
+
+        <!-- Section 4: 신체 회복 -->
+        <details id="sectionRecovery" class="main-section" open>
+            <summary><span>🌱 회복</span></summary>
+            <div class="section-content">
+                <div class="tab-container">
+                    <button class="tab-btn active" onclick="switchTab(this, 'physical')">신체<br>회복</button>
+                    <button class="tab-btn" onclick="switchTab(this, 'liver')">간<br>기능</button>
+                    <button class="tab-btn" onclick="switchTab(this, 'brain')">뇌<br>기능</button>
+                    <button id="alcoholDiseaseTab" type="button" class="tab-btn" onclick="switchTab(this, 'diseases')">알콜성<br>질환</button>
+                </div>
+
+                <div class="change-section" id="changeSection">
+                    <div id="changeList"></div>
+                </div>
+                <div id="alcoholDiseaseSection" style="display: none;"></div>
             </div>
         </details>
         
@@ -2034,8 +2039,9 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
             <button type="button" class="floating-nav-item" data-nav-target="timerDisplaySection" data-nav-number="02" onclick="scrollToPageTarget('timerDisplaySection')"><span class="floating-nav-number">02</span><span>현재 도전 타이머</span></button>
             <button type="button" class="floating-nav-item" data-nav-target="sectionCraving" data-nav-number="03" onclick="scrollToPageTarget('sectionCraving')"><span class="floating-nav-number">03</span><span>고비 관리 및 기록</span></button>
             <button type="button" class="floating-nav-item" data-nav-target="sectionStats" data-nav-number="04" onclick="scrollToPageTarget('sectionStats')"><span class="floating-nav-number">04</span><span>생존 현황 및 통계</span></button>
-            <button type="button" class="floating-nav-item" data-nav-target="sectionRecovery" data-nav-number="05" onclick="scrollToPageTarget('sectionRecovery')"><span class="floating-nav-number">05</span><span>회복 및 커뮤니티</span></button>
-            <button type="button" class="floating-nav-item" data-nav-target="pageBottomAnchor" data-nav-number="06" onclick="scrollToPageTarget('pageBottomAnchor')"><span class="floating-nav-number">06</span><span>맨 아래로</span></button>
+            <button type="button" class="floating-nav-item" data-nav-target="sectionCommunity" data-nav-number="05" onclick="scrollToPageTarget('sectionCommunity')"><span class="floating-nav-number">05</span><span>생존자 통신</span></button>
+            <button type="button" class="floating-nav-item" data-nav-target="sectionRecovery" data-nav-number="06" onclick="scrollToPageTarget('sectionRecovery')"><span class="floating-nav-number">06</span><span>회복</span></button>
+            <button type="button" class="floating-nav-item" data-nav-target="pageBottomAnchor" data-nav-number="07" onclick="scrollToPageTarget('pageBottomAnchor')"><span class="floating-nav-number">07</span><span>맨 아래로</span></button>
             <button type="button" class="floating-nav-item game-link" onclick="goToFunGame()"><span class="floating-nav-number">🎮</span><span>게임하기</span></button>
         </div>
         <div class="floating-nav-divider"></div>
@@ -2145,7 +2151,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
             </details>
         </section>
         <div id="calMonthSuccessContainer" class="cal-month-success-container">
-            <div id="calMonthSuccessText" class="cal-month-success-label">금주 성공률 계산 중</div>
+            <div id="calMonthSuccessText" class="cal-month-success-label">금주 달성률 계산 중</div>
             <div class="cal-month-success-progress"><div id="calMonthSuccessFill" class="cal-month-success-fill"></div></div>
             <div id="calAlcoholChangeCompareBox" class="cal-alcohol-change-compare-box" data-collapsed="true">
                 <button type="button" id="calAlcoholChangeCompareToggleBtn" class="cal-alcohol-change-compare-toggle" onclick="toggleCalAlcoholChangeCompareBox()" aria-expanded="false">
@@ -3118,7 +3124,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
 <button id="aiAssistantFloatingButton" class="floating-action-item pill-id-floating ai-assistant-floating" type="button" aria-label="AI 도우미에게 질문하기" aria-haspopup="dialog" aria-controls="aiAssistantModal" aria-expanded="false">
     <span class="floating-nav-toggle-inner pill-id-floating-inner ai-assistant-floating-inner"><svg aria-hidden="true" viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v5a3 3 0 0 1-3 3H8l-5 2 1-5V7a3 3 0 0 1 3-3h6"/><path d="m18 2 1.1 3.9L23 7l-3.9 1.1L18 12l-1.1-3.9L13 7l3.9-1.1L18 2ZM8 11h3M8 15h7"/></svg><span>도우미</span></span>
 </button>
-<button id="communityFloatingButton" class="floating-action-item pill-id-floating community-floating" type="button" onclick="openSurvivorCommunity()" aria-label="생존자 통신 바로가기" aria-controls="communitySection">
+<button id="communityFloatingButton" class="floating-action-item pill-id-floating community-floating" type="button" onclick="openSurvivorCommunity()" aria-label="생존자 통신 바로가기" aria-controls="sectionCommunity">
     <span class="floating-nav-toggle-inner pill-id-floating-inner community-floating-inner"><svg aria-hidden="true" viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11a8 8 0 0 1-8 8H7l-5 3 2-6a8 8 0 1 1 17-5Z"/><path d="M8 10h8M8 14h5"/></svg><span>통신</span></span>
 </button>
 <button id="coffeeFloatingButton" class="floating-action-item pill-id-floating coffee-floating" type="button" onclick="openCoffeeSleep()" aria-label="커피 섭취와 수면 기록" aria-haspopup="dialog" aria-controls="coffeeSleepModal">
@@ -3725,7 +3731,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
 
     
     import { backgroundTask, loadHomeEssentials } from './app-loading.js?v=20261008-1';
-    import { currentRecoveryGoals, recoveryGoalsHtml } from './recovery-goals.js?v=20261009-1';
+    import { currentRecoveryGoals, recoveryGoalsHtml } from './recovery-goals.js?v=20261009-2';
     import { installCommunityFeed } from './community-feed.js?v=20261009-1';
     import { installDailySchedules } from './daily-schedules.js?v=20260928-2';
     import { formatRecordDuration, compareStreakRecords } from './record-activity.js?v=20261005-1';
@@ -4283,7 +4289,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
         if (progressFill) progressFill.style.width = `${progress}%`;
 
         const targetButtons = Array.from(document.querySelectorAll('.floating-nav-item[data-nav-target]'));
-        const sectionIds = ['pageTopAnchor', 'timerDisplaySection', 'sectionCraving', 'sectionStats', 'sectionRecovery', 'pageBottomAnchor'];
+        const sectionIds = ['pageTopAnchor', 'timerDisplaySection', 'sectionCraving', 'sectionStats', 'sectionCommunity', 'sectionRecovery', 'pageBottomAnchor'];
         let activeId = 'pageTopAnchor';
         const threshold = Math.max(90, window.innerHeight * 0.32);
         sectionIds.forEach(id => {
@@ -5010,7 +5016,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
     function buildStreakRecordBadgeHtml(currentDays, successRate) {
         const recordInfo = getCurrentStreakRecordInfo(currentDays);
         const badge = recordInfo ? `<button type="button" class="streak-record-badge" data-streak-days="${recordInfo.targetDays}" aria-haspopup="dialog" aria-controls="streakRecordsModal" aria-label="역대 ${recordInfo.ordinal}번째 기록, 연속 ${recordInfo.targetDays}일 이상 달성한 1번째부터 ${recordInfo.ordinal}번째 기록 보기" title="연속 ${recordInfo.targetDays}일 이상 달성한 기록 보기">역대 ${recordInfo.ordinal}번째 기록</button>` : '';
-        return `<div class="streak-record-info">${badge}<span class="success-rate-box" title="성공률 = (금주 도전일 수 - 실패일수) / 금주 도전일 수"><span>성공률 ${successRate}%</span><span class="success-rate-progress"><span class="success-rate-progress-fill" style="display:block; width:${successRate}%;"></span></span></span></div>`;
+        return `<div class="streak-record-info">${badge}<span class="success-rate-box" title="달성률 = (금주 도전일 수 - 실패일수) / 금주 도전일 수"><span>달성률 ${successRate}%</span><span class="success-rate-progress"><span class="success-rate-progress-fill" style="display:block; width:${successRate}%;"></span></span></span></div>`;
     }
 
     function getCurrentRecoveryGoals() {
@@ -5056,7 +5062,9 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
             return;
         }
 
+        const recoveryOpen = container.querySelector('.current-recovery-stack')?.open === true;
         container.innerHTML = buildMainDaysContainerHtml(currentDays, totalCumul, successRate);
+        container.querySelector('.current-recovery-stack').open = recoveryOpen;
         dailyWisdom.renderTrigger();
         const streakButton = container.querySelector('[data-streak-days]');
         streakButton?.addEventListener('click', event => openStreakRecordsModal(Number(streakButton.dataset.streakDays), event));
@@ -7587,17 +7595,19 @@ initPillIdentification();
 
     function bindCommunityPreview(uid) {
         communityFeed.bindAccount(uid);
+        unsubscribePosts = null;
+        if (uid) syncCommunitySection();
         if (unsubscribeCommunityPreview) unsubscribeCommunityPreview();
         unsubscribeCommunityPreview = null;
-        recordSectionUI.setSummary('sectionRecoveryPreview', '', uid ? '최근 통신을 불러오는 중…' : '로그인 후 생존자 통신을 확인하세요');
+        recordSectionUI.setSummary('sectionCommunityPreview', '', uid ? '최근 통신을 불러오는 중…' : '로그인 후 생존자 통신을 확인하세요');
         if (!uid) return;
         unsubscribeCommunityPreview = onSnapshot(query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(1)), snapshot => {
             if (userId !== uid || auth.currentUser?.uid !== uid) return;
             const post = snapshot.docs[0]?.data();
             const content = String(post?.content ?? '').trim();
-            recordSectionUI.setSummary('sectionRecoveryPreview', content ? `생존자 통신 · ${post.author || '익명의 생존자'}: ${content}` : '', '아직 발송된 통신이 없습니다');
+            recordSectionUI.setSummary('sectionCommunityPreview', content ? `생존자 통신 · ${post.author || '익명의 생존자'}: ${content}` : '', '아직 발송된 통신이 없습니다');
         }, () => {
-            if (userId === uid) recordSectionUI.setSummary('sectionRecoveryPreview', '', '최근 통신을 불러오지 못했습니다');
+            if (userId === uid) recordSectionUI.setSummary('sectionCommunityPreview', '', '최근 통신을 불러오지 못했습니다');
         });
     }
 
@@ -9191,12 +9201,12 @@ initPillIdentification();
 
         const stats = getMonthlyAbstinenceSuccessStats(year, month);
         if (stats.totalDays <= 0) {
-            textEl.innerText = '이 달은 아직 금주 성공률을 집계할 날짜가 없습니다.';
+            textEl.innerText = '이 달은 아직 금주 달성률을 집계할 날짜가 없습니다.';
             fillEl.style.width = '0%';
             return;
         }
 
-        textEl.innerText = `이달 금주 성공률 ${stats.percent}% · ${stats.successDays}/${stats.totalDays}일 성공`;
+        textEl.innerText = `이달 금주 달성률 ${stats.percent}% · ${stats.successDays}/${stats.totalDays}일 성공`;
         fillEl.style.width = `${stats.percent}%`;
     }
 
@@ -10007,15 +10017,15 @@ initPillIdentification();
         return Math.max(0, diff / 86400000);
     }
 
-    window.openSurvivorCommunity = function({ focusTab = true } = {}) {
+    window.openSurvivorCommunity = function({ focusHeading = true } = {}) {
         window.switchAppTab('records');
         if (!userId || !auth.currentUser) {
             alert('생존자 통신은 로그인 후 이용할 수 있습니다.');
             document.getElementById('loginArea').scrollIntoView({ behavior:'smooth', block:'center' });
             return;
         }
-        const section = document.getElementById('sectionRecovery');
-        const tab = document.getElementById('survivorCommunityTab');
+        const section = document.getElementById('sectionCommunity');
+        const heading = document.getElementById('survivorCommunityHeading');
         if (!currentChallengeId || getComputedStyle(document.getElementById('displayArea')).display === 'none') {
             alert('도전을 시작한 뒤 생존자 통신을 이용할 수 있습니다.');
             document.getElementById('setupArea').scrollIntoView({ behavior:'smooth', block:'center' });
@@ -10023,11 +10033,11 @@ initPillIdentification();
         }
         section.open = true;
         closeFloatingQuickNav();
-        window.switchTab(tab, 'community');
+        syncCommunitySection();
         updateMainSectionControlState();
-        if (focusTab) requestAnimationFrame(() => {
-            tab.focus({ preventScroll:true });
-            tab.scrollIntoView({ behavior:'smooth', block:'start' });
+        if (focusHeading) requestAnimationFrame(() => {
+            heading.focus({ preventScroll:true });
+            section.scrollIntoView({ behavior:'smooth', block:'start' });
         });
     };
 
@@ -10040,19 +10050,13 @@ initPillIdentification();
     window.switchTab = function(btn, tabName) {
         document.querySelectorAll('#sectionRecovery .tab-btn').forEach(b => b.classList.toggle('active', b === btn));
         currentTabName = tabName;
-        document.getElementById('changeSection').style.display = ['community', 'diseases'].includes(tabName) ? 'none' : 'block';
-        document.getElementById('communitySection').style.display = tabName === 'community' ? 'block' : 'none';
+        document.getElementById('changeSection').style.display = tabName === 'diseases' ? 'none' : 'block';
         document.getElementById('alcoholDiseaseSection').style.display = tabName === 'diseases' ? 'block' : 'none';
-        if (tabName === 'community') loadPosts();
-        else {
-            if (unsubscribePosts) { unsubscribePosts(); unsubscribePosts = null; }
-            if (tabName === 'diseases') renderAlcoholDiseaseTab();
-            else { renderChangeCards(tabName); updateRoadmap(getCurrentDaysPassed()); }
-        }
+        if (tabName === 'diseases') renderAlcoholDiseaseTab();
+        else { renderChangeCards(tabName); updateRoadmap(getCurrentDaysPassed()); }
     };
 
     function renderChangeCards(tabName) {
-        if (tabName === 'community') return;
         if (tabName === 'diseases') { renderAlcoholDiseaseTab(); return; }
         let activeStages = physicalStages;
         if(tabName === 'liver') activeStages = liverStages;
@@ -10125,7 +10129,7 @@ initPillIdentification();
     }
 
     function updateRoadmap(days) {
-        if (['community', 'diseases'].includes(currentTabName)) return;
+        if (currentTabName === 'diseases') return;
         let activeStages = physicalStages;
         if(currentTabName === 'liver') activeStages = liverStages;
         if(currentTabName === 'brain') activeStages = brainStages;
@@ -10205,7 +10209,7 @@ initPillIdentification();
         cheers:COMMUNITY_CHEERS,
         dayAtWrite:communityDayAtWrite,
         isPending:(uid, postId) => pendingCommunityComments.has(communityCommentKey(uid, postId)),
-        // The full searchable feed is read only when this tab is opened; render 50 at a time.
+        // The full searchable feed is read only when this section is opened; render 50 at a time.
         watchPosts:(next, error) => onSnapshot(query(collection(db, 'posts'), orderBy('createdAt', 'desc')),
             snapshot => next(snapshot.docs.map(item => ({...item.data(), id:item.id}))), error),
         // Own-post notifications stay live after first paint, including comments on older posts.
@@ -10215,13 +10219,19 @@ initPillIdentification();
         deletePost:(...args) => window.deletePost(...args),
         addComment:(...args) => window.addComment(...args),
         deleteComment:(...args) => window.deleteComment(...args),
-        openCommunity:() => { if (!userId || !currentChallengeId) return false; window.openSurvivorCommunity({focusTab:false}); return true; }
+        openCommunity:() => { if (!userId || !currentChallengeId) return false; window.openSurvivorCommunity({focusHeading:false}); return true; }
     });
 
     window.loadPosts = function() {
         communityFeed.show();
         unsubscribePosts = () => communityFeed.hide();
     };
+
+    function syncCommunitySection() {
+        if (userId && currentChallengeId && document.getElementById('sectionCommunity').open) loadPosts();
+        else if (unsubscribePosts) { unsubscribePosts(); unsubscribePosts = null; }
+    }
+    document.getElementById('sectionCommunity').addEventListener('toggle', syncCommunitySection);
 
     window.editPost = async function(postId, encodedContent) {
         const oldContent = decodeURIComponent(encodedContent);
@@ -11650,7 +11660,7 @@ initPillIdentification();
                     && now.getTime() >= Number(recordBreakNotice.dataset.recordAt)) {
                 renderCalendar(currentCalDate.getFullYear(), currentCalDate.getMonth(), currentCalMode);
             }
-            if(currentTabName !== 'community') updateRoadmap(days); 
+            updateRoadmap(days);
 
             checkCautionAlerts();
 

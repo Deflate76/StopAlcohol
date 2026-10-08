@@ -19,7 +19,7 @@ test('three current recovery goals follow the real roadmap boundaries and keep p
     assert(currentRecoveryGoals(groups,4000).every(r=>r.complete&&r.percent===100));
     assert(currentRecoveryGoals(groups,-2).every(r=>r.percent===0));
     const dom=new JSDOM(recoveryGoalsHtml(rows)),d=dom.window.document;
-    assert.equal(d.querySelectorAll('.current-recovery-goal').length,3);assert.equal(d.querySelectorAll('details,button').length,0);assert.equal(d.querySelectorAll('[role="progressbar"]').length,3);
+    assert.equal(d.querySelectorAll('.current-recovery-goal').length,3);assert.equal(d.querySelectorAll('details').length,1);assert.equal(d.querySelector('details').open,false);assert.equal(d.querySelectorAll('[role="progressbar"]').length,3);
     assert(d.body.textContent.includes(groups[0].stages.find(s=>s.d===60).desc));dom.window.close();
 });
 
@@ -29,8 +29,27 @@ test('main timer moves success rate into the former rank location and keeps risk
     vm.createContext(context);vm.runInContext(extract('buildStreakRecordBadgeHtml')+extract('buildMainDaysContainerHtml'),context);
     const dom=new JSDOM(context.buildMainDaysContainerHtml(45,125,98)),d=dom.window.document;
     assert.equal(d.querySelectorAll('.success-rate-box').length,1);assert(d.querySelector('.streak-record-info .success-rate-box'));assert.equal(d.querySelector('#streakCurrentRank'),null);
+    assert.match(d.querySelector('.success-rate-box').textContent,/달성률 98%/);
     assert.equal(d.querySelector('[onclick*="openAlcohol"]'),null);assert(source.includes('id="alcoholDiseaseTab"'));assert(source.includes('id="alcoholDiseaseSection"'));
     dom.window.close();
+});
+
+test('standalone community opens independently above recovery and stops feed reads when collapsed', async t=>{
+    const {installCommunityFeed}=await community;
+    const sourceDoc=new JSDOM(source).window.document;
+    const html='<div id="displayArea"></div>'+sourceDoc.getElementById('sectionCommunity').outerHTML+sourceDoc.getElementById('sectionRecovery').outerHTML;
+    sourceDoc.defaultView.close();const dom=new JSDOM(html,{url:'https://fixture.invalid',runScripts:'outside-only'}),w=dom.window,d=w.document;t.after(()=>w.close());
+    const section=d.getElementById('sectionCommunity');assert.equal(section.open,false);assert.equal(section.nextElementSibling.id,'sectionRecovery');assert.equal(d.getElementById('survivorCommunityTab'),null);assert(section.contains(d.getElementById('communityUnreadBtn')));
+    let starts=0,stops=0;
+    w.userId='owner';w.currentChallengeId='active';w.currentTabName='physical';w.auth={currentUser:{uid:'owner'}};w.unsubscribePosts=null;
+    w.switchAppTab=()=>{};w.closeFloatingQuickNav=()=>{};w.updateMainSectionControlState=()=>{};w.renderAlcoholDiseaseTab=()=>{};w.renderChangeCards=()=>{};w.updateRoadmap=()=>{};w.getCurrentDaysPassed=()=>45;
+    w.communityFeed=installCommunityFeed({doc:d,win:w,getUid:()=>w.userId,dayAtWrite:()=>1,watchPosts:next=>{starts++;next([]);return()=>stops++;},watchOwnPosts:(uid,next)=>{next([]);return()=>{};},openCommunity:()=>true});
+    for(const name of ['loadPosts','switchTab']){const start=source.indexOf(`    window.${name} = `);w.eval(source.slice(start,source.indexOf('\n    };',start)+7));}
+    w.eval(extract('syncCommunitySection'));section.addEventListener('toggle',w.syncCommunitySection);
+    assert.equal(starts,0);section.open=true;await tick();assert.equal(starts,1);
+    w.switchTab(d.getElementById('alcoholDiseaseTab'),'diseases');assert(section.open);assert.equal(stops,0);
+    section.open=false;await tick();assert.equal(stops,1);section.open=true;await tick();assert.equal(starts,2);
+    w.userId=null;w.syncCommunitySection();assert.equal(stops,2);
 });
 
 test('community filters combine content, UID/nickname, inclusive Korean dates and original sobriety age',async()=>{
@@ -48,7 +67,7 @@ test('community filters combine content, UID/nickname, inclusive Korean dates an
 async function fixture(t,{saved}={}) {
     const {installCommunityFeed}=await community;
     const sourceDoc=new JSDOM(source).window.document;
-    const dom=new JSDOM(sourceDoc.getElementById('sectionRecovery').outerHTML,{url:'https://fixture.invalid'}),w=dom.window,d=w.document;
+    const dom=new JSDOM(sourceDoc.getElementById('sectionCommunity').outerHTML,{url:'https://fixture.invalid'}),w=dom.window,d=w.document;
     sourceDoc.defaultView.close();t.after(()=>w.close());
     if(saved)w.localStorage.setItem('alcoholaway-community-read:owner',saved);
     const state={uid:'owner',feeds:[],own:[],stops:0,opened:0};
