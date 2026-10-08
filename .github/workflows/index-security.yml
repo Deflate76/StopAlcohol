@@ -3,10 +3,10 @@ name: Index security checks
 on:
   pull_request:
     branches: [Rollback-version2]
-    paths: [index.html, app-loading.js, release-history.js, release-history.css, app-build.json, release-history-seed.json, release-notes/**, scripts/release-history.mjs, .github/workflows/release-history.yml, record-section-ui.js, record-activity.js, floating-actions.js, progress-chart.js, account-deletion.js, daily-wisdom.js, daily-health-tools.js, calendar-environment.js, calendar-navigation.js, korean-calendar.js, vendor/suncalc-1.9.0.js, scripts/update-index-csp.py, security-tests/**, .github/workflows/index-security.yml]
+    paths: [index.html, community-feed.js, recovery-goals.js, community-recovery.css, app-loading.js, release-history.js, release-history.css, app-build.json, release-history-seed.json, release-notes/**, scripts/release-history.mjs, .github/workflows/release-history.yml, record-section-ui.js, record-activity.js, floating-actions.js, progress-chart.js, account-deletion.js, daily-wisdom.js, daily-health-tools.js, calendar-environment.js, calendar-navigation.js, korean-calendar.js, vendor/suncalc-1.9.0.js, scripts/update-index-csp.py, security-tests/**, .github/workflows/index-security.yml]
   push:
     branches: [Rollback-version2]
-    paths: [index.html, app-loading.js, release-history.js, release-history.css, app-build.json, release-history-seed.json, release-notes/**, scripts/release-history.mjs, .github/workflows/release-history.yml, record-section-ui.js, record-activity.js, floating-actions.js, progress-chart.js, account-deletion.js, daily-wisdom.js, daily-health-tools.js, calendar-environment.js, calendar-navigation.js, korean-calendar.js, vendor/suncalc-1.9.0.js, scripts/update-index-csp.py, security-tests/**, .github/workflows/index-security.yml]
+    paths: [index.html, community-feed.js, recovery-goals.js, community-recovery.css, app-loading.js, release-history.js, release-history.css, app-build.json, release-history-seed.json, release-notes/**, scripts/release-history.mjs, .github/workflows/release-history.yml, record-section-ui.js, record-activity.js, floating-actions.js, progress-chart.js, account-deletion.js, daily-wisdom.js, daily-health-tools.js, calendar-environment.js, calendar-navigation.js, korean-calendar.js, vendor/suncalc-1.9.0.js, scripts/update-index-csp.py, security-tests/**, .github/workflows/index-security.yml]
   workflow_dispatch:
 
 permissions:
@@ -24,6 +24,9 @@ jobs:
           sparse-checkout: |
             /index.html
             /app-loading.js
+            /community-feed.js
+            /recovery-goals.js
+            /community-recovery.css
             /release-history.js
             /release-history.css
             /app-build.json

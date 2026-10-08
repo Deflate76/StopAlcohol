@@ -1,0 +1,42 @@
+.current-recovery-stack { gap:8px; margin:8px 0 0; }
+.current-recovery-goal { display:block; box-sizing:border-box; width:100%; padding:11px 13px; border-radius:14px; white-space:normal; text-align:left; cursor:default; }
+.current-recovery-goal:hover { transform:none; }
+.current-recovery-heading { display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:.76rem; }
+.current-recovery-heading span { color:#64748b; font-size:.67rem; font-weight:600; }
+.current-recovery-title { margin-top:6px; color:#334155; font-size:.8rem; }
+.current-recovery-goal p { margin:5px 0 9px; color:#64748b; font-size:.73rem; font-weight:500; line-height:1.5; }
+.current-recovery-progress { position:relative; overflow:hidden; height:18px; border-radius:9px; background:#e2e8f0; text-align:center; }
+.current-recovery-progress > span { display:block; height:100%; background:linear-gradient(90deg,#86efac,#2dd4bf); }
+.current-recovery-progress b { position:absolute; inset:0; color:#134e4a; font-size:.67rem; line-height:18px; }
+.current-recovery-note { margin:0; color:#718096; font-size:.65rem; line-height:1.5; font-weight:500; text-align:left; }
+#alcoholDiseaseSection { padding:12px 0; text-align:center; }
+#alcoholDiseaseSection .alcohol-dementia-risk-box, #alcoholDiseaseSection .alcohol-disease-risk-box { white-space:normal; text-align:left; min-height:32px; }
+.post-card.is-mine { border-left-color:var(--primary-color); }
+.post-card.is-notification-target { outline:2px solid #38bdf8; outline-offset:2px; }
+.post-card > .post-summary { display:block; padding:0; background:none; list-style:none; cursor:pointer; }
+.post-summary::-webkit-details-marker { display:none; }
+.post-card > .post-summary::after { display:none; }
+.post-author-group { display:flex; flex-wrap:wrap; align-items:center; gap:4px; min-width:0; }
+.post-card .post-header { flex-wrap:wrap; gap:5px; }
+.post-card .post-author { overflow-wrap:anywhere; }
+.post-preview { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; overflow-wrap:anywhere; color:#475569; font-size:.86rem; font-weight:500; line-height:1.5; }
+.post-card[open] .post-preview { display:none; }
+.post-summary-footer { display:block; margin-top:7px; font-size:.7rem; color:#64748b; font-weight:600; }
+.post-expanded-content { padding-top:10px; }
+.post-card .post-body { white-space:pre-wrap; }
+.post-author-id { font-size:.65rem; overflow-wrap:anywhere; color:#94a3b8; margin-bottom:6px; }
+.post-edited { display:block; color:#94a3b8; margin-top:4px; }
+.comment-notification-focus, .comment-item:focus { outline:2px solid #0ea5e9; outline-offset:3px; background:#f0f9ff; border-radius:6px; }
+.community-filters { padding:13px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; margin-bottom:14px; }
+.community-filters h4 { margin:0 0 9px; color:#334155; font-size:.9rem; }
+.community-filter-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; }
+.community-filter-grid label { display:block; min-width:0; color:#475569; font-size:.73rem; font-weight:700; }
+.community-filter-grid input, .community-filter-grid select { width:100%; max-width:100%; min-width:0; margin-top:4px; padding:9px 7px; border:1px solid #cbd5e1; border-radius:8px; box-sizing:border-box; font:inherit; font-weight:500; background:#fff; }
+.community-filter-wide { grid-column:1/-1; }
+.community-filter-hint, .community-status { margin:8px 0; font-size:.68rem; color:#64748b; line-height:1.5; }
+.community-toolbar { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin:10px 0; }
+.community-toolbar button, .community-filters > button, #communityMore { appearance:none; border:1px solid #cbd5e1; background:#fff; padding:7px 9px; border-radius:8px; color:#475569; font-family:inherit; font-size:.72rem; cursor:pointer; }
+.community-unread-badge { appearance:none; display:inline-flex; border:1px solid #fbbf24; background:#fffbeb; border-radius:999px; padding:4px 7px; margin:5px 0 0; color:#92400e; font-family:inherit; font-size:.7rem; font-weight:800; cursor:pointer; }
+.community-unread-badge[hidden], #communityBackToList[hidden], #communityMore[hidden] { display:none; }
+.community-empty { color:#64748b; text-align:center; padding:20px 8px; font-size:.85rem; }
+#sectionRecovery .tab-btn { flex:1; min-width:0; padding:8px 2px; font-size:clamp(.75rem,2.8vw,.95rem); word-break:keep-all; }

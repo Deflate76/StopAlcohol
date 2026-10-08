@@ -2,7 +2,7 @@ export function clearAccountLocalData(uid, storage = localStorage, session = ses
     const exact = new Set([
         `alcoholaway:medication-reminders:v1:${uid}`, `alcoholaway.otc.scan-history.v1.${uid}`,
         `calMedicationNonMedStartDate_${uid}`, `alcoholaway_control_drinking_goal_${uid}`,
-        'quitDrinkingDateTime_server'
+        `alcoholaway-community-read:${uid}`, 'quitDrinkingDateTime_server'
     ]);
     try {
         for (let i = storage.length-1; i >= 0; i--) {

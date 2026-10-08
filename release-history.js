@@ -17,7 +17,7 @@ export function normalizeHistory(value) {
             detailPath:`versions/${row.id}.json`})).sort((a,b) => Date.parse(b.deployedAt)-Date.parse(a.deployedAt) || b.number-a.number || b.attempt-a.attempt);
 }
 export function formatReleaseDate(value) {
-    return new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(value));
+    return new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(value));
 }
 export function installReleaseHistory({doc=document,win=window,fetcher=fetch,now=Date.now}={}) {
     const button=doc.getElementById('appVersionLabel'),dialog=doc.getElementById('releaseHistoryModal');
@@ -119,7 +119,7 @@ export function installReleaseHistory({doc=document,win=window,fetcher=fetch,now
         loading=(async()=>{
             try {
                 releases=normalizeHistory(await json(ARCHIVE+'index.json?t='+Math.floor(now()/60000)));
-                lastFetched=now();saveCache();status.textContent='성공한 배포만 표시합니다. 배포 시각은 한국시간입니다.';
+                lastFetched=now();saveCache();status.textContent='성공한 배포만 표시합니다. 배포일은 한국 날짜 기준입니다.';
             } catch {status.textContent=releases.length?'저장된 이력을 표시하고 있습니다. 최신 이력은 다시 불러올 수 있습니다.':'배포 이력을 불러오지 못했습니다. 다시 불러오기를 눌러 주세요.';}
             render();
             // A new page can arrive before its post-deployment archive is ready.

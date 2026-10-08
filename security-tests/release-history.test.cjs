@@ -21,7 +21,7 @@ test('release metadata rejects invalid identifiers and formats dates in Korean t
     assert.equal(records[0].detailPath,'versions/2-1.json');
     const rerun={...row(1),id:'1-2',version:'v1.2',attempt:2,deployedAt:'2026-10-06T08:00:00Z'};
     assert.equal(normalizeHistory(envelope([row(2),rerun]))[0].version,'v1.2');
-    assert.match(formatReleaseDate('2026-10-04T15:10:00Z'),/2026\. 10\. 05\./);
+    assert.equal(formatReleaseDate('2026-10-04T15:10:00Z'),'2026. 10. 05.');
     assert.throws(()=>normalizeHistory({releases:[]}));
 });
 

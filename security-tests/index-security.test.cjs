@@ -139,7 +139,7 @@ for (const action of ['delete', 'resume', 'edit-time']) {
     });
 }
 
-test('community listeners preserve quoted IDs, escaped content and comment actions', t => {
+test('community listeners preserve quoted IDs, escaped content and comment actions', async t => {
     const w = fixture(t);
     w.postId = quotePayload;
     w.post = {uid: w.userId, author: payload, content: payload, createdAt: Date.now(), comments: [{uid: w.userId, author: payload, text: payload}]};
@@ -147,6 +147,12 @@ test('community listeners preserve quoted IDs, escaped content and comment actio
     for (const method of ['editPost', 'deletePost', 'addComment', 'deleteComment']) {
         w[method] = (...args) => {assert.equal(args[0], quotePayload); calls.push([method, ...args]);};
     }
+    const {installCommunityFeed}=await import(require('node:url').pathToFileURL(path.join(root,'community-feed.js')));
+    w.communityFeed=installCommunityFeed({doc:w.document,win:w,getUid:()=>w.userId,
+        cheers:w.COMMUNITY_CHEERS,dayAtWrite:()=>null,watchOwnPosts:()=>()=>{},
+        watchPosts:next=>{next([{...w.post,id:w.postId}]);return()=>{};},
+        editPost:(...args)=>w.editPost(...args),deletePost:(...args)=>w.deletePost(...args),
+        addComment:(...args)=>w.addComment(...args),deleteComment:(...args)=>w.deleteComment(...args),openCommunity:()=>true});
     w.eval(extract('loadPosts')); w.loadPosts();
     assertInert(w, '#postList', payload);
     assert.equal(w.document.querySelectorAll('#postList [onclick]').length, 0);
