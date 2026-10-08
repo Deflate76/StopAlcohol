@@ -12,7 +12,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self';
         base-uri 'none';
         object-src 'none';
-        script-src 'self' https://www.gstatic.com/firebasejs/ https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/ https://apis.google.com/ https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js 'sha256-3tm/nIMzMo3dyBgkr995iJelhzFC5h54QA3R8E4AOpc=' 'sha256-AIBL0tC4iNNoKKwFcVeQsj034glNRfVxuUyzuCSYSiQ=' 'sha256-REiFfq6OotUrXGWxp84XojcMHah8Xjofp2pgS2BjRbM=' 'sha256-ZBDKI+cJWffsd+cXDpbTFeoXNCPy8uQD4RUYNTiPRSQ=' 'sha256-utYYx5qVnylo2gMZULKmJG8hNLajcNpGYKJuaVzT2NA=';
+        script-src 'self' https://www.gstatic.com/firebasejs/ https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/ https://apis.google.com/ https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js 'sha256-AIBL0tC4iNNoKKwFcVeQsj034glNRfVxuUyzuCSYSiQ=' 'sha256-REiFfq6OotUrXGWxp84XojcMHah8Xjofp2pgS2BjRbM=' 'sha256-ZBDKI+cJWffsd+cXDpbTFeoXNCPy8uQD4RUYNTiPRSQ=' 'sha256-uV4aBHiZCTu/QP8mGNZ7XeoBcaVk5skARq1ZnzcADIw=' 'sha256-utYYx5qVnylo2gMZULKmJG8hNLajcNpGYKJuaVzT2NA=';
         script-src-attr 'unsafe-hashes'
         'sha256-+/PyyZxYlaRwGKBfLX4QqCPnBcKxzZ6EQ/FEMykrPlg='
         'sha256-+8Obkk1yhOE1TPaUpOo8d/udOL2qT2+5fc9UsR20blw='
@@ -1664,7 +1664,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
 @media(prefers-reduced-motion:reduce) { .main-section > summary .diagnosis-summary-names.is-overflowing { overflow-x:auto; } }
 </style>
 <link rel="stylesheet" href="./release-history.css?v=20261005-1">
-<link rel="stylesheet" href="./community-recovery.css?v=20261009-2">
+<link rel="stylesheet" href="./community-recovery.css?v=20261009-3">
 </head>
 <body>
 <div id="pageTopAnchor" class="page-scroll-anchor" aria-hidden="true"></div>
@@ -1898,21 +1898,26 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
             <summary id="survivorCommunityHeading"><span class="diagnosis-summary-heading record-summary-heading"><span class="diagnosis-summary-title">📡 생존자 통신 <button type="button" id="communityUnreadBtn" class="community-unread-badge" hidden>🔔 새 댓글</button></span><span id="sectionCommunityPreview" class="diagnosis-summary-names is-empty"><span class="diagnosis-summary-track"><span></span><span aria-hidden="true" hidden></span></span></span></span></summary>
             <div class="section-content">
                 <div class="community-section" id="communitySection" style="text-align: left;">
-                    <section class="community-filters" aria-labelledby="communitySearchTitle">
-                        <h4 id="communitySearchTitle">통신 검색</h4>
-                        <div class="community-filter-grid">
-                            <label>작성글 키워드<input id="communityKeyword" type="search" placeholder="글 내용 검색"></label>
-                            <label>작성자 ID·닉네임<input id="communityAuthor" type="search" placeholder="ID 또는 닉네임"></label>
-                            <label>작성 시작일<input id="communityDateFrom" type="date"></label>
-                            <label>작성 종료일<input id="communityDateTo" type="date"></label>
-                            <label class="community-filter-wide">작성 당시 금주 기간<select id="communityDuration"><option value="">전체 기간</option></select></label>
+                    <details class="community-filters" aria-labelledby="communitySearchTitle">
+                        <summary id="communitySearchTitle">통신 검색</summary>
+                        <div class="community-filter-content">
+                            <div class="community-filter-grid">
+                                <label>작성글 키워드<input id="communityKeyword" type="search" placeholder="글 내용 검색"></label>
+                                <label>작성자 ID·닉네임<input id="communityAuthor" type="search" placeholder="ID 또는 닉네임"></label>
+                                <label>작성 시작일<input id="communityDateFrom" type="date"></label>
+                                <label>작성 종료일<input id="communityDateTo" type="date"></label>
+                                <label class="community-filter-wide">작성 당시 금주 기간<select id="communityDuration"><option value="">전체 기간</option></select></label>
+                            </div>
+                            <p class="community-filter-hint">작성일은 한국 날짜 기준입니다. 금주 기간은 작성 당시 기준이며 1개월은 30일, 1년은 365일로 구분합니다.</p>
+                            <button type="button" id="communityClearFilters">검색 초기화</button>
                         </div>
-                        <p class="community-filter-hint">작성일은 한국 날짜 기준입니다. 금주 기간은 작성 당시 기준이며 1개월은 30일, 1년은 365일로 구분합니다.</p>
-                        <button type="button" id="communityClearFilters">검색 초기화</button>
-                    </section>
-                    <div style="background: #fff; padding: 15px; border-radius: 14px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
-                        <textarea id="postContent" placeholder="오늘 하루, 어떤 고비가 있었나요? 생존자들과 나누어 보세요." rows="3" style="width: 100%; border: 1px solid #ddd; border-radius: 10px; padding: 12px; resize: none; margin-bottom: 10px; box-sizing: border-box; font-family: inherit;"></textarea>
-                        <button onclick="submitPost()" style="width: 100%; background: var(--warning-color); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">통신 발송</button>
+                    </details>
+                    <div class="community-composer">
+                        <label class="community-composer-title" for="postContent">오늘의 이야기를 남겨보세요</label>
+                        <p id="communityWritingHint" class="community-writing-hint">작은 변화도, 힘들었던 순간도 편하게 나누어 주세요.</p>
+                        <textarea id="postContent" placeholder="오늘 어떤 순간이 기억에 남나요?&#10;넘긴 고비나 작은 변화도 편하게 남겨보세요." rows="8" aria-describedby="communityWritingHint postCharacterCount"></textarea>
+                        <div class="community-composer-footer"><span>공백·줄바꿈 포함</span><output id="postCharacterCount" for="postContent" aria-live="off">0자</output></div>
+                        <button type="button" class="community-submit-btn" onclick="submitPost()">통신 발송</button>
                     </div>
                     <p id="communityNotificationStatus" class="community-status" role="status"></p>
                     <div class="community-toolbar"><button type="button" id="communityExpandAll">전체 펼치기</button><button type="button" id="communityCollapseAll">전체 접기</button><button type="button" id="communityRetry">다시 불러오기</button><button type="button" id="communityBackToList" hidden>알림 글 고정 해제</button></div>
@@ -3732,7 +3737,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
     
     import { backgroundTask, loadHomeEssentials } from './app-loading.js?v=20261008-1';
     import { currentRecoveryGoals, recoveryGoalsHtml } from './recovery-goals.js?v=20261009-2';
-    import { installCommunityFeed } from './community-feed.js?v=20261009-1';
+    import { installCommunityFeed } from './community-feed.js?v=20261009-3';
     import { installDailySchedules } from './daily-schedules.js?v=20260928-2';
     import { formatRecordDuration, compareStreakRecords } from './record-activity.js?v=20261005-1';
     import { installRecordSectionUI } from './record-section-ui.js?v=20261005-1';
@@ -10200,7 +10205,10 @@ initPillIdentification();
                 createdAt,
                 comments: []
             });
-            if (userId === uid && input.value.trim() === content) input.value = '';
+            if (userId === uid && input.value.trim() === content) {
+                input.value = '';
+                input.dispatchEvent(new Event('input', {bubbles:true}));
+            }
         } catch (error) { if (userId === uid) alert('작성에 실패했습니다: ' + error.message); }
     };
 

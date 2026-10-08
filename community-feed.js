@@ -49,6 +49,17 @@ export function communityCommentId(postId, comment) {
 export function installCommunityFeed({doc=document, win=window, getUid, watchPosts, watchOwnPosts,
     cheers=[], dayAtWrite, isPending=()=>false, editPost, deletePost, addComment, deleteComment, openCommunity} = {}) {
     const get = id => doc.getElementById(id), list = get('postList'), notice = get('communityUnreadBtn');
+    const postInput=get('postContent'), postCount=get('postCharacterCount');
+    const segmenter=typeof win.Intl?.Segmenter==='function'?new win.Intl.Segmenter('ko',{granularity:'grapheme'}):null;
+    function updatePostCount() {
+        if(!postInput || !postCount)return;
+        const value=postInput.value.normalize('NFC');
+        const count=segmenter?Array.from(segmenter.segment(value)).length:Array.from(value).length;
+        postCount.textContent=`${count.toLocaleString('ko-KR')}자`;
+    }
+    postInput?.addEventListener('input',updatePostCount);
+    postInput?.addEventListener('compositionend',updatePostCount);
+    updatePostCount();
     const inputs = {keyword:get('communityKeyword'), author:get('communityAuthor'), from:get('communityDateFrom'), to:get('communityDateTo'), duration:get('communityDuration')};
     const node = (tag, className, text) => {const el=doc.createElement(tag);if(className)el.className=className;if(text!==undefined)el.textContent=text;return el;};
     const action = (label, kind, callback, className='action-btn') => {

@@ -42,14 +42,28 @@
 .post-edited { display:block; color:#94a3b8; margin-top:4px; }
 .comment-notification-focus, .comment-item:focus { outline:2px solid #0ea5e9; outline-offset:3px; background:#f0f9ff; border-radius:6px; }
 .community-filters { padding:13px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; margin-bottom:14px; }
-.community-filters h4 { margin:0 0 9px; color:#334155; font-size:.9rem; }
+#sectionCommunity .community-filters > summary { display:flex; align-items:center; justify-content:space-between; padding:0; margin:0; border:0; color:#334155; font-size:.85rem; line-height:1.5; list-style:none; cursor:pointer; }
+#sectionCommunity .community-filters > summary::-webkit-details-marker { display:none; }
+#sectionCommunity .community-filters > summary::after { content:'＋'; color:#64748b; font-size:1rem; }
+#sectionCommunity .community-filters[open] > summary::after { content:'－'; }
+#sectionCommunity .community-filters > summary:focus-visible { outline:2px solid #d97706; outline-offset:4px; border-radius:4px; }
+.community-filter-content { padding-top:12px; }
+.community-composer { padding:15px 10px; border:1px solid #fde68a; border-radius:16px; margin-bottom:20px; background:linear-gradient(180deg,#fffbeb,#fff 48%); }
+.community-composer-title { display:block; color:#78350f; font-size:.92rem; font-weight:800; line-height:1.5; }
+.community-writing-hint { margin:5px 0 12px; color:#78716c; font-size:.73rem; line-height:1.6; }
+.community-composer #postContent { display:block; width:100%; min-height:220px; box-sizing:border-box; border:1px solid #cbd5e1; border-radius:12px; padding:14px 12px; resize:vertical; font-family:inherit; font-size:1rem; font-weight:400; line-height:1.7; background:#fff; color:#334155; }
+.community-composer #postContent::placeholder { color:#94a3b8; opacity:1; }
+.community-composer #postContent:focus { outline:2px solid #fbbf24; outline-offset:2px; border-color:#d97706; }
+.community-composer-footer { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:4px 10px; margin:9px 0 12px; color:#78716c; font-size:.67rem; }
+#postCharacterCount { margin-left:auto; color:#92400e; font-size:.8rem; font-weight:800; font-variant-numeric:tabular-nums; }
+.community-submit-btn { width:100%; padding:13px 10px; border:0; border-radius:10px; background:var(--warning-color); color:#fff; font:inherit; font-size:.85rem; font-weight:800; cursor:pointer; }
 .community-filter-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; }
 .community-filter-grid label { display:block; min-width:0; color:#475569; font-size:.73rem; font-weight:700; }
 .community-filter-grid input, .community-filter-grid select { width:100%; max-width:100%; min-width:0; margin-top:4px; padding:9px 7px; border:1px solid #cbd5e1; border-radius:8px; box-sizing:border-box; font:inherit; font-weight:500; background:#fff; }
 .community-filter-wide { grid-column:1/-1; }
 .community-filter-hint, .community-status { margin:8px 0; font-size:.68rem; color:#64748b; line-height:1.5; }
 .community-toolbar { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin:10px 0; }
-.community-toolbar button, .community-filters > button, #communityMore { appearance:none; border:1px solid #cbd5e1; background:#fff; padding:7px 9px; border-radius:8px; color:#475569; font-family:inherit; font-size:.72rem; cursor:pointer; }
+.community-toolbar button, .community-filters button, #communityMore { appearance:none; border:1px solid #cbd5e1; background:#fff; padding:7px 9px; border-radius:8px; color:#475569; font-family:inherit; font-size:.72rem; cursor:pointer; }
 .community-unread-badge { appearance:none; display:inline-flex; border:1px solid #fbbf24; background:#fffbeb; border-radius:999px; padding:4px 7px; margin:5px 0 0; color:#92400e; font-family:inherit; font-size:.7rem; font-weight:800; cursor:pointer; }
 .community-unread-badge[hidden], #communityBackToList[hidden], #communityMore[hidden] { display:none; }
 .community-empty { color:#64748b; text-align:center; padding:20px 8px; font-size:.85rem; }
