@@ -7,7 +7,6 @@ const community=import(pathToFileURL(path.join(root,'community-feed.js'))),goals
 const date=Date.parse('2026-10-09T12:00:00+09:00'),DAY=86400000;
 const comment=(uid='other',text='힘내요',createdAt=date)=>({uid,author:uid,text,createdAt,authorDayAtWrite:40});
 const post=(id,extra={})=>({id,uid:'other',author:'생존자',content:'오늘도 금주',createdAt:date,authorDayAtWrite:46,comments:[],...extra});
-const tick=()=>new Promise(r=>setTimeout(r,5));
 function extract(name){const start=source.indexOf(`    function ${name}(`);assert(start>=0,name);return source.slice(start,source.indexOf('\n    }',start)+6);}
 
 test('three current recovery goals follow the real roadmap boundaries and keep progress and wording',async()=>{
@@ -46,9 +45,10 @@ test('standalone community opens independently above recovery and stops feed rea
     w.communityFeed=installCommunityFeed({doc:d,win:w,getUid:()=>w.userId,dayAtWrite:()=>1,watchPosts:next=>{starts++;next([]);return()=>stops++;},watchOwnPosts:(uid,next)=>{next([]);return()=>{};},openCommunity:()=>true});
     for(const name of ['loadPosts','switchTab']){const start=source.indexOf(`    window.${name} = `);w.eval(source.slice(start,source.indexOf('\n    };',start)+7));}
     w.eval(extract('syncCommunitySection'));section.addEventListener('toggle',w.syncCommunitySection);
-    assert.equal(starts,0);section.open=true;await tick();assert.equal(starts,1);
+    const setOpen=async open=>{const toggled=new Promise(resolve=>section.addEventListener('toggle',resolve,{once:true}));section.open=open;await toggled;};
+    assert.equal(starts,0);await setOpen(true);assert.equal(starts,1);
     w.switchTab(d.getElementById('alcoholDiseaseTab'),'diseases');assert(section.open);assert.equal(stops,0);
-    section.open=false;await tick();assert.equal(stops,1);section.open=true;await tick();assert.equal(starts,2);
+    await setOpen(false);assert.equal(stops,1);await setOpen(true);assert.equal(starts,2);
     w.userId=null;w.syncCommunitySection();assert.equal(stops,2);
 });
 
