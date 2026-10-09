@@ -12,7 +12,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self';
         base-uri 'none';
         object-src 'none';
-        script-src 'self' https://www.gstatic.com/firebasejs/ https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/ https://apis.google.com/ https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js 'sha256-AIBL0tC4iNNoKKwFcVeQsj034glNRfVxuUyzuCSYSiQ=' 'sha256-REiFfq6OotUrXGWxp84XojcMHah8Xjofp2pgS2BjRbM=' 'sha256-ZBDKI+cJWffsd+cXDpbTFeoXNCPy8uQD4RUYNTiPRSQ=' 'sha256-uV4aBHiZCTu/QP8mGNZ7XeoBcaVk5skARq1ZnzcADIw=' 'sha256-utYYx5qVnylo2gMZULKmJG8hNLajcNpGYKJuaVzT2NA=';
+        script-src 'self' https://www.gstatic.com/firebasejs/ https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/ https://apis.google.com/ https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js 'sha256-AIBL0tC4iNNoKKwFcVeQsj034glNRfVxuUyzuCSYSiQ=' 'sha256-REiFfq6OotUrXGWxp84XojcMHah8Xjofp2pgS2BjRbM=' 'sha256-ZBDKI+cJWffsd+cXDpbTFeoXNCPy8uQD4RUYNTiPRSQ=' 'sha256-rimaI+FtuF1c3L4GVF9/UsYoe2XWG+ejSJqdASdDVqI=' 'sha256-utYYx5qVnylo2gMZULKmJG8hNLajcNpGYKJuaVzT2NA=';
         script-src-attr 'unsafe-hashes'
         'sha256-+/PyyZxYlaRwGKBfLX4QqCPnBcKxzZ6EQ/FEMykrPlg='
         'sha256-+8Obkk1yhOE1TPaUpOo8d/udOL2qT2+5fc9UsR20blw='
@@ -816,6 +816,15 @@
         .cal-day.range-acc-start { background-color: var(--success-color); color: white; border-radius: 8px 0 0 8px; }
         .cal-day.range-acc-mid { background-color: #f0fff4; color: #276749; border-radius: 0; }
         .cal-day.range-acc-end { background-color: var(--success-color); color: white; border-radius: 0 8px 8px 0; }
+        #calendarModal .cal-day.range-past-single { background:#15803d; color:#fff; border-radius:8px; }
+        #calendarModal .cal-day.range-past-start { background:#15803d; color:#fff; border-radius:8px 0 0 8px; }
+        #calendarModal .cal-day.range-past-mid { background:#dcfce7; color:#166534; border-radius:0; }
+        #calendarModal .cal-day.range-past-end { background:#15803d; color:#fff; border-radius:0 8px 8px 0; }
+        .cal-challenge-track { position:absolute; bottom:1px; left:0; right:0; height:3px; background:#15803d; box-shadow:0 0 0 1px #ffffffb3; pointer-events:none; z-index:2; }
+        .cal-challenge-track.cal-track-curr { background:#0369a1; }
+        .cal-challenge-track.cal-track-best { background:#b45309; }
+        .cal-challenge-track.cal-track-start { left:3px; border-radius:3px 0 0 3px; }
+        .cal-challenge-track.cal-track-end { right:3px; border-top-right-radius:3px; border-bottom-right-radius:3px; }
         
         .cal-day.range-best-single { background-color: var(--warning-color); color: white; border-radius: 8px; box-shadow: 0 2px 6px rgba(243, 156, 18, 0.3); }
         .cal-day.range-best-start { background-color: var(--warning-color); color: white; border-radius: 8px 0 0 8px; }
@@ -852,6 +861,11 @@
             background: #dbeafe !important; border-color: #3b82f6;
             color: #1e3a8a !important; -webkit-text-fill-color: #1e3a8a !important;
             box-shadow: 0 0 8px rgba(59, 130, 246, 0.3); animation: none;
+        }
+        #calendarModal .cal-range-badge.cal-past-badge {
+            background:#dcfce7 !important; border-color:#15803d;
+            color:#14532d !important; -webkit-text-fill-color:#14532d !important;
+            bottom:14px; box-shadow:none; animation:none;
         }
         .cal-best-record-note { flex-basis: 100%; color: #92400e; font-size: 0.75rem; font-weight: 800; text-align: center; }
         #calendarModal .cal-record-break-notice { margin: 8px 0; padding: 10px; border: 2px solid #d97706; border-radius: 12px; background: #fffbeb; color: #78350f; text-align: left; }
@@ -1191,12 +1205,22 @@
         @media (max-width:420px) { #calendarModal .cal-environment { font-size:9px; } #calendarModal .cal-weather-temp { flex-direction:column; } #calendarModal .cal-temp-divider { display:none; } }
         @media (max-width:360px) { #calendarModal .modal-content { padding-left:10px; padding-right:10px; } #calendarModal .cal-days { column-gap:2px; } #calendarModal .cal-environment { margin-left:0; margin-right:0; padding-left:0; padding-right:0; font-size:9px; letter-spacing:-.4px; } }
         #calendarDaysGrid { touch-action:pan-y pinch-zoom; }
-        .cal-view-toolbar { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:6px 10px; margin:0 0 10px; }
-        .cal-view-options { display:inline-flex; gap:2px; padding:3px; border-radius:9px; background:#eef2f6; }
-        .cal-view-options button { appearance:none; border:0; border-radius:6px; background:transparent; color:#64748b; padding:6px 9px; min-height:32px; font-size:.72rem; font-weight:700; line-height:1.4; font-family:inherit; cursor:pointer; }
-        .cal-view-options button[aria-pressed="true"] { background:white; color:#0369a1; box-shadow:0 1px 4px #0f172a1a; }
+        #calLegendContainer { display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:6px; margin-bottom:8px; font-size:.7rem; }
+        #calLegendItems { display:contents; }
+        .cal-legend-item { display:inline-flex; align-items:center; gap:4px; }
+        .cal-legend-swatch { width:10px; height:10px; border-radius:2px; }
+        .cal-view-options { position:relative; isolation:isolate; display:inline-grid; grid-template-columns:1fr 1fr; flex:0 0 86px; width:86px; padding:2px; box-sizing:border-box; border-radius:999px; background:#e2e8f0; }
+        .cal-view-options::before { content:''; position:absolute; z-index:-1; top:2px; bottom:2px; left:2px; width:calc(50% - 2px); border-radius:999px; background:white; box-shadow:0 1px 4px #0f172a26; transition:transform .2s ease; }
+        .cal-view-options[data-view="detail"]::before { transform:translateX(100%); }
+        .cal-view-options button { appearance:none; border:0; border-radius:999px; background:transparent; color:#64748b; padding:3px 6px; min-height:28px; font-size:.7rem; font-weight:700; line-height:1.4; font-family:inherit; cursor:pointer; }
+        .cal-view-options button[aria-pressed="true"] { color:#0369a1; }
         .cal-view-options button:focus-visible { outline:2px solid #0284c7; outline-offset:1px; }
-        .cal-swipe-hint { color:#64748b; font-size:.67rem; line-height:1.5; }
+        .cal-swipe-hint { display:flex; align-items:center; justify-content:center; gap:8px; margin:7px 0; padding:5px 8px; border-radius:999px; background:#eff6ff; color:#075985; font-size:.73rem; line-height:1.5; }
+        .cal-swipe-icon { display:inline-block; font-size:1.2rem; line-height:1; animation:calendarSwipeCue 1.5s ease-in-out 3; }
+        .cal-swipe-hint.is-swiping { background:#dbeafe; color:#1e40af; font-weight:800; }
+        .cal-swipe-hint.is-swiping .cal-swipe-icon { animation:none; }
+        @keyframes calendarSwipeCue { 0%,100% { transform:translateX(0); } 25% { transform:translateX(-5px); } 75% { transform:translateX(5px); } }
+        @media (prefers-reduced-motion:reduce) { .cal-view-options::before { transition:none; } .cal-swipe-icon { animation:none; } }
         #calendarModal.cal-compact .modal-content { max-width:400px; }
         #calendarModal.cal-compact .cal-environment-panel,
         #calendarModal.cal-compact .cal-environment { display:none; }
@@ -2127,14 +2151,6 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
             <div class="cal-title" id="calMonthTitle" role="status" aria-live="polite" aria-atomic="true">2026년 5월</div>
             <button type="button" class="cal-btn" onclick="changeCalMonth(1)" aria-label="다음 달">&#10095;</button>
         </div>
-        <div class="cal-view-toolbar">
-            <div class="cal-view-options" role="group" aria-label="달력 보기 방식">
-                <button id="calCompactView" type="button" aria-pressed="false">축소 보기</button>
-                <button id="calDetailView" type="button" aria-pressed="true">상세 보기</button>
-            </div>
-            <span class="cal-swipe-hint">← 다음 달 · 이전 달 →</span>
-            <span id="calViewStatus" class="sr-only" role="status" aria-live="polite"></span>
-        </div>
         <div id="calRecordBreakNotice" class="cal-record-break-notice" hidden>
             <strong id="calRecordBreakTitle"></strong>
             <div id="calRecordBreakDetail"></div>
@@ -2210,15 +2226,20 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
             </div>
         </div>
         
-        <div id="calLegendContainer" style="margin-bottom: 15px; font-size: 0.8rem; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-            <!-- 모드에 따라 범례 동적 변경 -->
+        <div id="calLegendContainer">
+            <div class="cal-view-options" role="group" aria-label="달력 보기 방식" data-view="detail">
+                <button id="calCompactView" type="button" aria-pressed="false" aria-label="축소 달력 보기">축소</button>
+                <button id="calDetailView" type="button" aria-pressed="true" aria-label="상세 달력 보기">상세</button>
+            </div>
+            <div id="calLegendItems"></div>
+            <span id="calViewStatus" class="sr-only" role="status" aria-live="polite"></span>
         </div>
         <p class="cal-interaction-hint">날짜 <strong>짧게 누르기: 건강·진단 기록</strong><br>길게 누르기: 식사·음주·흡연 기록 · <span style="color:#0f766e;">●</span> 건강기록 있음</p>
-
+        <div class="cal-swipe-hint" id="calSwipeHint"><span class="cal-swipe-icon" aria-hidden="true">↔</span><span id="calSwipeText">달력을 <strong>좌우로 밀어</strong> 이전·다음 달 보기</span></div>
         <div class="cal-week">
             <div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div>
         </div>
-        <div class="cal-days" id="calendarDaysGrid">
+        <div class="cal-days" id="calendarDaysGrid" aria-describedby="calSwipeHint">
             <!-- JS 동적 생성 -->
         </div>
         
@@ -3746,7 +3767,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
     import { installCalendarEnvironment } from './calendar-environment.js?v=20261008-1';
     import { installAccountDeletion } from './account-deletion.js?v=20261009-1';
     import { createProgressChartPlugin, formatBestRankRange, distributionDensityPercent, distributionDayProbabilityPercent } from './progress-chart.js?v=20261008-1';
-    import { installCalendarNavigation } from './calendar-navigation.js?v=20261004-1';
+    import { installCalendarNavigation } from './calendar-navigation.js?v=20261009-1';
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
     import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, deleteDoc, collection, addDoc, query, orderBy, limit, onSnapshot, getDocs, where, startAfter, serverTimestamp, writeBatch, runTransaction } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, reauthenticateWithPopup } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
@@ -9476,6 +9497,16 @@ initPillIdentification();
         };
     }
 
+    function getCalendarChallengeRanges(challenges = allChallengesData, nowMs = Date.now()) {
+        return challenges.flatMap(challenge => {
+            const range = getChallengeRecordRange(challenge, nowMs);
+            // Missing recorded end dates must not turn an old attempt into a range ending today.
+            if (range.durationMs === null || range.startMs > nowMs) return [];
+            return [{ ...range, id: challenge.id, startKey: dateToKey(range.startMs),
+                endKey: dateToKey(Math.min(range.effectiveEndMs, nowMs)) }];
+        }).sort((a, b) => b.startMs - a.startMs || b.effectiveEndMs - a.effectiveEndMs);
+    }
+
     function renderCalendar(year, month, mode) {
         const calendarNow = new Date();
         const bestRecord = mode === 'longest' ? refreshLongestChallengeRecord(calendarNow.getTime()) : null;
@@ -9492,38 +9523,27 @@ initPillIdentification();
         updateCalendarMonthToDateAlcoholCompareUI();
         updateCalendarMedicationAlcoholCompareUI();
         
-        const legendContainer = document.getElementById('calLegendContainer');
-        const alcoholLegendHtml = `
-            <div style="display:flex; align-items:center; gap:4px; margin-top: 4px;">
-                <span style="display:inline-block; width:28px; height:10px; background:linear-gradient(90deg, #fde68a, #f97316, #b91c1c); border:1px solid #fbbf24; border-radius:999px;"></span>
-                음주량 낮음~높음
-            </div>
-        `;
-        if (mode === 'current') {
-            legendContainer.innerHTML = `
-                <div><span style="display:inline-block; width:10px; height:10px; background:var(--primary-color); border-radius:2px;"></span> 현재 기록</div>
-                ${alcoholLegendHtml}
-            `;
-        } else if (mode === 'longest') {
-            legendContainer.innerHTML = `
-                <div><span style="display:inline-block; width:10px; height:10px; background:var(--warning-color); border-radius:2px;"></span> 최장 금주 구간</div>
-                ${alcoholLegendHtml}
-                <div class="cal-best-record-note">${globalBestStartDate
-                    ? `${formatDateShortKo(globalBestStartDate)} ~ ${formatDateShortKo(globalBestEndDate)}${bestRecord?.isActive ? ' (진행중)' : ''} · 시작일과 ${bestRecord?.isActive ? '진행중인 오늘' : '종료일'}을 배지로 표시합니다.`
-                    : '표시할 최장 단주 기록이 없습니다.'}</div>
-            `;
-        } else {
-            legendContainer.innerHTML = `
-                <div><span style="display:inline-block; width:10px; height:10px; background:var(--success-color); border-radius:2px;"></span> 과거 성공구간</div>
-                <div style="display:flex; align-items:center; gap:4px; margin-top: 4px;">
-                    <span style="display:inline-block; width:10px; height:10px; background:hsl(120,85%,45%); border:1px solid #ddd; position:relative; border-radius:2px;"><span style="position:absolute; font-size:6px; top:-2px; left:-1px;">❌</span></span>
-                    ~
-                    <span style="display:inline-block; width:10px; height:10px; background:hsl(0,85%,45%); border:1px solid #ddd; position:relative; border-radius:2px;"><span style="position:absolute; font-size:6px; top:-2px; left:-1px;">❌</span></span>
-                    실패한 날
-                </div>
-                ${alcoholLegendHtml}
-            `;
+        // Keep the view toggle mounted while replacing only the mode-specific legend.
+        const legendItems = document.getElementById('calLegendItems');
+        const currentLegend = '<span class="cal-legend-item" title="현재 도전 기간" aria-label="현재 도전 기간"><span class="cal-legend-swatch" style="background:var(--primary-color);"></span>현재</span>';
+        const pastLegend = '<span class="cal-legend-item" title="지난 도전 기간" aria-label="지난 도전 기간"><span class="cal-legend-swatch" style="background:#15803d;"></span>과거</span>';
+        const alcoholLegend = '<span class="cal-legend-item"><span style="width:22px; height:8px; background:linear-gradient(90deg,#fde68a,#f97316,#b91c1c); border-radius:999px;"></span>음주량</span>';
+        legendItems.innerHTML = (mode === 'longest'
+            ? '<span class="cal-legend-item" title="최장 금주 구간" aria-label="최장 금주 구간"><span class="cal-legend-swatch" style="background:var(--warning-color);"></span>최장</span>' + currentLegend
+            : currentLegend) + pastLegend + alcoholLegend;
+        if (mode === 'longest') {
+            const note = document.createElement('span');
+            note.className = 'cal-best-record-note';
+            note.textContent = globalBestStartDate
+                ? `${formatDateShortKo(globalBestStartDate)} ~ ${formatDateShortKo(globalBestEndDate)}${bestRecord?.isActive ? ' (진행중)' : ''} · 시작일과 ${bestRecord?.isActive ? '진행중인 오늘' : '종료일'}을 배지로 표시합니다.`
+                : '표시할 최장 단주 기록이 없습니다.';
+            legendItems.append(note);
         }
+        const calendarChallenges = [...allChallengesData];
+        if (userQuitDate && !calendarChallenges.some(challenge => challenge.id === currentChallengeId && challenge.status === 'active')) {
+            calendarChallenges.push({ id: currentChallengeId, startDate: userQuitDate, status: 'active' });
+        }
+        const calendarRanges = getCalendarChallengeRanges(calendarChallenges, calendarNow.getTime());
 
         const firstDay = new Date(year, month, 1).getDay();
         const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -9582,90 +9602,35 @@ initPillIdentification();
             const failedChallengeForDay = findFailedChallengeByDate(iterDateStrCal);
             const alcoholRecordForDay = getAlcoholRecordForDate(iterDateStrCal);
 
-            if (mode === 'current' && userQuitDate) {
-                const sDate = new Date(userQuitDate); sDate.setHours(0,0,0,0);
-                const eDate = today;
-                
-                const isStart = iterTime === sDate.getTime();
-                const isEnd = iterTime === eDate.getTime();
-                
-                if (iterTime >= sDate.getTime() && iterTime <= eDate.getTime()) {
-                    if (isStart && isEnd) classList.push('range-curr-single');
-                    else if (isStart) classList.push('range-curr-start');
-                    else if (isEnd) classList.push('range-curr-end');
-                    else classList.push('range-curr-mid');
-                    if (isStart || isEnd) {
-                        const labels = [];
-                        const descriptions = [];
-                        classList.push('cal-range-marker');
-                        if (isStart) {
-                            labels.push('시작');
-                            descriptions.push('현재 단주 도전 시작일');
-                        }
-                        if (isEnd) {
-                            labels.push('진행중');
-                            descriptions.push('현재 단주 도전 진행중');
-                        }
-                        if (labels.length > 1) classList.push('cal-range-multiple');
-                        calendarRangeBadge = `<span class="cal-range-badge cal-ongoing-badge" aria-hidden="true">${labels.join('<br>')}</span>`;
-                        calendarRangeDescription = descriptions.join(' · ');
+            const rangesForDay = calendarRanges.filter(range => range.startKey <= iterDateStrCal && range.endKey >= iterDateStrCal);
+            // The selected record stays prominent; other attempts remain visible in every month.
+            const dayRange = (mode === 'longest' && rangesForDay.find(range => range.id === bestRecord?.id))
+                || rangesForDay.find(range => range.id === currentChallengeId && range.isActive)
+                || rangesForDay[0];
+            let calendarRangeTrack = '';
+            if (dayRange) {
+                const kind = mode === 'longest' && dayRange.id === bestRecord?.id ? 'best' : dayRange.isActive ? 'curr' : 'past';
+                const isStart = iterDateStrCal === dayRange.startKey;
+                const isEnd = iterDateStrCal === dateToKey(dayRange.effectiveEndMs);
+                classList.push(`range-${kind}-${isStart && isEnd ? 'single' : isStart ? 'start' : isEnd ? 'end' : 'mid'}`);
+                calendarRangeTrack = `<span class="cal-challenge-track cal-track-${kind}${isStart ? ' cal-track-start' : ''}${isEnd ? ' cal-track-end' : ''}" aria-hidden="true"></span>`;
+                calendarRangeDescription = rangesForDay.map(range =>
+                    `${range.isActive ? '현재 도전' : '지난 도전'} ${formatDateShortKo(range.startMs)} ~ ${formatDateShortKo(range.effectiveEndMs)}${range.isActive ? ' 진행중' : ''}`
+                ).join(' · ');
+                if (isStart || isEnd) {
+                    const labels = [];
+                    classList.push('cal-range-marker');
+                    if (isStart) {
+                        labels.push('시작');
+                        if (kind === 'best') classList.push('cal-best-start-focus');
                     }
+                    if (isEnd) labels.push(dayRange.isActive ? '진행중' : '종료');
+                    if (labels.length > 1) classList.push('cal-range-multiple');
+                    const badgeClass = kind === 'best' && isStart ? 'cal-best-start-badge' : 'cal-range-badge';
+                    const colorClass = kind === 'past' ? ' cal-past-badge' : kind === 'curr' || (isEnd && dayRange.isActive && !isStart) ? ' cal-ongoing-badge' : '';
+                    calendarRangeBadge = `<span class="${badgeClass}${colorClass}" aria-hidden="true">${labels.join('<br>')}</span>`;
+                    calendarRangeDescription += ` · ${kind === 'best' ? '최장 단주 기록 ' : ''}${labels.join(' · ')}`;
                 }
-            } 
-            else if (mode === 'longest') {
-                if (globalBestStartDate) {
-                    const sd = new Date(globalBestStartDate); sd.setHours(0,0,0,0);
-                    const ed = globalBestEndDate ? new Date(globalBestEndDate) : new Date(); ed.setHours(0,0,0,0);
-
-                    const isStart = iterTime === sd.getTime();
-                    const isEnd = iterTime === ed.getTime();
-
-                    if (isStart || isEnd) {
-                        const labels = [];
-                        const descriptions = [];
-                        classList.push('cal-range-marker');
-                        if (isStart) {
-                            classList.push('cal-best-start-focus');
-                            labels.push('시작');
-                            descriptions.push('최장 단주 기록 시작일');
-                        }
-                        if (isEnd) {
-                            labels.push(bestRecord?.isActive ? '진행중' : '종료');
-                            descriptions.push(bestRecord?.isActive ? '최장 단주 기록 진행중' : '최장 단주 기록 종료일');
-                        }
-                        if (labels.length > 1) classList.push('cal-range-multiple');
-                        const badgeClass = isStart ? 'cal-best-start-badge' : 'cal-range-badge';
-                        const ongoingClass = isEnd && bestRecord?.isActive && !isStart ? ' cal-ongoing-badge' : '';
-                        calendarRangeBadge = `<span class="${badgeClass}${ongoingClass}" aria-hidden="true">${labels.join('<br>')}</span>`;
-                        calendarRangeDescription = descriptions.join(' · ');
-                    }
-                    if (iterTime >= sd.getTime() && iterTime <= ed.getTime()) {
-                        if (isStart && isEnd) classList.push('range-best-single');
-                        else if (isStart) classList.push('range-best-start');
-                        else if (isEnd) classList.push('range-best-end');
-                        else classList.push('range-best-mid');
-                    }
-                }
-            }
-            else if (mode === 'accumulated') {
-                allChallengesData.forEach(c => {
-                    const sd = new Date(c.startDate); sd.setHours(0,0,0,0);
-                    const ed = new Date(c.endDate); ed.setHours(0,0,0,0);
-                    
-                    const isStart = iterTime === sd.getTime();
-                    const isEnd = iterTime === ed.getTime();
-                    
-                    if (iterTime >= sd.getTime() && iterTime <= ed.getTime()) {
-                        if (isStart && isEnd) classList.push('range-acc-single');
-                        else if (isStart) classList.push('range-acc-start');
-                        else if (isEnd) classList.push('range-acc-end');
-                        else classList.push('range-acc-mid');
-                    }
-                    
-                    if (c.status === 'failed' && isEnd) {
-                        if (!classList.includes('fail-mark')) classList.push('fail-mark');
-                    }
-                });
             }
 
             if (recordBreak?.dateKey === iterDateStrCal) {
@@ -9734,7 +9699,7 @@ initPillIdentification();
             const hasHealthEntry = hr.entries.some(entry => entry.date === iterDateStrCal);
             const healthBadge = hasHealthEntry ? '<span class="cal-health-dot" aria-hidden="true"></span>' : '';
             const dateLabel = `aria-label="${iterDateStrCal}${calendarRangeDescription ? ', ' + calendarRangeDescription : ''}, 건강기록${hasHealthEntry ? ' 있음' : ' 추가'}"${calendarRangeDescription ? ` title="${calendarRangeDescription}"` : ''}`;
-            dayHtml.push(`<div class="${classList.join(' ')}" ${customStyle} ${dateLabel} role="button" tabindex="0" data-date="${iterDateStrCal}" onpointerdown="startPress(event, this)" onpointermove="moveCalendarPress(event)" onpointerup="cancelPress()" onpointerleave="cancelPress()" onpointercancel="cancelCalendarGesture()" oncontextmenu="event.preventDefault()"><span class="cal-day-number">${day}</span>${cravingBadge}${cBadge}${logBadge}${calendarRangeBadge}${healthBadge}</div>`);
+            dayHtml.push(`<div class="${classList.join(' ')}" ${customStyle} ${dateLabel} role="button" tabindex="0" data-date="${iterDateStrCal}" onpointerdown="startPress(event, this)" onpointermove="moveCalendarPress(event)" onpointerup="cancelPress()" onpointerleave="cancelPress()" onpointercancel="cancelCalendarGesture()" oncontextmenu="event.preventDefault()"><span class="cal-day-number">${day}</span>${cravingBadge}${cBadge}${logBadge}${calendarRangeBadge}${calendarRangeTrack}${healthBadge}</div>`);
         }
         grid.innerHTML = dayHtml.join('');
         grid.querySelectorAll('.cal-day[data-date]').forEach(cell => {

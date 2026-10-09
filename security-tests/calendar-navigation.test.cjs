@@ -10,7 +10,8 @@ const tick=()=>new Promise(resolve=>setTimeout(resolve,0));
 
 async function fixture(t,{saved,storageBlocked=false}={}) {
     const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
-    const toolbar=html.match(/<div class="cal-view-toolbar">[\s\S]*?<span id="calViewStatus"[\s\S]*?<\/span>\s*<\/div>/)[0];
+    const toolbar=html.match(/<div id="calLegendContainer">[\s\S]*?<span id="calViewStatus"[\s\S]*?<\/span>\s*<\/div>/)[0]
+        + html.match(/<div class="cal-swipe-hint"[\s\S]*?<\/div>/)[0];
     const dom=new JSDOM(`<div id="calendarModal">${toolbar}<div id="calendarDaysGrid"><div class="cal-day" data-date="2026-10-04" role="button" tabindex="0">4</div></div></div>`,{url:'https://fixture.invalid'});
     t.after(()=>dom.window.close());
     const win=dom.window,doc=win.document,grid=doc.getElementById('calendarDaysGrid'),day=grid.firstElementChild;
@@ -32,7 +33,10 @@ async function fixture(t,{saved,storageBlocked=false}={}) {
 
 test('left/right swipe changes one month, blocks the generated click, and allows the next tap',async t=>{
     const f=await fixture(t);
-    f.pointer('pointerdown',250,40);f.time(70);f.pointer('pointermove',170,44);f.time(150);f.pointer('pointerup',80,45);await tick();
+    f.pointer('pointerdown',250,40);f.time(70);f.pointer('pointermove',170,44);
+    assert.equal(f.doc.getElementById('calSwipeText').textContent,'놓으면 다음 달');
+    f.time(150);f.pointer('pointerup',80,45);await tick();
+    assert.match(f.doc.getElementById('calSwipeText').textContent,/좌우로 밀어/);
     assert.deepEqual(f.navigations,[1]);assert(f.cancelled()>0);
     f.click();assert.equal(f.clicks(),0);
     f.pointer('pointerdown',80,45);f.pointer('pointerup',80,45);f.click();assert.equal(f.clicks(),1);
@@ -90,6 +94,7 @@ test('multi-touch and lost focus cancel a swipe; keyboard clicks and right butto
 test('compact/detail selection restores and persists without affecting the date nodes',async t=>{
     const f=await fixture(t,{saved:'compact'});
     assert(f.ui.isCompact());assert.equal(f.doc.getElementById('calCompactView').getAttribute('aria-pressed'),'true');
+    assert.equal(f.doc.querySelector('#calLegendContainer .cal-view-options').dataset.view,'compact');
     f.doc.getElementById('calDetailView').click();assert(!f.ui.isCompact());
     assert.equal(f.win.localStorage.getItem('alcoholaway-calendar-view'),'detail');
     f.doc.getElementById('calCompactView').click();assert(f.ui.isCompact());
