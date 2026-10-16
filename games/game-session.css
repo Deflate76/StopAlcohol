@@ -1,0 +1,15 @@
+[hidden] { display:none!important; }
+.game-auth-gate { position:fixed; inset:0; display:grid; place-content:center; padding:28px; text-align:center; background:#090f1d; color:#e2e8f0; font:16px/1.7 system-ui,sans-serif; }
+.game-auth-gate a { color:#83ffe0; }
+.game-account-bar { display:flex; align-items:center; justify-content:space-between; gap:10px; margin:0 0 15px; font:12px/1.5 system-ui,sans-serif; }
+.game-account-bar button,.game-history button { padding:9px 12px; border:1px solid #395069; border-radius:9px; background:#111e30; color:#deebff; font:inherit; cursor:pointer; min-height:40px; }
+#gameUserBadge { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
+.game-history { margin:18px 0 0; padding:16px; border:1px solid #29435a; border-radius:14px; background:#091522; color:#d2e3ed; font:13px/1.6 system-ui,sans-serif; }
+.game-history-heading { display:flex; gap:10px; align-items:center; justify-content:space-between; }
+.game-history h2 { margin:0; font-size:15px; }
+.game-history ol { list-style:none; padding:0; margin:10px 0 0; max-height:240px; overflow:auto; }
+.game-history li { display:flex; justify-content:space-between; flex-wrap:wrap; gap:5px 12px; padding:9px 0; border-top:1px solid #233448; }
+.game-history li span { color:#9eafc5; font-size:11px; }
+.game-history p { margin:8px 0; font-size:12px; }
+.game-history .is-error { color:#ffb7a6; }
+@media(max-width:360px) { .game-account-bar { font-size:11px; } .game-history { padding:12px; } }

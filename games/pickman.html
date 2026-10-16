@@ -173,7 +173,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBWDwueP3a0atxCqFIgqd96sgXc0EqYbEY",
@@ -388,29 +388,33 @@ const db = getFirestore(firebaseApp);
 
   async function loadScoreHistory() {
     if (!currentUser) return;
+    const owner = currentUser.uid;
     if (refreshHistoryButton) refreshHistoryButton.disabled = true;
     setHistoryStatus('점수 기록을 불러오는 중입니다.');
     try {
       const historyQuery = query(
-        collection(db, 'users', currentUser.uid, 'game_scores'),
-        orderBy('playedAt', 'desc'),
-        limit(20)
+        collection(db, 'users', owner, 'game_scores'),
+        where('gameId', '==', 'pickman')
       );
       const snapshot = await getDocs(historyQuery);
-      const records = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+      if (currentUser?.uid !== owner) return;
+      const records = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }))
+        .sort((a,b) => Number(b.playedAt) - Number(a.playedAt)).slice(0,20);
       renderScoreHistory(records);
       setHistoryStatus(records.length ? '최근 점수 기록을 불러왔습니다.' : '첫 점수를 기다리고 있습니다.');
     } catch (error) {
+      if (currentUser?.uid !== owner) return;
       console.error('점수 히스토리 불러오기 실패:', error);
       renderScoreHistory([]);
       setHistoryStatus(`점수 기록을 불러오지 못했습니다: ${error.message}`, true);
     } finally {
-      if (refreshHistoryButton) refreshHistoryButton.disabled = false;
+      if (currentUser?.uid === owner && refreshHistoryButton) refreshHistoryButton.disabled = false;
     }
   }
 
   async function saveScoreSnapshot(outcome, checkpoint) {
     if (!currentUser || !currentRunId) return false;
+    const owner = currentUser.uid;
     const saveKey = `${currentRunId}|${outcome}|${checkpoint}|${game.score}|${game.round}|${game.gold}`;
     if (savedScoreKeys.has(saveKey)) return true;
     savedScoreKeys.add(saveKey);
@@ -433,10 +437,12 @@ const db = getFirestore(firebaseApp);
         playedAt: Date.now(),
         createdAt: serverTimestamp()
       });
+      if (currentUser?.uid !== owner) return true;
       setHistoryStatus(`${outcomeLabel(outcome)} 점수가 저장되었습니다.`);
       await loadScoreHistory();
       return true;
     } catch (error) {
+      if (currentUser?.uid !== owner) return false;
       savedScoreKeys.delete(saveKey);
       console.error('점수 저장 실패:', error);
       setHistoryStatus(`점수 저장에 실패했습니다: ${error.message}`, true);
@@ -1005,11 +1011,18 @@ const db = getFirestore(firebaseApp);
     }
   });
 
+  let authRedirectTimer = 0;
   onAuthStateChanged(auth, async user => {
+    clearTimeout(authRedirectTimer);
+    if (currentUser?.uid !== user?.uid) {
+      game.state = 'title'; currentRunId = ''; pendingScoreSavePromise = null;
+      savedScoreKeys.clear(); renderScoreHistory([]); game.score = 0;
+      gameApp.hidden = true; authGate.classList.remove('is-hidden');
+    }
     if (!user) {
       currentUser = null;
       setAuthGateText('로그인이 필요합니다', '즐거운 게임은 금주 서바이벌 리포트에 로그인한 사용자만 이용할 수 있습니다. 로그인 화면으로 이동합니다.');
-      window.setTimeout(() => window.location.replace('../index.html?gameLoginRequired=1'), 450);
+      authRedirectTimer = window.setTimeout(() => window.location.replace('../index.html?gameLoginRequired=1'), 450);
       return;
     }
 

@@ -28,7 +28,7 @@ test('main timer moves success rate into the former rank location and keeps risk
     vm.createContext(context);vm.runInContext(extract('buildStreakRecordBadgeHtml')+extract('buildMainDaysContainerHtml'),context);
     const dom=new JSDOM(context.buildMainDaysContainerHtml(45,125,98)),d=dom.window.document;
     assert.equal(d.querySelectorAll('.success-rate-box').length,1);assert(d.querySelector('.streak-record-info .success-rate-box'));assert.equal(d.querySelector('#streakCurrentRank'),null);
-    assert.match(d.querySelector('.success-rate-box').textContent,/달성률 98%/);
+    assert.match(d.querySelector('.success-rate-box').textContent,/금주율 98%/);
     assert.equal(d.querySelector('[onclick*="openAlcohol"]'),null);assert(source.includes('id="alcoholDiseaseTab"'));assert(source.includes('id="alcoholDiseaseSection"'));
     dom.window.close();
 });

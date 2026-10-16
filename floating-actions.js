@@ -1,4 +1,4 @@
-// Both disclosures keep existing modal handlers and restore focus before opening them.
+// All disclosures keep existing modal handlers and restore focus before opening them.
 const disclosures = [];
 function installDisclosure(prefix, label, closeName) {
     const root = document.getElementById(`${prefix}Menu`);
@@ -50,3 +50,5 @@ function installDisclosure(prefix, label, closeName) {
 }
 installDisclosure('floatingAction', '빠른 기능', 'closeFloatingActionMenu');
 installDisclosure('floatingCraving', '갈망', 'closeFloatingCravingMenu');
+
+installDisclosure('floatingRecord', '기록', 'closeFloatingRecordMenu');

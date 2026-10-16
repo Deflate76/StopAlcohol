@@ -25,6 +25,7 @@ export function createProgressChartPlugin(Chart, win = window, dom = document) {
         const annotation = annotations[id];
         return {id, annotation, x: chart.scales.x?.getPixelForValue(Number(annotation?.xMin))};
     };
+    const annotationValue = chart => position(chart).annotation?.xMin;
     function animate(chart, state) {
         if (state.frame || state.motion.matches || dom.hidden || !state.visible || state.destroyed) return;
         state.frame = win.requestAnimationFrame(time => {
@@ -80,13 +81,23 @@ export function createProgressChartPlugin(Chart, win = window, dom = document) {
             line.path(ctx);
             ctx.lineTo(last.x, area.bottom); ctx.lineTo(first.x, area.bottom);
             ctx.closePath(); ctx.clip();
-            ctx.fillStyle = 'rgba(231, 76, 60, 0.035)';
-            ctx.fillRect(area.left, area.top, right-area.left, height);
-            ctx.strokeStyle = 'rgba(231, 76, 60, 0.18)'; ctx.lineWidth = 6;
-            ctx.setLineDash([]);
-            for (let start = area.left-height-24+state.offset; start < right+24; start += 24) {
-                ctx.beginPath(); ctx.moveTo(start, area.bottom); ctx.lineTo(start+height, area.top); ctx.stroke();
-            }
+            const best = chart.$previousBestDays;
+            const boundary = Number.isFinite(best) && Number(annotationValue(chart)) > best
+                ? Math.max(area.left, Math.min(right, chart.scales.x.getPixelForValue(best))) : right;
+            const stripe = (left, end, record) => {
+                if (end <= left) return;
+                ctx.save(); ctx.beginPath(); ctx.rect(left, area.top, end-left, height); ctx.clip();
+                ctx.fillStyle = record ? 'rgba(124, 58, 237, 0.28)' : 'rgba(231, 76, 60, 0.035)';
+                ctx.fillRect(left, area.top, end-left, height);
+                ctx.strokeStyle = record ? 'rgba(109, 40, 217, 0.65)' : 'rgba(231, 76, 60, 0.18)';
+                ctx.lineWidth = 6; ctx.setLineDash([]);
+                for (let start = area.left-height-24+state.offset; start < end+24; start += 24) {
+                    ctx.beginPath(); ctx.moveTo(start, area.bottom); ctx.lineTo(start+height, area.top); ctx.stroke();
+                }
+                ctx.restore();
+            };
+            stripe(area.left, boundary, false);
+            stripe(boundary, right, true);
             ctx.restore();
         },
         afterDraw(chart) {
