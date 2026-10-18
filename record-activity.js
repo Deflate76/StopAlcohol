@@ -94,6 +94,37 @@ export function formatRecordDuration(ms) {
     return `${Math.floor(seconds / 86400)}일 ${Math.floor(seconds / 3600) % 24}시간 ${Math.floor(seconds / 60) % 60}분 ${seconds % 60}초`;
 }
 
+// Compare complete elapsed durations, not the count of attempts that reached
+// today's rounded-down day count. Retain all source rows so a live overtake can
+// reveal the next neighbor without another read.
+export function getStreakRankContext(rows, nowMs = Date.now()) {
+    const ranked = rows.map((row, index) => ({...row, originalIndex:row.originalIndex ?? index,
+        durationMs:row.isActive && Number.isFinite(row.startMs) ? nowMs - row.startMs : row.durationMs
+    })).filter(row => Number.isFinite(row.startMs) && row.startMs <= nowMs
+        && Number.isFinite(row.durationMs) && row.durationMs >= 0
+        && (row.isActive || (Number.isFinite(row.endMs) && row.endMs <= nowMs)))
+        .sort((a,b) => b.durationMs - a.durationMs || a.startMs - b.startMs || a.originalIndex - b.originalIndex);
+    const counts = new Map();
+    for (const row of ranked) counts.set(row.durationMs, (counts.get(row.durationMs) || 0) + 1);
+    let rank = 0, previousDuration;
+    ranked.forEach((row,index) => {
+        if (row.durationMs !== previousDuration) rank = index + 1;
+        row.durationRank = rank; row.tiedRank = counts.get(row.durationMs) > 1; previousDuration = row.durationMs;
+    });
+    const current = ranked.find(row => row.isCurrent);
+    if (!current) return {ranked, current:null, neighbors:[], key:'empty'};
+    const ranks = [...new Set(ranked.map(row => row.durationRank))], at = ranks.indexOf(current.durationRank);
+    const included = new Set(ranks.slice(Math.max(0,at-1),at+2));
+    const neighbors = ranked.filter(row => included.has(row.durationRank)).map(row => {
+        const difference = current.durationMs - row.durationMs;
+        return {...row, difference,
+            differenceText:difference === 0 ? '현재 기록과 같은 유지기간' : `현재가 ${formatRecordDuration(Math.abs(difference))} ${difference < 0 ? '짧음' : '더 길음'}`,
+            gapMs:!row.isCurrent && Number.isFinite(row.endMs) && row.endMs <= current.startMs ? current.startMs - row.endMs : null};
+    });
+    return {ranked, current, neighbors,
+        key:JSON.stringify([ranked.length, ...neighbors.map(row => [row.originalIndex,row.durationRank,row.tiedRank,row.isCurrent,row.isActive])])};
+}
+
 export function compareStreakRecords(rows, nowMs = Date.now()) {
     const current = rows.find(row => row.isCurrent);
     const previous = current && rows.find(row => row.ordinal === current.ordinal - 1);

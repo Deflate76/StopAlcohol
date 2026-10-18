@@ -12,7 +12,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self';
         base-uri 'none';
         object-src 'none';
-        script-src 'self' https://www.gstatic.com/firebasejs/ https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/ https://apis.google.com/ https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js 'sha256-AIBL0tC4iNNoKKwFcVeQsj034glNRfVxuUyzuCSYSiQ=' 'sha256-REiFfq6OotUrXGWxp84XojcMHah8Xjofp2pgS2BjRbM=' 'sha256-VB28fmlhbaV0WslFBT2pxLfsacrCRxI/ZFk0IDb0WYg=' 'sha256-ZBDKI+cJWffsd+cXDpbTFeoXNCPy8uQD4RUYNTiPRSQ=' 'sha256-utYYx5qVnylo2gMZULKmJG8hNLajcNpGYKJuaVzT2NA=';
+        script-src 'self' https://www.gstatic.com/firebasejs/ https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/ https://apis.google.com/ https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js 'sha256-AIBL0tC4iNNoKKwFcVeQsj034glNRfVxuUyzuCSYSiQ=' 'sha256-AZ0n9nzxhG6BtZi9wp8Z5Lp1HEz1WD4vfpZ4B0FcTa4=' 'sha256-REiFfq6OotUrXGWxp84XojcMHah8Xjofp2pgS2BjRbM=' 'sha256-ZBDKI+cJWffsd+cXDpbTFeoXNCPy8uQD4RUYNTiPRSQ=' 'sha256-utYYx5qVnylo2gMZULKmJG8hNLajcNpGYKJuaVzT2NA=';
         script-src-attr 'unsafe-hashes'
         'sha256-+/PyyZxYlaRwGKBfLX4QqCPnBcKxzZ6EQ/FEMykrPlg='
         'sha256-+8Obkk1yhOE1TPaUpOo8d/udOL2qT2+5fc9UsR20blw='
@@ -24,6 +24,7 @@
         'sha256-0PXE3q24pPIA7jk1OXUzJjgywSy95ly693BmyRwFgB8='
         'sha256-1++QAvqtho/UDL3rTjMe0D17/i7bDbMIiDexahj+YGA='
         'sha256-1HCaRD+geCUWl4EqilvZrCz19tMKQoCPTRVJm6Swv0U='
+        'sha256-1YFY2MoHtWjz5xJu+sIWZamJkHH/Asw0QLuwLIS8jP4='
         'sha256-1ZvyDf/6qpqzQ5ReNzQYoChdxAkAzjYd9zToFDFDJ3g='
         'sha256-2csOLYEEVBatwTczoC35/jPLib07jcJOtwx9JQZISv4='
         'sha256-2goXM1myluCcryceI80C+yuJfDm1W75lrOcjhnrY9vE='
@@ -121,7 +122,6 @@
         'sha256-P/MNlNpNvAi2xbTGmiRODMDob1QyARZf/hQWeIOfRkg='
         'sha256-P62/SEXrtnVPKlqM/RAbXC5n/zz79dwRjj22Js0S1Gc='
         'sha256-PT6+L5K54OKvbI1JRqgEiBaJGZg4XOtwb40BrOA9EwA='
-        'sha256-PzbDF0fFF4J+9iCtuCBiQorHXYGliKxbNPfm64eCSZM='
         'sha256-QM7NPqOrZoFF8yXd5KuioGgZ/dlUQa4PJdMQHjthxoU='
         'sha256-QOzOGKC1leTnS60dBV/WMphxfCOloe88bfL65OQH2SM='
         'sha256-QWVA031llAN4jsmmWB0SzH+EXvoP2IRuZC0uxyw9PME='
@@ -706,7 +706,13 @@
         .history-create-btn:focus-visible { outline: 2px solid #15803d; outline-offset: 2px; }
         #streakRecordsModal { z-index: 2400; }
         #streakRecordsModal[hidden], #logoutConfirmModal[hidden] { display: none !important; }
-        .streak-records-table { min-width: 340px; }
+        .accumulated-records-table.streak-records-table { min-width: 0; }
+        .streak-records-table .accumulated-record-date { font-size:.75rem; }
+        @media(max-width:480px) { .streak-record-year { display:block; } }
+        .streak-records-table .streak-record-relation { display:block; color:#64748b; font-size:.65rem; margin-top:4px; word-break:keep-all; }
+        .streak-records-table col:first-child { width:54px; }
+        .accumulated-records-table.streak-records-table td { padding:10px 3px; }
+        .streak-records-table .streak-gap-row td { padding:0 4px 8px; }
         .streak-record-number { display: block; font-weight: 850; white-space: nowrap; margin-bottom: 3px; }
         #streakRecordsModal tr.is-current { background: #eff6ff; }
         #logoutConfirmModal { z-index: 3000; }
@@ -2702,19 +2708,19 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
     </div>
 </div>
 
-<!-- 현재 연속 단주 일수를 달성한 1번째~n번째 기록 -->
+<!-- 현재 기록의 바로 위·아래 유지기간 순위 비교 -->
 <div id="streakRecordsModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="streakRecordsTitle" hidden>
     <div class="modal-content" style="max-width: 540px;">
         <button type="button" class="close-btn-top" onclick="closeHealthDialog('streakRecordsModal')" aria-label="달성 기록 닫기">&times;</button>
-        <h3 id="streakRecordsTitle" style="margin-top: 0; padding-right: 30px;">🏅 연속 단주 달성 기록</h3>
+        <h3 id="streakRecordsTitle" style="margin-top: 0; padding-right: 30px;">🏅 내 단주 기록 순위</h3>
         <p id="streakRecordsSummary" class="accumulated-records-summary" role="status" aria-live="polite"></p>
         <p class="accumulated-records-help">열 제목을 누르면 정렬 순서가 바뀝니다. ↑ 오름차순 · ↓ 내림차순</p>
         <div id="streakRecordsTableWrap" class="accumulated-records-table-wrap" hidden>
-            <table class="accumulated-records-table streak-records-table" aria-label="달성 순번별 시작일, 종료일, 유지기간">
-                <colgroup><col style="width: 58px;"><col><col><col></colgroup>
+            <table class="accumulated-records-table streak-records-table" aria-label="현재와 인접 순위 기록의 시작일, 종료일, 유지기간 및 차이">
+                <colgroup><col><col><col><col></colgroup>
                 <thead>
                     <tr>
-                        <th scope="col" data-sort-key="ordinal" aria-sort="ascending"><button type="button" onclick="sortStreakRecords('ordinal')">기록 <span data-sort-indicator aria-hidden="true">↑</span></button></th>
+                        <th scope="col" data-sort-key="rank" aria-sort="ascending"><button type="button" onclick="sortStreakRecords('rank')">순위 <span data-sort-indicator aria-hidden="true">↑</span></button></th>
                         <th scope="col" data-sort-key="start" aria-sort="none"><button type="button" onclick="sortStreakRecords('start')">시작일 <span data-sort-indicator aria-hidden="true">↕</span></button></th>
                         <th scope="col" data-sort-key="end" aria-sort="none"><button type="button" onclick="sortStreakRecords('end')">종료일 <span data-sort-indicator aria-hidden="true">↕</span></button></th>
                         <th scope="col" data-sort-key="duration" aria-sort="none"><button type="button" onclick="sortStreakRecords('duration')">유지기간 <span data-sort-indicator aria-hidden="true">↕</span></button></th>
@@ -2723,7 +2729,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
                 <tbody id="streakRecordsBody"></tbody>
             </table>
         </div>
-        <p class="accumulated-records-help">현재 도전 일수 이상을 유지한 기록을 첫 번째부터 현재 기록까지 표시합니다. 진행 중인 유지기간과 앞선 기록과의 차이는 초마다 갱신됩니다. 기록 사이에는 이전 종료일부터 이번 시작일까지의 공백도 표시합니다.</p>
+        <p class="accumulated-records-help">유지기간이 긴 순서로 현재와 바로 위·아래 순위의 기록을 표시합니다. 같은 유지기간은 공동 순위이며 인접한 실제 순위를 함께 보여줍니다. 유지기간·차이·순위는 초마다 갱신됩니다. 도전 사이의 공백은 별도로 표시합니다.</p>
         <button type="button" class="stat-btn" style="margin-top: 12px;" onclick="closeHealthDialog('streakRecordsModal')">닫기</button>
     </div>
 </div>
@@ -3817,7 +3823,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
     import { currentRecoveryGoals, recoveryGoalsHtml } from './recovery-goals.js?v=20261009-2';
     import { installCommunityFeed } from './community-feed.js?v=20261009-3';
     import { installDailySchedules } from './daily-schedules.js?v=20260928-2';
-    import { formatRecordDuration, compareStreakRecords } from './record-activity.js?v=20261005-1';
+    import { formatRecordDuration, getStreakRankContext } from './record-activity.js?v=20261018-1';
     import { installRecordSectionUI } from './record-section-ui.js?v=20261005-1';
     import { renderFailureTimeRisk, renderCravingTimeRisk, renderBodyTimeRisk, updateFailureTimeProgress, installTodayWeather } from './daily-health-tools.js?v=20261008-1';
     import { installDailyWisdom, WISDOM_SYSTEM_INSTRUCTION } from './daily-wisdom.js?v=20261004-1';
@@ -3988,8 +3994,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
     let accumulatedRecordsSort = { key: 'start', direction: 'desc' };
     let accumulatedRecordsRequestId = 0;
     let streakRecordsRows = [];
-    let streakRecordsSort = { key: 'ordinal', direction: 'asc' };
-    let streakRecordsTargetDays = 0;
+    let streakRecordsSort = { key: 'rank', direction: 'asc' };
     let streakRecordsRequestId = 0;
     let logoutConfirmUid = null;
     let logoutInProgress = false;
@@ -5097,17 +5102,14 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
         if (!source.some(challenge => challenge.id === currentId) && currentStart) {
             source.push({ id: currentId, startDate: currentStart, status: 'active', hasRecordedEndDate: false });
         }
-        const qualified = source.map(challenge => ({
-            id: challenge.id, ...getChallengeRecordRange(challenge, nowMs)
-        })).filter(row => row.durationMs !== null && row.durationMs >= targetDays * 86400000)
-            .sort((a, b) => a.startMs - b.startMs || String(a.id).localeCompare(String(b.id)));
-        const ordinal = qualified.findIndex(row => row.id === currentId) + 1;
-        if (!ordinal) return null;
+        const records = source.map((challenge, originalIndex) => ({
+            id: challenge.id, originalIndex, isCurrent:challenge.id === currentId, ...getChallengeRecordRange(challenge, nowMs)
+        }));
+        const context = getStreakRankContext(records, nowMs);
+        if (!context.current) return null;
         return {
-            targetDays, ordinal, totalQualified: qualified.length,
-            records: qualified.slice(0, ordinal).map((row, originalIndex) => ({
-                ...row, originalIndex, ordinal: originalIndex + 1, isCurrent: row.id === currentId
-            }))
+            targetDays, rank:context.current.durationRank, tiedRank:context.current.tiedRank,
+            totalRecords:context.ranked.length, records
         };
     }
 
@@ -5131,7 +5133,8 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
 
     function buildStreakRecordBadgeHtml(currentDays, successRate) {
         const recordInfo = getCurrentStreakRecordInfo(currentDays);
-        const badge = recordInfo ? `<button type="button" class="streak-record-badge" data-streak-days="${recordInfo.targetDays}" aria-haspopup="dialog" aria-controls="streakRecordsModal" aria-label="역대 ${recordInfo.ordinal}번째 기록, 연속 ${recordInfo.targetDays}일 이상 달성한 1번째부터 ${recordInfo.ordinal}번째 기록 보기" title="연속 ${recordInfo.targetDays}일 이상 달성한 기록 보기">역대 ${recordInfo.ordinal}번째 기록</button>` : '';
+        const rankLabel = recordInfo ? `${recordInfo.tiedRank ? '공동 ' : ''}${recordInfo.rank}위` : '';
+        const badge = recordInfo ? `<button type="button" class="streak-record-badge" data-streak-days="${recordInfo.targetDays}" aria-haspopup="dialog" aria-controls="streakRecordsModal" aria-label="역대 ${rankLabel} 기록, 현재와 바로 위·아래 순위 기록 비교" title="현재와 바로 위·아래 순위 기록 비교">역대 ${rankLabel} 기록</button>` : '';
         return `<div class="streak-record-info">${badge}<button type="button" class="success-rate-box" aria-haspopup="dialog" aria-controls="sobrietyRateModal" title="실제 날짜와 계산식 보기"><span>금주율 ${Number.isFinite(successRate) ? successRate + '%' : '—'}</span><span class="success-rate-progress"><span class="success-rate-progress-fill" style="display:block; width:${Number.isFinite(successRate) ? successRate : 0}%;"></span></span></button></div>`;
     }
 
@@ -5167,7 +5170,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
         const streakRecordInfo = getCurrentStreakRecordInfo(currentDays);
         return [currentDays, totalCumul, successRate,
             ...getCurrentRecoveryGoals().map(goal => `${goal.key}:${goal.stage.d}:${goal.percent}`),
-            streakRecordInfo ? `${streakRecordInfo.targetDays}:${streakRecordInfo.ordinal}:${streakRecordInfo.totalQualified}` : 'streak-none',
+            streakRecordInfo ? `${streakRecordInfo.targetDays}:${streakRecordInfo.rank}:${streakRecordInfo.tiedRank}:${streakRecordInfo.totalRecords}` : 'streak-none',
             (allChallengesData || []).length, hrToday(), hrCurrentQuitDate()
         ].join('|');
     }
@@ -5569,8 +5572,8 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
         if (id === 'streakRecordsModal') {
             streakRecordsRequestId++;
             streakRecordsRows = [];
-            streakRecordsTargetDays = 0;
             hrEl('streakRecordsBody').replaceChildren();
+            delete hrEl('streakRecordsBody').dataset.contextKey;
             hrEl('streakRecordsSummary').textContent = '';
             hrEl('streakRecordsTableWrap').hidden = true;
         }
@@ -9478,6 +9481,12 @@ initPillIdentification();
         return [days ? `${days}일` : '', hours ? `${hours}시간` : '', minutes ? `${minutes}분` : ''].filter(Boolean).join(' ');
     }
 
+    function formatStreakRecordDate(timestamp) {
+        if (!Number.isFinite(timestamp)) return '<span class="accumulated-record-date">—</span>';
+        const date = new Date(timestamp), pad = value => String(value).padStart(2, '0');
+        return `<span class="accumulated-record-date"><span class="streak-record-year">${date.getFullYear()}.</span>${pad(date.getMonth() + 1)}.${pad(date.getDate())}</span><span class="accumulated-record-time">${pad(date.getHours())}:${pad(date.getMinutes())}</span>`;
+    }
+
     function getSortedAccumulatedRecords(rows, key, direction) {
         const field = { start: 'startMs', end: 'endMs', duration: 'durationMs', rank: 'durationRank' }[key] || 'startMs';
         const multiplier = direction === 'asc' ? 1 : -1;
@@ -9566,27 +9575,30 @@ initPillIdentification();
         }
     };
 
-    function renderStreakRecords() {
+    function renderStreakRecords(nowMs = Date.now(), context = getStreakRankContext(streakRecordsRows, nowMs)) {
         const { key, direction } = streakRecordsSort;
-        const rows = key === 'ordinal'
-            ? [...streakRecordsRows].sort((a, b) => (a.ordinal - b.ordinal) * (direction === 'asc' ? 1 : -1))
-            : getSortedAccumulatedRecords(streakRecordsRows, key, direction);
+        const rows = getSortedAccumulatedRecords(context.neighbors, key, direction);
+        const current = context.current, rankLabel = row => `${row.tiedRank ? '공동 ' : ''}${row.durationRank}위`;
+        const currentPosition = rows.findIndex(row => row.isCurrent);
         hrEl('streakRecordsTableWrap').hidden = rows.length === 0;
         hrEl('streakRecordsSummary').textContent = rows.length
-            ? `연속 ${streakRecordsTargetDays}일 이상 유지 · 1번째부터 ${rows.length}번째까지, 총 ${rows.length}개 기록`
-            : '현재 도전에 해당하는 달성 기록이 없습니다. 도전 기록을 확인해 주세요.';
-        const comparison = compareStreakRecords(streakRecordsRows);
-        hrEl('streakRecordsBody').innerHTML = rows.map(row => `
-            ${row.isCurrent && comparison ? `<tr class="streak-gap-row"><td colspan="4"><div class="history-gap streak-comparison-gap"><small>${comparison.previous.ordinal}번째 기록 ↔ 현재 기록</small><strong id="streakDurationDifference"></strong>${comparison.gapMs !== null ? `<small>이전 종료 → 이번 시작 · ${formatRecordDuration(comparison.gapMs)} 공백</small>` : ''}</div></td></tr>` : ''}
-            <tr${row.isCurrent ? ' class="is-current"' : ''}>
-                <td><span class="streak-record-number">${row.ordinal}번째</span>${row.isCurrent ? '<span class="accumulated-record-active">현재</span>' : ''}</td>
-                <td>${formatAccumulatedRecordDate(row.startMs)}</td>
-                <td>${row.isActive ? '<span class="accumulated-record-active">진행 중</span>' : formatAccumulatedRecordDate(row.endMs)}</td>
-                <td><span class="accumulated-record-duration"${row.isActive ? ` data-streak-live="${row.ordinal}"` : ''}>${formatRecordDuration(row.durationMs)}</span></td>
-            </tr>
-        `).join('');
-        refreshStreakLiveRows();
-        const labels = { ordinal: '기록 순서', start: '시작일', end: '종료일', duration: '유지기간' };
+            ? `현재 ${rankLabel(current)} · 전체 ${context.ranked.length}개 중 ${rows.length}개 기록 비교${context.ranked.length === 1 ? ' · 비교할 다른 기록이 아직 없습니다.' : ''}`
+            : '현재 도전에 해당하는 기록이 없습니다. 도전 기록을 확인해 주세요.';
+        const body = hrEl('streakRecordsBody');
+        body.dataset.contextKey = context.key;
+        body.innerHTML = rows.map((row, index) => {
+            const comparison = row.isCurrent ? '' : `<tr class="streak-gap-row"><td colspan="4"><div class="history-gap streak-comparison-gap"><small>${rankLabel(row)} 기록 ↔ 현재 ${rankLabel(current)}</small><strong data-streak-difference="${row.originalIndex}">${row.differenceText}</strong>${row.gapMs !== null ? `<small>이 기록 종료 → 현재 시작 · ${formatRecordDuration(row.gapMs)} 공백</small>` : ''}</div></td></tr>`;
+            const relation = row.isCurrent ? '<span class="accumulated-record-active">현재</span>'
+                : `<small class="streak-record-relation">${row.durationRank < current.durationRank ? '바로 위' : row.durationRank > current.durationRank ? '바로 아래' : '같은 순위'}</small>`;
+            return `${index > currentPosition ? comparison : ''}
+                <tr data-streak-record="${row.originalIndex}"${row.isCurrent ? ' class="is-current"' : ''}>
+                    <td><span class="streak-record-number">${rankLabel(row)}</span>${relation}</td>
+                    <td>${formatStreakRecordDate(row.startMs)}</td>
+                    <td>${row.isActive ? '<span class="accumulated-record-active">진행 중</span>' : formatStreakRecordDate(row.endMs)}</td>
+                    <td><span class="accumulated-record-duration"${row.isActive ? ` data-streak-live="${row.originalIndex}"` : ''}>${formatRecordDuration(row.durationMs)}</span></td>
+                </tr>${index < currentPosition ? comparison : ''}`;
+        }).join('');
+        const labels = { rank: '순위', start: '시작일', end: '종료일', duration: '유지기간' };
         hrEl('streakRecordsModal').querySelectorAll('th[data-sort-key]').forEach(header => {
             const selected = header.dataset.sortKey === key;
             const ascending = direction === 'asc';
@@ -9598,20 +9610,19 @@ initPillIdentification();
     }
 
     function refreshStreakLiveRows(nowMs = Date.now()) {
-        if (hrEl('streakRecordsModal').hidden) return;
-        for (const row of streakRecordsRows) {
-            if (!row.isActive) continue;
-            row.durationMs = Math.max(0, nowMs - row.startMs);
-            const cell = hrEl('streakRecordsBody').querySelector(`[data-streak-live="${row.ordinal}"]`);
+        if (hrEl('streakRecordsModal').hidden || !streakRecordsRows.length) return;
+        const context = getStreakRankContext(streakRecordsRows, nowMs), body = hrEl('streakRecordsBody');
+        if (body.dataset.contextKey !== context.key) { renderStreakRecords(nowMs, context); return; }
+        for (const row of context.neighbors) {
+            const cell = body.querySelector(`[data-streak-live="${row.originalIndex}"]`);
             if (cell) cell.textContent = formatRecordDuration(row.durationMs);
+            const difference = body.querySelector(`[data-streak-difference="${row.originalIndex}"]`);
+            if (difference) difference.textContent = row.differenceText;
         }
-        const comparison = compareStreakRecords(streakRecordsRows, nowMs);
-        const label = hrEl('streakDurationDifference');
-        if (label && comparison) label.textContent = comparison.differenceText;
     }
 
     window.sortStreakRecords = function(key) {
-        if (!['ordinal', 'start', 'end', 'duration'].includes(key)) return;
+        if (!['rank', 'start', 'end', 'duration'].includes(key)) return;
         streakRecordsSort = {
             key, direction: streakRecordsSort.key === key && streakRecordsSort.direction === 'asc' ? 'desc' : 'asc'
         };
@@ -9633,11 +9644,11 @@ initPillIdentification();
             && accountGeneration === hr.generation && challengeId === currentChallengeId
             && !hrEl('streakRecordsModal').hidden;
         streakRecordsRows = [];
-        streakRecordsTargetDays = targetDays;
-        streakRecordsSort = { key: 'ordinal', direction: 'asc' };
+        streakRecordsSort = { key: 'rank', direction: 'asc' };
         hrEl('streakRecordsBody').replaceChildren();
+        delete hrEl('streakRecordsBody').dataset.contextKey;
         hrEl('streakRecordsTableWrap').hidden = true;
-        hrEl('streakRecordsTitle').textContent = `🏅 연속 ${targetDays}일 달성 기록`;
+        hrEl('streakRecordsTitle').textContent = '🏅 내 단주 기록 순위';
         hrEl('streakRecordsSummary').textContent = '단주 기록을 불러오는 중입니다…';
         hrOpen('streakRecordsModal');
         try {
