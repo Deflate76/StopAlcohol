@@ -4,7 +4,7 @@
 .diagnosis-photo-section { border-top:1px solid #e2e8f0; margin-top:22px; padding-top:16px; }
 .diagnosis-photo-section h4 { margin:0 0 12px; }
 .diagnosis-photo-section [hidden] { display:none!important; }
-#diagnosisPhotoActions { padding:0; margin:0; border:0; min-width:0; }
+#diagnosisPhotoActions { padding:0; margin:8px 0 0; border:0; min-width:0; }
 .diagnosis-photo-tools { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:14px 0; font-size:.8rem; }
 .diagnosis-photo-tools select { width:auto; max-width:100%; padding:7px; }
 #diagnosisPhotoList,#diagnosisPhotoQueue { display:grid; gap:12px; }
@@ -35,6 +35,31 @@
 .sobriety-rate-formula { font-weight:800; line-height:1.8; overflow-wrap:anywhere; }
 .sobriety-rate-facts { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:10px; font-size:.85rem; }
 .sobriety-rate-facts dt { color:#61736b; }.sobriety-rate-facts dd { margin:0; font-weight:750; text-align:right; }
-.sobriety-comparison { border:1px solid #e0e6eb; padding:16px; border-radius:14px; font-size:.84rem; line-height:1.65; }
-.sobriety-comparison h4 { margin:0 0 8px; }.sobriety-comparison a { color:#3d648e; }
 #sobrietyRateModal .modal-content { max-width:500px; }
+.sobriety-history,.sobriety-weekly { margin:22px 0; border-bottom:1px solid #e1e9e5; padding-bottom:18px; }
+.sobriety-history h4,.sobriety-weekly h4 { margin:0 0 8px; color:#244d40; }
+.sobriety-trend-tools { display:flex; gap:6px; margin:12px 0; }
+.sobriety-trend-tools .health-btn { flex:1; padding:7px 4px; font-size:.78rem; }
+.sobriety-trend-tools [aria-pressed="true"] { background:#e7f5ee; color:#1c704c; border-color:#5fa987; font-weight:800; }
+.sobriety-trend-chart { display:block; width:100%; height:auto; overflow:visible; cursor:crosshair; }
+.sobriety-grid-line { stroke:#dfe9e4; stroke-width:1; }
+.sobriety-axis-label { fill:#5e7469; font:13px sans-serif; }
+.sobriety-trend-line { stroke:#258c60; stroke-width:2.5; }
+.sobriety-trend-cursor { stroke:#81a792; stroke-dasharray:3 3; }
+.sobriety-trend-point { fill:#216e4d; stroke:#fff; stroke-width:2; }
+.sobriety-trend-selection { display:flex; flex-wrap:wrap; align-items:center; gap:10px; background:#f0f8f4; border-radius:12px; padding:12px; }
+.sobriety-trend-selection label { display:flex; align-items:center; gap:6px; font-size:.8rem; }
+#sobrietyTrendDate { width:auto; min-width:0; max-width:155px; margin:0; padding:6px; font-size:.82rem; }
+.sobriety-trend-selection output { display:grid; gap:4px; flex:1 1 150px; font-size:.75rem; color:#5e7469; }
+.sobriety-trend-selection strong { font-size:1.25rem; color:#23764c; }
+#sobrietyTrendSlider { display:block; width:100%; padding:0; margin:14px 0 0; accent-color:#258c60; }
+.sobriety-weekly-table { width:100%; border-collapse:collapse; table-layout:fixed; font-size:.8rem; }
+.sobriety-weekly-table caption { text-align:left; color:#6b7d74; font-size:.74rem; margin-bottom:8px; }
+.sobriety-weekly-table th,.sobriety-weekly-table td { padding:11px 4px; border-bottom:1px solid #e3ebe6; text-align:right; vertical-align:middle; }
+.sobriety-weekly-table th:first-child { width:41%; text-align:left; }
+.sobriety-weekly-table thead { background:#f2f7f4; color:#456553; }
+.sobriety-weekly-table tbody th { font-weight:500; }
+.sobriety-weekly-table tbody th>* { display:block; }
+.sobriety-weekly-table small { color:#75837c; margin-top:4px; font-size:.68rem; }
+.sobriety-weekly-table td:last-child { font-weight:850; color:#23764c; }
+.sobriety-weekly>button { margin-top:12px; width:100%; }

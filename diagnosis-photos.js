@@ -78,7 +78,7 @@ export function installDiagnosisPhotos({document = globalThis.document, context,
     }
     async function add(files) {
         const ctx = state(), seq = epoch;
-        if (!ctx || busy || adding) return;
+        if (!ctx || busy || adding || ctx.blocked) return;
         if (!ctx.validDate) return status('오늘 또는 지난 기록 날짜를 선택해 주세요.', true);
         adding = true; el('diagnosisPhotoActions').disabled = true; setBusy(true);
         el('diagnosisPhotoConfirmed').checked = false;
@@ -94,21 +94,23 @@ export function installDiagnosisPhotos({document = globalThis.document, context,
             }
         } finally {
             if (valid(ctx, seq)) { adding = false; setBusy(false); el('diagnosisPhotoActions').disabled = false; renderQueue();
-                if (!failed) status('사진별 설명을 적고 저장해 주세요. 사진 수에는 제한이 없습니다.'); }
+                if (!failed) status('사진별 설명을 적고 저장해 주세요. 사진 수에는 제한이 없습니다.');
+                el('diagnosisPhotoQueue').firstElementChild?.scrollIntoView?.({block:'nearest',behavior:'smooth'}); }
         }
     }
     async function camera() {
-        const ctx = state(), seq = epoch; if (!ctx || busy || adding) return;
+        const ctx = state(), seq = epoch; if (!ctx || busy || adding || ctx.blocked) return;
         stopCamera(); const cameraRequest = cameraEpoch;
         if (!win.navigator.mediaDevices?.getUserMedia || win.matchMedia?.('(pointer:coarse)').matches) { el('diagnosisPhotoCapture').click(); return; }
         try {
             const next = await win.navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false});
             if (!valid(ctx, seq) || cameraRequest !== cameraEpoch) { next.getTracks().forEach(track => track.stop()); return; }
             stream = next; el('diagnosisCamera').hidden = false; el('diagnosisCameraVideo').srcObject = stream; await el('diagnosisCameraVideo').play();
+            if (valid(ctx,seq)) el('diagnosisCamera').scrollIntoView?.({block:'nearest',behavior:'smooth'});
         } catch { if (valid(ctx, seq) && cameraRequest === cameraEpoch) { stopCamera(); status('카메라를 열 수 없습니다. 브라우저 카메라 권한을 확인하거나 사진 추가를 이용해 주세요.', true); } }
     }
     async function save() {
-        const ctx = state(), seq = epoch; if (!ctx || busy || adding || !queue.length) return;
+        const ctx = state(), seq = epoch; if (!ctx || busy || adding || ctx.blocked || !queue.length) return;
         if (!el('diagnosisPhotoConfirmed').checked) return status('사진에 불필요한 개인정보가 없는지 확인해 주세요.', true);
         lock(true); stopCamera(); renderQueue();
         try {
@@ -127,7 +129,7 @@ export function installDiagnosisPhotos({document = globalThis.document, context,
         finally { if (valid(ctx, seq)) { lock(false); renderQueue(); } }
     }
     async function mutate(fn) {
-        const ctx = state(), seq = epoch; if (!ctx || busy || adding) return;
+        const ctx = state(), seq = epoch; if (!ctx || busy || adding || ctx.blocked) return;
         lock(true);
         try { await fn(ctx); if (valid(ctx, seq)) { status('반영했습니다.'); refresh(true); } }
         catch (err) { if (valid(ctx, seq)) status(err.message || '반영하지 못했습니다. 다시 시도해 주세요.', true); }

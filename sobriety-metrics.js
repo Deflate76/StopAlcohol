@@ -11,12 +11,11 @@ export function koreanDay(value) {
     return Number.isFinite(ms) ? Math.floor((ms + 9 * 3600000) / DAY) : null;
 }
 
-export function calculateSobrietyRate({createdAt, challenges = [], dailyLogs = {}, controlSessions = [], now = Date.now()}) {
+function sobrietyDays({createdAt, challenges = [], dailyLogs = {}, controlSessions = [], now = Date.now()}) {
     const created = koreanDay(createdAt), today = koreanDay(now);
-    const empty = {startDate:null, totalDays:0, drinkingDays:0, soberDays:0, percent:null};
-    if (created === null || today === null) return empty;
+    if (created === null || today === null) return null;
     const starts = challenges.map(c => koreanDay(c.startDate)).filter(day => day !== null && day >= created && day <= today);
-    if (!starts.length) return empty;
+    if (!starts.length) return null;
     const first = Math.min(...starts), drinks = new Set();
     const add = value => {const day = koreanDay(value); if (day !== null && day >= first && day <= today) drinks.add(day);};
     for (const [date, log] of Object.entries(dailyLogs)) if (Number(log?.alcohol) > 0) add(date);
@@ -29,9 +28,44 @@ export function calculateSobrietyRate({createdAt, challenges = [], dailyLogs = {
         for (const drink of drinks) if ((Number(drink.alcoholGrams) > 0 || (Number(drink.abv) > 0 && Number(drink.volume) > 0))) add(drink.drinkStartedAt ?? drink.endTime ?? drink.startTime ?? session.startTime);
         if (!drinks.length && Number(session.totalAlcoholGrams) > 0) add(session.startTime);
     }
-    const totalDays = today - first + 1, soberDays = totalDays - drinks.size;
+    return {first, today, drinks};
+}
+
+const dayKey = day => new Date(day * DAY).toISOString().slice(0, 10);
+
+export function calculateSobrietyRate(input) {
+    const days = sobrietyDays(input);
+    if (!days) return {startDate:null, totalDays:0, drinkingDays:0, soberDays:0, percent:null};
+    const {first, today, drinks} = days, totalDays = today - first + 1, soberDays = totalDays - drinks.size;
     return {startDate:new Date(first * DAY).toISOString().slice(0, 10), totalDays,
         drinkingDays:drinks.size, soberDays, percent:Math.round(soberDays / totalDays * 100)};
+}
+
+// Historical daily values use exactly the same eligible start and deduplicated
+// drinking dates as the badge. Compute only on demand when details are opened.
+export function calculateSobrietyHistory(input) {
+    const days = sobrietyDays(input);
+    if (!days) return {daily:[], weeks:[]};
+    const {first, today, drinks} = days, daily = [], weeks = [];
+    let drinkingDays = 0;
+    for (let day = first; day <= today; day++) {
+        const drank = drinks.has(day);
+        if (drank) drinkingDays++;
+        const totalDays = day - first + 1, soberDays = totalDays - drinkingDays;
+        daily.push({date:dayKey(day), totalDays, drinkingDays, soberDays, percent:soberDays / totalDays * 100, drank});
+        // Unix day zero is Thursday; weeks start Monday, regardless of device TZ.
+        const monday = day - ((day + 3) % 7 + 7) % 7;
+        let week = weeks.at(-1);
+        if (!week || week.weekStart !== dayKey(monday)) {
+            week = {weekStart:dayKey(monday), startDate:dayKey(day), endDate:dayKey(day), totalDays:0, drinkingDays:0, soberDays:0, percent:0, current:false};
+            weeks.push(week);
+        }
+        week.endDate = dayKey(day); week.totalDays++; week.drinkingDays += Number(drank);
+        week.soberDays = week.totalDays - week.drinkingDays;
+        week.percent = week.soberDays / week.totalDays * 100;
+        week.current = day === today;
+    }
+    return {daily, weeks:weeks.reverse()};
 }
 
 export function previousBestDays(challenges, currentId, currentStart) {

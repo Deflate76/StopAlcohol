@@ -12,7 +12,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self';
         base-uri 'none';
         object-src 'none';
-        script-src 'self' https://www.gstatic.com/firebasejs/ https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/ https://apis.google.com/ https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js 'sha256-7tVLVHl3dMhjHEN4YWplZY9MN9oLG4bJoBvont98MrU=' 'sha256-AIBL0tC4iNNoKKwFcVeQsj034glNRfVxuUyzuCSYSiQ=' 'sha256-REiFfq6OotUrXGWxp84XojcMHah8Xjofp2pgS2BjRbM=' 'sha256-ZBDKI+cJWffsd+cXDpbTFeoXNCPy8uQD4RUYNTiPRSQ=' 'sha256-utYYx5qVnylo2gMZULKmJG8hNLajcNpGYKJuaVzT2NA=';
+        script-src 'self' https://www.gstatic.com/firebasejs/ https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/ https://apis.google.com/ https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js 'sha256-AIBL0tC4iNNoKKwFcVeQsj034glNRfVxuUyzuCSYSiQ=' 'sha256-REiFfq6OotUrXGWxp84XojcMHah8Xjofp2pgS2BjRbM=' 'sha256-ZBDKI+cJWffsd+cXDpbTFeoXNCPy8uQD4RUYNTiPRSQ=' 'sha256-utYYx5qVnylo2gMZULKmJG8hNLajcNpGYKJuaVzT2NA=' 'sha256-yoFUrTHki7d5eY1jZbiBTsqTs4z4Msn/ZOxKdTMl3zg=';
         script-src-attr 'unsafe-hashes'
         'sha256-+/PyyZxYlaRwGKBfLX4QqCPnBcKxzZ6EQ/FEMykrPlg='
         'sha256-+8Obkk1yhOE1TPaUpOo8d/udOL2qT2+5fc9UsR20blw='
@@ -1694,7 +1694,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
 <link rel="stylesheet" href="./release-history.css?v=20261005-1">
 <link rel="stylesheet" href="./community-recovery.css?v=20261009-3">
 <link rel="stylesheet" href="./quick-actions.css?v=20261017-1">
-<link rel="stylesheet" href="./diagnosis-diary.css?v=20261018-1">
+<link rel="stylesheet" href="./diagnosis-diary.css?v=20261018-2">
 </head>
 <body>
 <div id="pageTopAnchor" class="page-scroll-anchor" aria-hidden="true"></div>
@@ -2934,16 +2934,17 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
                 <div class="health-actions"><button type="submit" id="diagnosisDiarySave" class="health-btn primary">기록 저장</button><button type="button" class="health-btn" onclick="changeDiagnosisDiaryDate(true)">저장본 다시 불러오기</button><button type="button" id="diagnosisDiaryDelete" class="health-btn danger" onclick="saveDiagnosisDiary(true)" hidden>이 날짜 기록 삭제</button></div>
             </fieldset>
         </form>
+        <fieldset id="diagnosisPhotoActions">
+            <div class="health-actions"><button type="button" id="diagnosisPhotoCamera" class="health-btn">📷 사진 촬영</button><button type="button" id="diagnosisPhotoAdd" class="health-btn">＋ 여러 장 추가</button></div>
+            <input id="diagnosisPhotoCapture" type="file" accept="image/*" capture="environment" hidden>
+            <input id="diagnosisPhotoFiles" type="file" accept="image/*" multiple hidden>
+        </fieldset>
         <p id="diagnosisDiaryStatus" class="health-status" role="status" aria-live="polite"></p>
         <h4>날짜별 기록 <span id="diagnosisDiaryCount"></span></h4>
         <div id="diagnosisDiaryList"></div>
         <section class="diagnosis-photo-section" aria-labelledby="diagnosisPhotoTitle">
             <h4 id="diagnosisPhotoTitle">사진으로 남기는 회복 과정 <span id="diagnosisPhotoCount"></span></h4>
-            <fieldset id="diagnosisPhotoActions">
-                <div class="health-actions"><button type="button" id="diagnosisPhotoCamera" class="health-btn">📷 사진 촬영</button><button type="button" id="diagnosisPhotoAdd" class="health-btn">＋ 여러 장 추가</button></div>
-                <input id="diagnosisPhotoCapture" type="file" accept="image/*" capture="environment" hidden>
-                <input id="diagnosisPhotoFiles" type="file" accept="image/*" multiple hidden>
-            </fieldset>
+
             <p class="health-muted">위에서 선택한 날짜에 저장합니다. 장수 제한 없이 사진별 설명을 남겨보세요. 사진은 본인만 볼 수 있습니다.</p>
             <div id="diagnosisCamera" hidden><video id="diagnosisCameraVideo" playsinline muted></video><div class="health-actions"><button type="button" id="diagnosisCameraShutter" class="health-btn">촬영</button><button type="button" id="diagnosisCameraClose" class="health-btn">카메라 닫기</button></div></div>
             <div id="diagnosisPhotoQueue"></div>
@@ -2964,13 +2965,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
         <button type="button" class="close-btn-top" onclick="closeHealthDialog('sobrietyRateModal')" aria-label="금주율 상세 닫기">&times;</button>
         <h3 id="sobrietyRateTitle">나의 금주율</h3>
         <div id="sobrietyRateDetails" aria-live="polite"></div>
-        <div class="sobriety-comparison">
-            <h4>대한민국 같은 연령·성별과 비교</h4>
-            <p>같은 기간의 ‘전체 날짜 중 술을 마시지 않은 날짜 비율’에 해당하는 공식 연령·성별 평균은 확인하지 못했습니다.</p>
-            <p>질병관리청의 월간음주율은 한 달에 1회 이상 술을 마시는 <strong>사람의 비율</strong>입니다. 100%에서 월간음주율을 뺀 값도 나의 금주 <strong>날짜 비율</strong>과 직접 비교할 수 없어 평균 비교 그래프는 표시하지 않습니다.</p>
-            <a href="https://chs.kdca.go.kr/cdhs/biz/pblcVis/pop_idx.do?visIdxSn=675" target="_blank" rel="noopener noreferrer">질병관리청 · 월간음주율 정의와 산출식 ↗</a>
-            <p class="health-muted">자료 확인: 2026-10-18</p>
-        </div>
+
     </div>
 </div>
 
@@ -3829,10 +3824,10 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
     import { installCalendarEnvironment } from './calendar-environment.js?v=20261008-1';
     import { installAccountDeletion } from './account-deletion.js?v=20261009-1';
     import { createProgressChartPlugin, formatBestRankRange, distributionDensityPercent, distributionDayProbabilityPercent } from './progress-chart.js?v=20261017-1';
-    import {calculateSobrietyRate, koreanDay, previousBestDays} from './sobriety-metrics.js?v=20261017-1';
+    import {calculateSobrietyRate, calculateSobrietyHistory, koreanDay, previousBestDays} from './sobriety-metrics.js?v=20261018-2';
     import {installQuickActions, activeDiagnosisChoices} from './quick-actions.js?v=20261017-1';
-    import {installDiagnosisPhotos, isDiagnosisPhoto, diagnosisPhotoPrefix} from './diagnosis-photos.js?v=20261018-1';
-    import {renderSobrietyDetails} from './sobriety-details.js?v=20261018-1';
+    import {installDiagnosisPhotos, isDiagnosisPhoto, diagnosisPhotoPrefix} from './diagnosis-photos.js?v=20261018-2';
+    import {renderSobrietyDetails} from './sobriety-details.js?v=20261018-2';
     import { installCalendarNavigation } from './calendar-navigation.js?v=20261009-1';
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
     import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, deleteDoc, collection, addDoc, query, orderBy, limit, onSnapshot, getDocs, where, startAfter, serverTimestamp, writeBatch, runTransaction } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
@@ -5127,8 +5122,9 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
             || sobrietyCache.currentId !== currentChallengeId || sobrietyCache.start !== userQuitDate) {
             const challenges = allChallengesData.some(c => c.id === currentChallengeId) || !userQuitDate
                 ? allChallengesData : [...allChallengesData, {startDate:userQuitDate, status:'active'}];
-            sobrietyCache = {uid:userId, day, createdAt, currentId:currentChallengeId, start:userQuitDate,
-                result:calculateSobrietyRate({createdAt, challenges, dailyLogs:dailyLogsData, controlSessions:controlActivitySessions, now})};
+            const input = {createdAt, challenges, dailyLogs:dailyLogsData, controlSessions:controlActivitySessions, now};
+            sobrietyCache = {uid:userId, day, createdAt, currentId:currentChallengeId, start:userQuitDate, input,
+                result:calculateSobrietyRate(input)};
         }
         return sobrietyCache.result.percent;
     }
@@ -5139,7 +5135,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
         return `<div class="streak-record-info">${badge}<button type="button" class="success-rate-box" aria-haspopup="dialog" aria-controls="sobrietyRateModal" title="실제 날짜와 계산식 보기"><span>금주율 ${Number.isFinite(successRate) ? successRate + '%' : '—'}</span><span class="success-rate-progress"><span class="success-rate-progress-fill" style="display:block; width:${Number.isFinite(successRate) ? successRate : 0}%;"></span></span></button></div>`;
     }
 
-    let sobrietyDetailsKey = '';
+    let sobrietyDetailsKey = '', sobrietyDetailsResult = null;
     function refreshSobrietyDetails(force = false) {
         if (!force && hrEl('sobrietyRateModal').hidden) return;
         getCurrentSobrietyRate();
@@ -5147,9 +5143,11 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
         const ready = !!userId && auth.currentUser?.uid === userId && states.every(value => value === 'ready');
         const result = ready && sobrietyCache?.uid === userId ? sobrietyCache.result : null;
         const key = JSON.stringify([userId, states, result]);
-        if (!force && key === sobrietyDetailsKey) return;
-        sobrietyDetailsKey = key;
-        renderSobrietyDetails(document, result, {loading:states.includes('loading'), error:states.includes('error')});
+        if (!force && key === sobrietyDetailsKey && result === sobrietyDetailsResult) return;
+        sobrietyDetailsKey = key; sobrietyDetailsResult = result;
+        // Recompute when source records change, even if today's total rate is unchanged.
+        const history = result ? (sobrietyCache.history ||= calculateSobrietyHistory(sobrietyCache.input)) : null;
+        renderSobrietyDetails(document, result, {history, loading:states.includes('loading'), error:states.includes('error')});
     }
     window.openSobrietyRate = function(event) {
         event?.preventDefault(); event?.stopPropagation();
@@ -7275,7 +7273,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
     const diagnosisPhotos = installDiagnosisPhotos({
         context: () => hrSameUser(hr.uid) && hr.diaryTarget && !hrEl('diagnosisDiaryModal').hidden
             && hr.consents.photos?.status !== 'revoked' && !hr.consents.photos?.deletionPending
-            ? {uid:hr.uid, target:hr.diaryTarget, date:hrEl('diagnosisDiaryDate').value,
+            ? {uid:hr.uid, target:hr.diaryTarget, blocked:hr.busy, date:hrEl('diagnosisDiaryDate').value,
                 validDate:hrValidDate(hrEl('diagnosisDiaryDate').value) && hrEl('diagnosisDiaryDate').value <= hrToday()} : null,
         rows: () => hr.photos, loaded: () => hr.loaded.photos, error: () => hr.errors.photos,
         ensureTarget:hrEnsurePhotoDiagnosis,
