@@ -1,0 +1,40 @@
+.diagnosis-recovered-group { margin-top:12px; border:1px solid #dce3e7; border-radius:12px; background:#f6f8f9; }
+.diagnosis-recovered-group>summary { padding:12px; color:#5b6d76; font-weight:750; cursor:pointer; }
+.diagnosis-recovered-group .diagnosis-row { margin:0 8px 8px; }
+.diagnosis-photo-section { border-top:1px solid #e2e8f0; margin-top:22px; padding-top:16px; }
+.diagnosis-photo-section h4 { margin:0 0 12px; }
+.diagnosis-photo-section [hidden] { display:none!important; }
+#diagnosisPhotoActions { padding:0; margin:0; border:0; min-width:0; }
+.diagnosis-photo-tools { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:14px 0; font-size:.8rem; }
+.diagnosis-photo-tools select { width:auto; max-width:100%; padding:7px; }
+#diagnosisPhotoList,#diagnosisPhotoQueue { display:grid; gap:12px; }
+.diagnosis-photo-card,.diagnosis-photo-draft { border:1px solid #dbe5ea; background:#f8fbfa; border-radius:14px; padding:12px; min-width:0; }
+.diagnosis-photo-card time { font-weight:800; font-size:.82rem; color:#3c6c60; }
+.diagnosis-photo-card p { font-size:.88rem; white-space:pre-wrap; overflow-wrap:anywhere; margin:10px 0; }
+.diagnosis-photo-preview { display:block; width:100%; padding:0; margin-top:8px; overflow:hidden; min-height:80px; }
+.diagnosis-photo-preview img { display:block; width:100%; max-height:220px; object-fit:contain; background:#edf2ef; }
+.diagnosis-photo-draft { display:grid; gap:10px; grid-template-columns:72px minmax(0,1fr); align-items:start; }
+.diagnosis-photo-draft img { width:72px; height:80px; object-fit:cover; border-radius:8px; }
+.diagnosis-photo-draft label { min-width:0; font-size:.78rem; }
+.diagnosis-photo-draft textarea { display:block; margin-top:5px; width:100%; min-height:62px!important; box-sizing:border-box; }
+.diagnosis-photo-draft>button { grid-column:2; justify-self:start; }
+#diagnosisPhotoSave { width:100%; margin:12px 0; }
+#diagnosisCamera { background:#162523; padding:8px; border-radius:12px; margin:12px 0; }
+#diagnosisCameraVideo { width:100%; max-height:35vh; }
+#diagnosisPhotoViewer { margin-top:12px; border:2px solid #6ba998; border-radius:12px; padding:10px; }
+#diagnosisPhotoFull { width:100%; max-height:70vh; object-fit:contain; }
+#diagnosisPhotoFullCaption { white-space:pre-wrap; overflow-wrap:anywhere; }
+.success-rate-box { cursor:pointer; font-family:inherit; appearance:none; }
+.success-rate-box:focus-visible { outline:2px solid #24774e; outline-offset:3px; }
+.sobriety-rate-card { padding:20px; border-radius:18px; background:#f0faf5; border:1px solid #d4e9dd; margin:16px 0; }
+.sobriety-rate-number { font-size:2.5rem; font-weight:900; color:#23764c; }
+.sobriety-rate-bar { display:flex; height:20px; border-radius:12px; overflow:hidden; background:#ecaa91; margin:16px 0 10px; }
+.sobriety-rate-bar>span { background:#36a276; }
+.sobriety-rate-legend { display:flex; flex-wrap:wrap; justify-content:space-between; gap:8px; font-size:.83rem; }
+.sobriety-rate-legend span:first-child { color:#23764c; }.sobriety-rate-legend span:last-child { color:#9c4226; }
+.sobriety-rate-formula { font-weight:800; line-height:1.8; overflow-wrap:anywhere; }
+.sobriety-rate-facts { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:10px; font-size:.85rem; }
+.sobriety-rate-facts dt { color:#61736b; }.sobriety-rate-facts dd { margin:0; font-weight:750; text-align:right; }
+.sobriety-comparison { border:1px solid #e0e6eb; padding:16px; border-radius:14px; font-size:.84rem; line-height:1.65; }
+.sobriety-comparison h4 { margin:0 0 8px; }.sobriety-comparison a { color:#3d648e; }
+#sobrietyRateModal .modal-content { max-width:500px; }

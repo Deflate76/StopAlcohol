@@ -32,6 +32,7 @@ async function diaryFixture(t) {
     Object.assign(w, {hr, db:{}, HR_POLICY_VERSION:'policy', hrEl:id=>w.document.getElementById(id), hrToday:()=> '2026-10-01',
         hrSameUser:uid => uid === hr.uid, hrRequireConsent:async()=>true, hrOpen:id => {w.document.getElementById(id).hidden=false;},
         hrRenderDiagnoses(){}, hrRefreshHealthUI(){w.hrRenderDiagnosisDiary();},hrErrorMessage:()=> '저장 오류',
+        diagnosisPhotos:{canClose:()=>true,refresh(){},reset(){}},
         hrAbstinenceSignature:value=>JSON.stringify(value||null),hrAbstinencePlan:value=>value,
         confirm:()=>true,serverTimestamp:()=> 'server-time',collection:(_, ...parts)=>({path:parts.join('/')}),
         doc:(_, ...parts)=> parts.length ? {id:parts.at(-1),path:parts.join('/')} : {id:`new${++nextId}`},

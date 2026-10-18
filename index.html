@@ -12,7 +12,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self';
         base-uri 'none';
         object-src 'none';
-        script-src 'self' https://www.gstatic.com/firebasejs/ https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/ https://apis.google.com/ https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js 'sha256-AIBL0tC4iNNoKKwFcVeQsj034glNRfVxuUyzuCSYSiQ=' 'sha256-REiFfq6OotUrXGWxp84XojcMHah8Xjofp2pgS2BjRbM=' 'sha256-TipyppMAmbhgGtHACGb0mjCcQQJZzgaEkbC5t0WuJ+k=' 'sha256-ZBDKI+cJWffsd+cXDpbTFeoXNCPy8uQD4RUYNTiPRSQ=' 'sha256-utYYx5qVnylo2gMZULKmJG8hNLajcNpGYKJuaVzT2NA=';
+        script-src 'self' https://www.gstatic.com/firebasejs/ https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/ https://apis.google.com/ https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js 'sha256-7tVLVHl3dMhjHEN4YWplZY9MN9oLG4bJoBvont98MrU=' 'sha256-AIBL0tC4iNNoKKwFcVeQsj034glNRfVxuUyzuCSYSiQ=' 'sha256-REiFfq6OotUrXGWxp84XojcMHah8Xjofp2pgS2BjRbM=' 'sha256-ZBDKI+cJWffsd+cXDpbTFeoXNCPy8uQD4RUYNTiPRSQ=' 'sha256-utYYx5qVnylo2gMZULKmJG8hNLajcNpGYKJuaVzT2NA=';
         script-src-attr 'unsafe-hashes'
         'sha256-+/PyyZxYlaRwGKBfLX4QqCPnBcKxzZ6EQ/FEMykrPlg='
         'sha256-+8Obkk1yhOE1TPaUpOo8d/udOL2qT2+5fc9UsR20blw='
@@ -34,6 +34,7 @@
         'sha256-3uuphdxx3iX1650ajW7umDclP0GfqdSkncU8+US/Z+0='
         'sha256-3z+OUEr3B0hbBUPbtN1zOcadYMGI7/KgPrUiar8Fzm0='
         'sha256-4ApMTvHIrDqsL72wH7WXsV8prqz9PcAawDbVQ+2RR/E='
+        'sha256-4LXcHbN4zV+/2+AhKRd68SmE2DQQFJmyXEaU8H5vbKY='
         'sha256-5TunASYcofKFRWJSy1LbqYc6ylcMod1Jht3u7hgHKa0='
         'sha256-5Zvxf71/6JHNiloQyFghzxbbW2/zDRbhqCgTGMnQqK8='
         'sha256-5yYdn4i/rkzhcgTZdXWRYxusx/aN28Fl4UjUqrPI3pI='
@@ -1693,6 +1694,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
 <link rel="stylesheet" href="./release-history.css?v=20261005-1">
 <link rel="stylesheet" href="./community-recovery.css?v=20261009-3">
 <link rel="stylesheet" href="./quick-actions.css?v=20261017-1">
+<link rel="stylesheet" href="./diagnosis-diary.css?v=20261018-1">
 </head>
 <body>
 <div id="pageTopAnchor" class="page-scroll-anchor" aria-hidden="true"></div>
@@ -2935,6 +2937,40 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
         <p id="diagnosisDiaryStatus" class="health-status" role="status" aria-live="polite"></p>
         <h4>날짜별 기록 <span id="diagnosisDiaryCount"></span></h4>
         <div id="diagnosisDiaryList"></div>
+        <section class="diagnosis-photo-section" aria-labelledby="diagnosisPhotoTitle">
+            <h4 id="diagnosisPhotoTitle">사진으로 남기는 회복 과정 <span id="diagnosisPhotoCount"></span></h4>
+            <fieldset id="diagnosisPhotoActions">
+                <div class="health-actions"><button type="button" id="diagnosisPhotoCamera" class="health-btn">📷 사진 촬영</button><button type="button" id="diagnosisPhotoAdd" class="health-btn">＋ 여러 장 추가</button></div>
+                <input id="diagnosisPhotoCapture" type="file" accept="image/*" capture="environment" hidden>
+                <input id="diagnosisPhotoFiles" type="file" accept="image/*" multiple hidden>
+            </fieldset>
+            <p class="health-muted">위에서 선택한 날짜에 저장합니다. 장수 제한 없이 사진별 설명을 남겨보세요. 사진은 본인만 볼 수 있습니다.</p>
+            <div id="diagnosisCamera" hidden><video id="diagnosisCameraVideo" playsinline muted></video><div class="health-actions"><button type="button" id="diagnosisCameraShutter" class="health-btn">촬영</button><button type="button" id="diagnosisCameraClose" class="health-btn">카메라 닫기</button></div></div>
+            <div id="diagnosisPhotoQueue"></div>
+            <label id="diagnosisPhotoConfirmation" class="health-muted" hidden><input id="diagnosisPhotoConfirmed" type="checkbox"> 본인 사진이며 불필요한 개인정보가 없는지 확인했습니다.</label>
+            <button type="button" id="diagnosisPhotoSave" class="health-btn primary" hidden>사진 저장</button>
+            <p id="diagnosisPhotoStatus" class="health-status" role="status" aria-live="polite"></p>
+            <div class="diagnosis-photo-tools"><label for="diagnosisPhotoOrder">조회 순서</label><select id="diagnosisPhotoOrder"><option value="newest">최신 사진부터</option><option value="oldest">오래된 사진부터</option></select><button type="button" id="diagnosisPhotoReload" class="health-btn">다시 불러오기</button></div>
+            <div id="diagnosisPhotoViewer" tabindex="-1" hidden><button type="button" id="diagnosisPhotoViewerClose" class="health-btn">확대 사진 닫기</button><img id="diagnosisPhotoFull" alt=""><p id="diagnosisPhotoFullCaption"></p></div>
+            <div id="diagnosisPhotoList"></div>
+            <p class="health-muted">불필요한 개인정보와 다른 사람의 정보가 담기지 않게 확인해 주세요. 진단명을 삭제한 뒤에도 사진은 전체 사진 보관함에서 관리할 수 있습니다.</p>
+            <div class="health-actions"><button type="button" class="health-btn" onclick="openPrescriptionGallery()">전체 사진 보관함</button><button type="button" class="health-link" onclick="openHealthPrivacy('photos')">사진 개인정보 안내·삭제</button></div>
+        </section>
+    </div>
+</div>
+
+<div id="sobrietyRateModal" class="modal health-modal" role="dialog" aria-modal="true" aria-labelledby="sobrietyRateTitle" hidden>
+    <div class="modal-content">
+        <button type="button" class="close-btn-top" onclick="closeHealthDialog('sobrietyRateModal')" aria-label="금주율 상세 닫기">&times;</button>
+        <h3 id="sobrietyRateTitle">나의 금주율</h3>
+        <div id="sobrietyRateDetails" aria-live="polite"></div>
+        <div class="sobriety-comparison">
+            <h4>대한민국 같은 연령·성별과 비교</h4>
+            <p>같은 기간의 ‘전체 날짜 중 술을 마시지 않은 날짜 비율’에 해당하는 공식 연령·성별 평균은 확인하지 못했습니다.</p>
+            <p>질병관리청의 월간음주율은 한 달에 1회 이상 술을 마시는 <strong>사람의 비율</strong>입니다. 100%에서 월간음주율을 뺀 값도 나의 금주 <strong>날짜 비율</strong>과 직접 비교할 수 없어 평균 비교 그래프는 표시하지 않습니다.</p>
+            <a href="https://chs.kdca.go.kr/cdhs/biz/pblcVis/pop_idx.do?visIdxSn=675" target="_blank" rel="noopener noreferrer">질병관리청 · 월간음주율 정의와 산출식 ↗</a>
+            <p class="health-muted">자료 확인: 2026-10-18</p>
+        </div>
     </div>
 </div>
 
@@ -3060,7 +3096,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
 <div id="prescriptionGalleryModal" class="modal health-modal" role="dialog" aria-modal="true" aria-labelledby="prescriptionGalleryTitle" hidden>
     <div class="modal-content">
         <button type="button" class="close-btn-top" aria-label="사진 목록 닫기" onclick="closeHealthDialog('prescriptionGalleryModal')">&times;</button>
-        <h3 id="prescriptionGalleryTitle">🗂 처방전/약봉투 보기</h3>
+        <h3 id="prescriptionGalleryTitle">🗂 사진 보관함</h3>
         <p class="health-muted">사진을 누르면 크게 볼 수 있습니다.</p>
         <div class="health-actions">
             <button type="button" class="health-btn" onclick="startPrescriptionRecord()">＋ 새 사진 기록</button>
@@ -3795,6 +3831,8 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
     import { createProgressChartPlugin, formatBestRankRange, distributionDensityPercent, distributionDayProbabilityPercent } from './progress-chart.js?v=20261017-1';
     import {calculateSobrietyRate, koreanDay, previousBestDays} from './sobriety-metrics.js?v=20261017-1';
     import {installQuickActions, activeDiagnosisChoices} from './quick-actions.js?v=20261017-1';
+    import {installDiagnosisPhotos, isDiagnosisPhoto, diagnosisPhotoPrefix} from './diagnosis-photos.js?v=20261018-1';
+    import {renderSobrietyDetails} from './sobriety-details.js?v=20261018-1';
     import { installCalendarNavigation } from './calendar-navigation.js?v=20261009-1';
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
     import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, deleteDoc, collection, addDoc, query, orderBy, limit, onSnapshot, getDocs, where, startAfter, serverTimestamp, writeBatch, runTransaction } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
@@ -5098,8 +5136,26 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
     function buildStreakRecordBadgeHtml(currentDays, successRate) {
         const recordInfo = getCurrentStreakRecordInfo(currentDays);
         const badge = recordInfo ? `<button type="button" class="streak-record-badge" data-streak-days="${recordInfo.targetDays}" aria-haspopup="dialog" aria-controls="streakRecordsModal" aria-label="역대 ${recordInfo.ordinal}번째 기록, 연속 ${recordInfo.targetDays}일 이상 달성한 1번째부터 ${recordInfo.ordinal}번째 기록 보기" title="연속 ${recordInfo.targetDays}일 이상 달성한 기록 보기">역대 ${recordInfo.ordinal}번째 기록</button>` : '';
-        return `<div class="streak-record-info">${badge}<span class="success-rate-box" title="금주율 = (전체 도전일수 − 음주 기록일수) ÷ 전체 도전일수. 한국 날짜 기준, 계정 생성일 이후 첫 도전일부터 오늘까지(당일 포함). 일일·실패·음주 조절 기록에 음주량이 있는 날을 중복 없이 1일로 계산합니다."><span>금주율 ${Number.isFinite(successRate) ? successRate + '%' : '—'}</span><span class="success-rate-progress"><span class="success-rate-progress-fill" style="display:block; width:${Number.isFinite(successRate) ? successRate : 0}%;"></span></span></span></div>`;
+        return `<div class="streak-record-info">${badge}<button type="button" class="success-rate-box" aria-haspopup="dialog" aria-controls="sobrietyRateModal" title="실제 날짜와 계산식 보기"><span>금주율 ${Number.isFinite(successRate) ? successRate + '%' : '—'}</span><span class="success-rate-progress"><span class="success-rate-progress-fill" style="display:block; width:${Number.isFinite(successRate) ? successRate : 0}%;"></span></span></button></div>`;
     }
+
+    let sobrietyDetailsKey = '';
+    function refreshSobrietyDetails(force = false) {
+        if (!force && hrEl('sobrietyRateModal').hidden) return;
+        getCurrentSobrietyRate();
+        const states = [cravingHistoryStatus, sobrietyDailyStatus, sobrietyControlStatus];
+        const ready = !!userId && auth.currentUser?.uid === userId && states.every(value => value === 'ready');
+        const result = ready && sobrietyCache?.uid === userId ? sobrietyCache.result : null;
+        const key = JSON.stringify([userId, states, result]);
+        if (!force && key === sobrietyDetailsKey) return;
+        sobrietyDetailsKey = key;
+        renderSobrietyDetails(document, result, {loading:states.includes('loading'), error:states.includes('error')});
+    }
+    window.openSobrietyRate = function(event) {
+        event?.preventDefault(); event?.stopPropagation();
+        if (!userId || auth.currentUser?.uid !== userId) return;
+        refreshSobrietyDetails(true); hrOpen('sobrietyRateModal');
+    };
 
     function getCurrentRecoveryGoals() {
         return currentRecoveryGoals([
@@ -5150,6 +5206,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
         dailyWisdom.renderTrigger();
         const streakButton = container.querySelector('[data-streak-days]');
         streakButton?.addEventListener('click', event => openStreakRecordsModal(Number(streakButton.dataset.streakDays), event));
+        container.querySelector('.success-rate-box')?.addEventListener('click', openSobrietyRate);
         container.setAttribute('data-render-key', renderKey);
     }
 
@@ -5430,7 +5487,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
 
     // Private health records. Never write health data into the public user profile.
     // See the included rules/CORS instructions before enabling this feature in production.
-    const HR_POLICY_VERSION = '2026-09-19-v1';
+    const HR_POLICY_VERSION = '2026-10-18-v2';
     const hrStorage = getStorage(app);
     const hr = {
         uid: null, generation: 0, unsubs: [], entries: [], photos: [], consents: {},
@@ -5446,7 +5503,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
     const hrEl = id => document.getElementById(id);
     const hrSameUser = uid => !!uid && hr.uid === uid && userId === uid && auth.currentUser?.uid === uid;
     const hrToday = () => dateToKey(new Date());
-    const hrScopes = { health: '건강·질환진단 기록', photos: '처방전/약봉투 사진 기록' };
+    const hrScopes = { health: '건강·질환진단 기록', photos: '처방전·약봉투·질환 사진 기록' };
     function hrValidDate(value) {
         if (!/^\d{4}-\d{2}-\d{2}$/.test(value || '')) return false;
         const [y, m, d] = value.split('-').map(Number);
@@ -5492,11 +5549,13 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
         }
         if (id === 'diagnosisDiaryModal') {
             if (hr.diarySaving && !force) return;
+            if (!diagnosisPhotos.canClose(force)) return;
             hr.diaryTarget = null; hr.diaryVersion = ''; hr.diaryLoadedDate = '';
             hrEl('diagnosisDiaryNote').value = ''; hrEl('diagnosisDiaryDate').value = '';
             hrEl('diagnosisDiaryName').textContent = ''; hrEl('diagnosisDiaryList').replaceChildren();
             hrSetStatus('diagnosisDiaryStatus');
         }
+        if (id === 'sobrietyRateModal') hrEl('sobrietyRateDetails').replaceChildren();
         if (id === 'diagnosisRecoveryModal') {
             if (hr.recoverySaving && !force) return;
             hr.recoveryTarget = null;
@@ -5550,11 +5609,11 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
         const photo = scope === 'photos';
         return `<dl>
             <dt>처리 주체</dt><dd>Alcoholaway.com 운영자</dd>
-            <dt>수집·이용 목적</dt><dd>본인의 ${photo ? '처방전·약봉투 사진과 약수첩의 처방기록을 보관하고 조회·검색·수정·삭제' : '일상 건강·커피·수면 기록과 질환 다이어리를 보관하고 섭취량·수면 추이와 질환 진단일·경과일을 조회·관리'}하기 위해 사용합니다.</dd>
+            <dt>수집·이용 목적</dt><dd>본인의 ${photo ? '처방전·약봉투·질환 경과 사진과 사진 설명, 약수첩의 처방기록을 보관하고 조회·검색·수정·삭제' : '일상 건강·커피·수면 기록과 질환 다이어리를 보관하고 섭취량·수면 추이와 질환 진단일·경과일을 조회·관리'}하기 위해 사용합니다.</dd>
             <dt>개인정보 항목</dt><dd>로그인 계정 식별자, 기록 날짜·시간, ${photo ? '직접 입력한 제목·메모, AI로 읽어 확인·수정한 약명·복용법·처방일·조제일·의료기관과 사진에 남아 있는 개인정보' : '직접 작성한 자유 기록'}, 동의 여부·시각·안내문 버전.</dd>
             <dt>별도 동의를 받는 민감정보</dt><dd><strong>${photo ? '사진에 포함된 질환명, 처방약, 투약법, 진료·조제 내용 등 건강정보' : '컨디션, 스트레스, 질환명, 진단일, 커피 섭취 시각·양, 수면시간·수면의 질, 자유 기록에 포함된 증상·진료 등 건강정보'}.</strong></dd>
             <dt>보유·이용 기간</dt><dd>직접 삭제하거나 이 기능의 동의를 철회할 때까지 보관합니다. 동의 철회 시 해당 기록 삭제를 함께 실행합니다. 삭제가 실패하면 화면에 알리고 재시도할 수 있습니다. 동의 이력은 해당 기능의 철회·삭제 완료 시 함께 삭제됩니다.</dd>
-            <dt>저장·열람 방식</dt><dd>로그인한 계정에 연결하여 Google Firebase에 보관합니다. ${photo ? '사진은 저장 전에 개인정보를 확인하고 가릴 수 있습니다. 선택 기능인 AI복약알람 만들기 또는 약수첩에 기록하기를 누르면 선택한 저장본을 Google Gemini로 전송해 복용법을 읽습니다(국외 처리 가능). AI 초안은 화면에서 임시로 확인·수정하며, 직접 생성한 복약알람은 이 기기의 해당 계정에 저장됩니다. 약수첩에 기록하기는 판독 결과를 확인 전 상태로 본인 계정에 저장하며 약수첩에서 원본 대조·수정·삭제할 수 있습니다. 사진 삭제 시 연결된 약수첩 기록도 삭제되고, 사진 기록 동의 철회 시 약수첩 기록도 함께 삭제됩니다. 이 기능은 사진을 커뮤니티에 공개하거나 광고에 이용하지 않습니다.' : '이 건강기록 기능에는 커뮤니티 공개·광고 활용·외부 분석 전송 기능이 없습니다.'}</dd>
+            <dt>저장·열람 방식</dt><dd>로그인한 계정에 연결하여 Google Firebase에 보관합니다. ${photo ? '처방전·약봉투 사진은 저장 전에 개인정보를 확인하고 가릴 수 있습니다. 질환 사진은 저장 전 미리보기에서 불필요한 개인정보가 없는지 확인하며, 질환 사진에는 AI 분석 기능을 제공하지 않습니다. 선택 기능인 AI복약알람 만들기 또는 약수첩에 기록하기를 누르면 선택한 저장본을 Google Gemini로 전송해 복용법을 읽습니다(국외 처리 가능). AI 초안은 화면에서 임시로 확인·수정하며, 직접 생성한 복약알람은 이 기기의 해당 계정에 저장됩니다. 약수첩에 기록하기는 판독 결과를 확인 전 상태로 본인 계정에 저장하며 약수첩에서 원본 대조·수정·삭제할 수 있습니다. 사진 삭제 시 연결된 약수첩 기록도 삭제되고, 사진 기록 동의 철회 시 약수첩 기록도 함께 삭제됩니다. 이 기능은 사진을 커뮤니티에 공개하거나 광고에 이용하지 않습니다.' : '이 건강기록 기능에는 커뮤니티 공개·광고 활용·외부 분석 전송 기능이 없습니다.'}</dd>
             <dt>동의를 거부할 권리</dt><dd>동의하지 않을 수 있습니다. 거부하면 이 ${photo ? '사진 기록' : '건강·진단 기록'} 기능의 신규 저장만 이용할 수 없으며 기존 금주 기능은 계속 이용할 수 있습니다.</dd>
             <dt>열람·정정·삭제·철회</dt><dd>${photo ? '사진 목록에서 열람·삭제하고, 약수첩에서 처방기록을 열람·수정·삭제할 수 있습니다.' : '달력 날짜를 눌러 열람·수정·삭제할 수 있습니다.'} 이 안내 화면의 ‘동의 철회 및 기록 삭제’로 해당 기능의 전체 기록을 삭제할 수 있습니다.</dd>
             <dt>사진·기록 입력 시 주의</dt><dd>본인 정보만 입력하세요. 주민등록번호 등 고유식별정보, 불필요한 주소·연락처, 다른 사람의 정보는 입력하거나 저장하지 마세요. 사진 가리기는 저장본에 적용되며 기기에 이미 있는 원본에는 적용되지 않습니다.</dd>
@@ -5611,6 +5670,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
     };
     function hrBindAccount(uid) {
         if (hr.uid === uid) return;
+        diagnosisPhotos.reset();
         hr.generation++;
         hr.unsubs.forEach(fn => fn()); hr.unsubs = [];
         hr.uploadTask?.cancel(); hr.uploadTask = null;
@@ -5637,13 +5697,17 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
                 const rows = snap.docs.map(item => ({ ...item.data(), id: item.id }));
                 hr.loaded[kind] = true; delete hr.errors[kind];
                 if (kind === 'health') { hr.entries = rows; hrRefreshHealthUI(); }
-                if (kind === 'photos') { hr.photos = rows; if (!hrEl('prescriptionGalleryModal').hidden) hrRenderGallery(); }
-                if (kind === 'consents') hr.consents = Object.fromEntries(rows.map(row => [row.id, row]));
+                if (kind === 'photos') { hr.photos = rows; diagnosisPhotos.refresh(); if (!hrEl('prescriptionGalleryModal').hidden) hrRenderGallery(); }
+                if (kind === 'consents') {
+                    hr.consents = Object.fromEntries(rows.map(row => [row.id, row]));
+                    if (hr.consents.photos?.status === 'revoked' || hr.consents.photos?.deletionPending) diagnosisPhotos.reset();
+                }
             }, error => {
                 if (hr.uid !== uid || generation !== hr.generation) return;
                 hr.loaded[kind] = true; hr.errors[kind] = hrErrorMessage(error, '기록을 불러오');
                 if (kind === 'health') hrRefreshHealthUI();
                 if (kind === 'photos' && !hrEl('prescriptionGalleryModal').hidden) hrRenderGallery();
+                if (kind === 'photos') diagnosisPhotos.refresh();
             });
             hr.unsubs.push(unsub);
         });
@@ -5653,6 +5717,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
         refreshActivitySummaries();
         hrRenderDiagnoses(); if (hr.day) hrRenderDayEntries();
         if (hr.diaryTarget) hrRenderDiagnosisDiary();
+        diagnosisPhotos.refresh();
         csRefresh();
         if (hrEl('calendarModal').style.display === 'flex') renderCalendar(currentCalDate.getFullYear(), currentCalDate.getMonth(), currentCalMode);
     }
@@ -5672,17 +5737,21 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
     function hrRenderDiagnoses() {
         hrRefreshMinAbstinenceProgress();
         const list = hrEl('diagnosisRecordList'); if (!list) return;
+        const recoveredOpen = !!list.querySelector('.diagnosis-recovered-group')?.open;
         list.replaceChildren();
         if (hr.errors.health) { recordSectionUI.setDiagnosisNames([], '진단 기록 확인 필요'); list.textContent = hr.errors.health; return; }
         const records = hr.entries.flatMap(entry => (Array.isArray(entry.diagnoses) ? entry.diagnoses : [])
             .map((d, index) => ({ ...d, entry, index })).filter(d => hrValidDate(d.date)));
-        records.sort((a, b) => b.date.localeCompare(a.date) || String(a.name).localeCompare(String(b.name), 'ko'));
+        records.sort((a, b) => (hrRecoveryDetails(a) ? 2 : a.date > hrToday() ? 1 : 0) - (hrRecoveryDetails(b) ? 2 : b.date > hrToday() ? 1 : 0) || b.date.localeCompare(a.date) || String(a.name).localeCompare(String(b.name), 'ko'));
         const today = hrToday();
         const activeNames = records.filter(record => record.date <= today && !hrRecoveryDetails(record))
             .map(record => `${record.name} (${hrDayNumber(today) - hrDayNumber(record.date) + 1}일째 · ${record.date} 진단)`);
         lastDiagnosisSummaryDay = today;
         recordSectionUI.setDiagnosisNames(activeNames, hr.uid && !hr.loaded.health ? '진단 기록을 불러오는 중…' : '회복 중인 질환 없음');
         if (!records.length) { list.textContent = hr.uid && !hr.loaded.health ? '진단 기록을 불러오는 중입니다…' : '달력 날짜를 눌러 진단명을 추가해 보세요.'; return; }
+        const recoveredCount = records.filter(record => hrRecoveryDetails(record)).length;
+        const recoveredGroup = document.createElement('details'); recoveredGroup.className = 'diagnosis-recovered-group'; recoveredGroup.open = recoveredOpen;
+        const recoveredSummary = document.createElement('summary'); recoveredSummary.textContent = `회복된 질환 ${recoveredCount}개`; recoveredGroup.append(recoveredSummary);
         for (const record of records) {
             const recovery = hrRecoveryDetails(record);
             const elapsed = hrDayNumber(hrToday()) - hrDayNumber(record.date);
@@ -5719,8 +5788,9 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
             set.disabled = hr.busy || !hrSameUser(hr.uid) || elapsed < 0;
             set.addEventListener('click', () => openDiagnosisAbstinence(record.entry.id, record.index));
             abstinence.append(label, set); row.append(abstinence);
-            list.append(row);
+            (recovery ? recoveredGroup : list).append(row);
         }
+        if (recoveredCount) list.append(recoveredGroup);
     }
     // Minimum abstinence goals belong to each private diagnosis, never the public profile.
     // Six months for vestibular neuritis/shingles is the requested app default, not a clinical guideline.
@@ -5994,6 +6064,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
     }
     window.openDiagnosisDiary = function(entryId, index, date = hrToday()) {
         if (hr.busy || !hrSameUser(hr.uid)) return;
+        if (!diagnosisPhotos.canClose()) return;
         const entry = hr.entries.find(e => e.id === entryId), diagnosis = entry?.diagnoses?.[index];
         if (!diagnosis || !hrValidDate(diagnosis.date)) return;
         hr.diaryTarget = {entryId, index, name:diagnosis.name, date:diagnosis.date,
@@ -6002,7 +6073,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
         hrEl('diagnosisDiaryName').textContent = `${diagnosis.name} · ${diagnosis.date} 진단`;
         hrEl('diagnosisDiaryDate').max = hrToday(); hrEl('diagnosisDiaryDate').value = hrValidDate(date) ? date : hrToday();
         hrEl('diagnosisDiaryFields').disabled = false; hrEl('diagnosisDiaryNote').value = '';
-        changeDiagnosisDiaryDate(); hrRenderDiagnosisDiary(); hrOpen('diagnosisDiaryModal');
+        changeDiagnosisDiaryDate(); hrRenderDiagnosisDiary(); hrOpen('diagnosisDiaryModal'); diagnosisPhotos.refresh();
     };
     window.changeDiagnosisDiaryDate = function(reload = false) {
         if (!hr.diaryTarget || hr.diarySaving) return;
@@ -6979,7 +7050,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
     async function createPrescriptionAiReminder(id, notebook = false) {
         const uid=hr.uid, row=hr.photos.find(item=>item.id===id);
         if(!hrSameUser(uid) || hr.prescriptionAiBusy || hr.busy || hrEl('prescriptionGalleryModal').hidden)return;
-        if(!row || row.status!=='ready'){hrSetStatus('prescriptionAiStatus',rxAiMessage(rxAiError('rx-ai/not-ready')),true);return;}
+        if(!row || isDiagnosisPhoto(id) || row.status!=='ready'){hrSetStatus('prescriptionAiStatus',rxAiMessage(rxAiError('rx-ai/not-ready')),true);return;}
         const sequence=(hr.prescriptionAiSeq || 0)+1, generation=hr.generation;
         hr.prescriptionAiSeq=sequence;hr.prescriptionAiBusy=true;hr.prescriptionAiPhoto=id;hr.prescriptionAiError=false;
         hr.prescriptionAiDiagnostic='';hr.prescriptionAiNotebook=notebook;
@@ -7065,12 +7136,12 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
         const loadQueue = [];
         for (const row of visible) {
             const card = document.createElement('article'); card.className = 'prescription-card';
-            const title = document.createElement('strong'); title.textContent = row.label || '처방전/약봉투';
+            const title = document.createElement('strong'); title.textContent = (isDiagnosisPhoto(row.id) ? '질환 사진 · ' : '') + (row.label || '설명 없음');
             const date = document.createElement('p'); date.className = 'health-muted'; date.textContent = `${row.date || ''} · ${row.createdAtClient ? new Date(row.createdAtClient).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }) : ''}`;
             const status = document.createElement('p'); status.className = 'health-muted';
             if (row.status === 'ready') {
                 const thumb = document.createElement('button'); thumb.type = 'button'; thumb.className = 'prescription-thumb-button'; thumb.setAttribute('aria-label', `${row.label || '처방전/약봉투'} 크게 보기`);
-                const img = document.createElement('img'); img.alt = '저장한 처방전 또는 약봉투'; img.hidden = true; thumb.append(img);
+                const img = document.createElement('img'); img.alt = isDiagnosisPhoto(row.id) ? '저장한 질환 경과 사진' : '저장한 처방전 또는 약봉투'; img.hidden = true; thumb.append(img);
                 const showFailure = error => {
                     if (generation !== hr.galleryGeneration || !hrSameUser(uid) || hrEl('prescriptionGalleryModal').hidden) return;
                     img.hidden = true;
@@ -7100,7 +7171,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
             } else status.textContent = '저장 미완료 · 삭제 후 다시 촬영할 수 있습니다.';
             const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'health-btn danger'; remove.textContent = '삭제'; remove.addEventListener('click', () => deletePrescriptionPhoto(row.id));
             card.append(title, date, status);
-            if(row.status==='ready') {
+            if(row.status==='ready' && !isDiagnosisPhoto(row.id)) {
                 const aiButton=document.createElement('button'); aiButton.type='button'; aiButton.className='health-btn prescription-ai-btn';
                 aiButton.dataset.prescriptionAi=row.id; aiButton.textContent='AI복약알람 만들기';
                 aiButton.addEventListener('click',()=>createPrescriptionAiReminder(row.id)); card.append(aiButton);
@@ -7118,7 +7189,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
     }
     window.deletePrescriptionPhoto = async function(id) {
         const uid = hr.uid; if (hr.busy || !hrSameUser(uid) || !hr.photos.some(row => row.id === id)) return;
-        if (!confirm('이 처방전/약봉투 사진과 이 사진에서 만든 약수첩 기록을 함께 삭제할까요?')) return;
+        if (!confirm(isDiagnosisPhoto(id) ? '이 질환 사진과 설명을 삭제할까요?' : '이 처방전/약봉투 사진과 이 사진에서 만든 약수첩 기록을 함께 삭제할까요?')) return;
         hr.busy = true; hrSetStatus('prescriptionGalleryStatus', '사진을 삭제하고 있습니다…');
         try {
             await hrDeletePhotoObject(uid, id); if (!hrSameUser(uid)) return;
@@ -7140,6 +7211,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
             await setDoc(consentRef, { scope, status: 'revoked', revokedAt: serverTimestamp(), deletionPending: true }, { merge: true });
             if (!hrSameUser(uid)) return;
             hr.consents[scope] = { status: 'revoked', deletionPending: true };
+            if (scope === 'photos') diagnosisPhotos.reset();
             hrSetStatus('healthPrivacyStatus', '동의를 철회했습니다. 기록을 삭제하는 중입니다…');
             const path = scope === 'photos' ? 'prescription_photos' : 'health_entries';
             while (hrSameUser(uid)) {
@@ -7167,6 +7239,96 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
         } catch (error) { if (hrSameUser(uid)) hrSetStatus('healthPrivacyStatus', '동의 철회 또는 일부 기록 삭제를 완료하지 못했습니다. 인터넷 연결을 확인한 뒤 같은 버튼으로 다시 시도해 주세요.', true); }
         finally { if (hrSameUser(uid)) { hr.busy = false; hrEl('healthPrivacyRevoke').disabled = false; } }
     };
+
+    function hrPhotoDiaryCurrent(ctx, id) {
+        if (!ctx || !hrSameUser(ctx.uid) || hr.diaryTarget !== ctx.target
+            || (id && !id.startsWith(diagnosisPhotoPrefix(ctx.target.id)))) throw hrRecordConflict('계정 또는 질환 기록이 변경되었습니다. 다시 열어 주세요.');
+    }
+    async function hrEnsurePhotoDiagnosis(ctx) {
+        hrPhotoDiaryCurrent(ctx);
+        const result = await runTransaction(db, async tx => {
+            const parentRef = doc(db, 'users', ctx.uid, 'health_entries', ctx.target.entryId);
+            const parent = await tx.get(parentRef);
+            const health = await tx.get(doc(db, 'users', ctx.uid, 'health_consents', 'health'));
+            const photos = await tx.get(doc(db, 'users', ctx.uid, 'health_consents', 'photos'));
+            hrPhotoDiaryCurrent(ctx);
+            for (const snap of [health, photos]) {
+                const c = snap.exists() && snap.data();
+                if (c?.status !== 'granted' || c.version !== HR_POLICY_VERSION || !c.personal || !c.sensitive || c.deletionPending) throw hrRecordConflict('동의 상태가 변경되었습니다. 다시 확인해 주세요.');
+            }
+            const diagnoses = parent.exists() && Array.isArray(parent.data().diagnoses) ? parent.data().diagnoses : [];
+            let index = diagnoses.findIndex(d => d.id === ctx.target.id);
+            if (index < 0 && ctx.target.legacy) {
+                const old = diagnoses[ctx.target.index];
+                if (old?.name === ctx.target.name && old?.date === ctx.target.date) index = ctx.target.index;
+            }
+            if (index < 0) throw hrRecordConflict('진단이 삭제되었거나 변경되었습니다. 목록에서 다시 열어 주세요.');
+            const id = diagnoses[index].id || ctx.target.id;
+            diagnosisPhotoPrefix(id);
+            const next = diagnoses.map((d, i) => i === index ? {...d, id} : d);
+            if (!diagnoses[index].id) tx.update(parentRef, {diagnoses:next, updatedAt:serverTimestamp()});
+            return {id, diagnoses:next};
+        });
+        hrPhotoDiaryCurrent(ctx); ctx.target.id = result.id; ctx.target.legacy = false;
+        hr.entries = hr.entries.map(row => row.id === ctx.target.entryId ? {...row, diagnoses:result.diagnoses} : row);
+    }
+    const diagnosisPhotos = installDiagnosisPhotos({
+        context: () => hrSameUser(hr.uid) && hr.diaryTarget && !hrEl('diagnosisDiaryModal').hidden
+            && hr.consents.photos?.status !== 'revoked' && !hr.consents.photos?.deletionPending
+            ? {uid:hr.uid, target:hr.diaryTarget, date:hrEl('diagnosisDiaryDate').value,
+                validDate:hrValidDate(hrEl('diagnosisDiaryDate').value) && hrEl('diagnosisDiaryDate').value <= hrToday()} : null,
+        rows: () => hr.photos, loaded: () => hr.loaded.photos, error: () => hr.errors.photos,
+        ensureTarget:hrEnsurePhotoDiagnosis,
+        consent: async () => await hrRequireConsent('health') && await hrRequireConsent('photos'),
+        newId: () => doc(collection(db, 'users', hr.uid, 'prescription_photos')).id,
+        setBusy: value => { hr.busy = value; hr.diarySaving = value; hrEl('diagnosisDiaryFields').disabled = value; },
+        upload: async (ctx, id, item, progress) => {
+            hrPhotoDiaryCurrent(ctx, id);
+            // Same bounded fields as prescription photos; descriptions use the existing label.
+            const ref = doc(db, 'users', ctx.uid, 'prescription_photos', id);
+            const existing = await getDoc(ref); hrPhotoDiaryCurrent(ctx, id);
+            if (existing.exists() && existing.data().status === 'ready') {
+                // A ready write may have succeeded before the previous response was lost.
+                // Keep the same photo and apply any caption edited before retrying.
+                const label = item.label.trim().slice(0,100);
+                if (existing.data().label !== label) { await updateDoc(ref,{label,updatedAt:serverTimestamp()}); hrPhotoDiaryCurrent(ctx,id); }
+                hr.photos = [...hr.photos.filter(row => row.id !== id), {...existing.data(),id,label}];
+                return;
+            }
+            const meta = {date:item.date, label:item.label.trim().slice(0,100), status:'uploading', size:item.blob.size,
+                contentType:'image/jpeg', policyVersion:HR_POLICY_VERSION, redactionConfirmed:true,
+                createdAt:serverTimestamp(), createdAtClient:existing.data()?.createdAtClient || new Date().toISOString()};
+            // A visible pending metadata row survives interruption and allows deletion/retry.
+            await setDoc(ref, meta); hrPhotoDiaryCurrent(ctx, id);
+            const task = uploadBytesResumable(storageRef(hrStorage, hrPhotoPath(ctx.uid, id)), item.blob,
+                {contentType:'image/jpeg', cacheControl:'private, no-store, max-age=0', customMetadata:{policyVersion:HR_POLICY_VERSION}});
+            hr.uploadTask = task;
+            task.on('state_changed', snap => progress(Math.round(snap.bytesTransferred / snap.totalBytes * 100)));
+            await task; hrPhotoDiaryCurrent(ctx, id);
+            await updateDoc(ref, {status:'ready', updatedAt:serverTimestamp()}); hrPhotoDiaryCurrent(ctx, id);
+            hr.uploadTask = null;
+            hr.photos = [...hr.photos.filter(row => row.id !== id), {...meta, id, status:'ready'}];
+        },
+        read: async (ctx, id) => { hrPhotoDiaryCurrent(ctx,id); const blob = await getBlob(storageRef(hrStorage,hrPhotoPath(ctx.uid,id)),HR_PHOTO_MAX_BYTES+1); hrPhotoDiaryCurrent(ctx,id); return hrNormalizePhotoBlob(blob); },
+        rename: async (ctx, row, label) => {
+            hrPhotoDiaryCurrent(ctx,row.id);
+            if (!await hrRequireConsent('photos')) throw hrRecordConflict('사진 기록 동의 후 설명을 수정할 수 있습니다.');
+            hrPhotoDiaryCurrent(ctx,row.id);
+            await runTransaction(db, async tx => {
+                const ref = doc(db,'users',ctx.uid,'prescription_photos',row.id), snap = await tx.get(ref);
+                hrPhotoDiaryCurrent(ctx,row.id);
+                if (!snap.exists() || snap.data().label !== row.label) throw hrRecordConflict('사진 설명이 변경되었거나 삭제되었습니다. 다시 불러온 뒤 수정해 주세요.');
+                tx.update(ref,{label,updatedAt:serverTimestamp()});
+            });
+            hrPhotoDiaryCurrent(ctx,row.id); hr.photos = hr.photos.map(p => p.id === row.id ? {...p,label} : p);
+        },
+        remove: async (ctx, row) => {
+            hrPhotoDiaryCurrent(ctx,row.id);
+            await hrDeletePhotoObject(ctx.uid,row.id); hrPhotoDiaryCurrent(ctx,row.id);
+            await deleteDoc(doc(db,'users',ctx.uid,'prescription_photos',row.id)); hrPhotoDiaryCurrent(ctx,row.id);
+            hr.photos = hr.photos.filter(p => p.id !== row.id);
+        }
+    });
 
     window.dateToKeyForHealthToday = hrToday;
 
@@ -7672,6 +7834,7 @@ initPillIdentification();
 
     function refreshActivitySummaries() {
         sobrietyCache = null;
+        refreshSobrietyDetails();
         const timeData = userId ? {challenges:allChallengesData, currentId:currentChallengeId, cravings:cravingData} : {};
         const timeState = {loading:!!userId && cravingHistoryStatus === 'loading', error:!!userId && cravingHistoryStatus === 'error'};
         renderCravingTimeRisk(document, timeData, timeState);
@@ -11616,6 +11779,7 @@ initPillIdentification();
             const start = new Date(startISO);
             const now = new Date();
             const diff = now - start;
+            refreshSobrietyDetails();
             updateCurrentChallengeSummary(startISO, now.getTime());
             recordSectionUI.updateDayProgress(diff, now);
             refreshStreakLiveRows(now.getTime());
