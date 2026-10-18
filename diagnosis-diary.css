@@ -41,17 +41,32 @@
 .sobriety-trend-tools { display:flex; gap:6px; margin:12px 0; }
 .sobriety-trend-tools .health-btn { flex:1; padding:7px 4px; font-size:.78rem; }
 .sobriety-trend-tools [aria-pressed="true"] { background:#e7f5ee; color:#1c704c; border-color:#5fa987; font-weight:800; }
+.sobriety-trend-label { font-size:.76rem; color:#5e7469; margin-top:12px; }
+.sobriety-trend-legend { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; margin:8px 0 12px; }
+.sobriety-series-all { --series-color:#23764c; }
+.sobriety-series-30 { --series-color:#2463ba; }
+.sobriety-series-60 { --series-color:#ac571b; }
+.sobriety-series-90 { --series-color:#8650b7; }
+.sobriety-trend-legend .health-btn { display:flex; align-items:center; justify-content:center; gap:6px; padding:8px 4px; font-size:.78rem; color:var(--series-color); border:1px solid currentColor; background:#fff; }
+.sobriety-trend-legend [aria-pressed="false"] { opacity:.5; border-style:dashed; }
+.sobriety-trend-legend svg { flex:none; }
+.sobriety-trend-legend button:focus-visible { outline:2px solid currentColor; outline-offset:2px; }
 .sobriety-trend-chart { display:block; width:100%; height:auto; overflow:visible; cursor:crosshair; }
 .sobriety-grid-line { stroke:#dfe9e4; stroke-width:1; }
 .sobriety-axis-label { fill:#5e7469; font:13px sans-serif; }
-.sobriety-trend-line { stroke:#258c60; stroke-width:2.5; }
+.sobriety-trend-line { stroke:var(--series-color); stroke-width:2.5; }
 .sobriety-trend-cursor { stroke:#81a792; stroke-dasharray:3 3; }
-.sobriety-trend-point { fill:#216e4d; stroke:#fff; stroke-width:2; }
+.sobriety-trend-point { fill:var(--series-color); stroke:#fff; stroke-width:2; }
 .sobriety-trend-selection { display:flex; flex-wrap:wrap; align-items:center; gap:10px; background:#f0f8f4; border-radius:12px; padding:12px; }
 .sobriety-trend-selection label { display:flex; align-items:center; gap:6px; font-size:.8rem; }
 #sobrietyTrendDate { width:auto; min-width:0; max-width:155px; margin:0; padding:6px; font-size:.82rem; }
-.sobriety-trend-selection output { display:grid; gap:4px; flex:1 1 150px; font-size:.75rem; color:#5e7469; }
-.sobriety-trend-selection strong { font-size:1.25rem; color:#23764c; }
+.sobriety-trend-selection output { display:grid; gap:8px; flex:1 1 100%; min-width:0; font-size:.75rem; color:#5e7469; }
+.sobriety-trend-values { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+.sobriety-trend-value { display:grid; align-content:start; gap:4px; background:#fff; border:1px solid #deebe3; border-top:3px solid var(--series-color); border-radius:8px; padding:9px; min-width:0; }
+.sobriety-trend-value-label { color:var(--series-color); font-weight:800; }
+.sobriety-trend-selection strong { font-size:1.15rem; color:var(--series-color); }
+.sobriety-trend-value small { font-size:.66rem; line-height:1.5; overflow-wrap:anywhere; }
+.sobriety-trend-value-range span { display:block; white-space:nowrap; }
 #sobrietyTrendSlider { display:block; width:100%; padding:0; margin:14px 0 0; accent-color:#258c60; }
 .sobriety-weekly-table { width:100%; border-collapse:collapse; table-layout:fixed; font-size:.8rem; }
 .sobriety-weekly-table caption { text-align:left; color:#6b7d74; font-size:.74rem; margin-bottom:8px; }

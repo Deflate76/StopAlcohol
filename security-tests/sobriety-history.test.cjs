@@ -36,21 +36,65 @@ test('editing the date of a drink changes historical values even when today\'s b
     const b={...a,dailyLogs:{'2026-10-05':{alcohol:1}}};assert.deepEqual(rate(a),rate(b));
     assert.notEqual(history(a).daily[2].percent,history(b).daily[2].percent);
 });
+test('30/60/90-day rates include each date, expire older drinks and use only elapsed Korean calendar days',async()=>{
+    const {calculateSobrietyHistory}=await mod('sobriety-metrics.js');
+    const day=index=>new Date(Date.parse('2023-12-31T00:00:00Z')+index*86400000).toISOString().slice(0,10);
+    const drinkIndices=[0,29,30,59,60,89,90,120];
+    const input={createdAt:'2023-12-30',challenges:[{startDate:day(0)},
+        {startDate:day(1),endDate:day(30),status:'failed',failAmount:2}],now:day(120),
+        dailyLogs:Object.fromEntries([...drinkIndices,-1,121].map(i=>[day(i),{alcohol:2}])),
+        controlSessions:[{drinksList:[{alcoholGrams:2,drinkStartedAt:day(29)+'T15:00:00Z'}]}]};
+    const {daily}=calculateSobrietyHistory(input);assert.equal(daily.length,121);assert.equal(daily[60].date,'2024-02-29');
+    daily.forEach((row,index)=>{
+        for(const n of [30,60,90]){
+            const first=Math.max(0,index-n+1),drinks=drinkIndices.filter(i=>i>=first&&i<=index).length,total=index-first+1;
+            assert.deepEqual(row.rolling[n],{startDate:day(first),totalDays:total,drinkingDays:drinks,soberDays:total-drinks,percent:(total-drinks)/total*100},`day ${index}, window ${n}`);
+        }
+    });
+    for(const n of [30,60,90]){
+        const history=calculateSobrietyHistory({...input,challenges:[{startDate:day(0)}],controlSessions:[],dailyLogs:{[day(0)]:{alcohol:1}}});
+        assert.equal(history.daily[n-1].rolling[n].drinkingDays,1);
+        assert.equal(history.daily[n].rolling[n].drinkingDays,0,'N+1th day drops first drinking day');
+        assert.equal(history.daily[n].rolling[n].percent,100);
+        assert(history.daily[n].percent<100,'cumulative still includes old drink');
+    }
+});
 test('trend date/slider/range controls expose exact values and weekly table paginates all weeks',async t=>{
     const {calculateSobrietyHistory,calculateSobrietyRate}=await mod('sobriety-metrics.js'),{renderSobrietyDetails}=await mod('sobriety-details.js');
     const dom=new JSDOM(html),w=dom.window,d=w.document;t.after(()=>w.close());
-    const input={createdAt:'2026-01-01',challenges:[{startDate:'2026-01-01'}],dailyLogs:{'2026-01-01':{alcohol:1}},now:'2026-10-18'};
+    const input={createdAt:'2026-01-01',challenges:[{startDate:'2026-01-01'}],dailyLogs:{'2026-01-01':{alcohol:1},'2026-10-10':{alcohol:1}},now:'2026-10-18'};
     const history=calculateSobrietyHistory(input);renderSobrietyDetails(d,calculateSobrietyRate(input),{history});
+    assert.equal(d.querySelectorAll('.sobriety-trend-line').length,4);
     assert.equal(d.querySelector('.sobriety-trend-line').getAttribute('points').split(' ').length,history.daily.length);
-    d.querySelector('[data-period="30"]').click();assert.equal(d.querySelector('.sobriety-trend-line').getAttribute('points').split(' ').length,30);
+    for(const n of [30,60,90]){
+        const line=d.querySelector(`.sobriety-trend-line[data-series="${n}"]`);
+        assert.notEqual(line.getAttribute('points'),d.querySelector('.sobriety-trend-line').getAttribute('points'));
+        assert.match(d.querySelector(`[data-series-value="${n}"]`).textContent,new RegExp(history.daily.at(-1).rolling[n].percent.toFixed(2).replace('.','\\.')+'%'));
+        const before=d.querySelector(`[data-series-value="${n}"]`).textContent;
+        d.querySelector(`[data-period="${n}"]`).click();
+        assert.equal(d.querySelector('.sobriety-trend-line').getAttribute('points').split(' ').length,n);
+        assert.equal(d.querySelector(`[data-series-value="${n}"]`).textContent,before,'display range must not reset calculation start');
+    }
+    d.querySelector('[data-period="30"]').click();
     const date=d.getElementById('sobrietyTrendDate');date.value='2026-01-01';date.dispatchEvent(new w.Event('change'));
     assert.equal(d.querySelector('[data-period="all"]').getAttribute('aria-pressed'),'true');assert.match(d.getElementById('sobrietyTrendValue').textContent,/0.00%/);
     const slider=d.getElementById('sobrietyTrendSlider');slider.value='1';slider.dispatchEvent(new w.Event('input'));assert.equal(date.value,'2026-01-02');assert.match(slider.getAttribute('aria-valuetext'),/50.00%/);
+    assert.match(d.querySelector('[data-series-value="90"]').textContent,/90일 중 2일 집계/);
+    const toggle=d.querySelector('.sobriety-trend-legend [data-series="30"]');toggle.click();
+    assert.equal(toggle.getAttribute('aria-pressed'),'false');assert.equal(d.querySelector('.sobriety-trend-line[data-series="30"]'),null);
+    assert.equal(date.value,'2026-01-02');assert(d.querySelector('[data-series-value="30"]'),'exact values remain available when a line is hidden');
+    toggle.click();assert.equal(toggle.getAttribute('aria-pressed'),'true');assert.equal(d.querySelectorAll('.sobriety-trend-line').length,4);
+    for(const button of d.querySelectorAll('.sobriety-trend-legend button'))button.click();
+    assert.equal(d.querySelectorAll('.sobriety-trend-line').length,0);assert.match(d.querySelector('.sobriety-trend-chart').textContent,/범례를 눌러/);
+    d.querySelector('.sobriety-trend-legend [data-series="all"]').click();assert.equal(d.querySelectorAll('.sobriety-trend-line').length,1);
     assert.equal(d.querySelectorAll('.sobriety-weekly-table tbody tr').length,12);
     const more=d.querySelector('.sobriety-weekly>button');while(!more.hidden)more.click();assert.equal(d.querySelectorAll('.sobriety-weekly-table tbody tr').length,history.weeks.length);
     date.value='2027-01-01';date.dispatchEvent(new w.Event('change'));assert.equal(date.value,'2026-01-02');
     const one={createdAt:'2026-10-18',challenges:[{startDate:'2026-10-18'}],now:'2026-10-18'};renderSobrietyDetails(d,calculateSobrietyRate(one),{history:calculateSobrietyHistory(one)});
-    assert(d.getElementById('sobrietyTrendSlider').disabled);assert(!d.querySelector('.sobriety-trend-line').getAttribute('points').includes('NaN'));
+    assert(d.getElementById('sobrietyTrendSlider').disabled);
+    for(const line of d.querySelectorAll('.sobriety-trend-line'))assert(!line.getAttribute('points').includes('NaN'));
+    assert.equal(d.querySelectorAll('.sobriety-trend-point').length,4);
+    assert.match(d.querySelector('[data-series-value="30"]').textContent,/30일 중 1일 집계/);
 });
 test('popup reuses history between clock ticks, rebuilds for changed source records and clears history on account/loading changes',async t=>{
     const dom=new JSDOM(html,{runScripts:'outside-only',virtualConsole:new VirtualConsole()}),w=dom.window,d=w.document;t.after(()=>w.close());

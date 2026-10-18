@@ -30,20 +30,39 @@ export function renderSobrietyDetails(document, result, state = {}) {
 function renderSobrietyHistory(document, body, history) {
     const make = (tag, text, cls) => { const el = document.createElement(tag); if (text !== undefined) el.textContent = text; if (cls) el.className = cls; return el; };
     const section = make('section', undefined, 'sobriety-history'); section.setAttribute('aria-labelledby', 'sobrietyTrendTitle');
-    const title = make('h4', '날짜별 누적 금주율'); title.id = 'sobrietyTrendTitle';
-    section.append(title, make('p', '첫 도전일부터 각 날짜까지의 금주율입니다. 선을 누르거나 날짜를 선택해 보세요.', 'health-muted'));
+    const title = make('h4', '날짜별 금주율 추이'); title.id = 'sobrietyTrendTitle';
+    section.append(title, make('p', '누적 금주율과 각 날짜를 포함한 최근 30·60·90일의 금주율을 함께 비교합니다.', 'health-muted'));
+    section.append(make('div', '그래프 표시 기간', 'sobriety-trend-label'));
     const toolbar = make('div', undefined, 'sobriety-trend-tools'); toolbar.setAttribute('role','group'); toolbar.setAttribute('aria-label','그래프 표시 기간');
     let period = 'all', selected = history.daily.length - 1, offset = 0;
-    const options = [['30','최근 30일'],['90','최근 90일'],['all','전체']];
+    const options = [['30','30일'],['60','60일'],['90','90일'],['all','전체']];
     for (const [value, label] of options) {
         const button = make('button', label, 'health-btn'); button.type = 'button'; button.dataset.period = value;
         button.addEventListener('click', () => { period = value; selected = history.daily.length - 1; draw(); }); toolbar.append(button);
     }
     section.append(toolbar);
+    const series = [
+        {key:'all',label:'누적',className:'sobriety-series-all',dash:'',value:row=>row},
+        {key:'30',label:'최근 30일',className:'sobriety-series-30',dash:'7 3',value:row=>row.rolling[30]},
+        {key:'60',label:'최근 60일',className:'sobriety-series-60',dash:'2 3',value:row=>row.rolling[60]},
+        {key:'90',label:'최근 90일',className:'sobriety-series-90',dash:'9 3 2 3',value:row=>row.rolling[90]}
+    ];
+    const shown = new Set(series.map(item=>item.key));
+    section.append(make('div', '비교할 금주율 · 눌러서 선 표시/숨김', 'sobriety-trend-label'));
+    const legend = make('div', undefined, 'sobriety-trend-legend'); legend.setAttribute('role','group');legend.setAttribute('aria-label','금주율 비교 선');
     const ns = 'http://www.w3.org/2000/svg';
     const svgNode = (name, attrs = {}, text) => { const el = document.createElementNS(ns,name); for (const [key,val] of Object.entries(attrs)) el.setAttribute(key,String(val)); if (text !== undefined) el.textContent = text; return el; };
+    for (const item of series) {
+        const button = make('button',undefined,`health-btn ${item.className}`);button.type='button';button.dataset.series=item.key;
+        const swatch = svgNode('svg',{viewBox:'0 0 28 12',width:28,height:12,'aria-hidden':'true',focusable:'false'});
+        swatch.append(svgNode('line',{x1:1,x2:27,y1:6,y2:6,stroke:'currentColor','stroke-width':2.5,'stroke-dasharray':item.dash}));
+        button.append(swatch,make('span',item.label));
+        button.addEventListener('click',()=>{if(shown.has(item.key))shown.delete(item.key);else shown.add(item.key);draw();});legend.append(button);
+    }
+    section.append(legend);
     const svg = svgNode('svg',{viewBox:'0 0 420 210',role:'img','aria-labelledby':'sobrietyTrendTitle sobrietyTrendDescription',class:'sobriety-trend-chart'});
     section.append(svg);
+    section.append(make('p', '그래프를 누르거나 날짜를 선택하면 네 금주율을 확인할 수 있습니다. 도전 시작 전 날짜는 제외하며, 기간이 부족하면 실제 경과일수로 계산합니다.', 'health-muted'));
     const selection = make('div',undefined,'sobriety-trend-selection');
     const dateLabel = make('label','날짜 '), date = make('input'); date.type = 'date'; date.id = 'sobrietyTrendDate';
     date.min = history.daily[0].date; date.max = history.daily.at(-1).date; dateLabel.append(date);
@@ -53,30 +72,45 @@ function renderSobrietyHistory(document, body, history) {
     const slider = make('input'); slider.type = 'range'; slider.id = 'sobrietyTrendSlider'; slider.step = '1'; slider.setAttribute('aria-label','날짜별 금주율 확인');
     section.append(sliderLabel,slider); body.append(section);
     const left=42,right=405,top=18,bottom=173;
-    let visible = [], cursor, point;
+    let visible = [], cursor, markers = [];
     const x = index => visible.length > 1 ? left + index / (visible.length - 1) * (right-left) : (left+right)/2;
     const y = percent => bottom - percent / 100 * (bottom-top);
     function select(index) {
         selected = Math.max(offset,Math.min(history.daily.length-1,index));
         const row=history.daily[selected]; date.value=row.date; slider.value=String(selected);
-        output.replaceChildren(make('strong',`${row.percent.toFixed(2)}%`),make('span',`금주 ${row.soberDays} / ${row.totalDays}일 · ${row.drank ? '이날 음주 기록 있음' : '이날 음주 기록 없음'}`));
-        slider.setAttribute('aria-valuetext',`${row.date}, 누적 금주율 ${row.percent.toFixed(2)}%`);
+        const values=make('span',undefined,'sobriety-trend-values');
+        for(const item of series){
+            const value=item.value(row),cell=make('span',undefined,`sobriety-trend-value ${item.className}`);cell.dataset.seriesValue=item.key;
+            const range=make('small',undefined,'sobriety-trend-value-range');
+            range.append(make('span',item.key==='all'?history.daily[0].date:value.startDate),make('span',`~ ${row.date}`));
+            cell.append(make('span',item.label,'sobriety-trend-value-label'),make('strong',`${value.percent.toFixed(2)}%`),
+                make('span',`금주 ${value.soberDays} / ${value.totalDays}일`),range);
+            if(item.key!=='all'&&value.totalDays<Number(item.key))cell.append(make('small',`${item.key}일 중 ${value.totalDays}일 집계`));
+            values.append(cell);
+        }
+        output.replaceChildren(make('span',row.drank?'이날 음주 기록 있음':'이날 음주 기록 없음'),values);
+        slider.setAttribute('aria-valuetext',`${row.date}, ${series.map(item=>`${item.label} 금주율 ${item.value(row).percent.toFixed(2)}%`).join(', ')}`);
         cursor.setAttribute('x1',x(selected-offset));cursor.setAttribute('x2',x(selected-offset));
-        point.setAttribute('cx',x(selected-offset));point.setAttribute('cy',y(row.percent));
+        for(const {item,point} of markers){point.setAttribute('cx',x(selected-offset));point.setAttribute('cy',y(item.value(row).percent));}
     }
     function draw() {
         offset = period==='all' ? 0 : Math.max(0,history.daily.length-Number(period)); visible = history.daily.slice(offset);
         for (const button of toolbar.children) button.setAttribute('aria-pressed',String(button.dataset.period===period));
-        svg.replaceChildren(svgNode('desc',{id:'sobrietyTrendDescription'},`${visible[0].date}부터 ${visible.at(-1).date}까지 날짜별 누적 금주율. 세로축 0~100%. 아래 날짜 선택으로 정확한 값을 확인할 수 있습니다.`));
+        for (const button of legend.children) button.setAttribute('aria-pressed',String(shown.has(button.dataset.series)));
+        const active=series.filter(item=>shown.has(item.key));
+        svg.replaceChildren(svgNode('desc',{id:'sobrietyTrendDescription'},`${visible[0].date}부터 ${visible.at(-1).date}까지 ${active.map(item=>item.label).join(', ')||'선 숨김'} 금주율. 세로축 0~100%. 아래 날짜 선택으로 네 금주율의 정확한 값과 집계 기간을 확인할 수 있습니다.`));
         for (const value of [0,25,50,75,100]) {
             svg.append(svgNode('line',{x1:left,x2:right,y1:y(value),y2:y(value),class:'sobriety-grid-line'}),svgNode('text',{x:left-7,y:y(value)+4,'text-anchor':'end',class:'sobriety-axis-label'},`${value}%`));
         }
-        const points=visible.map((row,i)=>`${x(i).toFixed(2)},${y(row.percent).toFixed(2)}`).join(' ');
-        svg.append(svgNode('polyline',{points,fill:'none',class:'sobriety-trend-line','vector-effect':'non-scaling-stroke','stroke-linejoin':'round'}));
+        for(const item of active){
+            const points=visible.map((row,i)=>`${x(i).toFixed(2)},${y(item.value(row).percent).toFixed(2)}`).join(' ');
+            svg.append(svgNode('polyline',{points,fill:'none',class:`sobriety-trend-line ${item.className}`,'data-series':item.key,'stroke-dasharray':item.dash,'vector-effect':'non-scaling-stroke','stroke-linejoin':'round'}));
+        }
+        if(!active.length)svg.append(svgNode('text',{x:(left+right)/2,y:(top+bottom)/2,'text-anchor':'middle',class:'sobriety-axis-label'},'범례를 눌러 비교할 선을 선택하세요'));
         const ticks = new Set([0,Math.floor((visible.length-1)/2),visible.length-1]);
         for (const i of ticks) svg.append(svgNode('text',{x:x(i),y:bottom+24,'text-anchor':visible.length===1?'middle':i===0?'start':i===visible.length-1?'end':'middle',class:'sobriety-axis-label'},visible[i].date.slice(2).replaceAll('-','.')));
         cursor=svgNode('line',{y1:top,y2:bottom,class:'sobriety-trend-cursor'});
-        point=svgNode('circle',{r:4.5,class:'sobriety-trend-point'});svg.append(cursor,point);
+        markers=active.map(item=>({item,point:svgNode('circle',{r:4.5,class:`sobriety-trend-point ${item.className}`})}));svg.append(cursor,...markers.map(marker=>marker.point));
         slider.min=String(offset);slider.max=String(history.daily.length-1);slider.disabled=visible.length===1;
         select(selected);
     }

@@ -52,7 +52,18 @@ export function calculateSobrietyHistory(input) {
         const drank = drinks.has(day);
         if (drank) drinkingDays++;
         const totalDays = day - first + 1, soberDays = totalDays - drinkingDays;
-        daily.push({date:dayKey(day), totalDays, drinkingDays, soberDays, percent:soberDays / totalDays * 100, drank});
+        const rolling = {};
+        for (const windowDays of [30, 60, 90]) {
+            // Include this date and the previous N-1 days, bounded by the first
+            // eligible attempt. Prefix counts keep each window constant-time.
+            const windowTotal = Math.min(windowDays, totalDays);
+            const before = daily[totalDays - windowTotal - 1];
+            const windowDrinking = drinkingDays - (before?.drinkingDays || 0);
+            const windowSober = windowTotal - windowDrinking;
+            rolling[windowDays] = {startDate:dayKey(day - windowTotal + 1), totalDays:windowTotal,
+                drinkingDays:windowDrinking, soberDays:windowSober, percent:windowSober / windowTotal * 100};
+        }
+        daily.push({date:dayKey(day), totalDays, drinkingDays, soberDays, percent:soberDays / totalDays * 100, drank, rolling});
         // Unix day zero is Thursday; weeks start Monday, regardless of device TZ.
         const monday = day - ((day + 3) % 7 + 7) % 7;
         let week = weeks.at(-1);
