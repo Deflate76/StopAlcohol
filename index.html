@@ -12,7 +12,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self';
         base-uri 'none';
         object-src 'none';
-        script-src 'self' https://www.gstatic.com/firebasejs/ https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/ https://apis.google.com/ https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js 'sha256-AIBL0tC4iNNoKKwFcVeQsj034glNRfVxuUyzuCSYSiQ=' 'sha256-AZ0n9nzxhG6BtZi9wp8Z5Lp1HEz1WD4vfpZ4B0FcTa4=' 'sha256-REiFfq6OotUrXGWxp84XojcMHah8Xjofp2pgS2BjRbM=' 'sha256-ZBDKI+cJWffsd+cXDpbTFeoXNCPy8uQD4RUYNTiPRSQ=' 'sha256-utYYx5qVnylo2gMZULKmJG8hNLajcNpGYKJuaVzT2NA=';
+        script-src 'self' https://www.gstatic.com/firebasejs/ https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/ https://apis.google.com/ https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js 'sha256-AIBL0tC4iNNoKKwFcVeQsj034glNRfVxuUyzuCSYSiQ=' 'sha256-REiFfq6OotUrXGWxp84XojcMHah8Xjofp2pgS2BjRbM=' 'sha256-UNCBgSlXQfdasEBGJxmv2bbb+lXIegzVACshKRFtgUg=' 'sha256-ZBDKI+cJWffsd+cXDpbTFeoXNCPy8uQD4RUYNTiPRSQ=' 'sha256-utYYx5qVnylo2gMZULKmJG8hNLajcNpGYKJuaVzT2NA=';
         script-src-attr 'unsafe-hashes'
         'sha256-+/PyyZxYlaRwGKBfLX4QqCPnBcKxzZ6EQ/FEMykrPlg='
         'sha256-+8Obkk1yhOE1TPaUpOo8d/udOL2qT2+5fc9UsR20blw='
@@ -269,7 +269,7 @@
     <meta name="app-build" content="2026-09-28-diagnosis-progress-v1">
     
     <meta name="description" content="금주 도전부터 건강 상태, 진단과 처방전까지. 나의 건강을 하루씩 기록하는 금주도전/건강기록." />
-    <meta name="theme-color" content="#ffffff" />
+    <meta name="theme-color" content="#163d33" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -1701,12 +1701,17 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
 <link rel="stylesheet" href="./community-recovery.css?v=20261009-3">
 <link rel="stylesheet" href="./quick-actions.css?v=20261017-1">
 <link rel="stylesheet" href="./diagnosis-diary.css?v=20261018-3">
+<link rel="stylesheet" href="./app-theme.css?v=20261019-1">
 </head>
 <body>
 <div id="pageTopAnchor" class="page-scroll-anchor" aria-hidden="true"></div>
 
 <div class="container">
+    <header class="app-masthead">
+        <p class="app-brand">ALCOHOLAWAY</p>
     <h1 class="app-title"><svg class="app-title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/><path d="M3 12h4l2-4 4 8 2-4h6"/></svg><span>금주도전/건강기록</span><button type="button" id="otcScanOpen" class="otc-title-button" title="일반의약품 바코드 스캔" aria-label="일반의약품 바코드 스캔" aria-haspopup="dialog" aria-controls="otcBarcodeDialog"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" aria-hidden="true"><path d="M3 8V3h5M20 3h5v5M25 20v5h-5M8 25H3v-5" stroke-width="2" stroke-linecap="round"/><path d="M7 8v12m3-12v12m4-12v12m3-12v12m4-12v12" stroke-width="2"/><path d="M12 8v12m7-12v12" stroke-width="1"/></svg></button><a id="phrOpen" href="./phr.html" class="otc-title-button phr-title-link" title="약수첩" aria-label="약수첩"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="3" width="18" height="22" rx="3"/><path d="M10 3v22M3 8h5M3 14h5M3 20h5M14 12h6M17 9v6M14 20h6"/></svg></a></h1>
+        <p class="app-tagline">오늘의 기록이 내일의 회복으로.</p>
+    </header>
     <div class="app-tab-list" role="tablist" aria-label="주요 기능">
         <button type="button" id="appTabRecords" class="app-tab-button" role="tab" aria-selected="true" aria-controls="appPanelRecords" tabindex="0" data-app-tab="records">금주도전/<wbr>건강기록</button>
         <button type="button" id="appTabMedicines" class="app-tab-button" role="tab" aria-selected="false" aria-controls="appPanelMedicines" tabindex="-1" data-app-tab="medicines">의약품 정보</button>
@@ -1853,7 +1858,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
                 <p id="subBodySummary" class="sub-body-summary" role="status">몸상태 시간대를 불러오는 중…</p>
                 <details class="sub-body-method"><summary>몸상태 지수 계산 기준</summary><p>몸상태에서 실제 입력한 항목만 평균합니다. 기분은 0=나쁨·10=좋음, 금단·갈증·피로·스트레스·수면 부족·배고픔·멍함은 0=없음·10=심함으로 해석합니다. 기분을 제외한 항목은 방향을 뒤집어 종합상태 0~100점으로 환산합니다.</p><p>40점 이하를 ‘낮은 상태’로 표시합니다. 아래 %는 해당 2시간 구간의 몸상태 기록 중 낮은 상태의 비율입니다. 화살표를 누르면 기록 수와 평균 점수가 나옵니다. 기기 현지 시각 기준의 개인 기록 요약이며 의학적 판정 기준은 아닙니다.</p></details>
                 <p id="subFailureSummary" class="sub-failure-summary" role="status">실패 시간대를 불러오는 중…</p>
-                <div style="font-size: 0.8rem; color: #999; margin-top: 15px;">도전 시작 일시: <button type="button" id="displaySettingDate" onclick="openHistoryList()" title="현재 진행 중인 단주 기록 보기" aria-label="도전 시작 일시, 단주 기록 열기">-</button></div>
+                <div class="timer-start-date">도전 시작 일시: <button type="button" id="displaySettingDate" onclick="openHistoryList()" title="현재 진행 중인 단주 기록 보기" aria-label="도전 시작 일시, 단주 기록 열기">-</button></div>
             </div>
             </div>
         </div>
@@ -7929,7 +7934,7 @@ initPillIdentification();
 
             if (challengeCount > 0 && totalDays > 0) {
                 const htmlContent = `
-                    <div style="background: linear-gradient(135deg, #f0f7ff, #ffffff); border: 1px solid #cbe3fa; border-radius: 18px; padding: 20px; text-align: left; box-shadow: 0 4px 10px rgba(52, 152, 219, 0.1);">
+                    <div class="recovery-summary-card">
                         <h3 style="margin-top: 0; margin-bottom: 10px; color: var(--primary-color); font-size: 1.15rem; display: flex; align-items: center; gap: 8px;">
                             <span>🌱</span> 당신의 노력은 사라지지 않았습니다
                         </h3>
@@ -11030,14 +11035,15 @@ initPillIdentification();
             type: 'line',
             plugins: [goalGapBadgePlugin, currentPositionBadgePlugin, progressChartPlugin],
             data: { datasets: [
-                { label: '탈락 영역 (과거)', data: [], borderColor: '#e74c3c', backgroundColor: 'rgba(231, 76, 60, 0.4)', fill: true, pointRadius: 0, tension: 0.3 },
-                { label: '생존 영역 (잠재)', data: [], borderColor: '#2ecc71', backgroundColor: 'rgba(46, 204, 113, 0.4)', fill: true, pointRadius: 0, tension: 0.3 }
+                { label: '탈락 영역 (과거)', data: [], borderColor: '#cf6754', backgroundColor: 'rgba(207, 103, 84, 0.24)', fill: true, pointRadius: 0, tension: 0.3 },
+                { label: '생존 영역 (잠재)', data: [], borderColor: '#348c69', backgroundColor: 'rgba(52, 140, 105, 0.20)', fill: true, pointRadius: 0, tension: 0.3 }
             ]},
             options: { 
                 responsive: true, maintainAspectRatio: false, animation: false,
                 scales: { 
-                    x: { type: 'linear', min: 0, max: 100, title: { display:true, text:'경과 일수', font:{size:10} } }, 
+                    x: { grid: { color: '#e5ebe5' }, type: 'linear', min: 0, max: 100, title: { display:true, text:'경과 일수', font:{size:10} } },
                     y: { 
+                        grid: { color: '#e5ebe5' },
                         beginAtZero: true, 
                         max: 1000, 
                         title: { display:true, text:'도전자 수', font:{size:10} },
@@ -11049,9 +11055,9 @@ initPillIdentification();
                     annotation: {
                         clip: false,
                         annotations: { 
-                            line1: { type: 'line', xMin: 0, xMax: 0, borderColor: '#2d3748', borderWidth: 2, borderDash: [4, 4], label: { display: true, content: '현재 경과', position: 'center', rotation: 0, yAdjust: currentPositionBadgeYAdjust, backgroundColor: '#2d3748', color: '#fff', font: { size: 10 }, padding: { top: 4, bottom: 4, left: 6, right: 6 }, borderRadius: 4 } },
-                            line2: { type: 'line', yMin: 0, yMax: 0, borderColor: '#e74c3c', borderWidth: 1.5, borderDash: [4, 4], label: { display: true, content: '생존', position: 'start', backgroundColor: '#e74c3c', font: { size: 10 } } },
-                            line3: { type: 'line', xMin: 0, xMax: 0, borderColor: '#f39c12', borderWidth: 1.5, borderDash: [2, 2], label: { display: true, content: '최장 기록', position: 'center', backgroundColor: '#f39c12', font: { size: 10 } } },
+                            line1: { type: 'line', xMin: 0, xMax: 0, borderColor: '#294d3e', borderWidth: 2, borderDash: [4, 4], label: { display: true, content: '현재 경과', position: 'center', rotation: 0, yAdjust: currentPositionBadgeYAdjust, backgroundColor: '#294d3e', color: '#fff', font: { size: 10 }, padding: { top: 4, bottom: 4, left: 6, right: 6 }, borderRadius: 4 } },
+                            line2: { type: 'line', yMin: 0, yMax: 0, borderColor: '#cf6754', borderWidth: 1.5, borderDash: [4, 4], label: { display: true, content: '생존', position: 'start', backgroundColor: '#a84e40', font: { size: 10 } } },
+                            line3: { type: 'line', xMin: 0, xMax: 0, borderColor: '#b77926', borderWidth: 1.5, borderDash: [2, 2], label: { display: true, content: '최장 기록', position: 'center', backgroundColor: '#89612c', font: { size: 10 } } },
                             ...createGoalGapAnnotations()
                         } 
                     } 
@@ -11072,8 +11078,8 @@ initPillIdentification();
                     { 
                         label: '나의 여정 (좌측)', 
                         data: [], 
-                        borderColor: '#e74c3c', 
-                        backgroundColor: 'rgba(231, 76, 60, 0.4)', 
+                        borderColor: '#cf6754',
+                        backgroundColor: 'rgba(207, 103, 84, 0.24)',
                         fill: true, 
                         pointRadius: 0, 
                         tension: 0.4 
@@ -11081,8 +11087,8 @@ initPillIdentification();
                     { 
                         label: '미지의 영역 (우측)', 
                         data: [], 
-                        borderColor: '#9b59b6', 
-                        backgroundColor: 'rgba(155, 89, 182, 0.1)', 
+                        borderColor: '#82669c',
+                        backgroundColor: 'rgba(130, 102, 156, 0.10)',
                         fill: true, 
                         pointRadius: 0, 
                         tension: 0.4 
@@ -11095,8 +11101,9 @@ initPillIdentification();
                 animation: false,
                 interaction: {mode:'nearest', axis:'x', intersect:false},
                 scales: { 
-                    x: { type: 'linear', min: 0, max: 100, title: { display:true, text:'경과 일수', font:{size:10} } }, 
+                    x: { grid: { color: '#e5ebe5' }, type: 'linear', min: 0, max: 100, title: { display:true, text:'경과 일수', font:{size:10} } },
                     y: { 
+                        grid: { color: '#e5ebe5' },
                         display: true, 
                         beginAtZero: true,
                         title: { display:true, text:'포기 확률밀도 (%/일)', font:{size:9} },
@@ -11127,8 +11134,8 @@ initPillIdentification();
                     annotation: {
                         clip: false,
                         annotations: { 
-                            myPosition: { type: 'line', xMin: 0, xMax: 0, borderColor: '#e74c3c', borderWidth: 2, label: { display: true, content: '나의 위치', position: 'center', yAdjust: currentPositionBadgeYAdjust, backgroundColor: '#e74c3c', font: { size: 10 } } },
-                            maxPosition: { type: 'line', xMin: 0, xMax: 0, borderColor: '#f39c12', borderWidth: 2, borderDash: [2, 2], label: { display: true, content: '최장 기록', position: 'center', backgroundColor: '#f39c12', font: { size: 10 } } },
+                            myPosition: { type: 'line', xMin: 0, xMax: 0, borderColor: '#cf6754', borderWidth: 2, label: { display: true, content: '나의 위치', position: 'center', yAdjust: currentPositionBadgeYAdjust, backgroundColor: '#a84e40', font: { size: 10 } } },
+                            maxPosition: { type: 'line', xMin: 0, xMax: 0, borderColor: '#b77926', borderWidth: 2, borderDash: [2, 2], label: { display: true, content: '최장 기록', position: 'center', backgroundColor: '#89612c', font: { size: 10 } } },
                             ...createGoalGapAnnotations(true)
                         } 
                     } 
