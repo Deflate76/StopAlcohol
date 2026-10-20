@@ -1,4 +1,5 @@
 // Existing posts/comments schema. Reads start only on account binding or opening the feed.
+import {isCommunityAdvice} from './community-ai.js?v=20261021-1';
 const DAY = 86400000;
 const READ_PREFIX = 'alcoholaway-community-read:';
 export const SOBRIETY_RANGES = [
@@ -47,7 +48,8 @@ export function communityCommentId(postId, comment) {
 }
 
 export function installCommunityFeed({doc=document, win=window, getUid, watchPosts, watchOwnPosts,
-    cheers=[], dayAtWrite, isPending=()=>false, editPost, deletePost, addComment, deleteComment, openCommunity} = {}) {
+    cheers=[], dayAtWrite, isPending=()=>false, editPost, deletePost, addComment, deleteComment, openCommunity,
+    retryAdvice=()=>{}, onOwnPosts=()=>{}} = {}) {
     const get = id => doc.getElementById(id), list = get('postList'), notice = get('communityUnreadBtn');
     const postInput=get('postContent'), postCount=get('postCharacterCount');
     const segmenter=typeof win.Intl?.Segmenter==='function'?new win.Intl.Segmenter('ko',{granularity:'grapheme'}):null;
@@ -102,6 +104,7 @@ export function installCommunityFeed({doc=document, win=window, getUid, watchPos
         stopOwn=watchOwnPosts(owner,(rows,{fromCache=false}={})=>{
             if(!valid())return;
             ownPosts=rows.filter(post=>post.uid===owner);ownError='';
+            if(!fromCache)onOwnPosts(ownPosts);
             // Establish the first baseline from the server, not an incomplete offline cache.
             if(!ledgerReady && !fromCache){
                 for(const post of ownPosts)for(const comment of Array.isArray(post.comments)?post.comments:[])if(comment && typeof comment==='object')seen.add(communityCommentId(post.id,comment));
@@ -123,7 +126,10 @@ export function installCommunityFeed({doc=document, win=window, getUid, watchPos
         const author=node('span','post-author-group');author.append(node('strong','post-author',`${post.author||'익명의 생존자'}${post.uid===uid?' (나)':''}`),dayBadge(post));
         const date=postTime(post.createdAt), dateText=Number.isFinite(date)?new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}).format(date):'작성일 미상';
         header.append(author,node('span','post-date',dateText));
-        summary.append(header,node('span','post-preview',String(post.content??'')),node('span','post-summary-footer',`댓글 ${(Array.isArray(post.comments)?post.comments:[]).length}개 · 펼치기/접기`));card.append(summary);
+        const postComments=Array.isArray(post.comments)?post.comments:[];
+        const advice=postComments.find(isCommunityAdvice),commentCount=postComments.filter(comment=>!isCommunityAdvice(comment)||comment.state==='ready').length;
+        const aiLabel=advice ? (advice.state==='ready'?' · AI 조언 도착':advice.state==='failed'?' · AI 조언 재시도 가능':' · AI 조언 작성 중') : '';
+        summary.append(header,node('span','post-preview',String(post.content??'')),node('span','post-summary-footer',`댓글 ${commentCount}개${aiLabel} · 펼치기/접기`));card.append(summary);
         const body=node('div','post-expanded-content');body.append(node('div','post-author-id',`작성자 ID: ${post.uid||'미상'}`),node('div','post-body',String(post.content??'')));
         if(post.editedAt)body.append(node('small','post-edited','수정됨'));
         if(post.uid===uid){const buttons=node('div','post-actions');buttons.append(action('수정','edit',()=>editPost(post.id,encodeURIComponent(String(post.content??'')))),action('삭제','delete',()=>deletePost(post.id)));body.append(buttons);}
@@ -132,11 +138,22 @@ export function installCommunityFeed({doc=document, win=window, getUid, watchPos
             if(!comment || typeof comment!=='object')return;
             const row=node('div','comment-item');row.id=communityCommentId(post.id,comment);row.tabIndex=-1;
             if(row.id===pinned?.commentId)row.classList.add('comment-notification-focus');
-            const reaction=cheers.find(item=>item.emoji===comment.text);
-            row.append(node('strong','comment-author',comment.author||'익명의 생존자'),dayBadge(comment));
+            const ai=isCommunityAdvice(comment),reaction=!ai && cheers.find(item=>item.emoji===comment.text);
+            if(ai)row.classList.add('comment-ai');
+            row.append(node('strong','comment-author',ai?'Alcoholaway AI':comment.author||'익명의 생존자'));
+            if(ai)row.append(node('span','comment-ai-badge','AI 조언'));else row.append(dayBadge(comment));
+            if(ai && comment.state!=='ready') {
+                row.append(node('span','comment-ai-status',comment.state==='failed'?'AI 조언을 완성하지 못했습니다. 글은 정상적으로 저장되어 있습니다.':'이 글을 읽고 조언을 작성하고 있어요…'));
+                if(post.uid===uid){
+                    if(comment.state==='failed')row.append(action('조언 다시 받기','retry-advice',()=>void retryAdvice(post.id),'comment-ai-retry'));
+                    row.append(action('지우기','delete-comment',()=>deleteComment(post.id,index,communityCommentId(post.id,comment))));
+                }
+                comments.append(row);return;
+            }
             const text=node('span',reaction?'comment-reaction':'comment-text',String(comment.text??''));
             if(reaction){text.setAttribute('role','img');text.setAttribute('aria-label',reaction.label);}row.append(text);
-            if(comment.uid===uid){const button=action('지우기','delete-comment',()=>deleteComment(post.id,index));button.dataset.commentIndex=index;row.append(button);}
+            if(ai)row.append(node('small','comment-ai-note','AI가 생성한 생활 조언이며 의료진의 진단·치료를 대신하지 않습니다.'));
+            if(comment.uid===uid){const button=action('지우기','delete-comment',()=>deleteComment(post.id,index,communityCommentId(post.id,comment)));button.dataset.commentIndex=index;row.append(button);}
             comments.append(row);
         });
         const composer=node('div','comment-composer');composer.id=`cmtComposer_${post.id}`;

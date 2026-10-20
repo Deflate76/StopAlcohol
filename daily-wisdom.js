@@ -40,7 +40,7 @@ export function buildWisdomContext(input, nowMs = Date.now()) {
     if (post.uid === input.uid && typeof post.content === 'string') {
       communications.push({at:post.createdAt, text:wisdomText(post.content, 200)});
     }
-    for (const comment of array(post.comments)) if (comment.uid === input.uid && typeof comment.text === 'string') {
+    for (const comment of array(post.comments)) if (comment.uid === input.uid && comment.kind !== 'ai-advice-v1' && typeof comment.text === 'string') {
       communications.push({at:comment.createdAt, text:wisdomText(comment.text, 140)});
     }
   }

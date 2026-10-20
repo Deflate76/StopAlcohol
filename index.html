@@ -12,7 +12,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self';
         base-uri 'none';
         object-src 'none';
-        script-src 'self' https://www.gstatic.com/firebasejs/ https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/ https://apis.google.com/ https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js 'sha256-AIBL0tC4iNNoKKwFcVeQsj034glNRfVxuUyzuCSYSiQ=' 'sha256-REiFfq6OotUrXGWxp84XojcMHah8Xjofp2pgS2BjRbM=' 'sha256-UNCBgSlXQfdasEBGJxmv2bbb+lXIegzVACshKRFtgUg=' 'sha256-ZBDKI+cJWffsd+cXDpbTFeoXNCPy8uQD4RUYNTiPRSQ=' 'sha256-utYYx5qVnylo2gMZULKmJG8hNLajcNpGYKJuaVzT2NA=';
+        script-src 'self' https://www.gstatic.com/firebasejs/ https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/ https://apis.google.com/ https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js 'sha256-AIBL0tC4iNNoKKwFcVeQsj034glNRfVxuUyzuCSYSiQ=' 'sha256-REiFfq6OotUrXGWxp84XojcMHah8Xjofp2pgS2BjRbM=' 'sha256-W/FcL/3HbPqM3V6mS2nQNb+DELXf1wYtyZ1a51H883w=' 'sha256-ZBDKI+cJWffsd+cXDpbTFeoXNCPy8uQD4RUYNTiPRSQ=' 'sha256-utYYx5qVnylo2gMZULKmJG8hNLajcNpGYKJuaVzT2NA=';
         script-src-attr 'unsafe-hashes'
         'sha256-+/PyyZxYlaRwGKBfLX4QqCPnBcKxzZ6EQ/FEMykrPlg='
         'sha256-+8Obkk1yhOE1TPaUpOo8d/udOL2qT2+5fc9UsR20blw='
@@ -1337,7 +1337,7 @@
         .diagnosis-recovery-status { flex: 0 0 auto; color: #15803d; font-size: .7rem; font-weight: 800; white-space: nowrap; }
         .diagnosis-recovery-name { color: #134e4a; font-weight: 800; overflow-wrap: anywhere; }
         .health-diagnosis-recovery { grid-column: 1 / -1; }
-        #accumulatedRecordsModal .accumulated-records-table { min-width: 340px; }
+        #accumulatedRecordsModal .accumulated-records-table { min-width: 0; }
         .accumulated-record-rank { display: inline-block; border-radius: 7px; background: #f1f5f9; color: #475569; padding: 3px 5px; font-size: .72rem; font-weight: 850; white-space: nowrap; }
         .accumulated-record-rank.rank-first { background: #fef3c7; color: #92400e; }
         /* 질환별 최소 금주 목표 */
@@ -1701,7 +1701,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
 <link rel="stylesheet" href="./community-recovery.css?v=20261009-3">
 <link rel="stylesheet" href="./quick-actions.css?v=20261017-1">
 <link rel="stylesheet" href="./diagnosis-diary.css?v=20261018-3">
-<link rel="stylesheet" href="./app-theme.css?v=20261019-1">
+<link rel="stylesheet" href="./app-theme.css?v=20261021-1">
 </head>
 <body>
 <div id="pageTopAnchor" class="page-scroll-anchor" aria-hidden="true"></div>
@@ -1810,7 +1810,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
 
 
 
-        <div class="timer-display inline-collapsible-section" id="timerDisplaySection" data-collapsed="false">
+        <div class="timer-display inline-collapsible-section is-selected-section" id="timerDisplaySection" data-collapsed="false">
             <button type="button" class="inline-collapsible-summary" onclick="toggleInlineCollapsible('timerDisplaySection')" aria-expanded="true" aria-label="현재 도전 타이머 접기 또는 펼치기"><span class="timer-summary-label"><span>⏱️ 현재 도전 타이머</span><small id="currentChallengeRecordCount" class="health-muted" title="도전 시작을 1일째로 표시합니다. 생존율은 기존 그래프의 추정 모델이며 실제 이용자 순위가 아닙니다."></small></span></button>
             <div class="inline-collapsible-content timer-display-content">
             <div id="mainDaysContainer" style="width: 100%;">
@@ -1955,10 +1955,11 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
                     </details>
                     <div class="community-composer">
                         <label class="community-composer-title" for="postContent">오늘의 이야기를 남겨보세요</label>
-                        <p id="communityWritingHint" class="community-writing-hint">작은 변화도, 힘들었던 순간도 편하게 나누어 주세요.</p>
+                        <p id="communityWritingHint" class="community-writing-hint">작은 변화도, 힘들었던 순간도 편하게 나누어 주세요. 글을 보내면 작성한 내용을 바탕으로 AI 조언 댓글 1개가 생성됩니다.</p>
                         <textarea id="postContent" placeholder="오늘 어떤 순간이 기억에 남나요?&#10;넘긴 고비나 작은 변화도 편하게 남겨보세요." rows="8" aria-describedby="communityWritingHint postCharacterCount"></textarea>
                         <div class="community-composer-footer"><span>공백·줄바꿈 포함</span><output id="postCharacterCount" for="postContent" aria-live="off">0자</output></div>
-                        <button type="button" class="community-submit-btn" onclick="submitPost()">통신 발송</button>
+                        <button type="button" id="communitySubmitBtn" class="community-submit-btn" onclick="submitPost()">통신 발송</button>
+                        <p id="communitySubmitStatus" class="community-status" role="status" aria-live="polite"></p>
                     </div>
                     <p id="communityNotificationStatus" class="community-status" role="status"></p>
                     <div class="community-toolbar"><button type="button" id="communityExpandAll">전체 펼치기</button><button type="button" id="communityCollapseAll">전체 접기</button><button type="button" id="communityRetry">다시 불러오기</button><button type="button" id="communityBackToList" hidden>알림 글 고정 해제</button></div>
@@ -2693,10 +2694,16 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
         <button type="button" class="close-btn-top" onclick="closeModal('accumulatedRecordsModal')" aria-label="닫기">&times;</button>
         <h3 id="accumulatedRecordsTitle" style="margin-top: 0; padding-right: 20px;">📚 내 인생 누적 단주</h3>
         <p id="accumulatedRecordsSummary" class="accumulated-records-summary" role="status" aria-live="polite"></p>
+        <section id="accumulatedRecordsChartSection" class="accumulated-chart-card" aria-labelledby="accumulatedRecordsChartTitle" hidden>
+            <h4 id="accumulatedRecordsChartTitle">도전 횟수별 유지기간</h4>
+            <p class="accumulated-chart-hint">첫 도전부터 시작일 순서 · 막대를 누르면 상세 기록</p>
+            <div class="accumulated-chart-canvas"><canvas id="accumulatedRecordsChart" role="img" aria-label="도전 횟수별 유지기간 막대그래프. 같은 수치는 아래 기록 표에서 확인할 수 있습니다."></canvas></div>
+            <p class="accumulated-chart-legend"><span class="rank-first">1위</span><span class="rank-second">2위</span><span class="rank-third">3위</span><span>테두리: 진행 중</span></p>
+        </section>
         <p class="accumulated-records-help">열 제목을 누르면 정렬 순서가 바뀝니다. ↑ 오름차순 · ↓ 내림차순</p>
         <div id="accumulatedRecordsTableWrap" class="accumulated-records-table-wrap" hidden>
             <table class="accumulated-records-table" aria-label="단주 기록별 시작날짜, 종료날짜, 유지기간, 유지기간 순위">
-                <colgroup><col><col><col><col style="width: 64px;"></colgroup>
+                <colgroup><col style="width: 25%;"><col style="width: 25%;"><col style="width: 33%;"><col style="width: 17%;"></colgroup>
                 <thead>
                     <tr>
                         <th scope="col" data-sort-key="start" aria-sort="descending"><button type="button" onclick="sortAccumulatedRecords('start')">시작날짜 <span data-sort-indicator aria-hidden="true">↓</span></button></th>
@@ -2708,7 +2715,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
                 <tbody id="accumulatedRecordsBody"></tbody>
             </table>
         </div>
-        <p class="accumulated-records-help">순위는 유지기간이 긴 순서이며, 동일한 유지기간은 공동 순위입니다. 진행 중인 기록은 팝업을 연 시각 기준입니다. 종료날짜가 없는 기록은 종료날짜 정렬 시 맨 아래에 표시됩니다.</p>
+        <p class="accumulated-records-help">막대는 가장 긴 유지기간을 100%로 비교합니다. 순위는 긴 순서이며 같은 유지기간은 공동 순위입니다. 진행 중인 기록은 팝업을 연 시각 기준입니다. 날짜·유지기간이 없는 기록은 —로 표시하며 정렬 시 맨 아래에 둡니다.</p>
         <button type="button" class="stat-btn" style="margin-top: 12px;" onclick="closeModal('accumulatedRecordsModal')">닫기</button>
     </div>
 </div>
@@ -3826,12 +3833,15 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
     
     import { backgroundTask, loadHomeEssentials } from './app-loading.js?v=20261008-1';
     import { currentRecoveryGoals, recoveryGoalsHtml } from './recovery-goals.js?v=20261009-2';
-    import { installCommunityFeed } from './community-feed.js?v=20261009-3';
+    import { installCommunityFeed, communityCommentId } from './community-feed.js?v=20261021-1';
+    import { buildAccumulatedRecords, recordRankClass, accumulatedChartConfig } from './accumulated-records.js?v=20261021-1';
+    import { installSectionSelection } from './section-selection.js?v=20261021-1';
+    import { installCommunityAdvice, createCommunityAdviceSlot, COMMUNITY_ADVICE_INSTRUCTION } from './community-ai.js?v=20261021-1';
     import { installDailySchedules } from './daily-schedules.js?v=20260928-2';
     import { formatRecordDuration, getStreakRankContext } from './record-activity.js?v=20261018-1';
     import { installRecordSectionUI } from './record-section-ui.js?v=20261005-1';
     import { renderFailureTimeRisk, renderCravingTimeRisk, renderBodyTimeRisk, updateFailureTimeProgress, installTodayWeather } from './daily-health-tools.js?v=20261008-1';
-    import { installDailyWisdom, WISDOM_SYSTEM_INSTRUCTION } from './daily-wisdom.js?v=20261004-1';
+    import { installDailyWisdom, WISDOM_SYSTEM_INSTRUCTION } from './daily-wisdom.js?v=20261021-1';
     import { installCalendarEnvironment } from './calendar-environment.js?v=20261008-1';
     import { installAccountDeletion } from './account-deletion.js?v=20261009-1';
     import { createProgressChartPlugin, formatBestRankRange, distributionDensityPercent, distributionDayProbabilityPercent } from './progress-chart.js?v=20261017-1';
@@ -3998,6 +4008,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
     let accumulatedRecordsRows = [];
     let accumulatedRecordsSort = { key: 'start', direction: 'desc' };
     let accumulatedRecordsRequestId = 0;
+    let accumulatedRecordsChart = null;
     let streakRecordsRows = [];
     let streakRecordsSort = { key: 'rank', direction: 'asc' };
     let streakRecordsRequestId = 0;
@@ -4257,6 +4268,8 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
         else if (kind === 'diagnosis') quickActions.openDiagnoses();
     };
 
+    const sectionSelection = installSectionSelection();
+
     function getMainSections() {
         return Array.from(document.querySelectorAll('details.main-section'));
     }
@@ -4371,6 +4384,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
 
         const target = document.getElementById(targetId);
         if (!target) return;
+        sectionSelection.select(target);
         if (target.matches('details.main-section')) target.open = true;
         if (target.classList.contains('inline-collapsible-section')) setInlineCollapsibleOpen(target, true);
         target.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -7731,6 +7745,22 @@ initPillIdentification();
 
     onAuthStateChanged(auth, async (user) => {
         if (accountDeletion.isDeleting() && user) return;
+        communityAdvice.bindAccount(user?.uid || null);
+        if (userId !== user?.uid) {
+            accumulatedRecordsRequestId++;
+            accumulatedRecordsRows = [];
+            accumulatedRecordsChart?.destroy(); accumulatedRecordsChart = null;
+            document.getElementById('accumulatedRecordsBody').replaceChildren();
+            document.getElementById('accumulatedRecordsChartSection').hidden = true;
+            document.getElementById('accumulatedRecordsSummary').textContent = '';
+            closeModal('accumulatedRecordsModal');
+            sectionSelection.select('timerDisplaySection');
+            document.getElementById('communitySubmitStatus').textContent = '';
+            pendingCommunityPost = null;
+            document.getElementById('communitySubmitBtn').disabled = false;
+            document.getElementById('postContent').value = '';
+            document.getElementById('postContent').dispatchEvent(new Event('input'));
+        }
         if (userId !== user?.uid) quickActions.close();
         const generation = ++homeLoadGeneration;
         const loadingStatus = document.getElementById('appLoadingStatus');
@@ -7968,6 +7998,7 @@ initPillIdentification();
                 const summaryToggle = document.querySelector('#activeMotivationalSummary [data-collapsible-target]');
                 summaryToggle?.addEventListener('click', () => toggleInlineCollapsible(summaryToggle.dataset.collapsibleTarget));
                 document.getElementById('activeMotivationalSummary').style.display = 'block';
+                sectionSelection.refresh();
                 recordSectionUI.setSummary('activeRecoveryNames', `누적 단주 ${totalDays}일, 최장 생존 ${maxDays}일, 고비 ${totalCravings}번`);
                 updateMainSectionControlState();
             } else {
@@ -9507,14 +9538,16 @@ initPillIdentification();
     }
 
     function rankAccumulatedRecords(rows) {
-        const durations = rows.filter(row => Number.isFinite(row.durationMs) && row.durationMs >= 0)
-            .map(row => row.durationMs).sort((a, b) => b - a);
-        const ranks = new Map(), counts = new Map();
-        durations.forEach((duration, index) => {
-            if (!ranks.has(duration)) ranks.set(duration, index + 1);
-            counts.set(duration, (counts.get(duration) || 0) + 1);
-        });
-        return rows.map(row => ({ ...row, durationRank: ranks.get(row.durationMs) ?? null, tiedRank: (counts.get(row.durationMs) || 0) > 1 }));
+        return buildAccumulatedRecords(rows);
+    }
+
+    function renderAccumulatedRecordsChart(rows) {
+        document.getElementById('accumulatedRecordsChartSection').hidden = !rows.length;
+        accumulatedRecordsChart?.destroy(); accumulatedRecordsChart = null;
+        if (!rows.length || typeof Chart === 'undefined') return;
+        const formatDate = ms => Number.isFinite(ms) ? new Date(ms).toLocaleDateString('ko-KR') : '날짜 미상';
+        accumulatedRecordsChart = new Chart(document.getElementById('accumulatedRecordsChart'),
+            accumulatedChartConfig(rows, {formatDuration:formatAccumulatedDuration, formatDate}));
     }
 
     function renderAccumulatedRecords() {
@@ -9527,11 +9560,11 @@ initPillIdentification();
             ? `총 ${rows.length}개 기록 · 종료 ${rows.length - activeCount}개 · 진행 중 ${activeCount}개`
             : '아직 생성된 단주 기록이 없습니다.';
         body.innerHTML = rows.map(row => `
-            <tr>
-                <td>${formatAccumulatedRecordDate(row.startMs)}</td>
-                <td>${row.isActive ? '<span class="accumulated-record-active">진행 중</span>' : formatAccumulatedRecordDate(row.endMs)}</td>
-                <td><span class="accumulated-record-duration">${formatAccumulatedDuration(row.durationMs)}</span></td>
-                <td>${row.durationRank === null ? '—' : `<span class="accumulated-record-rank${row.durationRank === 1 ? ' rank-first' : ''}">${row.tiedRank ? '공동 ' : ''}${row.durationRank}위</span>`}</td>
+            <tr data-record-attempt="${row.attempt}" class="${row.isActive ? 'is-current-record' : ''}">
+                <td><span class="accumulated-attempt">${row.attempt}회차</span>${formatStreakRecordDate(row.startMs)}</td>
+                <td>${row.isActive ? '<span class="accumulated-record-active">진행 중</span>' : formatStreakRecordDate(row.endMs)}</td>
+                <td><span class="accumulated-record-duration">${formatAccumulatedDuration(row.durationMs)}</span>${row.durationRank === null ? '' : `<span class="accumulated-duration-track" aria-hidden="true"><span class="accumulated-duration-fill ${recordRankClass(row.durationRank)}" style="width:${row.durationPercent.toFixed(4)}%"></span></span>`}</td>
+                <td>${row.durationRank === null ? '—' : `<span class="accumulated-record-rank ${recordRankClass(row.durationRank)}">${row.tiedRank ? '<small>공동</small>' : ''}${row.durationRank}위</span>`}</td>
             </tr>
         `).join('');
         const labels = { start: '시작날짜', end: '종료날짜', duration: '유지기간', rank: '순위' };
@@ -9558,7 +9591,10 @@ initPillIdentification();
     window.openAccumulatedRecordsModal = async function() {
         if (!userId) return alert('로그인이 필요합니다.');
         const requestId = ++accumulatedRecordsRequestId;
+        const uid = userId;
         accumulatedRecordsRows = [];
+        accumulatedRecordsChart?.destroy(); accumulatedRecordsChart = null;
+        document.getElementById('accumulatedRecordsChartSection').hidden = true;
         accumulatedRecordsSort = { key: 'start', direction: 'desc' };
         document.getElementById('accumulatedRecordsBody').innerHTML = '';
         document.getElementById('accumulatedRecordsTableWrap').hidden = true;
@@ -9567,12 +9603,13 @@ initPillIdentification();
         openModal('accumulatedRecordsModal');
         try {
             const challenges = await ensureAllChallengesLoaded(true);
-            if (requestId !== accumulatedRecordsRequestId) return;
+            if (requestId !== accumulatedRecordsRequestId || userId !== uid) return;
             const nowMs = Date.now();
             accumulatedRecordsRows = challenges.map((challenge, originalIndex) => ({
                 ...getChallengeRecordRange(challenge, nowMs), originalIndex
             }));
             renderAccumulatedRecords();
+            renderAccumulatedRecordsChart(rankAccumulatedRecords(accumulatedRecordsRows));
         } catch (e) {
             if (requestId !== accumulatedRecordsRequestId) return;
             document.getElementById('accumulatedRecordsSummary').textContent = '기록을 불러오지 못했습니다. 잠시 후 다시 열어 주세요.';
@@ -10243,6 +10280,7 @@ initPillIdentification();
             return;
         }
         section.open = true;
+        sectionSelection.select(section);
         closeFloatingQuickNav();
         syncCommunitySection();
         updateMainSectionControlState();
@@ -10396,26 +10434,51 @@ initPillIdentification();
         document.getElementById(`cmtComposer_${postId}`)?.querySelectorAll('button').forEach(button => { button.disabled = pending; });
     }
 
+    const communityAdvice = installCommunityAdvice({
+        getUid:() => userId === auth.currentUser?.uid ? userId : null,
+        transact:(postId, change) => runTransaction(db, async transaction => {
+            const ref = doc(db, 'posts', postId), snapshot = await transaction.get(ref);
+            const result = change(snapshot.exists() ? snapshot.data() : null);
+            if (result?.patch) transaction.update(ref, result.patch);
+            return result?.value;
+        }),
+        generate:(context, signal) => generateFirebaseText(context, signal, {
+            systemInstruction:COMMUNITY_ADVICE_INSTRUCTION, maxOutputTokens:2048, temperature:0.7
+        })
+    });
+    let pendingCommunityPost = null;
+
     window.submitPost = async function() {
         if (!userId) return alert('로그인이 필요합니다.');
+        if (pendingCommunityPost === userId) return;
         const input = document.getElementById('postContent'), content = input.value.trim();
         if (!content) return alert('내용을 입력해 주세요.');
         const uid = userId, createdAt = Date.now(), authorQuitDate = userQuitDate || null;
+        pendingCommunityPost = uid;
+        const button = document.getElementById('communitySubmitBtn'), status = document.getElementById('communitySubmitStatus');
+        button.disabled = true; status.textContent = '글을 보내는 중…';
         try {
-            await addDoc(collection(db, 'posts'), {
+            const postRef = await addDoc(collection(db, 'posts'), {
                 uid,
                 author: userProfile.nickname || auth.currentUser?.displayName || '익명의 생존자',
                 authorQuitDate,
                 authorDayAtWrite: calcDday(authorQuitDate, createdAt),
                 content,
                 createdAt,
-                comments: []
+                comments: [createCommunityAdviceSlot(uid, createdAt)]
             });
             if (userId === uid && input.value.trim() === content) {
                 input.value = '';
                 input.dispatchEvent(new Event('input', {bubbles:true}));
             }
-        } catch (error) { if (userId === uid) alert('작성에 실패했습니다: ' + error.message); }
+            if (userId === uid) {
+                status.textContent = '글을 보냈습니다. AI 조언은 잠시 후 글 아래에 표시됩니다.';
+                void communityAdvice.run(postRef.id);
+            }
+        } catch (error) { if (userId === uid) status.textContent = '작성하지 못했습니다. 연결 상태를 확인하고 다시 보내 주세요.'; }
+        finally {
+            if (pendingCommunityPost === uid) { pendingCommunityPost = null; button.disabled = false; }
+        }
     };
 
     const communityFeed = installCommunityFeed({
@@ -10433,6 +10496,8 @@ initPillIdentification();
         deletePost:(...args) => window.deletePost(...args),
         addComment:(...args) => window.addComment(...args),
         deleteComment:(...args) => window.deleteComment(...args),
+        retryAdvice:postId => communityAdvice.run(postId, {retry:true}),
+        onOwnPosts:posts => communityAdvice.resume(posts),
         openCommunity:() => { if (!userId || !currentChallengeId) return false; window.openSurvivorCommunity({focusHeading:false}); return true; }
     });
 
@@ -10514,17 +10579,21 @@ initPillIdentification();
         }
     };
 
-    window.deleteComment = async function(postId, commentIndex) {
+    window.deleteComment = async function(postId, commentIndex, expectedId = null) {
+        const uid = userId;
+        if (!uid) return;
         if(confirm("댓글을 삭제하시겠습니까?")) {
             try {
                 const postRef = doc(db, "posts", postId);
-                const postSnap = await getDoc(postRef);
-                if(postSnap.exists()) {
-                    const postData = postSnap.data();
-                    let newComments = [...(postData.comments || [])];
-                    newComments.splice(commentIndex, 1);
-                    await updateDoc(postRef, { comments: newComments });
-                }
+                await runTransaction(db, async transaction => {
+                    const postSnap = await transaction.get(postRef);
+                    if (!postSnap.exists() || userId !== uid || auth.currentUser?.uid !== uid) return;
+                    const comments = [...(postSnap.data().comments || [])];
+                    const index = expectedId ? comments.findIndex(comment => communityCommentId(postId, comment) === expectedId) : commentIndex;
+                    if (index < 0 || comments[index]?.uid !== uid) return;
+                    comments.splice(index, 1);
+                    transaction.update(postRef, {comments});
+                });
             } catch(e) { 
                 console.error("댓글 삭제 에러:", e);
                 alert("댓글 삭제 실패: " + e.message); 
@@ -12302,6 +12371,10 @@ initPillIdentification();
     }
 
     async function generateDailyWisdom(context, signal) {
+        return generateFirebaseText(context, signal, {systemInstruction:WISDOM_SYSTEM_INSTRUCTION, maxOutputTokens:2048, temperature:0.9});
+    }
+
+    async function generateFirebaseText(context, signal, {systemInstruction, maxOutputTokens, temperature}) {
         const deadline = promise => new Promise((resolve, reject) => {
             const timer = setTimeout(() => reject(new Error('AI timeout')), 45000);
             Promise.resolve(promise).then(value => {clearTimeout(timer);resolve(value);}, error => {clearTimeout(timer);reject(error);});
@@ -12313,8 +12386,8 @@ initPillIdentification();
         if (signal.aborted) throw new Error('Cancelled');
         const backend = hrEl('aiTestProvider').value === 'agent' ? new AgentPlatformBackend(hrEl('aiTestLocation').value.trim()) : new GoogleAIBackend();
         const model = getGenerativeModel(getAI(app, {backend}), {
-            model:hrEl('aiTestModel').value.trim(), systemInstruction:WISDOM_SYSTEM_INSTRUCTION,
-            generationConfig:{maxOutputTokens:2048, temperature:0.9}
+            model:hrEl('aiTestModel').value.trim(), systemInstruction,
+            generationConfig:{maxOutputTokens, temperature}
         }, {timeout:45000, signal});
         const result = await deadline(model.generateContent({contents:[{role:'user',parts:[{text:JSON.stringify(context)}]}]}));
         if (signal.aborted) throw new Error('Cancelled');

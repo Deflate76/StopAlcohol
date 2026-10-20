@@ -99,7 +99,7 @@ button, a, input, select, textarea, summary { scroll-margin-block: 24px; }
 .section-bulk-toolbar { border-color: var(--ui-line); background: #edf2ee; }
 #enablePushBtn { box-shadow: none; font-size: .77rem; font-weight: 650; border-style: solid; background: #f2f7f3; }
 
-/* The current challenge is the visual focus; every statistic keeps its existing position and meaning. */
+/* The timer starts selected. The shared selection layer below moves this emphasis on interaction. */
 .timer-display.inline-collapsible-section {
     position: relative;
     isolation: isolate;
@@ -222,6 +222,70 @@ details.achieved-details, details.upcoming-details { border-color: #e3e9e1; back
 .post-card.is-mine { border-left-color: #4c9973; }
 .post-preview, .post-body { line-height: 1.75; }
 
+/* One selected section. Inner reading surfaces retain their readable light palette. */
+:is(details.main-section, .inline-collapsible-section.active-summary-collapsible).is-selected-section {
+    border-color: #235b49;
+    background: radial-gradient(ellipse at 100% 0, #2a6553 0, transparent 58%), linear-gradient(155deg, #163d33, #12382f 70%, #164637);
+    box-shadow: 0 12px 28px rgba(19, 69, 49, .15);
+}
+:is(details.main-section, .inline-collapsible-section).is-selected-section > :is(summary, .inline-collapsible-summary) { color: #f4f8f4; border-bottom-color: #ffffff20; }
+:is(details.main-section, .inline-collapsible-section).is-selected-section > :is(summary, .inline-collapsible-summary)::after { color: #c5dfd0; background: #ffffff0b; border-color: #ffffff1a; }
+:is(details.main-section, .inline-collapsible-section).is-selected-section > :is(summary, .inline-collapsible-summary) .diagnosis-summary-names { color: #c1dccd; }
+:is(details.main-section, .inline-collapsible-section.active-summary-collapsible).is-selected-section > :is(.section-content, .inline-collapsible-content) { position: relative; isolation: isolate; color: var(--ui-ink); background: #fff; border-radius: 13px; }
+#sectionStats .chart-container > canvas { position: relative; z-index: 1; }
+.timer-display.inline-collapsible-section:not(.is-selected-section) { background: #fff; border-color: var(--ui-line); color: var(--ui-ink); box-shadow: var(--ui-shadow); }
+.timer-display:not(.is-selected-section) .inline-collapsible-summary { color: var(--ui-ink); border-bottom-color: #e9eeea; }
+.timer-display:not(.is-selected-section) .inline-collapsible-summary::after { color: #6b8979 !important; background: #f3f6f3; border-color: #e2eae3; }
+.timer-display:not(.is-selected-section) #currentChallengeRecordCount { color: #87642d; }
+.timer-display:not(.is-selected-section) :is(.time-unit, #subTime, .clickable-time-box:hover .time-unit) { color: #1b5a43; }
+.timer-display:not(.is-selected-section) :is(.daily-wisdom-hint, .sub-time-clickable, .clickable-time-box:hover .sub-time-clickable) { color: #557666; }
+.timer-display:not(.is-selected-section) :is(.day-progress-percent, .sub-failure-summary) { color: #866020; }
+.timer-display:not(.is-selected-section) .sub-percent-text { color: #975440; }
+.timer-display:not(.is-selected-section) :is(.tick-label, .sub-body-method, .timer-start-date) { color: #687e70; }
+.timer-display:not(.is-selected-section) .sub-craving-summary { color: #79618c; }
+.timer-display:not(.is-selected-section) .sub-body-summary { color: #357c65; }
+.timer-display:not(.is-selected-section) .time-bar-bg { background: #edf2ee; }
+.timer-display:not(.is-selected-section) .hour-fill { background: #bedce5; }
+.timer-display:not(.is-selected-section) .min-fill { background: #bcdcc8; }
+.timer-display:not(.is-selected-section) .sec-fill { background: #ebd8b0; }
+.timer-display:not(.is-selected-section) .time-bar-text { color: #244b3b; text-shadow: none; }
+.timer-display:not(.is-selected-section) .clickable-time-box:hover { background: #f5f9f5; border-color: #dce8de; }
+
+/* Compact four-column history, with matching podium colors in both charts. */
+#accumulatedRecordsModal .modal-content { box-sizing: border-box; padding-inline: clamp(12px, 4vw, 24px); }
+#accumulatedRecordsModal .accumulated-records-table { font-size: .72rem; }
+#accumulatedRecordsModal .accumulated-records-table th button { font-size: clamp(.62rem, 2.65vw, .75rem); padding: 12px 1px; letter-spacing: -.04em; }
+#accumulatedRecordsModal .accumulated-records-table td { padding: 9px 3px; overflow-wrap: anywhere; }
+#accumulatedRecordsModal .accumulated-record-date { white-space: normal; font-size: .73rem; line-height: 1.45; }
+#accumulatedRecordsModal .streak-record-year { display: block; color: #76877d; font-size: .64rem; }
+#accumulatedRecordsModal .accumulated-record-time { font-size: .64rem; margin-top: 2px; }
+#accumulatedRecordsModal .accumulated-record-duration { font-size: .71rem; line-height: 1.65; word-break: keep-all; }
+#accumulatedRecordsModal .accumulated-record-active { padding: 3px; font-size: .66rem; }
+#accumulatedRecordsModal .accumulated-record-rank { font-size: .7rem; padding: 5px 4px; border: 1px solid transparent; }
+#accumulatedRecordsModal .accumulated-record-rank small { display: block; font-size: .58rem; }
+#accumulatedRecordsModal .accumulated-record-rank.rank-first, .accumulated-chart-legend .rank-first { color: #805a14; background: #fcf0cc; border-color: #dec486; }
+#accumulatedRecordsModal .accumulated-record-rank.rank-second, .accumulated-chart-legend .rank-second { color: #465d70; background: #e9eff5; border-color: #b3c3d3; }
+#accumulatedRecordsModal .accumulated-record-rank.rank-third, .accumulated-chart-legend .rank-third { color: #895134; background: #f5e6da; border-color: #d6ad90; }
+.accumulated-attempt { display: block; color: #44765d; font-size: .61rem; font-weight: 700; margin-bottom: 3px; }
+.accumulated-duration-track { display: block; height: 6px; overflow: hidden; background: #e7eee9; border-radius: 4px; margin-top: 7px; }
+.accumulated-duration-fill { display: block; height: 100%; background: #438c75; border-radius: inherit; }
+.accumulated-duration-fill.rank-first { background: #c39a42; }
+.accumulated-duration-fill.rank-second { background: #879cae; }
+.accumulated-duration-fill.rank-third { background: #bb815c; }
+#accumulatedRecordsBody .is-current-record td { background: #f0f8f2; }
+.accumulated-chart-card { background: #f7faf7; border: 1px solid #dce8df; border-radius: 14px; padding: 12px 8px 8px; margin: 12px 0; }
+.accumulated-chart-card h4 { margin: 0 4px; font-size: .88rem; color: #345c45; }
+.accumulated-chart-hint { font-size: .68rem; color: #6b8071; margin: 5px 4px 10px; }
+.accumulated-chart-canvas { position: relative; height: 205px; min-width: 0; }
+.accumulated-chart-legend { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 5px; font-size: .64rem; color: #647b6b; margin: 8px 0 0; }
+.accumulated-chart-legend > span { border: 1px solid transparent; padding: 2px 5px; border-radius: 5px; }
+.community-submit-btn:disabled { opacity: .6; cursor: wait; }
+.comment-item.comment-ai { background: #edf6f0; border: 1px solid #c7dece; border-radius: 10px; padding: 12px; color: #345841; }
+.comment-ai-badge { display: inline-block; margin-left: 6px; border-radius: 5px; padding: 2px 5px; background: #d3e9da; color: #316548; font-size: .65rem; font-weight: 750; }
+.comment-ai .comment-text, .comment-ai-status { display: block; margin: 7px 0 4px; font-size: .79rem; line-height: 1.75; white-space: pre-wrap; overflow-wrap: anywhere; }
+.comment-ai-note { display: block; margin-top: 7px; font-size: .65rem; color: #667d6c; line-height: 1.6; }
+.comment-ai-retry { margin-top: 6px; padding: 6px 9px; border: 1px solid #adcdb9; border-radius: 7px; background: #fff; color: #36634b; font-size: .72rem; }
+
 /* Shared controls and dialogs. No display rules: feature code owns visibility. */
 .modal { background: rgba(15, 35, 28, .55); backdrop-filter: blur(6px); }
 .modal-content, .quick-dialog, .weather-dialog, .wisdom-dialog, .pill-id-dialog, .release-dialog, .ai-assistant-dialog, .account-delete-dialog {
@@ -306,7 +370,7 @@ dialog::backdrop { background: rgba(15, 35, 28, .55); backdrop-filter: blur(5px)
     .rank-info { padding-inline: 5px; }
 }
 @media (prefers-reduced-motion: reduce) {
-    .app-tab-button { transition: none; }
+    .app-tab-button, .timer-display .time-unit { transition: none; }
     .craving-btn:hover, .stat-btn:hover { transform: none; }
 }
 @media print {
