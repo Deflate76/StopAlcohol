@@ -65,7 +65,8 @@ test('trend date/slider/range controls expose exact values and weekly table pagi
     const input={createdAt:'2026-01-01',challenges:[{startDate:'2026-01-01'}],dailyLogs:{'2026-01-01':{alcohol:1},'2026-10-10':{alcohol:1}},now:'2026-10-18'};
     const history=calculateSobrietyHistory(input);renderSobrietyDetails(d,calculateSobrietyRate(input),{history});
     assert.equal(d.querySelectorAll('.sobriety-trend-line').length,4);
-    assert.equal(d.querySelector('.sobriety-trend-line').getAttribute('points').split(' ').length,history.daily.length);
+    assert.equal(d.querySelector('.sobriety-trend-line').getAttribute('points').split(' ').length,history.daily.length-1);
+    assert.equal(d.querySelector('.sobriety-trend-chart').dataset.startDate,'2026-01-02');
     for(const n of [30,60,90]){
         const line=d.querySelector(`.sobriety-trend-line[data-series="${n}"]`);
         assert.notEqual(line.getAttribute('points'),d.querySelector('.sobriety-trend-line').getAttribute('points'));
@@ -95,6 +96,62 @@ test('trend date/slider/range controls expose exact values and weekly table pagi
     for(const line of d.querySelectorAll('.sobriety-trend-line'))assert(!line.getAttribute('points').includes('NaN'));
     assert.equal(d.querySelectorAll('.sobriety-trend-point').length,4);
     assert.match(d.querySelector('[data-series-value="30"]').textContent,/30일 중 1일 집계/);
+});
+test('rate headline uses two decimals and unrounded Korean previous-day rates for signed percentage-point changes',async t=>{
+    const {calculateSobrietyHistory,calculateSobrietyRate}=await mod('sobriety-metrics.js'),{renderSobrietyDetails}=await mod('sobriety-details.js');
+    const dom=new JSDOM('<div id="sobrietyRateDetails"></div>'),d=dom.window.document;t.after(()=>dom.window.close());
+    const input={createdAt:'2026-10-01',challenges:[{startDate:'2026-10-01'}],now:'2026-10-03'};
+    for(const [logs,number,change,direction] of [
+        [{'2026-10-01':{alcohol:1}},'66.67%','(전날 +16.67%p)','up'],
+        [{'2026-10-03':{alcohol:1}},'66.67%','(전날 -33.33%p)','down'],
+        [{},'100.00%','(전날 0.00%p)','same'],
+        [Object.fromEntries([1,2,3].map(day=>[`2026-10-0${day}`,{alcohol:1}])),'0.00%','(전날 0.00%p)','same']
+    ]){
+        const data={...input,dailyLogs:logs};renderSobrietyDetails(d,calculateSobrietyRate(data),{history:calculateSobrietyHistory(data)});
+        assert.equal(d.querySelector('.sobriety-rate-number').textContent,number);
+        assert.equal(d.querySelector('.sobriety-rate-change').textContent,change);
+        assert.equal(d.querySelector('.sobriety-rate-change').dataset.direction,direction);
+        assert.equal(parseFloat(d.querySelector('.sobriety-rate-bar>span').style.width).toFixed(2),number.slice(0,-1));
+        assert(!d.querySelector('.sobriety-rate-formula').textContent.includes('→'));
+    }
+    const midnight={createdAt:'2026-10-20T00:00:00+09:00',challenges:[{startDate:'2026-10-20'}],
+        controlSessions:[{drinksList:[{alcoholGrams:10,drinkStartedAt:'2026-10-20T14:59:00Z'}]}],now:'2026-10-20T15:00:00Z'};
+    renderSobrietyDetails(d,calculateSobrietyRate(midnight),{history:calculateSobrietyHistory(midnight)});
+    assert.equal(d.querySelector('.sobriety-rate-number').textContent,'50.00%');
+    assert.equal(d.querySelector('.sobriety-rate-change').textContent,'(전날 +50.00%p)');
+    const first={...input,now:'2026-10-01'};renderSobrietyDetails(d,calculateSobrietyRate(first),{history:calculateSobrietyHistory(first)});
+    assert.equal(d.querySelector('.sobriety-rate-change').textContent,'(첫 기록)');
+    renderSobrietyDetails(d,calculateSobrietyRate(input));assert.equal(d.querySelector('.sobriety-rate-change').textContent,'(전날 기록 없음)');
+});
+test('default chart starts at the first nonzero rate without removing initial drinking days from totals or date inspection',async t=>{
+    const {calculateSobrietyHistory,calculateSobrietyRate}=await mod('sobriety-metrics.js'),{renderSobrietyDetails}=await mod('sobriety-details.js');
+    const dom=new JSDOM('<div id="sobrietyRateDetails"></div>'),w=dom.window,d=w.document;t.after(()=>w.close());
+    const input={createdAt:'2026-10-01',challenges:[{startDate:'2026-10-01'}],now:'2026-10-05',dailyLogs:{'2026-10-01':{alcohol:1},'2026-10-02':{alcohol:1},'2026-10-03':{alcohol:1}}};
+    const history=calculateSobrietyHistory(input),snapshot=JSON.stringify(history);
+    renderSobrietyDetails(d,calculateSobrietyRate(input),{history});
+    const points=()=>d.querySelector('.sobriety-trend-line').getAttribute('points').split(' ');
+    assert.equal(d.querySelector('.sobriety-trend-chart').dataset.startDate,'2026-10-04');
+    assert.equal(points().length,2);assert.equal(Number(points()[0].split(',')[1]),134.25,'first point is the actual 25%, not a zero anchor');
+    assert.equal(d.querySelector('.sobriety-rate-number').textContent,'40.00%');
+    assert.match(d.querySelector('.sobriety-rate-formula').textContent,/5 − 3/);
+    assert.equal(JSON.stringify(history),snapshot,'chart never changes calculations or weekly records');
+    assert.match(d.querySelector('.sobriety-weekly-table tbody').textContent,/3일/);
+    const date=d.getElementById('sobrietyTrendDate');date.value='2026-10-01';date.dispatchEvent(new w.Event('change'));
+    assert.equal(date.value,'2026-10-01');assert.equal(points().length,5);assert.match(d.getElementById('sobrietyTrendValue').textContent,/0.00%/);
+    d.querySelector('[data-period="all"]').click();assert.equal(points().length,2);
+    const zeros={...input,now:'2026-10-03'};renderSobrietyDetails(d,calculateSobrietyRate(zeros),{history:calculateSobrietyHistory(zeros)});
+    assert.equal(points().length,3);assert(points().every(point=>Number(point.split(',')[1])===173),'all-zero recorded history remains visible');
+    const sparse={...input,dailyLogs:{'2026-10-01':{alcohol:1}}},partial=calculateSobrietyHistory(sparse);partial.daily=partial.daily.slice(3);
+    renderSobrietyDetails(d,calculateSobrietyRate(sparse),{history:partial});
+    assert.equal(points().length,2);assert.equal(Number(points()[0].split(',')[1]),56.75,'first available value of 75% begins at its own height');
+});
+test('later genuine zero rates in rolling windows are still drawn',async t=>{
+    const {calculateSobrietyHistory,calculateSobrietyRate}=await mod('sobriety-metrics.js'),{renderSobrietyDetails}=await mod('sobriety-details.js');
+    const dom=new JSDOM('<div id="sobrietyRateDetails"></div>'),d=dom.window.document;t.after(()=>dom.window.close());
+    const input={createdAt:'2026-10-01',challenges:[{startDate:'2026-10-01'}],now:'2026-10-31',dailyLogs:Object.fromEntries(Array.from({length:30},(_,i)=>[`2026-10-${String(i+2).padStart(2,'0')}`,{alcohol:1}]))};
+    renderSobrietyDetails(d,calculateSobrietyRate(input),{history:calculateSobrietyHistory(input)});
+    const points=d.querySelector('.sobriety-trend-line[data-series="30"]').getAttribute('points').split(' ');
+    assert.equal(points.length,31);assert.equal(Number(points.at(-1).split(',')[1]),173);
 });
 test('popup reuses history between clock ticks, rebuilds for changed source records and clears history on account/loading changes',async t=>{
     const dom=new JSDOM(html,{runScripts:'outside-only',virtualConsole:new VirtualConsole()}),w=dom.window,d=w.document;t.after(()=>w.close());

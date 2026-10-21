@@ -108,11 +108,12 @@ test('photo errors remain visible; descriptions are plain text; deleting a photo
     [...f.el('diagnosisPhotoList').querySelectorAll('button')].find(b=>b.textContent==='사진 삭제').click();await tick();
     assert.equal(f.d.querySelectorAll('.diagnosis-photo-card').length,0);assert(f.revoked.length);
 });
-test('sobriety popup substitutes actual values, shares the rounded badge value, and removes the national comparison section',async t=>{
+test('sobriety popup substitutes actual values, displays two decimals, and removes the national comparison section',async t=>{
     const {renderSobrietyDetails}=await mod('sobriety-details.js'),{calculateSobrietyRate}=await mod('sobriety-metrics.js');
     const dom=new JSDOM(html);t.after(()=>dom.window.close());const d=dom.window.document;
     const data=calculateSobrietyRate({createdAt:'2026-10-01',now:'2026-10-10',challenges:[{startDate:'2026-10-02'}],dailyLogs:{'2026-10-03':{alcohol:3},'2026-10-04':{alcohol:2}}});
-    renderSobrietyDetails(d,data);assert.match(d.getElementById('sobrietyRateDetails').textContent,/\(9 − 2\) ÷ 9 × 100 = 77.78% → 78%/);
+    renderSobrietyDetails(d,data);assert.match(d.getElementById('sobrietyRateDetails').textContent,/\(9 − 2\) ÷ 9 × 100 = 77.78%/);
+    assert.equal(d.querySelector('.sobriety-rate-number').textContent,'77.78%');
     assert.match(d.querySelector('.sobriety-rate-bar').getAttribute('aria-label'),/금주 7일, 음주 기록 2일/);
     assert.equal(d.querySelector('.sobriety-rate-bar>span').style.width,'77.77777777777779%');
     assert.equal(d.querySelector('.sobriety-comparison'),null);

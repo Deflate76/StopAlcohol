@@ -27,9 +27,15 @@
 .success-rate-box { cursor:pointer; font-family:inherit; appearance:none; }
 .success-rate-box:focus-visible { outline:2px solid #24774e; outline-offset:3px; }
 .sobriety-rate-card { padding:20px; border-radius:18px; background:#f0faf5; border:1px solid #d4e9dd; margin:16px 0; }
-.sobriety-rate-number { font-size:2.5rem; font-weight:900; color:#23764c; }
+.sobriety-rate-headline { display:flex; align-items:baseline; flex-wrap:wrap; gap:4px 10px; margin-top:6px; font-variant-numeric:tabular-nums; }
+.sobriety-rate-number { font-size:clamp(1.8rem,8vw,2.5rem); font-weight:900; color:#23764c; line-height:1.25; white-space:nowrap; }
+.sobriety-rate-change { font-size:clamp(.68rem,2.5vw,.8rem); font-weight:700; color:#61736b; white-space:nowrap; }
+.sobriety-rate-change[data-direction="up"] { color:#23764c; }
+.sobriety-rate-change[data-direction="down"] { color:#a44b32; }
 .sobriety-rate-bar { display:flex; height:20px; border-radius:12px; overflow:hidden; background:#ecaa91; margin:16px 0 10px; }
-.sobriety-rate-bar>span { background:#36a276; }
+.sobriety-rate-bar>span { background-color:#2e956c; background-image:linear-gradient(135deg,#ffffff30 25%,transparent 25%,transparent 50%,#ffffff30 50%,#ffffff30 75%,transparent 75%,transparent); background-size:28px 28px; animation:sobrietyStripeFlow 1.15s linear infinite; box-shadow:inset 0 1px 0 #ffffff30; }
+@keyframes sobrietyStripeFlow { to { background-position:28px 0; } }
+@media (prefers-reduced-motion:reduce) { .sobriety-rate-bar>span { animation:none; } }
 .sobriety-rate-legend { display:flex; flex-wrap:wrap; justify-content:space-between; gap:8px; font-size:.83rem; }
 .sobriety-rate-legend span:first-child { color:#23764c; }.sobriety-rate-legend span:last-child { color:#9c4226; }
 .sobriety-rate-formula { font-weight:800; line-height:1.8; overflow-wrap:anywhere; }

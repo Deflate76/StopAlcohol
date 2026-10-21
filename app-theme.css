@@ -232,6 +232,7 @@ details.achieved-details, details.upcoming-details { border-color: #e3e9e1; back
 :is(details.main-section, .inline-collapsible-section).is-selected-section > :is(summary, .inline-collapsible-summary)::after { color: #c5dfd0; background: #ffffff0b; border-color: #ffffff1a; }
 :is(details.main-section, .inline-collapsible-section).is-selected-section > :is(summary, .inline-collapsible-summary) .diagnosis-summary-names { color: #c1dccd; }
 :is(details.main-section, .inline-collapsible-section.active-summary-collapsible).is-selected-section > :is(.section-content, .inline-collapsible-content) { position: relative; isolation: isolate; color: var(--ui-ink); background: #fff; border-radius: 13px; }
+#sectionCraving.is-selected-section > .section-content { background: linear-gradient(145deg, #edf5ee, #dcebe1); box-shadow: inset 0 1px 0 #ffffff80; }
 #sectionStats .chart-container > canvas { position: relative; z-index: 1; }
 .timer-display.inline-collapsible-section:not(.is-selected-section) { background: #fff; border-color: var(--ui-line); color: var(--ui-ink); box-shadow: var(--ui-shadow); }
 .timer-display:not(.is-selected-section) .inline-collapsible-summary { color: var(--ui-ink); border-bottom-color: #e9eeea; }

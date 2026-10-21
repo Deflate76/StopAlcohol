@@ -8,9 +8,23 @@ export function renderSobrietyDetails(document, result, state = {}) {
         return;
     }
     const exact = result.soberDays / result.totalDays * 100;
+    const endMs = Date.parse(result.startDate + 'T00:00:00Z') + (result.totalDays - 1) * 86400000;
+    const end = new Date(endMs).toISOString().slice(0, 10);
+    const yesterday = new Date(endMs - 86400000).toISOString().slice(0, 10);
+    const previous = state.history?.daily?.find(row => row.date === yesterday);
     const card = make('div', undefined, 'sobriety-rate-card');
-    card.append(make('div', '나의 금주율 · 기록 기준', 'health-muted'), make('div', `${result.percent}%`, 'sobriety-rate-number'));
-    const end = new Date(Date.parse(result.startDate + 'T00:00:00Z') + (result.totalDays - 1) * 86400000).toISOString().slice(0, 10);
+    const headline = make('div', undefined, 'sobriety-rate-headline');
+    const change = make('span', result.totalDays === 1 ? '(첫 기록)' : '(전날 기록 없음)', 'sobriety-rate-change');
+    if (previous?.totalDays > 0 && Number.isFinite(previous.soberDays)) {
+        // Compare the unrounded rates, then round the difference only once.
+        const delta = Number((exact - previous.soberDays / previous.totalDays * 100).toFixed(2));
+        change.textContent = `(전날 ${delta > 0 ? '+' : ''}${delta.toFixed(2)}%p)`;
+        change.dataset.direction = delta > 0 ? 'up' : delta < 0 ? 'down' : 'same';
+        change.title = `${yesterday} 금주율 대비 변화 · %p는 두 금주율의 차이입니다.`;
+        change.setAttribute('aria-label', `전날 대비 ${Math.abs(delta).toFixed(2)}퍼센트포인트 ${delta > 0 ? '증가' : delta < 0 ? '감소' : '변화 없음'}`);
+    }
+    headline.append(make('strong', `${exact.toFixed(2)}%`, 'sobriety-rate-number'), change);
+    card.append(make('div', '나의 금주율 · 기록 기준', 'health-muted'), headline);
     card.append(make('p', `${result.startDate} ~ ${end} · 시작일과 오늘 포함`, 'health-muted'));
     const bar = make('div', undefined, 'sobriety-rate-bar'); bar.setAttribute('role','img');
     bar.setAttribute('aria-label', `전체 ${result.totalDays}일 중 금주 ${result.soberDays}일, 음주 기록 ${result.drinkingDays}일`);
@@ -19,11 +33,11 @@ export function renderSobrietyDetails(document, result, state = {}) {
     if (state.history?.daily?.length) renderSobrietyHistory(document, body, state.history);
     body.append(make('h4', '이렇게 계산했어요'));
     body.append(make('p', '(금주 도전일수 − 음주 기록일수) ÷ 금주 도전일수 × 100', 'health-muted'));
-    body.append(make('p', `(${result.totalDays} − ${result.drinkingDays}) ÷ ${result.totalDays} × 100 = ${exact.toFixed(2)}% → ${result.percent}%`, 'sobriety-rate-formula'));
+    body.append(make('p', `(${result.totalDays} − ${result.drinkingDays}) ÷ ${result.totalDays} × 100 = ${exact.toFixed(2)}%`, 'sobriety-rate-formula'));
     const facts = make('dl', undefined, 'sobriety-rate-facts');
     for (const [label, value] of [['전체 도전일수', `${result.totalDays}일`],['음주가 기록된 날짜', `${result.drinkingDays}일`],['금주일수', `${result.soberDays}일`]]) facts.append(make('dt', label), make('dd', value));
     body.append(facts);
-    body.append(make('p', '계정 생성일 이후 첫 도전일부터 오늘까지, 도전 사이의 공백도 포함합니다. 한국 날짜로 계산하고 같은 날 여러 번 마셔도 1일로 셉니다. 일일 기록·실패 기록·음주 조절 기록의 실제 음주량을 합쳐 확인합니다. 배지는 소수점 첫째 자리에서 반올림합니다.', 'health-muted'));
+    body.append(make('p', '계정 생성일 이후 첫 도전일부터 오늘까지, 도전 사이의 공백도 포함합니다. 한국 날짜로 계산하고 같은 날 여러 번 마셔도 1일로 셉니다. 일일 기록·실패 기록·음주 조절 기록의 실제 음주량을 합쳐 확인합니다. 금주율과 전날 대비 차이는 소수점 둘째 자리까지, 메인 화면의 작은 배지는 정수로 반올림합니다. %p는 두 금주율의 차이입니다.', 'health-muted'));
     body.append(make('p', '음주 기록이 없는 날은 금주일로 계산됩니다. 누락된 음주 기록을 입력하면 비율도 달라집니다.', 'health-muted'));
 }
 
@@ -34,11 +48,15 @@ function renderSobrietyHistory(document, body, history) {
     section.append(title, make('p', '누적 금주율과 각 날짜를 포함한 최근 30·60·90일의 금주율을 함께 비교합니다.', 'health-muted'));
     section.append(make('div', '그래프 표시 기간', 'sobriety-trend-label'));
     const toolbar = make('div', undefined, 'sobriety-trend-tools'); toolbar.setAttribute('role','group'); toolbar.setAttribute('aria-label','그래프 표시 기간');
-    let period = 'all', selected = history.daily.length - 1, offset = 0;
+    // Keep all records in the calculations and date picker. Only the default
+    // viewport skips the initial zero-rate days before the first sober day.
+    // An all-zero history is still real data and must remain visible.
+    const defaultStart = Math.max(0, history.daily.findIndex(row => Number.isFinite(row.percent) && row.percent > 0));
+    let chartStart = defaultStart, period = 'all', selected = history.daily.length - 1, offset = 0;
     const options = [['30','30일'],['60','60일'],['90','90일'],['all','전체']];
     for (const [value, label] of options) {
         const button = make('button', label, 'health-btn'); button.type = 'button'; button.dataset.period = value;
-        button.addEventListener('click', () => { period = value; selected = history.daily.length - 1; draw(); }); toolbar.append(button);
+        button.addEventListener('click', () => { period = value; chartStart = defaultStart; selected = history.daily.length - 1; draw(); }); toolbar.append(button);
     }
     section.append(toolbar);
     const series = [
@@ -62,6 +80,7 @@ function renderSobrietyHistory(document, body, history) {
     section.append(legend);
     const svg = svgNode('svg',{viewBox:'0 0 420 210',role:'img','aria-labelledby':'sobrietyTrendTitle sobrietyTrendDescription',class:'sobriety-trend-chart'});
     section.append(svg);
+    if (defaultStart > 0) section.append(make('p', `기본 그래프는 금주율이 처음 생긴 ${history.daily[defaultStart].date}부터 표시합니다. 앞선 0% 날짜도 금주율 계산과 주별 표에 포함되며, 아래에서 날짜를 선택해 확인할 수 있습니다.`, 'health-muted sobriety-trend-start-note'));
     section.append(make('p', '그래프를 누르거나 날짜를 선택하면 네 금주율을 확인할 수 있습니다. 도전 시작 전 날짜는 제외하며, 기간이 부족하면 실제 경과일수로 계산합니다.', 'health-muted'));
     const selection = make('div',undefined,'sobriety-trend-selection');
     const dateLabel = make('label','날짜 '), date = make('input'); date.type = 'date'; date.id = 'sobrietyTrendDate';
@@ -94,7 +113,8 @@ function renderSobrietyHistory(document, body, history) {
         for(const {item,point} of markers){point.setAttribute('cx',x(selected-offset));point.setAttribute('cy',y(item.value(row).percent));}
     }
     function draw() {
-        offset = period==='all' ? 0 : Math.max(0,history.daily.length-Number(period)); visible = history.daily.slice(offset);
+        offset = Math.max(chartStart, period==='all' ? 0 : history.daily.length-Number(period)); visible = history.daily.slice(offset);
+        svg.dataset.startDate = visible[0].date;
         for (const button of toolbar.children) button.setAttribute('aria-pressed',String(button.dataset.period===period));
         for (const button of legend.children) button.setAttribute('aria-pressed',String(shown.has(button.dataset.series)));
         const active=series.filter(item=>shown.has(item.key));
@@ -123,7 +143,7 @@ function renderSobrietyHistory(document, body, history) {
     date.addEventListener('change',()=>{
         const index=history.daily.findIndex(row=>row.date===date.value);
         if(index<0){date.value=history.daily[selected].date;return;}
-        selected=index;if(index<offset){period='all';draw();}else select(index);
+        selected=index;if(index<offset){period='all';chartStart=Math.min(chartStart,index);draw();}else select(index);
     });
     draw();
 
