@@ -1,9 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="금주결심: 새로운 하루와 회복의 새싹">
-  <defs><linearGradient id="forest" x2="1" y2="1"><stop stop-color="#23634f"/><stop offset="1" stop-color="#123b31"/></linearGradient></defs>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="금도끼: 하루씩 쌓는 금주 도전 기록">
+  <defs>
+    <linearGradient id="forest" x2="1" y2="1"><stop stop-color="#25634f"/><stop offset="1" stop-color="#103b31"/></linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffdf8b"/><stop offset=".52" stop-color="#eabb57"/><stop offset="1" stop-color="#bd842d"/></linearGradient>
+  </defs>
   <rect width="64" height="64" rx="14" fill="url(#forest)"/>
-  <circle cx="21.5" cy="16.5" r="3.5" fill="#edc884"/>
-  <path d="M31.5 36C21 37 16 30 16 23c10 0 15.5 4 15.5 13Z" fill="#f4f8ed"/>
-  <path d="M31.5 32C31.5 21 37 16 48 16c0 10-5 16-16.5 16Z" fill="#a6d8b8"/>
-  <path d="m23 29 8.5 8V48m0-15L40 24" fill="none" stroke="#f4f8ed" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M24 49h16" stroke="#edc884" stroke-width="2.6" stroke-linecap="round"/>
+  <path d="m24 49 13-30" fill="none" stroke="#153e32" stroke-width="8" stroke-linecap="round"/>
+  <path d="m24 48 13-29" fill="none" stroke="#f4dfaf" stroke-width="5.6" stroke-linecap="round"/>
+  <path d="M28 18 35 14c4 4 10 6 16 6-1 8-5 14-11 17l-6-9-6-2Z" fill="url(#gold)"/>
+  <path d="M47.8 22.5c-1.1 5-3.6 8.6-7.3 11.1" fill="none" stroke="#ffe7aa" stroke-width="1.7" stroke-linecap="round"/>
+  <path d="m29 21 5.7 2.6" stroke="#9d742e" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M18 17v6m-3-3h6" stroke="#eac981" stroke-width="1.8" stroke-linecap="round"/>
 </svg>

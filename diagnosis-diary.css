@@ -57,6 +57,20 @@
 .sobriety-trend-legend [aria-pressed="false"] { opacity:.5; border-style:dashed; }
 .sobriety-trend-legend svg { flex:none; }
 .sobriety-trend-legend button:focus-visible { outline:2px solid currentColor; outline-offset:2px; }
+.sobriety-reference-legend { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; margin:8px 0; }
+.sobriety-reference-month { --reference-color:#9a7024; }
+.sobriety-reference-week { --reference-color:#66788c; }
+.sobriety-reference-week2 { --reference-color:#917273; }
+.sobriety-reference-week3 { --reference-color:#777354; }
+.sobriety-reference-legend .health-btn { display:flex; flex-wrap:wrap; align-items:center; justify-content:center; column-gap:5px; row-gap:2px; padding:8px 3px; color:var(--reference-color); border:1px dashed currentColor; background:#fffdf6; font-size:clamp(.67rem,2.65vw,.76rem); }
+.sobriety-reference-legend svg { flex:none; width:22px; }
+.sobriety-reference-legend :is(span,strong) { white-space:nowrap; }
+.sobriety-reference-legend [aria-pressed="false"] { opacity:.55; background:#fff; }
+.sobriety-reference-legend button:focus-visible { outline:2px solid currentColor; outline-offset:2px; }
+.sobriety-reference-line { stroke:var(--reference-color); stroke-width:1.5; opacity:.8; }
+.sobriety-reference-info { margin:8px 0 14px; color:#61736b; font-size:.74rem; line-height:1.65; }
+.sobriety-reference-info>summary { cursor:pointer; font-weight:650; }
+.sobriety-reference-info a { color:#346e59; text-underline-offset:3px; }
 .sobriety-trend-chart { display:block; width:100%; height:auto; overflow:visible; cursor:crosshair; }
 .sobriety-grid-line { stroke:#dfe9e4; stroke-width:1; }
 .sobriety-axis-label { fill:#5e7469; font:13px sans-serif; }

@@ -140,7 +140,7 @@ export function installCommunityFeed({doc=document, win=window, getUid, watchPos
             if(row.id===pinned?.commentId)row.classList.add('comment-notification-focus');
             const ai=isCommunityAdvice(comment),reaction=!ai && cheers.find(item=>item.emoji===comment.text);
             if(ai)row.classList.add('comment-ai');
-            row.append(node('strong','comment-author',ai?'Alcoholaway AI':comment.author||'익명의 생존자'));
+            row.append(node('strong','comment-author',ai?'금도끼 AI':comment.author||'익명의 생존자'));
             if(ai)row.append(node('span','comment-ai-badge','AI 조언'));else row.append(dayBadge(comment));
             if(ai && comment.state!=='ready') {
                 row.append(node('span','comment-ai-status',comment.state==='failed'?'AI 조언을 완성하지 못했습니다. 글은 정상적으로 저장되어 있습니다.':'이 글을 읽고 조언을 작성하고 있어요…'));

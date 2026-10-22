@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="./game-session.css?v=20261017-1">
 <style>@media(max-width:360px){.stick{width:100px;height:100px}.fire{width:72px;height:72px}.lock{width:58px;height:58px}.touch{gap:8px}.touch-actions{gap:7px}}</style>
 </head>
-<body><div id="authGate" class="game-auth-gate"><h1>Alcoholaway</h1><p id="authGateMessage">로그인 상태를 확인하고 있습니다…</p><a href="../index.html">금주 리포트로 돌아가기</a></div><main id="gameApp" hidden>
+<body><div id="authGate" class="game-auth-gate"><h1>금도끼</h1><p id="authGateMessage">로그인 상태를 확인하고 있습니다…</p><a href="../index.html">금주 리포트로 돌아가기</a></div><main id="gameApp" hidden>
 <div class="game-account-bar"><button type="button" id="backButton">← 금주 리포트</button><span id="gameUserBadge"></span></div>
 <header><div><div class="eyebrow">RETRO SPACE ARCADE</div><h1>우주대작전</h1><small>그 시절의 우주로, 다시 출발.</small></div><div class="toolbar"><button id="sound" aria-pressed="false">소리 끔</button><button id="pause" disabled>일시정지</button></div></header>
 <section class="scorebar" aria-label="게임 현황"><div><div class="label">SCORE · 점수</div><div class="value" id="score">000000</div></div><div><div class="label">BEST · 최고</div><div class="value" id="best">000000</div></div><div><div class="label">WAVE · 단계</div><div class="value" id="wave">01</div></div><div><div class="label">SHIPS · 기체</div><div class="value" id="lives">♥ ♥ ♥</div></div></section>
@@ -17,7 +17,7 @@
 <div class="status"><span id="hint" role="status">출격 준비 완료</span><span id="remaining">로그인 계정으로 플레이</span></div>
 <div class="touch"><div class="stick" id="stick" role="group" aria-label="터치 이동 스틱"><div class="knob" id="knob"></div></div><div class="touch-actions"><button class="lock" id="lock" aria-pressed="false">방향<br>고정</button><button class="fire" id="fire">발사</button></div></div>
 <div class="instructions"><div><b>컴퓨터</b>　<kbd>↑ ↓ ← →</kbd> / <kbd>W A S D</kbd> 이동　<kbd>Space</kbd> 연사<br><kbd>Shift</kbd> 누르는 동안 발사 방향 고정　<kbd>P</kbd> / <kbd>Esc</kbd> 일시정지</div><div><b>휴대폰</b>　왼쪽 스틱으로 이동 · 발사 버튼 길게 누르기<br>방향 고정을 켜면 이동해도 같은 방향으로 발사합니다.</div></div>
-<footer>SPC-1500 「우주대작전」의 추억을 바탕으로 새로 만든 비공식 창작 게임입니다. 원본 프로그램·그래픽·음원은 포함하지 않으며, 원작과 동작이 다를 수 있습니다. 게임 종료 시 점수는 로그인한 Alcoholaway 계정에 저장됩니다.</footer>
+<footer>SPC-1500 「우주대작전」의 추억을 바탕으로 새로 만든 비공식 창작 게임입니다. 원본 프로그램·그래픽·음원은 포함하지 않으며, 원작과 동작이 다를 수 있습니다. 게임 종료 시 점수는 로그인한 금도끼 계정에 저장됩니다.</footer>
 <section class="game-history" aria-labelledby="historyTitle"><div class="game-history-heading"><h2 id="historyTitle">내 우주대작전 기록</h2><button id="refreshHistoryButton">새로고침</button></div><p id="scoreHistorySummary">내 최고 0점</p><p id="scoreHistoryStatus" role="status">로그인 확인 중…</p><button id="retryScoreButton" hidden>다시 저장</button><ol id="scoreHistoryList"></ol></section>
 </main>
 <script type="module">

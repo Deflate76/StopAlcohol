@@ -9,7 +9,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>음주 조절 모드</title>
+    <title>음주 조절 모드 · 금도끼</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1"></script>
@@ -667,7 +667,7 @@
 
     const versionEl = document.getElementById('appVersionText');
     if (versionEl) {
-        versionEl.innerText = `AlcoholAway Control ${APP_VERSION.version} · 업데이트 ${APP_VERSION.updatedAt} · ${APP_VERSION.note}`;
+        versionEl.innerText = `금도끼 음주 조절 ${APP_VERSION.version} · 업데이트 ${APP_VERSION.updatedAt} · ${APP_VERSION.note}`;
     }
 
     let userId = null;
@@ -1023,7 +1023,7 @@
         foregroundFcmHandlerRegistered = true;
         onMessage(messaging, (payload) => {
             const data = payload?.data || {};
-            const title = payload?.notification?.title || data.title || 'AlcoholAway 음주 조절 알림';
+            const title = payload?.notification?.title || data.title || '금도끼 음주 조절 알림';
             const body = payload?.notification?.body || data.body || data.message || '음주 조절 상태를 확인해 주세요.';
             const type = String(data.type || 'control-fcm-message');
             const tag = data.tag || type || 'alcoholaway-control-alert';

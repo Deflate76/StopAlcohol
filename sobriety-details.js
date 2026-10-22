@@ -78,6 +78,35 @@ function renderSobrietyHistory(document, body, history) {
         button.addEventListener('click',()=>{if(shown.has(item.key))shown.delete(item.key);else shown.add(item.key);draw();});legend.append(button);
     }
     section.append(legend);
+    // Frequency examples describe sober DAYS, unlike population drinking
+    // prevalence. They are fixed proportions, not invented national averages.
+    const references = [
+        {key:'monthly1',label:'월 1회',days:30,drinkingDays:1,dash:'6 5',className:'sobriety-reference-month'},
+        {key:'weekly1',label:'주 1회',days:7,drinkingDays:1,dash:'3 5',className:'sobriety-reference-week'},
+        {key:'weekly2',label:'주 2회',days:7,drinkingDays:2,dash:'10 4',className:'sobriety-reference-week2'},
+        {key:'weekly3',label:'주 3회',days:7,drinkingDays:3,dash:'6 3 2 3',className:'sobriety-reference-week3'}
+    ].map(item=>({...item,percent:(item.days-item.drinkingDays)/item.days*100}));
+    const shownReferences = new Set(['monthly1','weekly1']);
+    section.append(make('div','음주 빈도별 비교 예시 · 눌러서 선 표시/숨김','sobriety-trend-label'));
+    const referenceLegend = make('div',undefined,'sobriety-reference-legend');
+    referenceLegend.setAttribute('role','group');referenceLegend.setAttribute('aria-label','음주 빈도별 금주율 비교 예시');
+    for(const item of references){
+        const button=make('button',undefined,`health-btn ${item.className}`);button.type='button';button.dataset.reference=item.key;
+        const formula=`${item.days-item.drinkingDays}/${item.days} × 100 = ${item.percent.toFixed(2)}%`;
+        button.title=`${item.label} 음주 가정 · ${formula}`;button.setAttribute('aria-label',`${item.label} 음주 시 금주율 예시 ${item.percent.toFixed(2)}%, 비교선 표시 또는 숨김`);
+        const swatch=svgNode('svg',{viewBox:'0 0 28 12',width:28,height:12,'aria-hidden':'true',focusable:'false'});
+        swatch.append(svgNode('line',{x1:1,x2:27,y1:6,y2:6,stroke:'currentColor','stroke-width':2,'stroke-dasharray':item.dash}));
+        button.append(swatch,make('span',item.label),make('strong',`${item.percent.toFixed(2)}%`));
+        button.addEventListener('click',()=>{if(shownReferences.has(item.key))shownReferences.delete(item.key);else shownReferences.add(item.key);draw();});
+        referenceLegend.append(button);
+    }
+    section.append(referenceLegend);
+    const assumptions=make('details',undefined,'sobriety-reference-info');
+    assumptions.append(make('summary','비교선 계산 기준 · 성인 평균과의 차이'));
+    assumptions.append(make('p','월 1회는 30일 중 29일 금주(96.67%), 주 1회는 7일 중 6일 금주(85.71%)로 계산합니다. 1회마다 서로 다른 날에 마시고 같은 빈도를 반복한다고 가정한 일정한 비율입니다. 월은 30일로 가정하며 실제 달력에 따른 음주일수는 다를 수 있습니다.'));
+    assumptions.append(make('p','이 선들은 음주 빈도별 비교 예시이며 성인 평균 금주율이나 권장 음주량이 아닙니다. 질병관리청의 월간음주율은 월 1회 이상 술을 마신 사람의 비율이므로, 이를 금주한 날짜의 비율로 환산할 수 없습니다.'));
+    const source=make('a','질병관리청 · 월간음주율 정의');source.href='https://chs.kdca.go.kr/cdhs/biz/pblcVis/pop_idx.do?visIdxSn=7';source.target='_blank';source.rel='noopener noreferrer';assumptions.append(source);
+    section.append(assumptions);
     const svg = svgNode('svg',{viewBox:'0 0 420 210',role:'img','aria-labelledby':'sobrietyTrendTitle sobrietyTrendDescription',class:'sobriety-trend-chart'});
     section.append(svg);
     if (defaultStart > 0) section.append(make('p', `기본 그래프는 금주율이 처음 생긴 ${history.daily[defaultStart].date}부터 표시합니다. 앞선 0% 날짜도 금주율 계산과 주별 표에 포함되며, 아래에서 날짜를 선택해 확인할 수 있습니다.`, 'health-muted sobriety-trend-start-note'));
@@ -117,16 +146,22 @@ function renderSobrietyHistory(document, body, history) {
         svg.dataset.startDate = visible[0].date;
         for (const button of toolbar.children) button.setAttribute('aria-pressed',String(button.dataset.period===period));
         for (const button of legend.children) button.setAttribute('aria-pressed',String(shown.has(button.dataset.series)));
+        for (const button of referenceLegend.children) button.setAttribute('aria-pressed',String(shownReferences.has(button.dataset.reference)));
         const active=series.filter(item=>shown.has(item.key));
-        svg.replaceChildren(svgNode('desc',{id:'sobrietyTrendDescription'},`${visible[0].date}부터 ${visible.at(-1).date}까지 ${active.map(item=>item.label).join(', ')||'선 숨김'} 금주율. 세로축 0~100%. 아래 날짜 선택으로 네 금주율의 정확한 값과 집계 기간을 확인할 수 있습니다.`));
+        const activeReferences=references.filter(item=>shownReferences.has(item.key));
+        svg.replaceChildren(svgNode('desc',{id:'sobrietyTrendDescription'},`${visible[0].date}부터 ${visible.at(-1).date}까지 ${active.map(item=>item.label).join(', ')||'내 기록 선 숨김'} 금주율. ${activeReferences.length?'음주 빈도별 비교 예시: '+activeReferences.map(item=>`${item.label} ${item.percent.toFixed(2)}%`).join(', ')+'. ':''}세로축 0~100%. 아래 날짜 선택으로 네 금주율의 정확한 값과 집계 기간을 확인할 수 있습니다.`));
         for (const value of [0,25,50,75,100]) {
             svg.append(svgNode('line',{x1:left,x2:right,y1:y(value),y2:y(value),class:'sobriety-grid-line'}),svgNode('text',{x:left-7,y:y(value)+4,'text-anchor':'end',class:'sobriety-axis-label'},`${value}%`));
+        }
+        for(const item of activeReferences){
+            const line=svgNode('line',{x1:left,x2:right,y1:y(item.percent),y2:y(item.percent),class:`sobriety-reference-line ${item.className}`,'data-reference':item.key,'stroke-dasharray':item.dash,'vector-effect':'non-scaling-stroke'});
+            line.append(svgNode('title',{},`${item.label} 음주 가정 · 금주 ${item.days-item.drinkingDays}/${item.days}일 = ${item.percent.toFixed(2)}%`));svg.append(line);
         }
         for(const item of active){
             const points=visible.map((row,i)=>`${x(i).toFixed(2)},${y(item.value(row).percent).toFixed(2)}`).join(' ');
             svg.append(svgNode('polyline',{points,fill:'none',class:`sobriety-trend-line ${item.className}`,'data-series':item.key,'stroke-dasharray':item.dash,'vector-effect':'non-scaling-stroke','stroke-linejoin':'round'}));
         }
-        if(!active.length)svg.append(svgNode('text',{x:(left+right)/2,y:(top+bottom)/2,'text-anchor':'middle',class:'sobriety-axis-label'},'범례를 눌러 비교할 선을 선택하세요'));
+        if(!active.length&&!activeReferences.length)svg.append(svgNode('text',{x:(left+right)/2,y:(top+bottom)/2,'text-anchor':'middle',class:'sobriety-axis-label'},'범례를 눌러 비교할 선을 선택하세요'));
         const ticks = new Set([0,Math.floor((visible.length-1)/2),visible.length-1]);
         for (const i of ticks) svg.append(svgNode('text',{x:x(i),y:bottom+24,'text-anchor':visible.length===1?'middle':i===0?'start':i===visible.length-1?'end':'middle',class:'sobriety-axis-label'},visible[i].date.slice(2).replaceAll('-','.')));
         cursor=svgNode('line',{y1:top,y2:bottom,class:'sobriety-trend-cursor'});

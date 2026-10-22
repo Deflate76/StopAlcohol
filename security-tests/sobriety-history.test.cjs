@@ -86,6 +86,7 @@ test('trend date/slider/range controls expose exact values and weekly table pagi
     assert.equal(date.value,'2026-01-02');assert(d.querySelector('[data-series-value="30"]'),'exact values remain available when a line is hidden');
     toggle.click();assert.equal(toggle.getAttribute('aria-pressed'),'true');assert.equal(d.querySelectorAll('.sobriety-trend-line').length,4);
     for(const button of d.querySelectorAll('.sobriety-trend-legend button'))button.click();
+    for(const button of d.querySelectorAll('.sobriety-reference-legend [aria-pressed="true"]'))button.click();
     assert.equal(d.querySelectorAll('.sobriety-trend-line').length,0);assert.match(d.querySelector('.sobriety-trend-chart').textContent,/범례를 눌러/);
     d.querySelector('.sobriety-trend-legend [data-series="all"]').click();assert.equal(d.querySelectorAll('.sobriety-trend-line').length,1);
     assert.equal(d.querySelectorAll('.sobriety-weekly-table tbody tr').length,12);
@@ -96,6 +97,49 @@ test('trend date/slider/range controls expose exact values and weekly table pagi
     for(const line of d.querySelectorAll('.sobriety-trend-line'))assert(!line.getAttribute('points').includes('NaN'));
     assert.equal(d.querySelectorAll('.sobriety-trend-point').length,4);
     assert.match(d.querySelector('[data-series-value="30"]').textContent,/30일 중 1일 집계/);
+});
+test('frequency comparison lines use sober-day ratios and stay fixed across periods and recorded dates',async t=>{
+    const {calculateSobrietyHistory,calculateSobrietyRate}=await mod('sobriety-metrics.js'),{renderSobrietyDetails}=await mod('sobriety-details.js');
+    const dom=new JSDOM('<div id="sobrietyRateDetails"></div>'),d=dom.window.document;t.after(()=>dom.window.close());
+    const input={createdAt:'2026-01-01',challenges:[{startDate:'2026-01-01'}],now:'2026-10-22',dailyLogs:{'2026-01-01':{alcohol:1},'2026-10-21':{alcohol:1}}};
+    const history=calculateSobrietyHistory(input),before=JSON.stringify(history);
+    renderSobrietyDetails(d,calculateSobrietyRate(input),{history});
+    const cases=[['monthly1',29,30],['weekly1',6,7],['weekly2',5,7],['weekly3',4,7]];
+    assert.equal(d.querySelectorAll('.sobriety-reference-line').length,2);
+    for(const [key,sober,total] of cases){
+        const toggle=d.querySelector(`.sobriety-reference-legend [data-reference="${key}"]`);
+        assert.match(toggle.textContent,new RegExp((sober/total*100).toFixed(2).replace('.','\\.')+'%'));
+        if(toggle.getAttribute('aria-pressed')==='false')toggle.click();
+    }
+    for(const period of ['30','60','90','all']){
+        d.querySelector(`[data-period="${period}"]`).click();
+        for(const [key,sober,total] of cases){
+            const line=d.querySelector(`.sobriety-reference-line[data-reference="${key}"]`);
+            assert.equal(line.getAttribute('y1'),line.getAttribute('y2'),'comparison is a constant rate, not a generated drinking diary');
+            assert(Math.abs(Number(line.getAttribute('y1'))-(173-sober/total*155))<1e-8);
+            assert.equal(line.getAttribute('x1'),'42');assert.equal(line.getAttribute('x2'),'405');
+            assert.match(line.textContent,new RegExp(`금주 ${sober}/${total}일`));
+        }
+    }
+    assert.equal(JSON.stringify(history),before,'examples cannot alter user rates or weekly records');
+    assert.match(d.querySelector('.sobriety-reference-info').textContent,/성인 평균 금주율이나 권장 음주량이 아닙니다/);
+    assert.match(d.getElementById('sobrietyTrendDescription').textContent,/음주 빈도별 비교 예시/);
+});
+test('comparison toggles preserve date selection and own curves, and disappear with cleared user data',async t=>{
+    const {calculateSobrietyHistory,calculateSobrietyRate}=await mod('sobriety-metrics.js'),{renderSobrietyDetails}=await mod('sobriety-details.js');
+    const dom=new JSDOM('<div id="sobrietyRateDetails"></div>'),w=dom.window,d=w.document;t.after(()=>w.close());
+    const input={createdAt:'2026-10-01',challenges:[{startDate:'2026-10-01'}],now:'2026-10-22'};
+    renderSobrietyDetails(d,calculateSobrietyRate(input),{history:calculateSobrietyHistory(input)});
+    const date=d.getElementById('sobrietyTrendDate');date.value='2026-10-10';date.dispatchEvent(new w.Event('change'));
+    const values=d.getElementById('sobrietyTrendValue').textContent,points=d.querySelector('.sobriety-trend-line').getAttribute('points');
+    const toggle=d.querySelector('.sobriety-reference-legend [data-reference="monthly1"]');toggle.click();
+    assert.equal(toggle.getAttribute('aria-pressed'),'false');assert.equal(d.querySelector('.sobriety-reference-line[data-reference="monthly1"]'),null);
+    assert.equal(date.value,'2026-10-10');assert.equal(d.getElementById('sobrietyTrendValue').textContent,values);
+    assert.equal(d.querySelector('.sobriety-trend-line').getAttribute('points'),points);
+    toggle.click();assert.equal(d.querySelectorAll('.sobriety-reference-line').length,2);
+    const one={...input,now:'2026-10-01'};renderSobrietyDetails(d,calculateSobrietyRate(one),{history:calculateSobrietyHistory(one)});
+    assert.equal(d.querySelectorAll('.sobriety-reference-line').length,2);assert(d.getElementById('sobrietyTrendSlider').disabled);
+    renderSobrietyDetails(d,null,{loading:true});assert.equal(d.querySelector('.sobriety-reference-legend'),null);assert.equal(d.querySelector('.sobriety-trend-chart'),null);
 });
 test('rate headline uses two decimals and unrounded Korean previous-day rates for signed percentage-point changes',async t=>{
     const {calculateSobrietyHistory,calculateSobrietyRate}=await mod('sobriety-metrics.js'),{renderSobrietyDetails}=await mod('sobriety-details.js');

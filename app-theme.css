@@ -58,7 +58,7 @@ button, a, input, select, textarea, summary { scroll-margin-block: 24px; }
     line-height: 1.5;
 }
 .app-title > span { flex: 1 1 auto; min-width: 0; }
-.app-title-icon { flex: 0 0 28px; width: 28px; height: 28px; color: #207d68; }
+.app-title-icon { flex: 0 0 34px; width: 34px; height: 34px; color: #207d68; }
 .app-title .otc-title-button {
     flex: 0 0 34px;
     width: 34px;
@@ -359,7 +359,7 @@ dialog::backdrop { background: rgba(15, 35, 28, .55); backdrop-filter: blur(5px)
     body { padding-inline: 6px; }
     .container { padding: 20px 12px; border-radius: 21px; }
     .app-title { gap: 5px; font-size: 1rem; }
-    .app-title-icon { width: 24px; height: 24px; flex-basis: 24px; }
+    .app-title-icon { width: 28px; height: 28px; flex-basis: 28px; }
     .app-title .otc-title-button { width: 30px; height: 30px; flex-basis: 30px; padding: 6px; }
     .app-brand { font-size: .6rem; }
     .app-tagline { font-size: .7rem; }

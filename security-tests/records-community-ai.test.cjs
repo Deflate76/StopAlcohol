@@ -104,7 +104,7 @@ test('AI replies are visibly labeled, escaped and counted once without pretendin
     feed.show();const slot={...createCommunityAdviceSlot('owner',1000),state:'ready',text:'<img src=x onerror=alert(1)>조언'};
     next([{id:'p',uid:'owner',content:'본문',comments:[slot]}]);
     assert.equal(d.querySelectorAll('.comment-ai').length,1);assert.equal(d.querySelector('.comment-ai .day-badge'),null);assert.equal(d.querySelector('.comment-ai img'),null);
-    assert.equal(d.querySelector('.comment-ai .comment-author').textContent,'Alcoholaway AI');assert.match(d.querySelector('.post-summary-footer').textContent,/댓글 1개/);
+    assert.equal(d.querySelector('.comment-ai .comment-author').textContent,'금도끼 AI');assert.match(d.querySelector('.post-summary-footer').textContent,/댓글 1개/);
     next([{id:'p',uid:'owner',content:'본문',comments:[{...slot,state:'failed',text:''}]}]);
     d.querySelector('[data-community-action="retry-advice"]').click();assert.equal(retries,1);assert.match(d.querySelector('.post-summary-footer').textContent,/댓글 0개/);
 });
