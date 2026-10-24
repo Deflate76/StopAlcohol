@@ -99,29 +99,29 @@ button, a, input, select, textarea, summary { scroll-margin-block: 24px; }
 .section-bulk-toolbar { border-color: var(--ui-line); background: #edf2ee; }
 #enablePushBtn { box-shadow: none; font-size: .77rem; font-weight: 650; border-style: solid; background: #f2f7f3; }
 
-/* The timer starts selected. The shared selection layer below moves this emphasis on interaction. */
+/* White timer surface with the same quiet accent used by the other sections. */
 .timer-display.inline-collapsible-section {
     position: relative;
     isolation: isolate;
     padding: 0 20px 22px;
-    border: 1px solid #235b49;
+    border: 1px solid var(--ui-line);
     border-radius: 24px;
-    background: radial-gradient(ellipse at 100% 0, #2a6553 0, transparent 58%), linear-gradient(155deg, #163d33, #12382f 70%, #164637);
-    color: #edf7f1;
-    box-shadow: 0 12px 28px rgba(19, 69, 49, .15);
+    background: #fff;
+    color: var(--ui-ink);
+    box-shadow: var(--ui-shadow);
 }
-.timer-display.inline-collapsible-section .inline-collapsible-summary { color: #f4f8f4; font-size: 1rem; font-weight: 750; }
-.timer-display.inline-collapsible-section:not([data-collapsed="true"]) .inline-collapsible-summary { border-bottom: 1px solid #ffffff20; }
-.timer-display .inline-collapsible-summary::after { color: #b8dbca !important; background: #ffffff0b; border: 1px solid #ffffff1a; border-radius: 50%; }
-#currentChallengeRecordCount { color: #e3c993; font-weight: 600; font-size: .7rem; }
-.timer-display .daily-wisdom-hint { color: #c1e0d0; opacity: 1; font-weight: 550; font-size: .73rem; margin: 0 0 9px; }
-.timer-display .daily-wisdom-hint:focus-visible { outline-color: #c3e3ce; }
-.timer-display .time-unit { color: #fff9e9; font-size: clamp(3.25rem, 15vw, 4.2rem); font-weight: 800; letter-spacing: -.06em; text-decoration-color: #6b9a85; text-decoration-thickness: 2px; text-underline-offset: 10px; font-variant-numeric: tabular-nums; margin-bottom: 9px; }
+.timer-display.inline-collapsible-section .inline-collapsible-summary { color: var(--ui-ink); font-size: 1rem; font-weight: 750; }
+.timer-display.inline-collapsible-section:not([data-collapsed="true"]) .inline-collapsible-summary { border-bottom: 1px solid #e9eeea; }
+.timer-display .inline-collapsible-summary::after { color: #6b8979 !important; background: #f3f6f3; border: 1px solid #e2eae3; border-radius: 50%; }
+#currentChallengeRecordCount { color: #87642d; font-weight: 600; font-size: .7rem; }
+.timer-display .daily-wisdom-hint { color: #557666; opacity: 1; font-weight: 550; font-size: .73rem; margin: 0 0 9px; }
+.timer-display .daily-wisdom-hint:focus-visible { outline-color: #278b79; }
+.timer-display .time-unit { color: #1b5a43; font-size: clamp(3.25rem, 15vw, 4.2rem); font-weight: 800; letter-spacing: -.06em; text-decoration-color: #6b9a85; text-decoration-thickness: 2px; text-underline-offset: 10px; font-variant-numeric: tabular-nums; margin-bottom: 9px; }
 .timer-display .time-unit-row { gap: 10px; }
-.timer-display .clickable-time-box:hover { background: #ffffff08; border-color: #ffffff18; box-shadow: none; transform: none; }
-.timer-display .clickable-time-box:hover .time-unit { color: #fff9e9; }
-.timer-display .sub-time-clickable { color: #c0d9cc; font-size: .92rem; font-weight: 550; text-decoration-color: #759d88; }
-.timer-display .clickable-time-box:hover .sub-time-clickable { color: #fff9e9; }
+.timer-display .clickable-time-box:hover { background: #f5f9f5; border-color: #dce8de; box-shadow: none; transform: none; }
+.timer-display .clickable-time-box:hover .time-unit { color: #1b5a43; }
+.timer-display .sub-time-clickable { color: #557666; font-size: .92rem; font-weight: 550; text-decoration-color: #759d88; }
+.timer-display .clickable-time-box:hover .sub-time-clickable { color: #557666; }
 .timer-display .streak-record-badge { color: #7d5826; background: #fff0cd; border-color: #dec18c; }
 .timer-display .streak-record-badge:hover { background: #ffdf96; border-color: #f4d59d; }
 .timer-display .success-rate-box { color: #165c43; background: #d9eddf; border-color: #a7d1ba; }
@@ -133,23 +133,23 @@ button, a, input, select, textarea, summary { scroll-margin-block: 24px; }
 .timer-display .current-recovery-summary { color: #315f46; font-weight: 700; }
 .timer-display .current-recovery-goal { border-radius: 10px; box-shadow: none; border-color: #d6e2d7; background: #fff; color: #315f46; }
 .timer-display .current-recovery-progress > span { background: linear-gradient(90deg, #9bceb0, #5bb28a); }
-.timer-display #subTime { color: #ecf5ed; font-size: 1.12rem; font-weight: 550; font-variant-numeric: tabular-nums; }
-.timer-display .day-progress-percent { color: #e7cd98; font-size: .78rem; }
-.timer-display .time-bar-bg { background: #ffffff15; box-shadow: inset 0 1px 2px #0c2f3820; border-radius: 7px; }
-.timer-display .hour-fill { background: linear-gradient(90deg, #2a6b7a, #448b99); }
-.timer-display .min-fill { background: linear-gradient(90deg, #2f785d, #4a9976); }
-.timer-display .sec-fill { background: linear-gradient(90deg, #9c7639, #ad8a48); }
-.timer-display .time-bar-text { font-size: .73rem; font-weight: 650; text-shadow: 0 1px 2px #0b302eb3; }
-.timer-display .sub-percent-text { color: #f1d8c3; font-size: .8rem; font-weight: 600; }
+.timer-display #subTime { color: #1b5a43; font-size: 1.12rem; font-weight: 550; font-variant-numeric: tabular-nums; }
+.timer-display .day-progress-percent { color: #866020; font-size: .78rem; }
+.timer-display .time-bar-bg { background: #edf2ee; box-shadow: inset 0 1px 2px #0c2f3820; border-radius: 7px; }
+.timer-display .hour-fill { background: #bedce5; }
+.timer-display .min-fill { background: #bcdcc8; }
+.timer-display .sec-fill { background: #ebd8b0; }
+.timer-display .time-bar-text { color: #244b3b; font-size: .73rem; font-weight: 650; text-shadow: none; }
+.timer-display .sub-percent-text { color: #975440; font-size: .8rem; font-weight: 600; }
 .timer-display .sub-progress-bg { background: #e3e9df; }
 .timer-display .sub-progress-fill { background: #d86e58; }
-.timer-display .tick-label { color: #b0cebd; font-weight: 500; }
-.timer-display .sub-craving-summary { color: #d6c8ec; }
-.timer-display .sub-body-summary { color: #b2e1d3; }
-.timer-display .sub-body-method { color: #b4cbbd; }
-.timer-display .sub-failure-summary { color: #f0c993; }
+.timer-display .tick-label { color: #687e70; font-weight: 500; }
+.timer-display .sub-craving-summary { color: #79618c; }
+.timer-display .sub-body-summary { color: #357c65; }
+.timer-display .sub-body-method { color: #687e70; }
+.timer-display .sub-failure-summary { color: #866020; }
 .timer-display #displaySettingDate { background: #eaf2ea; border-color: #c7dbca; color: #315c46; font-weight: 650; box-shadow: none; }
-.timer-start-date { color: #b5cbbb; font-size: .73rem; margin-top: 17px; }
+.timer-start-date { color: #687e70; font-size: .73rem; margin-top: 17px; }
 
 /* A consistent card rhythm for diagnoses, daily records, charts and recovery. */
 details.main-section, .inline-collapsible-section.active-summary-collapsible {
@@ -222,35 +222,24 @@ details.achieved-details, details.upcoming-details { border-color: #e3e9e1; back
 .post-card.is-mine { border-left-color: #4c9973; }
 .post-preview, .post-body { line-height: 1.75; }
 
-/* One selected section. Inner reading surfaces retain their readable light palette. */
-:is(details.main-section, .inline-collapsible-section.active-summary-collapsible).is-selected-section {
-    border-color: #235b49;
-    background: radial-gradient(ellipse at 100% 0, #2a6553 0, transparent 58%), linear-gradient(155deg, #163d33, #12382f 70%, #164637);
-    box-shadow: 0 12px 28px rgba(19, 69, 49, .15);
+/* A slim left rail identifies each section without a selected background.
+   Keep geometry fixed while interacting so headings never move on selection. */
+#displayArea :is(details.main-section, .inline-collapsible-section) {
+    --section-accent: #268265;
+    border-left: 4px solid var(--section-accent);
+    background: #fff;
+    color: var(--ui-ink);
+    transition: border-color .18s ease, box-shadow .18s ease;
 }
-:is(details.main-section, .inline-collapsible-section).is-selected-section > :is(summary, .inline-collapsible-summary) { color: #f4f8f4; border-bottom-color: #ffffff20; }
-:is(details.main-section, .inline-collapsible-section).is-selected-section > :is(summary, .inline-collapsible-summary)::after { color: #c5dfd0; background: #ffffff0b; border-color: #ffffff1a; }
-:is(details.main-section, .inline-collapsible-section).is-selected-section > :is(summary, .inline-collapsible-summary) .diagnosis-summary-names { color: #c1dccd; }
-:is(details.main-section, .inline-collapsible-section.active-summary-collapsible).is-selected-section > :is(.section-content, .inline-collapsible-content) { position: relative; isolation: isolate; color: var(--ui-ink); background: #fff; border-radius: 13px; }
-#sectionCraving.is-selected-section > .section-content { background: linear-gradient(145deg, #edf5ee, #dcebe1); box-shadow: inset 0 1px 0 #ffffff80; }
+#displayArea #diagnosisRecordSection { --section-accent: #9465bc; }
+#displayArea #activeRecoverySummary { --section-accent: #7a9146; }
+#displayArea #sectionCraving { --section-accent: #bd6431; }
+#displayArea #sectionStats { --section-accent: #2872bc; }
+#displayArea #sectionCommunity { --section-accent: #8c56ba; }
+#displayArea #sectionRecovery { --section-accent: #309077; }
+#displayArea :is(details.main-section, .inline-collapsible-section) > :is(summary, .inline-collapsible-summary) { touch-action: manipulation; }
+#displayArea :is(details.main-section, .inline-collapsible-section.active-summary-collapsible) > :is(.section-content, .inline-collapsible-content) { position: relative; isolation: isolate; color: var(--ui-ink); background: #fff; border-radius: 13px; }
 #sectionStats .chart-container > canvas { position: relative; z-index: 1; }
-.timer-display.inline-collapsible-section:not(.is-selected-section) { background: #fff; border-color: var(--ui-line); color: var(--ui-ink); box-shadow: var(--ui-shadow); }
-.timer-display:not(.is-selected-section) .inline-collapsible-summary { color: var(--ui-ink); border-bottom-color: #e9eeea; }
-.timer-display:not(.is-selected-section) .inline-collapsible-summary::after { color: #6b8979 !important; background: #f3f6f3; border-color: #e2eae3; }
-.timer-display:not(.is-selected-section) #currentChallengeRecordCount { color: #87642d; }
-.timer-display:not(.is-selected-section) :is(.time-unit, #subTime, .clickable-time-box:hover .time-unit) { color: #1b5a43; }
-.timer-display:not(.is-selected-section) :is(.daily-wisdom-hint, .sub-time-clickable, .clickable-time-box:hover .sub-time-clickable) { color: #557666; }
-.timer-display:not(.is-selected-section) :is(.day-progress-percent, .sub-failure-summary) { color: #866020; }
-.timer-display:not(.is-selected-section) .sub-percent-text { color: #975440; }
-.timer-display:not(.is-selected-section) :is(.tick-label, .sub-body-method, .timer-start-date) { color: #687e70; }
-.timer-display:not(.is-selected-section) .sub-craving-summary { color: #79618c; }
-.timer-display:not(.is-selected-section) .sub-body-summary { color: #357c65; }
-.timer-display:not(.is-selected-section) .time-bar-bg { background: #edf2ee; }
-.timer-display:not(.is-selected-section) .hour-fill { background: #bedce5; }
-.timer-display:not(.is-selected-section) .min-fill { background: #bcdcc8; }
-.timer-display:not(.is-selected-section) .sec-fill { background: #ebd8b0; }
-.timer-display:not(.is-selected-section) .time-bar-text { color: #244b3b; text-shadow: none; }
-.timer-display:not(.is-selected-section) .clickable-time-box:hover { background: #f5f9f5; border-color: #dce8de; }
 
 /* Compact four-column history, with matching podium colors in both charts. */
 #accumulatedRecordsModal .modal-content { box-sizing: border-box; padding-inline: clamp(12px, 4vw, 24px); }
