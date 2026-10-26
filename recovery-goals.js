@@ -12,6 +12,13 @@ export function currentRecoveryGoals(groups, elapsedDays) {
     });
 }
 
+export function recoveryGoalsSummary(goals) {
+    const order = ['liver', 'brain', 'physical'];
+    const ordered = [...goals].sort((a, b) => order.indexOf(a.key) - order.indexOf(b.key));
+    if (!ordered.length) return '';
+    return `기간 기준 · ${ordered.map(goal => `${goal.label} 목표 ${goal.stage.t} · ${goal.complete ? '달성 ' : ''}${goal.percent}%`).join('  /  ')}`;
+}
+
 export function recoveryGoalsHtml(goals) {
     return `<details class="alcohol-risk-stack current-recovery-stack">
         <summary class="current-recovery-summary"><span>🌱 현재 회복 목표</span><small>신체 · 간 · 뇌</small></summary>

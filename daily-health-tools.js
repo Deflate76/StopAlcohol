@@ -75,28 +75,62 @@ function observeTimeMarkers(track, document) {
     }
 }
 
+// Arrows represent the midpoint of each 2-hour bin. Keep just the next
+// recorded midpoint on the daily clock, including the following day at wrap.
+export function nextTimeMarker(counts, now = new Date()) {
+    const date = new Date(now);
+    if (!Number.isFinite(date.getTime())) return null;
+    const seconds = date.getHours() * 3600 + date.getMinutes() * 60 + date.getSeconds() + date.getMilliseconds() / 1000;
+    const indices = Array.from({length:12}, (_, index) => index).filter(index => Number.isFinite(counts?.[index]) && counts[index] > 0);
+    if (!indices.length) return null;
+    const index = indices.find(index => (index * 2 + 1) * 3600 >= seconds);
+    return {index:index ?? indices[0], tomorrow:index === undefined};
+}
+
+const nextMarkerStates = new WeakMap();
+function refreshNextTimeMarker(track, now) {
+    const state = nextMarkerStates.get(track);
+    if (!state) return;
+    const next = nextTimeMarker(state.counts, now), key = next ? `${next.index}:${next.tomorrow}` : 'empty';
+    if (key === state.key) return;
+    state.key = key;
+    track.replaceChildren(); track.hidden = !next;
+    state.render(next);
+    if (next) observeTimeMarkers(track, track.ownerDocument);
+    else track.style.height = '0px';
+}
+
+function installNextTimeMarker(track, counts, render, now) {
+    nextMarkerStates.set(track, {counts, render, key:null});
+    refreshNextTimeMarker(track, now);
+}
+
+const nextMarkerLabel = next => `${next.tomorrow ? '내일' : '오늘'} ${timeBinLabel(next.index)}`;
+
 export function renderBodyTimeRisk(document, data = {}, {error = false, loading = false, nowMs = Date.now()} = {}) {
     const track = document.getElementById('subBodyMarkers'), summary = document.getElementById('subBodySummary');
     if (!track || !summary) return;
     const stats = bodyTimeStats(error || loading ? {} : data, nowMs);
-    track.replaceChildren(); track.hidden = !stats.low;
-    summary.textContent = error ? '몸상태 시간대를 불러오지 못했습니다.' : loading ? '몸상태 시간대를 불러오는 중…'
+    const base = error ? '몸상태 시간대를 불러오지 못했습니다.' : loading ? '몸상태 시간대를 불러오는 중…'
         : !stats.total ? '시각이 확인되는 몸상태 기록이 없습니다.'
-        : `몸상태 ${stats.total}건 중 낮은 상태 ${stats.low}건${stats.low ? ' · 시간대 내 비율 (아래 화살표 선택)' : ' · 40점 이하 기록 없음'}`;
-    if (stats.skipped) summary.textContent += ` (시각·항목 미확인 등 ${stats.skipped}건 제외)`;
-    stats.bins.forEach((bin, index) => {
-        if (!bin.low) return;
+        : `몸상태 ${stats.total}건 중 낮은 상태 ${stats.low}건${stats.low ? '' : ' · 40점 이하 기록 없음'}`;
+    const skipped = stats.skipped ? ` (시각·항목 미확인 등 ${stats.skipped}건 제외)` : '';
+    track.setAttribute('aria-label', '다음 몸상태 저하 기록 시간대의 비율');
+    summary.title = '기기 현지 시각부터 다음에 오는 기록 시간대 하나를 표시합니다. 화살표는 2시간 구간의 가운데를 가리키며 마지막 화살표를 지나면 내일의 첫 기록 시간대를 표시합니다. 과거 기록의 요약이며 몸상태를 예측한 값은 아닙니다.';
+    installNextTimeMarker(track, stats.bins.map(bin => bin.low), next => {
+        summary.textContent = base + (next ? ` · 다음: ${nextMarkerLabel(next)} (아래 화살표 선택)` : '') + skipped;
+        if (!next) return;
+        const {index} = next, bin = stats.bins[index];
         const marker = document.createElement('span'), button = document.createElement('button'), arrow = document.createElement('span');
         const percent = percentLabel(bin.low / bin.total * 100);
-        const detail = `${timeBinLabel(index)} · 이 시간대 ${bin.total}건 중 낮은 상태 ${bin.low}건 (${percent}) · 평균 종합상태 ${Math.round(bin.sum/bin.total)}점/100`;
-        marker.dataset.bin = index;
+        const detail = `${nextMarkerLabel(next)} · 이 시간대 ${bin.total}건 중 낮은 상태 ${bin.low}건 (${percent}) · 평균 종합상태 ${Math.round(bin.sum/bin.total)}점/100`;
+        marker.className = 'sub-body-marker'; marker.dataset.bin = index;
         button.type = 'button'; button.className = 'sub-craving-percent sub-body-percent'; button.textContent = percent;
-        button.title = detail; button.setAttribute('aria-label', detail);
+        button.title = detail; button.setAttribute('aria-label', `다음 몸상태 저하 기록 시간대: ${detail}`);
         button.addEventListener('click', () => { summary.textContent = detail; });
         arrow.className = 'sub-body-arrow'; arrow.style.left = `${(index+.5)/12*100}%`; arrow.setAttribute('aria-hidden', 'true');
         marker.append(arrow, button); track.append(marker);
-    });
-    observeTimeMarkers(track, document);
+    }, nowMs);
     return stats;
 }
 
@@ -104,23 +138,24 @@ export function renderCravingTimeRisk(document, data = {}, {error = false, loadi
     const track = document.getElementById('subCravingMarkers'), summary = document.getElementById('subCravingSummary');
     if (!track || !summary) return;
     const stats = cravingTimeStats(error || loading ? {} : data, nowMs);
-    track.replaceChildren(); track.hidden = !stats.total;
-    summary.textContent = error ? '갈망 시간대를 불러오지 못했습니다.' : loading ? '갈망 시간대를 불러오는 중…'
-        : stats.total ? `🟣 갈망 ${stats.total}건 · 2시간별 비율 (화살표 선택)` : '시각이 확인되는 갈망 기록이 없습니다.';
-    if (stats.skipped) summary.textContent += ` (시각 미확인 등 ${stats.skipped}건 제외)`;
-    summary.title = '전체 도전의 갈망 기록 중 시각이 확인된 기록만 집계합니다. 대처·몸상태·평가·복용 기록은 제외합니다. 기기 현지 시각 기준이며 화살표는 2시간 구간의 가운데를 가리킵니다. 반올림한 비율의 합은 100%와 조금 다를 수 있습니다.';
-    stats.counts.forEach((count, index) => {
-        if (!count) return;
+    const base = error ? '갈망 시간대를 불러오지 못했습니다.' : loading ? '갈망 시간대를 불러오는 중…'
+        : stats.total ? `🟣 갈망 ${stats.total}건` : '시각이 확인되는 갈망 기록이 없습니다.';
+    const skipped = stats.skipped ? ` (시각 미확인 등 ${stats.skipped}건 제외)` : '';
+    track.setAttribute('aria-label', '다음 갈망 기록 시간대의 비율');
+    summary.title = '전체 도전의 갈망 기록 중 시각이 확인된 기록만 집계합니다. 대처·몸상태·평가·복용 기록은 제외합니다. 기기 현지 시각부터 다음에 오는 화살표 하나를 표시하며 화살표는 2시간 구간의 가운데를 가리킵니다. 마지막 화살표를 지나면 내일의 첫 기록 시간대를 표시합니다. 과거 기록의 요약이며 갈망을 예측한 값은 아닙니다.';
+    installNextTimeMarker(track, stats.counts, next => {
+        summary.textContent = base + (next ? ` · 다음: ${nextMarkerLabel(next)} (화살표 선택)` : '') + skipped;
+        if (!next) return;
+        const {index} = next, count = stats.counts[index];
         const marker = document.createElement('span'), button = document.createElement('button'), arrow = document.createElement('span');
         marker.className = 'sub-craving-marker'; marker.dataset.bin = index;
-        const detail = `${timeBinLabel(index)} · ${count}/${stats.total}건 (${percentLabel(stats.percentages[index])}) · 전체 갈망 기준`;
+        const detail = `${nextMarkerLabel(next)} · ${count}/${stats.total}건 (${percentLabel(stats.percentages[index])}) · 전체 갈망 기준`;
         button.type = 'button'; button.className = 'sub-craving-percent'; button.textContent = percentLabel(stats.percentages[index]);
-        button.title = detail; button.setAttribute('aria-label', detail);
+        button.title = detail; button.setAttribute('aria-label', `다음 갈망 기록 시간대: ${detail}`);
         button.addEventListener('click', () => { summary.textContent = `🟣 ${detail}`; });
         arrow.className = 'sub-craving-arrow'; arrow.style.left = `${(index + .5) / 12 * 100}%`;
         arrow.setAttribute('aria-hidden', 'true'); marker.append(arrow, button); track.append(marker);
-    });
-    observeTimeMarkers(track, document);
+    }, nowMs);
     return stats;
 }
 
@@ -148,6 +183,10 @@ export function updateFailureTimeProgress(document, now = new Date()) {
     const progress = `${seconds / 86400 * 100}%`, active = Math.floor(seconds / 7200);
     const fill = document.getElementById('subFill');
     if (fill) fill.style.width = progress;
+    for (const id of ['subCravingMarkers', 'subBodyMarkers']) {
+        const track = document.getElementById(id);
+        if (track) refreshNextTimeMarker(track, date);
+    }
     if (!layer) return;
     layer.style.setProperty('--clock-position', progress);
     [...layer.children].forEach((cell, index) => {

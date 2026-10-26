@@ -35,8 +35,8 @@ test('body percentages use each time bin’s own denominator, override stale cur
 test('body arrows show observed ratios/sample sizes and clear private values for loading/error/account reset',async t=>{
     const {renderBodyTimeRisk}=await health;
     const dom=new JSDOM('<div id="subBodyMarkers"></div><p id="subBodySummary"></p>');t.after(()=>dom.window.close());const d=dom.window.document;
-    renderBodyTimeRisk(d,{cravings:[state(0),state(1,{stress:0}),state(23)]},{nowMs:now});
-    const buttons=d.querySelectorAll('button');assert.deepEqual([...buttons].map(b=>b.textContent),['50%','100%']);
+    renderBodyTimeRisk(d,{cravings:[state(0),state(1,{stress:0}),state(23)]},{nowMs:new Date(2026,9,8,0).getTime()});
+    const buttons=d.querySelectorAll('button');assert.deepEqual([...buttons].map(b=>b.textContent),['50%']);
     buttons[0].click();assert.match(d.getElementById('subBodySummary').textContent,/00~02시.*2건 중.*1건 \(50%\).*60점/);
     const arrow=d.querySelector('.sub-body-arrow');assert.equal(arrow.style.top,'0px');assert.equal(arrow.style.height,'8px');
     for(const options of [{loading:true},{error:true},{}]) {renderBodyTimeRisk(d,{},options);assert(d.getElementById('subBodyMarkers').hidden);assert.equal(d.querySelectorAll('button').length,0);}

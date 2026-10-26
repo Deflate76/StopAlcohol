@@ -55,14 +55,15 @@ test('meal and weight edits never resend a stale cached satisfaction array', asy
     assert.equal(Object.hasOwn(writes[0].data,'alcohol'),false);
     assert.equal(writes[0].options.merge,true);
 });
-test('rating slot sits immediately after current-day display outside calendar click targets', () => {
+test('rating stays below the live timer outside calendar click targets', () => {
     const start=source.indexOf('    function buildMainDaysContainerHtml('),end=source.indexOf('\n    function renderMainDaysContainerIfNeeded',start);
     const context={buildStreakRecordBadgeHtml:()=>'',buildMinAbstinenceProgressHtml:()=>'',recoveryGoalsHtml:()=>'',getCurrentRecoveryGoals:()=>[]};
     vm.createContext(context);vm.runInContext(source.slice(start,end),context);
     const dom=new JSDOM(context.buildMainDaysContainerHtml(12,30,90));
     const slot=dom.window.document.getElementById('sobrietySatisfactionSlot');
     assert(slot);assert.equal(slot.closest('.clickable-time-box'),null);
-    assert(slot.previousElementSibling.querySelector('.time-unit-row'));
+    assert.equal(slot.previousElementSibling.id,'timerClockProgressSlot');
+    assert(slot.previousElementSibling.previousElementSibling.matches('.time-unit-row'));
     dom.window.close();
 });
 
@@ -78,5 +79,41 @@ test('satisfaction-only days do not become zero-valued meal or drinking chart re
     await context.openMealWeightLogList();
     assert.match(dom.window.document.getElementById('mealWeightLogListContainer').textContent,/아직 기록된/);
     assert.equal(context.dailyLogsData['2026-10-24'].sobrietySatisfaction.length,1);
+    dom.window.close();
+});
+
+test('timer redraw preserves live clock nodes and satisfaction draft while keeping record actions separate', () => {
+    const page=new JSDOM(source), clock=page.window.document.getElementById('timerClockProgress').outerHTML;
+    page.window.close();
+    const dom=new JSDOM('<div id="mainDaysContainer"></div>'+clock,{runScripts:'dangerously'}),d=dom.window.document;
+    const form=d.createElement('form');form.className='sobriety-satisfaction';form.innerHTML='<input value="draft">';
+    const calls=[],context={document:d,currentTabName:'physical',lastMainDaysRenderState:null,
+        refreshRecoverySummary:()=>calls.push('recovery'),getCurrentStreakRecordInfo:()=>({targetDays:47,rank:1}),
+        buildMainDaysRenderKey:(...args)=>args.join('|'),getCurrentRecoveryGoals:()=>[],
+        recoveryGoalsHtml:()=>'<details class="current-recovery-stack"></details>',buildMinAbstinenceProgressHtml:()=>'',
+        sobrietySatisfaction:{mount:host=>host.append(form)},dailyWisdom:{renderTrigger(){}},
+        openStreakRecordsModal:()=>calls.push('record'),openSobrietyRate:()=>calls.push('rate')};
+    dom.window.openCalendarModal=mode=>calls.push(mode);
+    vm.createContext(context);
+    for(const name of ['buildStreakRecordBadgeHtml','buildMainDaysContainerHtml','renderMainDaysContainerIfNeeded']) {
+        const start=source.indexOf(`    function ${name}(`),end=source.indexOf('\n    }',start)+6;
+        vm.runInContext(source.slice(start,end),context);
+    }
+    const live=d.getElementById('timerClockProgress'),bar=d.getElementById('barHourFill');
+    bar.style.width='75%';d.getElementById('subTime').textContent='18시간 36분 50초';
+    context.renderMainDaysContainerIfNeeded(47,125,97.28);
+    form.querySelector('input').focus();
+    context.renderMainDaysContainerIfNeeded(48,126,97.3);
+    assert.equal(d.getElementById('timerClockProgress'),live);
+    assert.equal(d.getElementById('barHourFill'),bar);
+    assert.equal(bar.style.width,'75%');
+    assert.equal(d.getElementById('subTime').textContent,'18시간 36분 50초');
+    assert.equal(d.querySelector('#timerClockProgressSlot').firstElementChild,live);
+    assert.equal(form.querySelector('input').value,'draft');assert.equal(d.activeElement,form.querySelector('input'));
+    calls.length=0;
+    for(const selector of ['.time-unit','.sub-time-clickable','.streak-record-badge','.success-rate-box'])d.querySelector(selector).click();
+    assert.deepEqual(calls,['current','accumulated','record','rate']);
+    calls.length=0;context.renderMainDaysContainerIfNeeded(48,126,97.3);
+    assert.deepEqual(calls,['recovery'],'heading progress refreshes even when timer render key is unchanged');
     dom.window.close();
 });

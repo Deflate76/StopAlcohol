@@ -12,7 +12,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self';
         base-uri 'none';
         object-src 'none';
-        script-src 'self' https://www.gstatic.com/firebasejs/ https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/ https://apis.google.com/ https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js 'sha256-+KvzCkUcUlST+j5qs56IGJa+6DhA5gC+zR8gFZReQy4=' 'sha256-AIBL0tC4iNNoKKwFcVeQsj034glNRfVxuUyzuCSYSiQ=' 'sha256-REiFfq6OotUrXGWxp84XojcMHah8Xjofp2pgS2BjRbM=' 'sha256-ZBDKI+cJWffsd+cXDpbTFeoXNCPy8uQD4RUYNTiPRSQ=' 'sha256-utYYx5qVnylo2gMZULKmJG8hNLajcNpGYKJuaVzT2NA=';
+        script-src 'self' https://www.gstatic.com/firebasejs/ https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/ https://apis.google.com/ https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js 'sha256-AIBL0tC4iNNoKKwFcVeQsj034glNRfVxuUyzuCSYSiQ=' 'sha256-FcE4ycABs6dAzu7Ye18G7jKS9Wde81mJKkPubE9i4fw=' 'sha256-REiFfq6OotUrXGWxp84XojcMHah8Xjofp2pgS2BjRbM=' 'sha256-ZBDKI+cJWffsd+cXDpbTFeoXNCPy8uQD4RUYNTiPRSQ=' 'sha256-utYYx5qVnylo2gMZULKmJG8hNLajcNpGYKJuaVzT2NA=';
         script-src-attr 'unsafe-hashes'
         'sha256-+/PyyZxYlaRwGKBfLX4QqCPnBcKxzZ6EQ/FEMykrPlg='
         'sha256-+8Obkk1yhOE1TPaUpOo8d/udOL2qT2+5fc9UsR20blw='
@@ -1703,7 +1703,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
 <link rel="stylesheet" href="./community-recovery.css?v=20261009-3">
 <link rel="stylesheet" href="./quick-actions.css?v=20261017-1">
 <link rel="stylesheet" href="./diagnosis-diary.css?v=20261022-1">
-<link rel="stylesheet" href="./app-theme.css?v=20261024-1">
+<link rel="stylesheet" href="./app-theme.css?v=20261027-1">
 <link rel="stylesheet" href="./sobriety-satisfaction.css?v=20261024-1">
 </head>
 <body>
@@ -1832,6 +1832,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
                 <!-- JS에서 동적으로 달력 호버 UI를 생성합니다 -->
             </div>
             
+            <div id="timerClockProgress" class="timer-clock-progress">
             <div class="sub-time-row"><div id="subTime">0시간 0분 0초</div><span id="subTimePercent" class="day-progress-percent" title="도전 경과시간의 24시간 주기 진행률" aria-label="도전 24시간 주기 진행률">(0.0%)</span></div>
             
             <div class="time-bar-container">
@@ -1849,6 +1850,8 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
                 </div>
             </div>
             
+            </div>
+
             <div class="sub-progress-container">
                 <div class="sub-progress-label"><span class="sub-percent-text" id="subPercent">현재 시각: -</span><span id="subDayPercent" class="day-progress-percent" title="오늘 0시부터의 24시간 진행률" aria-label="오늘의 24시간 진행률">(0.0%)</span></div>
                 
@@ -1987,7 +1990,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
 
         <!-- Section 4: 신체 회복 -->
         <details id="sectionRecovery" class="main-section" open>
-            <summary><span>🌱 회복</span></summary>
+            <summary><span class="diagnosis-summary-heading record-summary-heading"><span class="diagnosis-summary-title">🌱 회복</span><span id="sectionRecoveryPreview" class="diagnosis-summary-names is-empty"><span class="diagnosis-summary-track"><span>도전을 시작하면 현재 회복 목표가 표시됩니다</span><span aria-hidden="true" hidden></span></span></span></span></summary>
             <div class="section-content">
                 <div class="tab-container">
                     <button class="tab-btn active" onclick="switchTab(this, 'physical')">신체<br>회복</button>
@@ -3847,7 +3850,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
 
     
     import { backgroundTask, loadHomeEssentials } from './app-loading.js?v=20261008-1';
-    import { currentRecoveryGoals, recoveryGoalsHtml } from './recovery-goals.js?v=20261009-2';
+    import { currentRecoveryGoals, recoveryGoalsHtml, recoveryGoalsSummary } from './recovery-goals.js?v=20261027-1';
     import { installCommunityFeed, communityCommentId } from './community-feed.js?v=20261022-1';
     import { buildAccumulatedRecords, recordRankClass, accumulatedChartConfig } from './accumulated-records.js?v=20261021-1';
     import { installSectionSelection } from './section-selection.js?v=20261024-1';
@@ -3855,7 +3858,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
     import { installDailySchedules } from './daily-schedules.js?v=20260928-2';
     import { formatRecordDuration, getStreakRankContext } from './record-activity.js?v=20261018-1';
     import { installRecordSectionUI } from './record-section-ui.js?v=20261005-1';
-    import { renderFailureTimeRisk, renderCravingTimeRisk, renderBodyTimeRisk, updateFailureTimeProgress, installTodayWeather } from './daily-health-tools.js?v=20261008-1';
+    import { renderFailureTimeRisk, renderCravingTimeRisk, renderBodyTimeRisk, updateFailureTimeProgress, installTodayWeather } from './daily-health-tools.js?v=20261027-1';
     import { installDailyWisdom, WISDOM_SYSTEM_INSTRUCTION } from './daily-wisdom.js?v=20261022-1';
     import { installCalendarEnvironment } from './calendar-environment.js?v=20261008-1';
     import { installAccountDeletion } from './account-deletion.js?v=20261009-1';
@@ -5233,6 +5236,15 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
         ], getCurrentDaysPassed());
     }
 
+    function refreshRecoverySummary() {
+        const startMs = userQuitDate ? new Date(userQuitDate).getTime() : NaN;
+        const hasChallenge = userId && auth.currentUser?.uid === userId && Number.isFinite(startMs);
+        const pending = hasChallenge && startMs > Date.now();
+        recordSectionUI.setSummary('sectionRecoveryPreview',
+            hasChallenge && !pending ? recoveryGoalsSummary(getCurrentRecoveryGoals()) : '',
+            pending ? '금주 도전 시작 예정' : '도전을 시작하면 현재 회복 목표가 표시됩니다');
+    }
+
     function buildMainDaysRenderKey(currentDays, totalCumul, successRate) {
         const streakRecordInfo = getCurrentStreakRecordInfo(currentDays);
         return [currentDays, totalCumul, successRate,
@@ -5245,12 +5257,14 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
     function buildMainDaysContainerHtml(currentDays, totalCumul, successRate) {
         return `
                 <button type="button" class="cal-hint daily-wisdom-hint" data-daily-wisdom-open aria-haspopup="dialog" aria-controls="dailyWisdomModal">오늘의 조언을 준비하고 있어요…</button>
-                <div class="clickable-time-box" onclick="openCalendarModal('current')">
-                    <div class="time-unit-row"><div class="time-unit">${currentDays}일</div>${buildStreakRecordBadgeHtml(currentDays, successRate)}</div>
+                <div class="time-unit-row" style="--day-chars:${String(currentDays).length + 1};">
+                    <button type="button" class="time-unit" onclick="openCalendarModal('current')" aria-label="현재 금주 ${currentDays}일, 달력 보기">${currentDays}일</button>
+                    ${buildStreakRecordBadgeHtml(currentDays, successRate)}
+                    <button type="button" class="sub-time-clickable" onclick="openCalendarModal('accumulated')">누적 ${totalCumul}일 보기</button>
                 </div>
+                <div id="timerClockProgressSlot"></div>
                 <div id="sobrietySatisfactionSlot"></div>
-                <div class="clickable-time-box" onclick="openCalendarModal('accumulated')" style="margin-top: -10px; padding: 5px 15px;">
-                    <span class="sub-time-clickable">(누적 ${totalCumul}일 보기)</span>
+                <div class="clickable-time-box" onclick="openCalendarModal('accumulated')" style="padding: 5px 0;">
                     <div id="minAbstinenceProgressSlot" style="width:100%; min-width:0;">${buildMinAbstinenceProgressHtml()}</div>
                 </div>
                 ${recoveryGoalsHtml(getCurrentRecoveryGoals())}
@@ -5258,6 +5272,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
     }
 
     function renderMainDaysContainerIfNeeded(currentDays, totalCumul, successRate) {
+        refreshRecoverySummary();
         if (currentTabName === 'diseases') renderAlcoholDiseaseTab();
         const container = document.getElementById('mainDaysContainer');
         if (!container) return;
@@ -5269,9 +5284,11 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
             return;
         }
 
+        const timerClockProgress = document.getElementById('timerClockProgress');
         const recoveryOpen = container.querySelector('.current-recovery-stack')?.open === true;
         const satisfactionFocus = container.querySelector('.sobriety-satisfaction')?.contains(document.activeElement) ? document.activeElement : null;
         container.innerHTML = buildMainDaysContainerHtml(currentDays, totalCumul, successRate);
+        if (timerClockProgress) container.querySelector('#timerClockProgressSlot').append(timerClockProgress);
         sobrietySatisfaction.mount(container.querySelector('#sobrietySatisfactionSlot'));
         if (satisfactionFocus?.isConnected) satisfactionFocus.focus({preventScroll:true});
         container.querySelector('.current-recovery-stack').open = recoveryOpen;
@@ -7747,6 +7764,7 @@ initPillIdentification();
             bindCommunityPreview(null);
             recordSectionUI.setActivityData({});
             dailyWisdom.bindAccount(null);
+            recordSectionUI.setSummary('sectionRecoveryPreview', '');
             sobrietySatisfaction.bindAccount(null);
             window.bindMedicationReminderAccount?.(null);
         }
@@ -7834,6 +7852,7 @@ initPillIdentification();
                 userProfile.bodyInfoLogs = []; cautionDays = []; controlActivitySessions = []; totalCravingCount = 0;
                 recordSectionUI.setActivityData({});
                 recordSectionUI.setSummary('sectionStatsPreview', '', '순위를 계산하는 중…');
+                recordSectionUI.setSummary('sectionRecoveryPreview', '', '현재 회복 목표를 불러오는 중…');
                 if (unsubscribePosts) { unsubscribePosts(); unsubscribePosts = null; }
                 renderFailureTimeRisk(document, [], {loading: true});
                 renderCravingTimeRisk(document, {}, {loading: true});
@@ -7902,6 +7921,7 @@ initPillIdentification();
             recordSectionUI.setActivityData({});
             recordSectionUI.setSummary('sectionStatsPreview', '');
             recordSectionUI.setSummary('activeRecoveryNames', '');
+            recordSectionUI.setSummary('sectionRecoveryPreview', '');
             totalCravingCount = 0; userProfile.bodyInfoLogs = []; controlActivitySessions = [];
             if (unsubscribePosts) { unsubscribePosts(); unsubscribePosts = null; }
             hrBindAccount(null);
@@ -11894,6 +11914,7 @@ initPillIdentification();
     window.startApp = function(startISO) {
         localStorage.setItem('quitDrinkingDateTime_server', startISO);
         updateCurrentChallengeSummary(startISO);
+        refreshRecoverySummary();
         recordSectionUI.updateDayProgress(Date.now() - new Date(startISO).getTime());
         document.getElementById('setupArea').style.display = 'none';
         document.getElementById('displayArea').style.display = 'block';

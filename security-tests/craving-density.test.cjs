@@ -48,7 +48,7 @@ test('time arrows identify their exact bins, expose counts by tap/keyboard, and 
     const dom = new JSDOM('<div id="subCravingMarkers"></div><p id="subCravingSummary"></p>');
     t.after(()=>dom.window.close()); const d=dom.window.document, track=d.getElementById('subCravingMarkers'), summary=d.getElementById('subCravingSummary');
     renderCravingTimeRisk(d,{cravings:[entry(0),entry(0),entry(23)]},{nowMs:now});
-    assert(!track.hidden); assert.equal(track.children.length,2);
+    assert(!track.hidden); assert.equal(track.children.length,1);
     const last=track.lastElementChild;
     assert(Math.abs(parseFloat(last.querySelector('.sub-craving-arrow').style.left)-95.83333333)<1e-6);
     assert.match(last.querySelector('button').getAttribute('aria-label'),/22~24시.*1\/3건 \(33.3%\)/);
