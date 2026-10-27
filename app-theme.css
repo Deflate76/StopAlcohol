@@ -238,6 +238,13 @@ details.achieved-details, details.upcoming-details { border-color: #e3e9e1; back
 #displayArea #sectionCommunity { --section-accent: #8c56ba; }
 #displayArea #sectionRecovery { --section-accent: #309077; }
 #displayArea :is(details.main-section, .inline-collapsible-section) > :is(summary, .inline-collapsible-summary) { touch-action: manipulation; }
+/* Keep focus on the compact toggle, without drawing a second frame over a section. */
+#displayArea :is(details.main-section, .inline-collapsible-section) > :is(summary, .inline-collapsible-summary):focus-visible { outline: none; }
+#displayArea :is(details.main-section, .inline-collapsible-section) > :is(summary, .inline-collapsible-summary):focus-visible::after {
+    border-radius: 50%;
+    outline: 2px solid var(--section-accent, #278b79);
+    outline-offset: 2px;
+}
 #displayArea :is(details.main-section, .inline-collapsible-section.active-summary-collapsible) > :is(.section-content, .inline-collapsible-content) { position: relative; isolation: isolate; color: var(--ui-ink); background: #fff; border-radius: 13px; }
 #sectionStats .chart-container > canvas { position: relative; z-index: 1; }
 
