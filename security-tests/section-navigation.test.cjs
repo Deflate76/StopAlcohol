@@ -83,3 +83,66 @@ test('a new pointer gesture clears suppression from a cancelled gesture',async t
     f.pointer('pointerdown',heading);f.pointer('pointerup',heading);f.click(heading);
     assert.equal(f.q('#sectionCraving').open,true);assert.equal(f.changes.length,1);
 });
+
+test('footer tap closes only its section and returns focus and view to its heading',async t=>{
+    const f=await fixture(t),section=f.q('#sectionCraving'),heading=f.q('#sectionCraving > summary');
+    section.open=true;let scrolled=0;heading.scrollIntoView=options=>{assert.equal(options.block,'start');scrolled++;};
+    const close=f.q('#sectionCraving > .section-close-footer button');
+    assert.equal(close.type,'button');assert.equal(close.getAttribute('aria-controls'),'sectionCraving');
+    assert.equal(close.getAttribute('aria-label'),'고비 관리 접기');
+    f.pointer('pointerdown',close);f.pointer('pointerup',close);
+    // The now-hidden footer can leave a different section under the pointer.
+    f.click(f.q('#sectionStats > summary'));
+    assert.equal(section.open,false);assert.equal(f.q('#sectionStats').open,false);
+    assert.equal(f.doc.activeElement,heading);assert(scrolled>=1);
+    assert.deepEqual(f.changes,[['sectionCraving',false]]);
+    assert.deepEqual(f.events,[{id:'sectionCraving',open:false}]);
+});
+
+test('keyboard footer activation collapses inline sections idempotently and keeps their content',async t=>{
+    const f=await fixture(t),section=f.q('#timerDisplaySection'),heading=f.q('#timerDisplaySection > button');
+    section.dataset.collapsed='false';heading.setAttribute('aria-expanded','true');
+    const input=f.doc.createElement('input');input.value='unsaved draft';section.children[1].append(input);
+    const close=f.q('#timerDisplaySection > .section-close-footer button');
+    close.click();close.click();
+    assert.equal(section.dataset.collapsed,'true');assert.equal(heading.getAttribute('aria-expanded'),'false');
+    assert.equal(input.value,'unsaved draft');assert(input.isConnected);assert.equal(f.doc.activeElement,heading);
+    assert.deepEqual(f.changes,[['timerDisplaySection',false]]);
+    assert.equal(f.q('#nested .section-close-button'),null,'nested community controls do not acquire parent footers');
+});
+
+test('refresh adds one footer to dynamic sections and retains the intended close action across replacement',async t=>{
+    const f=await fixture(t),markup='<section id="activeRecoverySummary" class="inline-collapsible-section" data-collapsed="false"><button class="inline-collapsible-summary">누적</button><div>기록</div></section>';
+    f.q('#dynamic').innerHTML=markup;f.ui.refresh();f.ui.refresh();
+    assert.equal(f.q('#activeRecoverySummary').querySelectorAll('.section-close-footer').length,1);
+    const close=f.q('#activeRecoverySummary .section-close-button');f.pointer('pointerdown',close);
+    f.q('#dynamic').innerHTML=markup;f.ui.refresh();
+    f.pointer('pointerup',f.q('#sectionStats summary'));f.click(f.q('#sectionStats summary'));
+    assert.equal(f.q('#activeRecoverySummary').dataset.collapsed,'true');assert.equal(f.q('#sectionStats').open,false);
+    assert.deepEqual(f.changes,[['activeRecoverySummary',false]]);
+    assert.equal(f.q('#activeRecoverySummary').querySelectorAll('.section-close-footer').length,1);
+});
+
+test('scrolling or cancelling a gesture on the footer does not close a section',async t=>{
+    for(const mode of ['drag','cancel','hold']) {
+        const f=await fixture(t),section=f.q('#sectionCraving'),close=f.q('#sectionCraving .section-close-button');section.open=true;
+        f.pointer('pointerdown',close);
+        if(mode==='drag')f.pointer('pointermove',close,{clientY:150});
+        if(mode==='cancel')f.pointer('pointercancel',close);
+        if(mode==='hold')f.advance(800);
+        f.pointer('pointerup',close);f.click(close);
+        assert.equal(section.open,true,mode);assert.equal(f.changes.length,0,mode);
+    }
+});
+
+test('a footer touch suppresses synthetic focus changes but leaves the next deliberate press alone',async t=>{
+    const f=await fixture(t),section=f.q('#sectionCraving'),heading=f.q('#sectionCraving > summary'),close=f.q('#sectionCraving .section-close-button');
+    section.open=true;f.pointer('pointerdown',close);f.pointer('pointerup',close);
+    const lower=f.q('#sectionStats > summary');
+    const mouse=()=>new f.dom.window.MouseEvent('mousedown',{bubbles:true,cancelable:true});
+    const compatibility=mouse();lower.dispatchEvent(compatibility);assert.equal(compatibility.defaultPrevented,true);
+    lower.focus();f.click(lower);assert.equal(f.doc.activeElement,heading);assert.equal(f.q('#sectionStats').open,false);
+    f.pointer('pointerdown',lower);const intentional=mouse();lower.dispatchEvent(intentional);
+    assert.equal(intentional.defaultPrevented,false);
+    f.pointer('pointerup',lower);f.click(lower);assert.equal(f.q('#sectionStats').open,true);
+});

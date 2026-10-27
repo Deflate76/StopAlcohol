@@ -248,6 +248,24 @@ details.achieved-details, details.upcoming-details { border-color: #e3e9e1; back
 #displayArea :is(details.main-section, .inline-collapsible-section.active-summary-collapsible) > :is(.section-content, .inline-collapsible-content) { position: relative; isolation: isolate; color: var(--ui-ink); background: #fff; border-radius: 13px; }
 #sectionStats .chart-container > canvas { position: relative; z-index: 1; }
 
+/* A footer action closes a long section without a trip back to its heading. */
+#displayArea .section-close-footer { display: flex; justify-content: flex-end; margin-top: 12px; }
+#displayArea .inline-collapsible-section[data-collapsed="true"] > .section-close-footer,
+#displayArea details.main-section:not([open]) > .section-close-footer { display: none; }
+.section-close-button {
+    display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+    min-height: 36px; padding: 6px 11px; border: 1px solid #dce6e0; border-radius: 999px;
+    background: #f6f9f7; color: #416c59; font-size: .75rem; font-weight: 650;
+    line-height: 1.2; cursor: pointer; touch-action: manipulation;
+}
+.section-close-button svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.section-close-button:hover { background: #eaf2ec; border-color: #b9d0c2; }
+.section-close-button:focus-visible { outline: 2px solid #278b79; outline-offset: 3px; }
+@media (max-width: 640px) {
+    #displayArea .section-close-footer { padding-inline-end: 44px; }
+}
+@media print { #displayArea .section-close-footer { display: none; } }
+
 /* Compact four-column history, with matching podium colors in both charts. */
 #accumulatedRecordsModal .modal-content { box-sizing: border-box; padding-inline: clamp(12px, 4vw, 24px); }
 #accumulatedRecordsModal .accumulated-records-table { font-size: .72rem; }
