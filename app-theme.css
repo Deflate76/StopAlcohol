@@ -380,7 +380,7 @@ dialog::backdrop { background: rgba(15, 35, 28, .55); backdrop-filter: blur(5px)
 .timer-display .time-unit-row {
     container-type: inline-size;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.8fr);
     grid-template-rows: repeat(2, minmax(0, 1fr));
     column-gap: 8px;
     row-gap: 0;
@@ -402,7 +402,7 @@ dialog::backdrop { background: rgba(15, 35, 28, .55); backdrop-filter: blur(5px)
     border: 0;
     border-radius: 10px;
     background: transparent;
-    font-size: clamp(1.1rem, calc(40cqw / var(--day-chars, 3)), 4.2rem);
+    font-size: clamp(1.1rem, calc(50cqw / var(--day-chars, 3)), clamp(3.5rem, 18vw, 4.2rem));
     white-space: nowrap;
     cursor: pointer;
 }
