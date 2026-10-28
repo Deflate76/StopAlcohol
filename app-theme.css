@@ -217,7 +217,7 @@ details.achieved-details, details.upcoming-details { border-color: #e3e9e1; back
 .community-composer #postContent::placeholder { color: #87978c; }
 .community-submit-btn { background: #286d50; border-radius: 10px; font-weight: 700; }
 #postCharacterCount { color: #51765a; }
-.community-toolbar button, .community-filters button, #communityMore { border-color: #dce5d9; border-radius: 8px; color: #58705b; }
+.community-toolbar button, .community-filters button, .community-pagination button { border-color: #dce5d9; border-radius: 8px; color: #58705b; }
 .post-card { background: #fff; border-color: #e0e8dd; border-radius: 14px; box-shadow: var(--ui-shadow); }
 .post-card.is-mine { border-left-color: #4c9973; }
 .post-preview, .post-body { line-height: 1.75; }
@@ -249,7 +249,7 @@ details.achieved-details, details.upcoming-details { border-color: #e3e9e1; back
 #sectionStats .chart-container > canvas { position: relative; z-index: 1; }
 
 /* A footer action closes a long section without a trip back to its heading. */
-#displayArea .section-close-footer { display: flex; justify-content: flex-end; margin-top: 12px; }
+#displayArea .section-close-footer { display: flex; justify-content: center; margin-top: 12px; }
 #displayArea .inline-collapsible-section[data-collapsed="true"] > .section-close-footer,
 #displayArea details.main-section:not([open]) > .section-close-footer { display: none; }
 .section-close-button {
@@ -261,9 +261,6 @@ details.achieved-details, details.upcoming-details { border-color: #e3e9e1; back
 .section-close-button svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 .section-close-button:hover { background: #eaf2ec; border-color: #b9d0c2; }
 .section-close-button:focus-visible { outline: 2px solid #278b79; outline-offset: 3px; }
-@media (max-width: 640px) {
-    #displayArea .section-close-footer { padding-inline-end: 44px; }
-}
 @media print { #displayArea .section-close-footer { display: none; } }
 
 /* Compact four-column history, with matching podium colors in both charts. */

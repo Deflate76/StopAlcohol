@@ -12,7 +12,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self';
         base-uri 'none';
         object-src 'none';
-        script-src 'self' https://www.gstatic.com/firebasejs/ https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/ https://apis.google.com/ https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js 'sha256-AIBL0tC4iNNoKKwFcVeQsj034glNRfVxuUyzuCSYSiQ=' 'sha256-AbQT79BRxw/H9w90CpTNWtzsqGb5UMWTmTcifUq/agg=' 'sha256-REiFfq6OotUrXGWxp84XojcMHah8Xjofp2pgS2BjRbM=' 'sha256-ZBDKI+cJWffsd+cXDpbTFeoXNCPy8uQD4RUYNTiPRSQ=' 'sha256-utYYx5qVnylo2gMZULKmJG8hNLajcNpGYKJuaVzT2NA=';
+        script-src 'self' https://www.gstatic.com/firebasejs/ https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/ https://apis.google.com/ https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js 'sha256-AIBL0tC4iNNoKKwFcVeQsj034glNRfVxuUyzuCSYSiQ=' 'sha256-REiFfq6OotUrXGWxp84XojcMHah8Xjofp2pgS2BjRbM=' 'sha256-ZBDKI+cJWffsd+cXDpbTFeoXNCPy8uQD4RUYNTiPRSQ=' 'sha256-c7SO7UFUekvnEN9VEj8v2vO6JjxCMrSXKsH460dduVk=' 'sha256-utYYx5qVnylo2gMZULKmJG8hNLajcNpGYKJuaVzT2NA=';
         script-src-attr 'unsafe-hashes'
         'sha256-+/PyyZxYlaRwGKBfLX4QqCPnBcKxzZ6EQ/FEMykrPlg='
         'sha256-+8Obkk1yhOE1TPaUpOo8d/udOL2qT2+5fc9UsR20blw='
@@ -1700,10 +1700,10 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
 @media(prefers-reduced-motion:reduce) { .main-section > summary .diagnosis-summary-names.is-overflowing { overflow-x:auto; } }
 </style>
 <link rel="stylesheet" href="./release-history.css?v=20261005-1">
-<link rel="stylesheet" href="./community-recovery.css?v=20261009-3">
+<link rel="stylesheet" href="./community-recovery.css?v=20261028-1">
 <link rel="stylesheet" href="./quick-actions.css?v=20261017-1">
 <link rel="stylesheet" href="./diagnosis-diary.css?v=20261022-1">
-<link rel="stylesheet" href="./app-theme.css?v=20261028-1">
+<link rel="stylesheet" href="./app-theme.css?v=20261028-2">
 <link rel="stylesheet" href="./sobriety-satisfaction.css?v=20261024-1">
 </head>
 <body>
@@ -1962,7 +1962,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
                         <div class="community-filter-content">
                             <div class="community-filter-grid">
                                 <label>작성글 키워드<input id="communityKeyword" type="search" placeholder="글 내용 검색"></label>
-                                <label>작성자 ID·닉네임<input id="communityAuthor" type="search" placeholder="ID 또는 닉네임"></label>
+                                <label>작성자 닉네임<input id="communityAuthor" type="search" placeholder="닉네임 검색"></label>
                                 <label>작성 시작일<input id="communityDateFrom" type="date"></label>
                                 <label>작성 종료일<input id="communityDateTo" type="date"></label>
                                 <label class="community-filter-wide">작성 당시 금주 기간<select id="communityDuration"><option value="">전체 기간</option></select></label>
@@ -1980,10 +1980,14 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
                         <p id="communitySubmitStatus" class="community-status" role="status" aria-live="polite"></p>
                     </div>
                     <p id="communityNotificationStatus" class="community-status" role="status"></p>
-                    <div class="community-toolbar"><button type="button" id="communityExpandAll">전체 펼치기</button><button type="button" id="communityCollapseAll">전체 접기</button><button type="button" id="communityRetry">다시 불러오기</button><button type="button" id="communityBackToList" hidden>알림 글 고정 해제</button></div>
+                    <div class="community-toolbar"><button type="button" id="communityExpandAll">전체 펼치기</button><button type="button" id="communityCollapseAll">전체 접기</button><button type="button" id="communityRetry">다시 불러오기</button><button type="button" id="communityBackToList" hidden>통신 목록으로</button></div>
                     <p id="communityFilterStatus" class="community-status" role="status" aria-live="polite"></p>
-                    <div id="postList" style="display: flex; flex-direction: column; gap: 0px;"></div>
-                    <button type="button" id="communityMore" hidden>글 더 보기</button>
+                    <div id="postList" tabindex="-1" style="display: flex; flex-direction: column; gap: 0px;"></div>
+                    <nav id="communityPagination" class="community-pagination" aria-label="통신 글 페이지" hidden>
+                        <button type="button" id="communityPrevPage" aria-controls="postList">‹ 이전</button>
+                        <span id="communityPageStatus" role="status" aria-live="polite"></span>
+                        <button type="button" id="communityNextPage" aria-controls="postList">다음 ›</button>
+                    </nav>
                 </div>
             </div>
         </details>
@@ -3851,7 +3855,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
     
     import { backgroundTask, loadHomeEssentials } from './app-loading.js?v=20261008-1';
     import { currentRecoveryGoals, recoveryGoalsHtml, recoveryGoalsSummary } from './recovery-goals.js?v=20261027-1';
-    import { installCommunityFeed, communityCommentId } from './community-feed.js?v=20261022-1';
+    import { installCommunityFeed, communityCommentId } from './community-feed.js?v=20261028-1';
     import { buildAccumulatedRecords, recordRankClass, accumulatedChartConfig } from './accumulated-records.js?v=20261021-1';
     import { installSectionSelection } from './section-selection.js?v=20261028-1';
     import { installCommunityAdvice, createCommunityAdviceSlot, COMMUNITY_ADVICE_INSTRUCTION } from './community-ai.js?v=20261022-1';
@@ -10565,7 +10569,7 @@ initPillIdentification();
         cheers:COMMUNITY_CHEERS,
         dayAtWrite:communityDayAtWrite,
         isPending:(uid, postId) => pendingCommunityComments.has(communityCommentKey(uid, postId)),
-        // The full searchable feed is read only when this section is opened; render 50 at a time.
+        // The searchable feed is read only when this section is opened; display five posts per page.
         watchPosts:(next, error) => onSnapshot(query(collection(db, 'posts'), orderBy('createdAt', 'desc')),
             snapshot => next(snapshot.docs.map(item => ({...item.data(), id:item.id}))), error),
         // Own-post notifications stay live after first paint, including comments on older posts.
@@ -10647,9 +10651,8 @@ initPillIdentification();
         try {
             await updateDoc(doc(db, 'posts', postId), { comments: arrayUnion(newComment) });
             if (userId !== uid) return;
-            const currentInput = document.getElementById(`cmtInput_${postId}`);
-            if (!reaction && currentInput?.value === originalDraft) currentInput.value = '';
             setStatus(reaction ? '응원을 보냈어요.' : '댓글을 등록했습니다.');
+            return {saved:true, uid, originalDraft, reaction:!!reaction};
         } catch (error) {
             setStatus('등록하지 못했습니다. 연결이나 로그인 상태를 확인하고 다시 시도해 주세요.', true);
         } finally {

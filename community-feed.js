@@ -2,6 +2,7 @@
 import {isCommunityAdvice} from './community-ai.js?v=20261021-1';
 const DAY = 86400000;
 const READ_PREFIX = 'alcoholaway-community-read:';
+const PAGE_SIZE = 5;
 export const SOBRIETY_RANGES = [
     {id:'month1', label:'1개월 미만', min:0, max:30},
     {id:'month3', label:'1~3개월', min:30, max:90},
@@ -31,7 +32,7 @@ export function filterCommunityPosts(posts, filters = {}) {
     const range = SOBRIETY_RANGES.find(item => item.id === filters.duration);
     return posts.filter(post => {
         if (keyword && !normalized(post.content).includes(keyword)) return false;
-        if (author && ![post.uid, post.author].some(value => normalized(value).includes(author))) return false;
+        if (author && !normalized(post.author).includes(author)) return false;
         const time = postTime(post.createdAt);
         if ((filters.from || filters.to) && (!Number.isFinite(time) || time < from || time >= to)) return false;
         const days = range ? sobrietyDaysAtPost(post) : null;
@@ -69,10 +70,26 @@ export function installCommunityFeed({doc=document, win=window, getUid, watchPos
     };
     if (inputs.duration) for (const range of SOBRIETY_RANGES) {const option=node('option','',range.label);option.value=range.id;inputs.duration.append(option);}
     let uid=null, generation=0, feedSequence=0, stopFeed=null, stopOwn=null, visible=false, loading=false, error='', ownError='';
-    let posts=[], ownPosts=[], shown=50, defaultOpen=false, pinned=null, ledgerReady=false, seen=new Set();
+    let posts=[], ownPosts=[], page=0, defaultOpen=false, pinned=null, notificationReturn=null, ledgerReady=false, seen=new Set();
     const expanded=new Map(), drafts=new Map();
     let unread=[];
     const filters = () => Object.fromEntries(Object.entries(inputs).map(([key,input])=>[key,input?.value || '']));
+    function setFilters(values={}) {Object.entries(inputs).forEach(([key,input])=>{if(input)input.value=values[key]||'';});}
+    function updatePagination(count=0) {
+        const pageCount=Math.max(1,Math.ceil(count/PAGE_SIZE)), pager=get('communityPagination');
+        if(pager)pager.hidden=!uid || !count || !!error;
+        const previous=get('communityPrevPage'), next=get('communityNextPage'), status=get('communityPageStatus');
+        if(previous)previous.disabled=!count || page===0 || !!error;
+        if(next)next.disabled=!count || page>=pageCount-1 || !!error;
+        if(status) {
+            status.textContent=count?`${page+1} / ${pageCount}`:'';
+            status.setAttribute('aria-label',count?`전체 ${pageCount}페이지 중 ${page+1}페이지, 글 ${page*PAGE_SIZE+1}~${Math.min(count,(page+1)*PAGE_SIZE)}번째`:'표시할 글 없음');
+        }
+    }
+    function focusList() {
+        list?.focus({preventScroll:true});
+        list?.scrollIntoView?.({behavior:win.matchMedia?.('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
+    }
     function saveSeen() {if(uid && ledgerReady)try{win.localStorage.setItem(READ_PREFIX+uid,JSON.stringify({version:1,seen:[...seen]}));}catch{}}
     function updateNotice() {
         unread=[];
@@ -94,11 +111,13 @@ export function installCommunityFeed({doc=document, win=window, getUid, watchPos
     function bindAccount(nextUid) {
         if(uid===nextUid)return;
         stopFeed?.();stopOwn?.();stopFeed=stopOwn=null;generation++;feedSequence++;
-        uid=nextUid;visible=false;loading=false;posts=[];ownPosts=[];unread=[];pinned=null;error=ownError='';shown=50;
+        uid=nextUid;visible=false;loading=false;posts=[];ownPosts=[];unread=[];pinned=null;notificationReturn=null;error=ownError='';page=0;
         expanded.clear();drafts.clear();seen=new Set();ledgerReady=false;defaultOpen=false;
-        Object.values(inputs).forEach(input=>{if(input)input.value='';});
+        setFilters();
         if (uid) try {const saved=JSON.parse(win.localStorage.getItem(READ_PREFIX+uid));if(saved?.version===1 && Array.isArray(saved.seen)){seen=new Set(saved.seen.filter(id=>typeof id==='string'));ledgerReady=true;}}catch{}
-        list?.replaceChildren();updateNotice();
+        list?.replaceChildren();updatePagination();updateNotice();
+        const filterStatus=get('communityFilterStatus');if(filterStatus)filterStatus.textContent='';
+        const back=get('communityBackToList');if(back)back.hidden=true;
         if(!uid)return;
         const owner=uid, epoch=generation, valid=()=>uid===owner && generation===epoch && getUid()===owner;
         stopOwn=watchOwnPosts(owner,(rows,{fromCache=false}={})=>{
@@ -130,7 +149,7 @@ export function installCommunityFeed({doc=document, win=window, getUid, watchPos
         const advice=postComments.find(isCommunityAdvice),commentCount=postComments.filter(comment=>!isCommunityAdvice(comment)||comment.state==='ready').length;
         const aiLabel=advice ? (advice.state==='ready'?' · AI 조언 도착':advice.state==='failed'?' · AI 조언 재시도 가능':' · AI 조언 작성 중') : '';
         summary.append(header,node('span','post-preview',String(post.content??'')),node('span','post-summary-footer',`댓글 ${commentCount}개${aiLabel} · 펼치기/접기`));card.append(summary);
-        const body=node('div','post-expanded-content');body.append(node('div','post-author-id',`작성자 ID: ${post.uid||'미상'}`),node('div','post-body',String(post.content??'')));
+        const body=node('div','post-expanded-content');body.append(node('div','post-body',String(post.content??'')));
         if(post.editedAt)body.append(node('small','post-edited','수정됨'));
         if(post.uid===uid){const buttons=node('div','post-actions');buttons.append(action('수정','edit',()=>editPost(post.id,encodeURIComponent(String(post.content??'')))),action('삭제','delete',()=>deletePost(post.id)));body.append(buttons);}
         const comments=node('div','comment-section');
@@ -159,7 +178,22 @@ export function installCommunityFeed({doc=document, win=window, getUid, watchPos
         const composer=node('div','comment-composer');composer.id=`cmtComposer_${post.id}`;
         const inputRow=node('div','comment-input-area'), input=node('input','comment-input');input.type='text';input.id=`cmtInput_${post.id}`;input.placeholder='응원의 댓글 달기...';input.setAttribute('aria-label','응원의 댓글');input.value=drafts.get(post.id)||'';
         input.addEventListener('input',()=>drafts.set(post.id,input.value));
-        const send=async reaction=>{const owner=uid;try{await addComment(post.id,reaction);}finally{if(owner===uid)drafts.set(post.id,get(`cmtInput_${post.id}`)?.value??drafts.get(post.id)??'');}};
+        const send=async reaction=>{
+            const owner=uid,epoch=generation;let result;
+            try{result=await addComment(post.id,reaction);}
+            finally{
+                if(owner===uid && epoch===generation && getUid()===owner){
+                    const currentInput=get(`cmtInput_${post.id}`),currentDraft=currentInput?.value??drafts.get(post.id)??'';
+                    // A successful write may finish after paging away. Clear
+                    // its original text in the draft map as well as the DOM,
+                    // but retain edits made meanwhile and all reaction drafts.
+                    const saved=result?.saved===true && result.uid===owner && reaction===null && result.reaction===false
+                        && typeof result.originalDraft==='string' && currentDraft===result.originalDraft;
+                    if(saved && currentInput)currentInput.value='';
+                    drafts.set(post.id,saved?'':currentDraft);
+                }
+            }
+        };
         input.addEventListener('keydown',event=>{if(event.key==='Enter'&&!event.isComposing){event.preventDefault();void send(null);}});
         inputRow.append(input,action('등록','comment',()=>void send(null),'comment-btn'));composer.append(inputRow,node('p','comment-reaction-hint','아이콘을 누르면 응원 댓글이 등록돼요.'));
         const reactions=node('div','comment-reactions');reactions.setAttribute('role','group');reactions.setAttribute('aria-label','아이콘으로 응원 댓글 보내기');
@@ -169,20 +203,35 @@ export function installCommunityFeed({doc=document, win=window, getUid, watchPos
         card.addEventListener('toggle',()=>{if(card.isConnected)expanded.set(post.id,card.open);});
         return card;
     }
+    function pageRows() {
+        // A notification can arrive before the full feed, including an older
+        // post. Merge just that post at its chronological position, never as
+        // an extra card outside the five-post page.
+        const target=pinned&&ownPosts.find(post=>post.id===pinned.postId);
+        if(!target)return posts;
+        const index=posts.findIndex(post=>post.id===target.id), rows=posts.slice();
+        if(index>=0)rows[index]=target;
+        else {
+            const time=postTime(target.createdAt), before=rows.findIndex(post=>postTime(post.createdAt)<time);
+            rows.splice(before<0?rows.length:before,0,target);
+        }
+        return rows;
+    }
     function render() {
         if(!list)return;
         const active=doc.activeElement, focus=list.contains(active)&&active.matches('.comment-input,.comment-item')?{id:active.id,start:active.selectionStart,end:active.selectionEnd}:null;
         list.querySelectorAll('.comment-input').forEach(input=>{const id=input.closest('.post-card')?.dataset.postId;if(id)drafts.set(id,input.value);});
         list.querySelectorAll('.post-card').forEach(card=>expanded.set(card.dataset.postId,card.open));
         const values=filters(), badDates=values.from&&values.to&&values.from>values.to;
-        const matching=filterCommunityPosts(posts,values);
-        let displayed=matching.slice(0,shown);
-        const target=pinned&&ownPosts.find(post=>post.id===pinned.postId);
-        if(target){displayed=displayed.filter(post=>post.id!==target.id);displayed.unshift(target);expanded.set(target.id,true);}
+        const rows=pageRows(), matching=filterCommunityPosts(rows,values);
+        const targetIndex=pinned?matching.findIndex(post=>post.id===pinned.postId):-1;
+        if(targetIndex>=0){page=Math.floor(targetIndex/PAGE_SIZE);expanded.set(pinned.postId,true);}
+        page=Math.max(0,Math.min(page,Math.max(0,Math.ceil(matching.length/PAGE_SIZE)-1)));
+        const displayed=matching.slice(page*PAGE_SIZE,(page+1)*PAGE_SIZE);
         list.replaceChildren(...displayed.map(renderPost));
         if(!displayed.length)list.append(node('p','community-empty',error || (badDates?'작성 기간의 시작일은 종료일보다 늦을 수 없습니다.':loading?'통신을 불러오는 중…':posts.length?'검색 결과가 없습니다.':'아직 발송된 통신이 없습니다. 첫 생존 신고를 남겨보세요!')));
-        const status=get('communityFilterStatus');if(status)status.textContent=error || (badDates?'작성 기간을 확인해 주세요.':`${loading?'불러오는 중 · ':''}전체 ${posts.length}개 중 ${matching.length}개${target?' · 알림 대상 글을 맨 위에 표시합니다.':''}`);
-        const more=get('communityMore');if(more)more.hidden=matching.length<=shown;
+        const status=get('communityFilterStatus');if(status)status.textContent=error || (badDates?'작성 기간을 확인해 주세요.':`${loading?'불러오는 중 · ':''}전체 ${rows.length}개 중 ${matching.length}개${matching.length?` · ${page*PAGE_SIZE+1}~${Math.min(matching.length,(page+1)*PAGE_SIZE)}번째 글`:''}${targetIndex>=0?' · 알림 댓글이 있는 페이지입니다.':''}`);
+        updatePagination(matching.length);
         const back=get('communityBackToList');if(back)back.hidden=!pinned;
         if(focus){const target=get(focus.id);if(target){target.focus({preventScroll:true});if(target.classList.contains('comment-input'))target.setSelectionRange(focus.start,focus.end);}}
     }
@@ -196,16 +245,18 @@ export function installCommunityFeed({doc=document, win=window, getUid, watchPos
     function hide(){visible=false;feedSequence++;stopFeed?.();stopFeed=null;}
     function jumpToUnread() {
         const next=unread[0];if(!next || openCommunity()===false)return;
+        if(!pinned)notificationReturn={filters:filters(),page};
+        setFilters();
         pinned={postId:next.post.id,commentId:next.id};expanded.set(next.post.id,true);render();
         const target=get(next.id);
         if(target){target.classList.add('comment-notification-focus');target.scrollIntoView?.({behavior:win.matchMedia?.('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'});target.focus({preventScroll:true});seen.add(next.id);saveSeen();updateNotice();}
     }
     notice?.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();jumpToUnread();});
-    Object.values(inputs).forEach(input=>input?.addEventListener('input',()=>{shown=50;pinned=null;render();}));
-    get('communityClearFilters')?.addEventListener('click',()=>{Object.values(inputs).forEach(input=>{if(input)input.value='';});shown=50;pinned=null;render();});
-    for(const [id,open] of [['communityExpandAll',true],['communityCollapseAll',false]])get(id)?.addEventListener('click',()=>{defaultOpen=open;expanded.clear();pinned=null;for(const post of posts)expanded.set(post.id,open);list.querySelectorAll('.post-card').forEach(card=>{card.open=open;});});
-    get('communityMore')?.addEventListener('click',()=>{shown+=50;render();});
+    Object.values(inputs).forEach(input=>input?.addEventListener('input',()=>{page=0;pinned=null;notificationReturn=null;render();}));
+    get('communityClearFilters')?.addEventListener('click',()=>{setFilters();page=0;pinned=null;notificationReturn=null;render();});
+    for(const [id,open] of [['communityExpandAll',true],['communityCollapseAll',false]])get(id)?.addEventListener('click',()=>{defaultOpen=open;expanded.clear();pinned=null;notificationReturn=null;for(const post of posts)expanded.set(post.id,open);list.querySelectorAll('.post-card').forEach(card=>{card.open=open;});render();});
+    for(const [id,step] of [['communityPrevPage',-1],['communityNextPage',1]])get(id)?.addEventListener('click',()=>{page+=step;pinned=null;notificationReturn=null;render();focusList();});
     get('communityRetry')?.addEventListener('click',()=>{hide();show();});
-    get('communityBackToList')?.addEventListener('click',()=>{pinned=null;render();});
+    get('communityBackToList')?.addEventListener('click',()=>{pinned=null;if(notificationReturn){setFilters(notificationReturn.filters);page=notificationReturn.page;}notificationReturn=null;render();focusList();});
     return {bindAccount,show,hide,jumpToUnread,render,getUnread:()=>unread.map(item=>({postId:item.post.id,commentId:item.id}))};
 }

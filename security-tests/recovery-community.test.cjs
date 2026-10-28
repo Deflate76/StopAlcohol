@@ -53,10 +53,11 @@ test('standalone community opens independently above recovery and stops feed rea
     w.userId=null;w.syncCommunitySection();assert.equal(stops,2);
 });
 
-test('community filters combine content, UID/nickname, inclusive Korean dates and original sobriety age',async()=>{
+test('community filters combine content, nickname, inclusive Korean dates and original sobriety age without searching Firebase UIDs',async()=>{
     const {filterCommunityPosts:filter,sobrietyDaysAtPost:age,SOBRIETY_RANGES}=await community;
     const rows=[post('a',{uid:'ABC123',author:'주현',content:'산책과 금주',createdAt:Date.parse('2026-10-08T15:00Z')}),post('b',{createdAt:Date.parse('2026-10-09T14:59:59.999Z')}),post('c',{createdAt:Date.parse('2026-10-09T15:00Z')}),post('missing',{createdAt:null,authorDayAtWrite:null})];
-    assert.deepEqual(filter(rows,{keyword:' 산책 ',author:'abc',from:'2026-10-09',to:'2026-10-09',duration:'month3'}).map(r=>r.id),['a']);
+    assert.deepEqual(filter(rows,{keyword:' 산책 ',author:' 주현 ',from:'2026-10-09',to:'2026-10-09',duration:'month3'}).map(r=>r.id),['a']);
+    assert.equal(filter(rows,{author:'abc'}).length,0);
     assert.deepEqual(filter(rows,{author:'주현'}).map(r=>r.id),['a']);
     assert.deepEqual(filter(rows,{from:'2026-10-09',to:'2026-10-09'}).map(r=>r.id),['a','b']);
     assert.equal(filter(rows,{from:'2026-10-10',to:'2026-10-09'}).length,0);
@@ -71,11 +72,11 @@ async function fixture(t,{saved}={}) {
     const dom=new JSDOM(sourceDoc.getElementById('sectionCommunity').outerHTML,{url:'https://fixture.invalid'}),w=dom.window,d=w.document;
     sourceDoc.defaultView.close();t.after(()=>w.close());
     if(saved)w.localStorage.setItem('alcoholaway-community-read:owner',saved);
-    const state={uid:'owner',feeds:[],own:[],stops:0,opened:0};
+    const state={uid:'owner',feeds:[],own:[],stops:0,opened:0,addComment:()=>{}};
     const feed=installCommunityFeed({doc:d,win:w,getUid:()=>state.uid,cheers:[{id:'heart',emoji:'💚',label:'응원해요'}],dayAtWrite:r=>r.authorDayAtWrite??null,
         watchPosts:(next,error)=>{state.feeds.push({next,error});return()=>state.stops++;},
         watchOwnPosts:(uid,next,error)=>{state.own.push({uid,next,error});return()=>state.stops++;},
-        editPost(){},deletePost(){},addComment(){},deleteComment(){},openCommunity(){state.opened++;feed.show();return true;}});
+        editPost(){},deletePost(){},addComment:(...args)=>state.addComment(...args),deleteComment(){},openCommunity(){state.opened++;feed.show();return true;}});
     const input=(id,value)=>{d.getElementById(id).value=value;d.getElementById(id).dispatchEvent(new w.Event('input',{bubbles:true}));};
     return {w,d,feed,state,input};
 }
@@ -83,16 +84,94 @@ async function fixture(t,{saved}={}) {
 test('post folding, pagination, combined searches and comment drafts survive live snapshot replacements',async t=>{
     const f=await fixture(t);f.feed.show();f.state.own[0].next([]);
     const rows=Array.from({length:61},(_,i)=>post(`p${i}`,{content:i===60?'마지막 산책 기록':'금주 기록'}));f.state.feeds[0].next(rows);
-    assert.equal(f.d.querySelectorAll('.post-card').length,50);assert(f.d.querySelector('.post-card').open===false);
+    assert.equal(f.d.querySelectorAll('.post-card').length,5);assert(f.d.querySelector('.post-card').open===false);
+    assert.equal(f.d.getElementById('communityPrevPage').disabled,true);assert.match(f.d.getElementById('communityPageStatus').textContent,/1 \/ 13/);
     f.d.getElementById('communityExpandAll').click();assert([...f.d.querySelectorAll('.post-card')].every(c=>c.open));
     const input=f.d.getElementById('cmtInput_p0');input.value='작성 중인 댓글';input.dispatchEvent(new f.w.Event('input'));input.focus();input.setSelectionRange(2,4);
     f.state.feeds[0].next(rows.map((r,i)=>i===0?{...r,comments:[comment()]}:r));
     assert.equal(f.d.activeElement.id,'cmtInput_p0');assert.equal(f.d.activeElement.value,'작성 중인 댓글');assert.equal(f.d.activeElement.selectionStart,2);assert(f.d.querySelector('.post-card').open);
-    f.d.getElementById('communityMore').click();assert.equal(f.d.querySelectorAll('.post-card').length,61);assert([...f.d.querySelectorAll('.post-card')].every(c=>c.open));
+    f.d.getElementById('communityNextPage').click();assert.equal(f.d.querySelectorAll('.post-card').length,5);assert.equal(f.d.querySelector('.post-card').dataset.postId,'p5');assert([...f.d.querySelectorAll('.post-card')].every(c=>c.open));
+    assert.equal(f.d.activeElement.id,'postList');assert.match(f.d.getElementById('communityPageStatus').textContent,/2 \/ 13/);
+    f.state.feeds[0].next(rows);assert.equal(f.d.querySelector('.post-card').dataset.postId,'p5');
+    f.d.getElementById('communityPrevPage').click();assert.equal(f.d.getElementById('cmtInput_p0').value,'작성 중인 댓글');assert(f.d.querySelector('.post-card').open);
     f.d.getElementById('communityCollapseAll').click();assert([...f.d.querySelectorAll('.post-card')].every(c=>!c.open));
     f.input('communityKeyword','마지막');assert.equal(f.d.querySelectorAll('.post-card').length,1);assert.equal(f.d.querySelector('.post-card').dataset.postId,'p60');
     f.d.getElementById('communityClearFilters').click();assert.equal(f.d.getElementById('cmtInput_p0').value,'작성 중인 댓글');
     f.state.feeds[0].error(new Error('denied'));assert.equal(f.d.querySelectorAll('.post-card').length,0);assert.match(f.d.getElementById('communityFilterStatus').textContent,/불러오지 못했습니다/);
+    assert.equal(f.d.getElementById('communityPagination').hidden,true);
+});
+
+test('five-post page boundaries, empty searches and shrinking snapshots keep valid page controls',async t=>{
+    const f=await fixture(t);f.feed.show();
+    const rows=Array.from({length:18},(_,i)=>post(`p${i}`,{content:i%2?'산책 기록':'금주 기록'}));f.state.feeds[0].next(rows);
+    const ids=()=>[...f.d.querySelectorAll('.post-card')].map(card=>card.dataset.postId);
+    for(let page=0;page<4;page++) {
+        assert.deepEqual(ids(),rows.slice(page*5,(page+1)*5).map(row=>row.id));
+        assert.equal(f.d.getElementById('communityPrevPage').disabled,page===0);
+        assert.equal(f.d.getElementById('communityNextPage').disabled,page===3);
+        assert.equal(f.d.getElementById('communityPageStatus').textContent,`${page+1} / 4`);
+        f.d.getElementById('communityNextPage').click();
+    }
+    assert.deepEqual(ids(),['p15','p16','p17']);
+    f.state.feeds[0].next(rows.slice(0,7));assert.deepEqual(ids(),['p5','p6']);assert.match(f.d.getElementById('communityPageStatus').textContent,/2 \/ 2/);
+    f.input('communityKeyword','산책');assert.deepEqual(ids(),['p1','p3','p5']);assert.match(f.d.getElementById('communityPageStatus').textContent,/1 \/ 1/);
+    f.input('communityKeyword','없는 검색');assert.equal(ids().length,0);assert(f.d.getElementById('communityPagination').hidden);
+    f.d.getElementById('communityClearFilters').click();assert.deepEqual(ids(),['p0','p1','p2','p3','p4']);assert.equal(f.d.getElementById('communityPrevPage').disabled,true);
+});
+
+test('Firebase author UIDs never appear in expanded post metadata or author search',async t=>{
+    const f=await fixture(t);f.feed.show();
+    f.state.feeds[0].next([post('public-post',{uid:'firebase-private-author-uid',author:'별빛 생존자'})]);
+    f.d.getElementById('communityExpandAll').click();
+    assert.equal(f.d.querySelector('.post-author').textContent,'별빛 생존자');assert.equal(f.d.querySelector('.post-author-id'),null);
+    assert.equal(f.d.getElementById('postList').outerHTML.includes('firebase-private-author-uid'),false);
+    f.input('communityAuthor','firebase-private');assert.equal(f.d.querySelectorAll('.post-card').length,0);
+    f.input('communityAuthor','별빛');assert.equal(f.d.querySelectorAll('.post-card').length,1);
+});
+
+test('comment write acknowledgements clear saved off-page drafts and preserve failures, reactions and newer edits',async t=>{
+    for(const mode of ['saved','failed','reaction','edited']) {
+        const f=await fixture(t);f.feed.show();
+        const rows=Array.from({length:6},(_,i)=>post(`p${i}`));f.state.feeds[0].next(rows);
+        let finish;f.state.addComment=()=>new Promise(resolve=>{finish=resolve;});
+        const original='저장할 댓글',input=f.d.getElementById('cmtInput_p0');input.value=original;input.dispatchEvent(new f.w.Event('input'));
+        f.d.querySelector(`[data-post-id="p0"] [data-community-action="${mode==='reaction'?'cheer':'comment'}"]`).click();
+        if(mode==='edited'){input.value='다음에 쓸 새 댓글';input.dispatchEvent(new f.w.Event('input'));}
+        f.d.getElementById('communityNextPage').click();assert.equal(f.d.getElementById('cmtInput_p0'),null);
+        finish(mode==='failed'?{saved:false}:{saved:true,uid:'owner',originalDraft:original,reaction:mode==='reaction'});
+        await new Promise(resolve=>setImmediate(resolve));
+        f.d.getElementById('communityPrevPage').click();
+        assert.equal(f.d.getElementById('cmtInput_p0').value,mode==='saved'?'':mode==='edited'?'다음에 쓸 새 댓글':original,mode);
+    }
+});
+
+test('an older session comment completion cannot clear the same account’s fresh session draft',async t=>{
+    const f=await fixture(t);f.feed.show();f.state.feeds[0].next([post('p0')]);
+    let finish;f.state.addComment=()=>new Promise(resolve=>{finish=resolve;});
+    const original='같은 문장',input=f.d.getElementById('cmtInput_p0');input.value=original;input.dispatchEvent(new f.w.Event('input'));
+    f.d.querySelector('[data-community-action="comment"]').click();
+    f.state.uid='other';f.feed.bindAccount('other');f.state.uid='owner';f.feed.bindAccount('owner');f.feed.show();
+    f.state.feeds.at(-1).next([post('p0')]);const fresh=f.d.getElementById('cmtInput_p0');fresh.value=original;fresh.dispatchEvent(new f.w.Event('input'));
+    finish({saved:true,uid:'owner',originalDraft:original,reaction:false});await new Promise(resolve=>setImmediate(resolve));
+    f.feed.render();assert.equal(f.d.getElementById('cmtInput_p0').value,original);
+});
+
+test('notifications find the actual five-post page and restore prior filters and page on return',async t=>{
+    const f=await fixture(t),{communityCommentId}=await community;f.feed.show();
+    const rows=Array.from({length:18},(_,i)=>post(`p${i}`,{uid:i===12?'owner':'other',content:i<12?'산책 기록':'저녁 기록',createdAt:date-i*DAY}));
+    f.state.feeds[0].next(rows);f.state.own[0].next([rows[12]]);
+    f.input('communityKeyword','산책');f.d.getElementById('communityNextPage').click();
+    assert.equal(f.d.querySelector('.post-card').dataset.postId,'p5');
+    const added=comment('friend','반가운 댓글',date+1),updated={...rows[12],comments:[added]};f.state.own[0].next([updated]);
+    f.d.getElementById('communityUnreadBtn').click();
+    assert.equal(f.d.getElementById('communityKeyword').value,'');assert.equal(f.d.querySelectorAll('.post-card').length,5);
+    assert.deepEqual([...f.d.querySelectorAll('.post-card')].map(card=>card.dataset.postId),['p10','p11','p12','p13','p14']);
+    assert.equal(f.d.getElementById('communityPageStatus').textContent,'3 / 4');assert.equal(f.d.activeElement.id,communityCommentId('p12',added));
+    assert.equal(f.d.querySelector('[data-post-id="p12"]').open,true);
+    f.state.feeds[0].next([post('new',{createdAt:date+DAY}),...rows]);
+    assert.equal(f.d.querySelectorAll('.post-card').length,5);assert(f.d.getElementById(communityCommentId('p12',added)));assert.equal(f.d.activeElement.id,communityCommentId('p12',added));
+    f.d.getElementById('communityBackToList').click();assert.equal(f.d.getElementById('communityKeyword').value,'산책');
+    assert.equal(f.d.getElementById('communityPageStatus').textContent,'2 / 3');assert.equal(f.d.querySelector('.post-card').dataset.postId,'p5');
 });
 
 test('own-post alerts baseline on the server, ignore self replies and jump to stable comment IDs despite hidden/old posts',async t=>{
@@ -118,6 +197,7 @@ test('account switches and late listener callbacks clear drafts, post content an
     const oldFeed=f.state.feeds[0],oldOwn=f.state.own[0];f.state.uid='other';f.feed.bindAccount('other');
     oldFeed.next([post('stale')]);oldOwn.next([post('private',{uid:'owner',comments:[comment()]})]);
     assert.equal(f.d.querySelectorAll('.post-card').length,0);assert.equal(f.feed.getUnread().length,0);assert(f.d.getElementById('communityUnreadBtn').hidden);assert(f.state.stops>=2);
+    assert(f.d.getElementById('communityPagination').hidden);assert.equal(f.d.getElementById('communityPageStatus').textContent,'');assert.equal(f.d.getElementById('communityFilterStatus').textContent,'');
     f.feed.show();f.state.feeds.at(-1).next([post('new')]);f.feed.hide();f.state.feeds.at(-1).next([post('late')]);assert.equal(f.d.querySelector('.post-card').dataset.postId,'new');
 });
 
