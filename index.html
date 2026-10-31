@@ -12,7 +12,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self';
         base-uri 'none';
         object-src 'none';
-        script-src 'self' https://www.gstatic.com/firebasejs/ https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/ https://apis.google.com/ https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js 'sha256-AIBL0tC4iNNoKKwFcVeQsj034glNRfVxuUyzuCSYSiQ=' 'sha256-REiFfq6OotUrXGWxp84XojcMHah8Xjofp2pgS2BjRbM=' 'sha256-ZBDKI+cJWffsd+cXDpbTFeoXNCPy8uQD4RUYNTiPRSQ=' 'sha256-bq06qgK7LQ9XnYvCcWvOQfD/0mICHX21Tmqj630xF8E=' 'sha256-tsTK1ouYEEKQkBTE3DgFSYewB1HMbqpCCNAiJd2UHi0=';
+        script-src 'self' https://www.gstatic.com/firebasejs/ https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/ https://apis.google.com/ https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js 'sha256-3+G6PWQrj5L1n47N1f284bElpgu8c+lBx8ufR2zgKXw=' 'sha256-AIBL0tC4iNNoKKwFcVeQsj034glNRfVxuUyzuCSYSiQ=' 'sha256-REiFfq6OotUrXGWxp84XojcMHah8Xjofp2pgS2BjRbM=' 'sha256-ZBDKI+cJWffsd+cXDpbTFeoXNCPy8uQD4RUYNTiPRSQ=' 'sha256-bq06qgK7LQ9XnYvCcWvOQfD/0mICHX21Tmqj630xF8E=';
         script-src-attr 'unsafe-hashes'
         'sha256-+/PyyZxYlaRwGKBfLX4QqCPnBcKxzZ6EQ/FEMykrPlg='
         'sha256-+8Obkk1yhOE1TPaUpOo8d/udOL2qT2+5fc9UsR20blw='
@@ -1703,7 +1703,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
 <link rel="stylesheet" href="./community-recovery.css?v=20261028-1">
 <link rel="stylesheet" href="./quick-actions.css?v=20261017-1">
 <link rel="stylesheet" href="./diagnosis-diary.css?v=20261031-1">
-<link rel="stylesheet" href="./app-theme.css?v=20261031-1">
+<link rel="stylesheet" href="./app-theme.css?v=20261031-2">
 <link rel="stylesheet" href="./sobriety-satisfaction.css?v=20261024-1">
 </head>
 <body>
@@ -5182,7 +5182,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
     function buildStreakRecordBadgeHtml(currentDays, successRate) {
         const recordInfo = getCurrentStreakRecordInfo(currentDays);
         const rankLabel = recordInfo ? `${recordInfo.tiedRank ? '공동 ' : ''}${recordInfo.rank}위` : '';
-        const badge = recordInfo ? `<button type="button" class="streak-record-badge" data-streak-days="${recordInfo.targetDays}" aria-haspopup="dialog" aria-controls="streakRecordsModal" aria-label="역대 ${rankLabel} 기록, 현재와 바로 위·아래 순위 기록 비교" title="현재와 바로 위·아래 순위 기록 비교">역대 ${rankLabel} 기록</button>` : '';
+        const badge = recordInfo ? `<button type="button" class="streak-record-badge" data-streak-days="${recordInfo.targetDays}" aria-haspopup="dialog" aria-controls="streakRecordsModal" aria-label="역대 ${rankLabel} 기록, 현재와 바로 위·아래 순위 기록 비교" title="현재와 바로 위·아래 순위 기록 비교">역대 ${rankLabel}</button>` : '';
         return `<div class="streak-record-info">${badge}<button type="button" class="success-rate-box" aria-haspopup="dialog" aria-controls="sobrietyRateModal" title="실제 날짜와 계산식 보기"><span>금주율 ${Number.isFinite(successRate) ? successRate + '%' : '—'}</span><span class="success-rate-progress"><span class="success-rate-progress-fill" style="display:block; width:${Number.isFinite(successRate) ? successRate : 0}%;"></span></span></button></div>`;
     }
 
@@ -5206,10 +5206,14 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
         }
     });
     document.addEventListener('app:sectiontoggle', event => {
-        if (event.detail?.id === 'timerDisplaySection' && event.detail.open) sobrietySatisfaction.resetDraft();
+        if (event.detail?.id === 'timerDisplaySection') {
+            if (event.detail.open) sobrietySatisfaction.resetDraft();
+            syncDayCountMotion();
+        }
     });
     document.addEventListener('app:tabchange', event => {
         if (event.detail?.tab === 'records') sobrietySatisfaction.resetDraft();
+        syncDayCountMotion();
     });
 
     let sobrietyDetailsKey = '', sobrietyDetailsResult = null;
@@ -5259,18 +5263,29 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
     }
 
     function buildMainDaysContainerHtml(currentDays, totalCumul, successRate) {
+        const day = Math.max(0, Math.floor(Number(currentDays) || 0));
+        const dayMotion = ['aurora', 'breeze', 'sunrise', 'tide', 'orchid', 'amber', 'emerald'][day % 7];
         return `
                 <button type="button" class="cal-hint daily-wisdom-hint" data-daily-wisdom-open aria-haspopup="dialog" aria-controls="dailyWisdomModal">오늘의 조언을 준비하고 있어요…</button>
-                <div class="time-unit-row" style="--day-chars:${String(currentDays).length + 1};">
-                    <button type="button" class="time-unit" onclick="openCalendarModal('current')" aria-label="현재 금주 ${currentDays}일, 달력 보기">${currentDays}일</button>
-                    ${buildStreakRecordBadgeHtml(currentDays, successRate)}
-                    <button type="button" class="sub-time-clickable" onclick="openCalendarModal('accumulated')">누적 ${totalCumul}일 보기</button>
+                <div class="time-unit-row" data-day-motion="${dayMotion}" style="--day-chars:${String(currentDays).length + 1};">
+                    <button type="button" class="time-unit" onclick="openCalendarModal('current')" aria-label="현재 금주 ${currentDays}일, 달력 보기" aria-haspopup="dialog" aria-controls="calendarModal"><span class="time-day-value">${currentDays}</span><span class="time-day-unit">일</span></button>
+                    <div class="timer-day-actions" role="group" aria-label="금주 기록 요약">
+                        ${buildStreakRecordBadgeHtml(currentDays, successRate)}
+                        <button type="button" class="sub-time-clickable" onclick="openCalendarModal('accumulated')" aria-label="누적 금주 ${totalCumul}일, 누적 기록 달력 보기" aria-haspopup="dialog" aria-controls="calendarModal">누적 ${totalCumul}일</button>
+                    </div>
                 </div>
                 <div id="timerClockProgressSlot"></div>
                 <div id="sobrietySatisfactionSlot"></div>
                 <div id="minAbstinenceProgressSlot" style="width:100%; min-width:0; box-sizing:border-box; padding:5px 0;">${buildMinAbstinenceProgressHtml()}</div>
                 ${recoveryGoalsHtml(getCurrentRecoveryGoals())}
             `;
+    }
+
+    function syncDayCountMotion() {
+        const row = document.querySelector('#mainDaysContainer .time-unit-row');
+        if (!row) return;
+        const collapsed = document.getElementById('timerDisplaySection')?.dataset.collapsed === 'true';
+        row.classList.toggle('day-motion-paused', document.hidden || collapsed || !!row.closest('[hidden]'));
     }
 
     function renderMainDaysContainerIfNeeded(currentDays, totalCumul, successRate) {
@@ -5299,6 +5314,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
         streakButton?.addEventListener('click', event => openStreakRecordsModal(Number(streakButton.dataset.streakDays), event));
         container.querySelector('.success-rate-box')?.addEventListener('click', openSobrietyRate);
         container.setAttribute('data-render-key', renderKey);
+        syncDayCountMotion();
     }
 
     function invalidateMainDaysContainerRender() {
@@ -7747,6 +7763,7 @@ initPillIdentification();
         generate:generateDailyWisdom
     });
     document.addEventListener('visibilitychange', () => {
+        syncDayCountMotion();
         if (!document.hidden) {
             if (lastDiagnosisSummaryDay !== hrToday()) hrRenderDiagnoses();
             if (userQuitDate) { refreshMainClock(); refreshProgressCharts(); }

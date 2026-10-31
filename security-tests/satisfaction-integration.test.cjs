@@ -85,7 +85,7 @@ test('satisfaction-only days do not become zero-valued meal or drinking chart re
 test('timer redraw preserves live clock nodes and satisfaction draft while keeping record actions separate', () => {
     const page=new JSDOM(source), clock=page.window.document.getElementById('timerClockProgress').outerHTML;
     page.window.close();
-    const dom=new JSDOM('<div id="mainDaysContainer"></div>'+clock,{runScripts:'dangerously'}),d=dom.window.document;
+    const dom=new JSDOM('<section id="timerDisplaySection" data-collapsed="false"><div id="mainDaysContainer"></div>'+clock+'</section>',{runScripts:'dangerously',pretendToBeVisual:true}),d=dom.window.document;
     const form=d.createElement('form');form.className='sobriety-satisfaction';form.innerHTML='<input value="draft">';
     const calls=[],context={document:d,currentTabName:'physical',lastMainDaysRenderState:null,
         refreshRecoverySummary:()=>calls.push('recovery'),getCurrentStreakRecordInfo:()=>({targetDays:47,rank:1}),
@@ -95,15 +95,20 @@ test('timer redraw preserves live clock nodes and satisfaction draft while keepi
         openStreakRecordsModal:()=>calls.push('record'),openSobrietyRate:()=>calls.push('rate')};
     dom.window.openCalendarModal=mode=>calls.push(mode);
     vm.createContext(context);
-    for(const name of ['buildStreakRecordBadgeHtml','buildMainDaysContainerHtml','renderMainDaysContainerIfNeeded']) {
+    for(const name of ['buildStreakRecordBadgeHtml','buildMainDaysContainerHtml','syncDayCountMotion','renderMainDaysContainerIfNeeded']) {
         const start=source.indexOf(`    function ${name}(`),end=source.indexOf('\n    }',start)+6;
         vm.runInContext(source.slice(start,end),context);
     }
     const live=d.getElementById('timerClockProgress'),bar=d.getElementById('barHourFill');
     bar.style.width='75%';d.getElementById('subTime').textContent='18시간 36분 50초';
     context.renderMainDaysContainerIfNeeded(47,125,97.28);
+    const previousTheme=d.querySelector('.time-unit-row').dataset.dayMotion;
     form.querySelector('input').focus();
     context.renderMainDaysContainerIfNeeded(48,126,97.3);
+    const dayRow=d.querySelector('.time-unit-row'),dayValue=d.querySelector('.time-day-value');
+    assert.notEqual(dayRow.dataset.dayMotion,previousTheme,'a new elapsed day changes the visual theme');
+    assert.equal(dayValue.textContent,'48');
+    assert.equal(d.querySelectorAll('.timer-day-actions button').length,3);
     assert.equal(d.getElementById('timerClockProgress'),live);
     assert.equal(d.getElementById('barHourFill'),bar);
     assert.equal(bar.style.width,'75%');
@@ -115,5 +120,15 @@ test('timer redraw preserves live clock nodes and satisfaction draft while keepi
     assert.deepEqual(calls,['current','accumulated','record','rate']);
     calls.length=0;context.renderMainDaysContainerIfNeeded(48,126,97.3);
     assert.deepEqual(calls,['recovery'],'heading progress refreshes even when timer render key is unchanged');
+    assert.equal(d.querySelector('.time-day-value'),dayValue,'unchanged timer ticks preserve the animated element');
+    assert.equal(dayRow.classList.contains('day-motion-paused'),false);
+    d.getElementById('timerDisplaySection').dataset.collapsed='true';context.syncDayCountMotion();
+    assert.equal(dayRow.classList.contains('day-motion-paused'),true);
+    d.getElementById('timerDisplaySection').dataset.collapsed='false';d.body.hidden=true;context.syncDayCountMotion();
+    assert.equal(dayRow.classList.contains('day-motion-paused'),true,'a hidden app panel pauses motion');
+    d.body.hidden=false;context.syncDayCountMotion();
+    assert.equal(dayRow.classList.contains('day-motion-paused'),false);
+    Object.defineProperty(d,'hidden',{configurable:true,value:true});context.syncDayCountMotion();
+    assert.equal(dayRow.classList.contains('day-motion-paused'),true,'a background browser tab pauses motion');
     dom.window.close();
 });
