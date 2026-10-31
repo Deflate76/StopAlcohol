@@ -67,6 +67,10 @@ test('trend date/slider/range controls expose exact values and weekly table pagi
     assert.equal(d.querySelectorAll('.sobriety-trend-line').length,4);
     assert.equal(d.querySelector('.sobriety-trend-line').getAttribute('points').split(' ').length,history.daily.length-1);
     assert.equal(d.querySelector('.sobriety-trend-chart').dataset.startDate,'2026-01-02');
+    const sliderDate=id=>d.getElementById(`sobrietySlider${id}Date`);
+    assert.equal(sliderDate('Start').textContent,'2026-01-02');
+    assert.equal(sliderDate('End').textContent,'2026-10-18');
+    assert.equal(sliderDate('Selected').dateTime,'2026-10-18');
     for(const n of [30,60,90]){
         const line=d.querySelector(`.sobriety-trend-line[data-series="${n}"]`);
         assert.notEqual(line.getAttribute('points'),d.querySelector('.sobriety-trend-line').getAttribute('points'));
@@ -75,11 +79,16 @@ test('trend date/slider/range controls expose exact values and weekly table pagi
         d.querySelector(`[data-period="${n}"]`).click();
         assert.equal(d.querySelector('.sobriety-trend-line').getAttribute('points').split(' ').length,n);
         assert.equal(d.querySelector(`[data-series-value="${n}"]`).textContent,before,'display range must not reset calculation start');
+        assert.equal(sliderDate('Start').dateTime,history.daily.at(-n).date);
+        assert.equal(sliderDate('End').textContent,history.daily.at(-1).date);
+        assert.equal(sliderDate('Selected').textContent,history.daily.at(-1).date);
     }
     d.querySelector('[data-period="30"]').click();
     const date=d.getElementById('sobrietyTrendDate');date.value='2026-01-01';date.dispatchEvent(new w.Event('change'));
     assert.equal(d.querySelector('[data-period="all"]').getAttribute('aria-pressed'),'true');assert.match(d.getElementById('sobrietyTrendValue').textContent,/0.00%/);
+    assert.equal(sliderDate('Start').textContent,'2026-01-01');assert.equal(sliderDate('Selected').textContent,'2026-01-01');
     const slider=d.getElementById('sobrietyTrendSlider');slider.value='1';slider.dispatchEvent(new w.Event('input'));assert.equal(date.value,'2026-01-02');assert.match(slider.getAttribute('aria-valuetext'),/50.00%/);
+    assert.equal(sliderDate('Selected').textContent,date.value);assert.equal(sliderDate('Selected').dateTime,date.value);
     assert.match(d.querySelector('[data-series-value="90"]').textContent,/90일 중 2일 집계/);
     const toggle=d.querySelector('.sobriety-trend-legend [data-series="30"]');toggle.click();
     assert.equal(toggle.getAttribute('aria-pressed'),'false');assert.equal(d.querySelector('.sobriety-trend-line[data-series="30"]'),null);
@@ -94,6 +103,7 @@ test('trend date/slider/range controls expose exact values and weekly table pagi
     date.value='2027-01-01';date.dispatchEvent(new w.Event('change'));assert.equal(date.value,'2026-01-02');
     const one={createdAt:'2026-10-18',challenges:[{startDate:'2026-10-18'}],now:'2026-10-18'};renderSobrietyDetails(d,calculateSobrietyRate(one),{history:calculateSobrietyHistory(one)});
     assert(d.getElementById('sobrietyTrendSlider').disabled);
+    for(const name of ['Start','Selected','End'])assert.equal(sliderDate(name).textContent,'2026-10-18');
     for(const line of d.querySelectorAll('.sobriety-trend-line'))assert(!line.getAttribute('points').includes('NaN'));
     assert.equal(d.querySelectorAll('.sobriety-trend-point').length,4);
     assert.match(d.querySelector('[data-series-value="30"]').textContent,/30일 중 1일 집계/);
@@ -156,6 +166,9 @@ test('rate headline uses two decimals and unrounded Korean previous-day rates fo
         assert.equal(d.querySelector('.sobriety-rate-change').textContent,change);
         assert.equal(d.querySelector('.sobriety-rate-change').dataset.direction,direction);
         assert.equal(parseFloat(d.querySelector('.sobriety-rate-bar>span').style.width).toFixed(2),number.slice(0,-1));
+        const drinkingWidth=parseFloat(d.querySelector('.sobriety-rate-drinking').style.width);
+        assert.equal(drinkingWidth.toFixed(2),(100-parseFloat(d.querySelector('.sobriety-rate-sober').style.width)).toFixed(2));
+        assert(drinkingWidth>=0&&drinkingWidth<=100);
         assert(!d.querySelector('.sobriety-rate-formula').textContent.includes('→'));
     }
     const midnight={createdAt:'2026-10-20T00:00:00+09:00',challenges:[{startDate:'2026-10-20'}],

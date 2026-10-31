@@ -28,7 +28,9 @@ export function renderSobrietyDetails(document, result, state = {}) {
     card.append(make('p', `${result.startDate} ~ ${end} · 시작일과 오늘 포함`, 'health-muted'));
     const bar = make('div', undefined, 'sobriety-rate-bar'); bar.setAttribute('role','img');
     bar.setAttribute('aria-label', `전체 ${result.totalDays}일 중 금주 ${result.soberDays}일, 음주 기록 ${result.drinkingDays}일`);
-    const sober = make('span'); sober.style.width = `${exact}%`; bar.append(sober); card.append(bar);
+    const sober = make('span', undefined, 'sobriety-rate-sober'); sober.style.width = `${exact}%`;
+    const drinking = make('span', undefined, 'sobriety-rate-drinking'); drinking.style.width = `${100-exact}%`;
+    bar.append(sober,drinking); card.append(bar);
     const legend = make('div', undefined, 'sobriety-rate-legend'); legend.append(make('span', `● 금주 ${result.soberDays}일`), make('span', `● 음주 ${result.drinkingDays}일`)); card.append(legend); body.append(card);
     if (state.history?.daily?.length) renderSobrietyHistory(document, body, state.history);
     body.append(make('h4', '이렇게 계산했어요'));
@@ -118,7 +120,15 @@ function renderSobrietyHistory(document, body, history) {
     selection.append(dateLabel,output); section.append(selection);
     const sliderLabel = make('label','날짜 이동','sr-only'); sliderLabel.htmlFor = 'sobrietyTrendSlider';
     const slider = make('input'); slider.type = 'range'; slider.id = 'sobrietyTrendSlider'; slider.step = '1'; slider.setAttribute('aria-label','날짜별 금주율 확인');
-    section.append(sliderLabel,slider); body.append(section);
+    const sliderDates = make('div',undefined,'sobriety-slider-dates');
+    const sliderDate = (id,label,cls='') => {
+        const cell=make('div',undefined,cls), time=make('time');time.id=id;
+        cell.append(make('span',label),time);sliderDates.append(cell);return time;
+    };
+    const startDate=sliderDate('sobrietySliderStartDate','범위 시작');
+    const selectedDate=sliderDate('sobrietySliderSelectedDate','선택일','sobriety-slider-selected');
+    const endDate=sliderDate('sobrietySliderEndDate','범위 끝');
+    section.append(sliderLabel,slider,sliderDates); body.append(section);
     const left=42,right=405,top=18,bottom=173;
     let visible = [], cursor, markers = [];
     const x = index => visible.length > 1 ? left + index / (visible.length - 1) * (right-left) : (left+right)/2;
@@ -126,6 +136,7 @@ function renderSobrietyHistory(document, body, history) {
     function select(index) {
         selected = Math.max(offset,Math.min(history.daily.length-1,index));
         const row=history.daily[selected]; date.value=row.date; slider.value=String(selected);
+        selectedDate.textContent=row.date;selectedDate.dateTime=row.date;
         const values=make('span',undefined,'sobriety-trend-values');
         for(const item of series){
             const value=item.value(row),cell=make('span',undefined,`sobriety-trend-value ${item.className}`);cell.dataset.seriesValue=item.key;
@@ -167,6 +178,8 @@ function renderSobrietyHistory(document, body, history) {
         cursor=svgNode('line',{y1:top,y2:bottom,class:'sobriety-trend-cursor'});
         markers=active.map(item=>({item,point:svgNode('circle',{r:4.5,class:`sobriety-trend-point ${item.className}`})}));svg.append(cursor,...markers.map(marker=>marker.point));
         slider.min=String(offset);slider.max=String(history.daily.length-1);slider.disabled=visible.length===1;
+        startDate.textContent=visible[0].date;startDate.dateTime=visible[0].date;
+        endDate.textContent=visible.at(-1).date;endDate.dateTime=visible.at(-1).date;
         select(selected);
     }
     svg.addEventListener('click',event=>{
