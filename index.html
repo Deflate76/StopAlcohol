@@ -12,7 +12,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self';
         base-uri 'none';
         object-src 'none';
-        script-src 'self' https://www.gstatic.com/firebasejs/ https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/ https://apis.google.com/ https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js 'sha256-3+G6PWQrj5L1n47N1f284bElpgu8c+lBx8ufR2zgKXw=' 'sha256-AIBL0tC4iNNoKKwFcVeQsj034glNRfVxuUyzuCSYSiQ=' 'sha256-REiFfq6OotUrXGWxp84XojcMHah8Xjofp2pgS2BjRbM=' 'sha256-ZBDKI+cJWffsd+cXDpbTFeoXNCPy8uQD4RUYNTiPRSQ=' 'sha256-bq06qgK7LQ9XnYvCcWvOQfD/0mICHX21Tmqj630xF8E=';
+        script-src 'self' https://www.gstatic.com/firebasejs/ https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/ https://apis.google.com/ https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js 'sha256-AIBL0tC4iNNoKKwFcVeQsj034glNRfVxuUyzuCSYSiQ=' 'sha256-M2rX0o6mC+Lj+t9iFqD4pLLwpf8nfG+Fl//b8hkEweQ=' 'sha256-REiFfq6OotUrXGWxp84XojcMHah8Xjofp2pgS2BjRbM=' 'sha256-ZBDKI+cJWffsd+cXDpbTFeoXNCPy8uQD4RUYNTiPRSQ=' 'sha256-bq06qgK7LQ9XnYvCcWvOQfD/0mICHX21Tmqj630xF8E=';
         script-src-attr 'unsafe-hashes'
         'sha256-+/PyyZxYlaRwGKBfLX4QqCPnBcKxzZ6EQ/FEMykrPlg='
         'sha256-+8Obkk1yhOE1TPaUpOo8d/udOL2qT2+5fc9UsR20blw='
@@ -1703,7 +1703,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
 <link rel="stylesheet" href="./community-recovery.css?v=20261028-1">
 <link rel="stylesheet" href="./quick-actions.css?v=20261017-1">
 <link rel="stylesheet" href="./diagnosis-diary.css?v=20261031-1">
-<link rel="stylesheet" href="./app-theme.css?v=20261031-2">
+<link rel="stylesheet" href="./app-theme.css?v=20261031-3">
 <link rel="stylesheet" href="./sobriety-satisfaction.css?v=20261024-1">
 </head>
 <body>
@@ -5268,7 +5268,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
         return `
                 <button type="button" class="cal-hint daily-wisdom-hint" data-daily-wisdom-open aria-haspopup="dialog" aria-controls="dailyWisdomModal">오늘의 조언을 준비하고 있어요…</button>
                 <div class="time-unit-row" data-day-motion="${dayMotion}" style="--day-chars:${String(currentDays).length + 1};">
-                    <button type="button" class="time-unit" onclick="openCalendarModal('current')" aria-label="현재 금주 ${currentDays}일, 달력 보기" aria-haspopup="dialog" aria-controls="calendarModal"><span class="time-day-value">${currentDays}</span><span class="time-day-unit">일</span></button>
+                    <button type="button" class="time-unit" onclick="openCalendarModal('current')" aria-label="현재 금주 ${currentDays}일, 달력 보기" aria-haspopup="dialog" aria-controls="calendarModal"><span class="time-day-value">${String(currentDays).split('').map((digit, index) => `<span class="time-day-digit" style="--digit-index:${index};">${digit}</span>`).join('')}</span><span class="time-day-unit">일</span></button>
                     <div class="timer-day-actions" role="group" aria-label="금주 기록 요약">
                         ${buildStreakRecordBadgeHtml(currentDays, successRate)}
                         <button type="button" class="sub-time-clickable" onclick="openCalendarModal('accumulated')" aria-label="누적 금주 ${totalCumul}일, 누적 기록 달력 보기" aria-haspopup="dialog" aria-controls="calendarModal">누적 ${totalCumul}일</button>
