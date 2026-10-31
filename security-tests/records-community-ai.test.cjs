@@ -96,7 +96,7 @@ test('reloading resumes only explicitly queued advice; a live lease is respected
     f.controller.bindAccount(null);assert.equal(f.timers.size,0);
 });
 
-test('AI replies are visibly labeled, escaped and counted once without pretending to be the author',async t=>{
+test('automated replies use a helper label, remain escaped and counted once, and retain medical limitations',async t=>{
     const {installCommunityFeed}=await import(pathToFileURL(path.join(root,'community-feed.js'))),{createCommunityAdviceSlot}=await ai;
     const page=new JSDOM(source),dom=new JSDOM(page.window.document.getElementById('sectionCommunity').outerHTML,{url:'https://fixture.invalid'});page.window.close();t.after(()=>dom.window.close());
     const d=dom.window.document;let next,retries=0;
@@ -104,7 +104,10 @@ test('AI replies are visibly labeled, escaped and counted once without pretendin
     feed.show();const slot={...createCommunityAdviceSlot('owner',1000),state:'ready',text:'<img src=x onerror=alert(1)>조언'};
     next([{id:'p',uid:'owner',content:'본문',comments:[slot]}]);
     assert.equal(d.querySelectorAll('.comment-ai').length,1);assert.equal(d.querySelector('.comment-ai .day-badge'),null);assert.equal(d.querySelector('.comment-ai img'),null);
-    assert.equal(d.querySelector('.comment-ai .comment-author').textContent,'금도끼 AI');assert.match(d.querySelector('.post-summary-footer').textContent,/댓글 1개/);
+    assert.equal(d.querySelector('.comment-ai .comment-author').textContent,'금도끼 도우미');assert.match(d.querySelector('.post-summary-footer').textContent,/댓글 1개/);
+    assert.equal(d.querySelector('.comment-ai-badge').textContent,'자동 조언');
+    assert.match(d.querySelector('.comment-ai-note').textContent,/의료진의 진단·치료를 대신하지 않습니다/);
+    assert.doesNotMatch(d.querySelector('.comment-ai').textContent,/AI가|AI 조언|금도끼 AI/);
     next([{id:'p',uid:'owner',content:'본문',comments:[{...slot,state:'failed',text:''}]}]);
     d.querySelector('[data-community-action="retry-advice"]').click();assert.equal(retries,1);assert.match(d.querySelector('.post-summary-footer').textContent,/댓글 0개/);
 });

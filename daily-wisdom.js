@@ -214,7 +214,7 @@ export function installDailyWisdom({document:doc = document, window:win = window
       if (valid(owner,version)) {
         failed=true;
         message=current?.pending?'조언은 준비됐지만 저장하지 못했습니다. 저장을 다시 시도해 주세요.':
-          current?'새 조언을 받지 못해 최근 조언을 보여 드립니다. 다시 시도해 주세요.':'AI 연결이 어려워 기본 응원 문구를 보여 드립니다. 다시 시도해 주세요.';
+          current?'새 조언을 받지 못해 최근 조언을 보여 드립니다. 다시 시도해 주세요.':'조언을 받지 못해 기본 응원 문구를 보여 드립니다. 다시 시도해 주세요.';
       }
     } finally { if (valid(owner,version)) {busy=false;controller=null;render();} }
   }

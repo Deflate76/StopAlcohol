@@ -342,6 +342,73 @@ dialog::backdrop { background: rgba(15, 35, 28, .55); backdrop-filter: blur(5px)
 .cal-swipe-hint { color: #73816d; }
 .cal-month-success-progress { box-shadow: none; background: #e4ebdd; }
 .cal-month-success-fill { background: linear-gradient(90deg, #78ac83, #34865b); }
+
+/* Calendar markers share fixed slots so a busy day cannot stretch its week. */
+#calendarModal { --calendar-day-height: 176px; }
+#calendarModal.cal-compact { --calendar-day-height: 64px; }
+#calendarModal .cal-days { grid-auto-rows: var(--calendar-day-height); }
+#calendarModal .cal-days > .cal-day {
+    box-sizing: border-box; height: var(--calendar-day-height); min-height: 0;
+    max-height: var(--calendar-day-height); padding: 0; overflow: hidden;
+}
+#calendarModal .cal-day.has-user-input:hover, #calendarModal .cal-day.fail-mark:hover { transform: none; }
+#calendarModal .cal-day-number {
+    position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+    font-size: 14px; line-height: 19px; font-variant-numeric: tabular-nums;
+}
+#calendarModal .cal-log-icons {
+    position: absolute !important; top: 1px !important; left: 2px !important; right: 2px;
+    display: flex; align-items: center; justify-content: center; height: 10px;
+    font-size: 9px !important; line-height: 10px; letter-spacing: 0 !important; pointer-events: none;
+}
+#calendarModal .cal-log-icons > span { flex: 1 1 0; min-width: 0; text-align: center; }
+#calendarModal .caution-badge { top: 0; right: 0; padding: 0; font-size: 10px; line-height: 12px; }
+#calendarModal .cal-day.fail-mark::after { top: 0; right: 0; padding: 0; font-size: 8px; line-height: 11px; }
+#calendarModal .cal-best-start-badge, #calendarModal .cal-range-badge {
+    bottom: 14px; max-width: calc(100% - 2px); padding: 1px 2px;
+    border-width: 1px; border-radius: 4px; font-size: 7.5px; line-height: 1.15;
+}
+#calendarModal .cal-record-break-stack {
+    position: absolute; left: 1px; right: 1px; bottom: 14px;
+    margin: 0; gap: 1px; pointer-events: none;
+}
+#calendarModal .cal-record-break-stack > .cal-range-badge,
+#calendarModal .cal-record-break-stack > .cal-best-start-badge { max-width: 100%; }
+#calendarModal .cal-record-break-badge {
+    padding: 1px 2px; font-size: 7.5px; line-height: 1.15; white-space: nowrap;
+}
+#calendarModal .cal-record-break-badge br { display: none; }
+#calendarModal .cal-record-break-stack:has(> :nth-child(2)) > :first-child { font-size: 7px; line-height: 1; padding-block: 0; }
+#calendarModal .cal-record-break-day.cal-range-marker .cal-day-number { top: 6px; }
+#calendarModal .craving-avg-badge {
+    bottom: 2px; left: 1px; transform: none; padding: 0 1px;
+    font-size: 8px; line-height: 11px; max-width: calc(100% - 2px); box-shadow: none;
+}
+#calendarModal .cal-schedule-badge {
+    position: absolute; top: 0; right: 1px; bottom: auto; margin: 0; padding: 0 1px;
+    font-size: 7.5px; line-height: 9px; max-width: calc(100% - 2px); z-index: 21;
+}
+#calendarModal .cal-health-dot { bottom: 10px; width: 4px; height: 4px; transform: translateX(-50%); }
+#calendarModal .cal-day:has(.cal-schedule-badge) .cal-log-icons { right: 22px; }
+#calendarModal .cal-day:has(.cal-schedule-badge) .caution-badge,
+#calendarModal .cal-day.fail-mark:has(.cal-schedule-badge)::after { top: 0; left: 0; right: auto; font-size: 8px; line-height: 9px; }
+#calendarModal .cal-day:has(.craving-avg-badge) .cal-health-dot { left: auto; right: 2px; bottom: 6px; transform: none; }
+#calendarModal .cal-environment {
+    position: absolute; top: 30px; left: 1px; right: 1px; height: 104px;
+    box-sizing: border-box; display: grid; grid-template-rows: 12px 38px 24px 18px;
+    gap: 2px; margin: 0; padding: 2px 0; overflow: hidden; font-size: 9px; line-height: 1.2;
+}
+#calendarModal .cal-holiday-name { grid-row: 1; font-size: 8px; line-height: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#calendarModal .cal-weather { grid-row: 2; min-height: 0; }
+#calendarModal .cal-weather-icon { font-size: 15px; line-height: 16px; }
+#calendarModal .cal-weather-temp { font-size: 8px; line-height: 10px; }
+#calendarModal .cal-sun-times { grid-row: 3; gap: 0; line-height: 12px; }
+#calendarModal .cal-moon { grid-row: 4; font-size: 15px; line-height: 18px; }
+@media (max-width: 360px) {
+    #calendarModal .cal-best-start-badge, #calendarModal .cal-range-badge,
+    #calendarModal .cal-record-break-badge { font-size: 7px; }
+    #calendarModal .cal-log-icons { font-size: 8px !important; }
+}
 .streak-records-table, .sobriety-weekly-table { font-variant-numeric: tabular-nums; }
 .sobriety-rate-card { background: #eff6e9; border-color: #d5e3ca; box-shadow: none; }
 .sobriety-rate-number { color: #2b7044; letter-spacing: -.04em; }

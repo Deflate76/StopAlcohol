@@ -147,7 +147,7 @@ export function installCommunityFeed({doc=document, win=window, getUid, watchPos
         header.append(author,node('span','post-date',dateText));
         const postComments=Array.isArray(post.comments)?post.comments:[];
         const advice=postComments.find(isCommunityAdvice),commentCount=postComments.filter(comment=>!isCommunityAdvice(comment)||comment.state==='ready').length;
-        const aiLabel=advice ? (advice.state==='ready'?' · AI 조언 도착':advice.state==='failed'?' · AI 조언 재시도 가능':' · AI 조언 작성 중') : '';
+        const aiLabel=advice ? (advice.state==='ready'?' · 조언 도착':advice.state==='failed'?' · 조언 재시도 가능':' · 조언 작성 중') : '';
         summary.append(header,node('span','post-preview',String(post.content??'')),node('span','post-summary-footer',`댓글 ${commentCount}개${aiLabel} · 펼치기/접기`));card.append(summary);
         const body=node('div','post-expanded-content');body.append(node('div','post-body',String(post.content??'')));
         if(post.editedAt)body.append(node('small','post-edited','수정됨'));
@@ -159,10 +159,10 @@ export function installCommunityFeed({doc=document, win=window, getUid, watchPos
             if(row.id===pinned?.commentId)row.classList.add('comment-notification-focus');
             const ai=isCommunityAdvice(comment),reaction=!ai && cheers.find(item=>item.emoji===comment.text);
             if(ai)row.classList.add('comment-ai');
-            row.append(node('strong','comment-author',ai?'금도끼 AI':comment.author||'익명의 생존자'));
-            if(ai)row.append(node('span','comment-ai-badge','AI 조언'));else row.append(dayBadge(comment));
+            row.append(node('strong','comment-author',ai?'금도끼 도우미':comment.author||'익명의 생존자'));
+            if(ai)row.append(node('span','comment-ai-badge','자동 조언'));else row.append(dayBadge(comment));
             if(ai && comment.state!=='ready') {
-                row.append(node('span','comment-ai-status',comment.state==='failed'?'AI 조언을 완성하지 못했습니다. 글은 정상적으로 저장되어 있습니다.':'이 글을 읽고 조언을 작성하고 있어요…'));
+                row.append(node('span','comment-ai-status',comment.state==='failed'?'조언을 완성하지 못했습니다. 글은 정상적으로 저장되어 있습니다.':'이 글을 읽고 조언을 작성하고 있어요…'));
                 if(post.uid===uid){
                     if(comment.state==='failed')row.append(action('조언 다시 받기','retry-advice',()=>void retryAdvice(post.id),'comment-ai-retry'));
                     row.append(action('지우기','delete-comment',()=>deleteComment(post.id,index,communityCommentId(post.id,comment))));
@@ -171,7 +171,7 @@ export function installCommunityFeed({doc=document, win=window, getUid, watchPos
             }
             const text=node('span',reaction?'comment-reaction':'comment-text',String(comment.text??''));
             if(reaction){text.setAttribute('role','img');text.setAttribute('aria-label',reaction.label);}row.append(text);
-            if(ai)row.append(node('small','comment-ai-note','AI가 생성한 생활 조언이며 의료진의 진단·치료를 대신하지 않습니다.'));
+            if(ai)row.append(node('small','comment-ai-note','생활 참고용 조언이며 의료진의 진단·치료를 대신하지 않습니다.'));
             if(comment.uid===uid){const button=action('지우기','delete-comment',()=>deleteComment(post.id,index,communityCommentId(post.id,comment)));button.dataset.commentIndex=index;row.append(button);}
             comments.append(row);
         });

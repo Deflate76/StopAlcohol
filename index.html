@@ -12,7 +12,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self';
         base-uri 'none';
         object-src 'none';
-        script-src 'self' https://www.gstatic.com/firebasejs/ https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/ https://apis.google.com/ https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js 'sha256-AIBL0tC4iNNoKKwFcVeQsj034glNRfVxuUyzuCSYSiQ=' 'sha256-REiFfq6OotUrXGWxp84XojcMHah8Xjofp2pgS2BjRbM=' 'sha256-X1a5b1H6X8RSQ+IdsR6OILgd4P7kNg+YAYGDssfL+Fc=' 'sha256-ZBDKI+cJWffsd+cXDpbTFeoXNCPy8uQD4RUYNTiPRSQ=' 'sha256-utYYx5qVnylo2gMZULKmJG8hNLajcNpGYKJuaVzT2NA=';
+        script-src 'self' https://www.gstatic.com/firebasejs/ https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ https://www.recaptcha.net/recaptcha/ https://apis.google.com/ https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js 'sha256-AIBL0tC4iNNoKKwFcVeQsj034glNRfVxuUyzuCSYSiQ=' 'sha256-REiFfq6OotUrXGWxp84XojcMHah8Xjofp2pgS2BjRbM=' 'sha256-ZBDKI+cJWffsd+cXDpbTFeoXNCPy8uQD4RUYNTiPRSQ=' 'sha256-bq06qgK7LQ9XnYvCcWvOQfD/0mICHX21Tmqj630xF8E=' 'sha256-tsTK1ouYEEKQkBTE3DgFSYewB1HMbqpCCNAiJd2UHi0=';
         script-src-attr 'unsafe-hashes'
         'sha256-+/PyyZxYlaRwGKBfLX4QqCPnBcKxzZ6EQ/FEMykrPlg='
         'sha256-+8Obkk1yhOE1TPaUpOo8d/udOL2qT2+5fc9UsR20blw='
@@ -1703,7 +1703,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
 <link rel="stylesheet" href="./community-recovery.css?v=20261028-1">
 <link rel="stylesheet" href="./quick-actions.css?v=20261017-1">
 <link rel="stylesheet" href="./diagnosis-diary.css?v=20261031-1">
-<link rel="stylesheet" href="./app-theme.css?v=20261028-2">
+<link rel="stylesheet" href="./app-theme.css?v=20261031-1">
 <link rel="stylesheet" href="./sobriety-satisfaction.css?v=20261024-1">
 </head>
 <body>
@@ -1973,7 +1973,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
                     </details>
                     <div class="community-composer">
                         <label class="community-composer-title" for="postContent">오늘의 이야기를 남겨보세요</label>
-                        <p id="communityWritingHint" class="community-writing-hint">작은 변화도, 힘들었던 순간도 편하게 나누어 주세요. 글을 보내면 작성한 내용을 바탕으로 AI 조언 댓글 1개가 생성됩니다.</p>
+                        <p id="communityWritingHint" class="community-writing-hint">작은 변화도, 힘들었던 순간도 편하게 나누어 주세요. 글을 보내면 이야기에 맞는 조언 댓글을 받을 수 있습니다.</p>
                         <textarea id="postContent" placeholder="오늘 어떤 순간이 기억에 남나요?&#10;넘긴 고비나 작은 변화도 편하게 남겨보세요." rows="8" aria-describedby="communityWritingHint postCharacterCount"></textarea>
                         <div class="community-composer-footer"><span>공백·줄바꿈 포함</span><output id="postCharacterCount" for="postContent" aria-live="off">0자</output></div>
                         <button type="button" id="communitySubmitBtn" class="community-submit-btn" onclick="submitPost()">통신 발송</button>
@@ -2034,7 +2034,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
             <span class="info-source-label">반복 일정 · 휴대폰 달력으로 가져오기</span>
             <p>처방전·약봉투에 적힌 복용법에 맞춰 입력해 주세요. 한국 시간(Asia/Seoul)을 기준으로 매일 반복합니다.</p>
             <section id="mrAiDraftPanel" aria-labelledby="mrAiDraftTitle" hidden>
-                <h4 id="mrAiDraftTitle">AI가 읽은 복약알람 초안</h4>
+                <h4 id="mrAiDraftTitle">처방전에서 읽은 복약알람 초안</h4>
                 <p>아직 저장되지 않았습니다. 사진과 약 이름·1일 횟수·시각·기간을 비교하고 수정한 뒤 약별로 생성하세요.</p>
                 <p id="mrAiProgress" role="status" aria-live="polite"></p>
                 <label class="mr-label" for="mrAiSelect">확인할 약 선택<select id="mrAiSelect"></select></label>
@@ -3289,7 +3289,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
 
 <dialog id="dailyWisdomModal" class="wisdom-dialog" aria-labelledby="dailyWisdomTitle" aria-describedby="dailyWisdomDescription">
     <div class="wisdom-heading"><h2 id="dailyWisdomTitle">오늘의 격언과 조언</h2><button type="button" id="dailyWisdomClose" class="wisdom-close" aria-label="오늘의 조언 닫기">×</button></div>
-    <p id="dailyWisdomDescription" class="health-muted">AI가 최근 건강·컨디션·생활 기록과 본인이 쓴 커뮤니티 글을 참고해 만든 한 줄입니다. 진료를 대신하지 않습니다.</p>
+    <p id="dailyWisdomDescription" class="health-muted">최근 건강·컨디션·생활 기록과 본인이 쓴 커뮤니티 글을 참고한 한 줄 조언입니다. 진료를 대신하지 않습니다.</p>
     <h3>현재 조언 · 별점으로 만족도를 알려 주세요</h3>
     <div id="dailyWisdomCurrent"></div>
     <p id="dailyWisdomStatus" class="health-status" role="status" aria-live="polite"></p>
@@ -3331,7 +3331,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
         </form>
         <p id="aiTestStatus" class="ai-test-status" role="status" aria-live="polite">AI 기능을 준비하고 있습니다…</p>
         <details id="aiHelperError" class="ai-helper-details" hidden><summary>오류 상세 보기</summary><pre id="aiHelperErrorText"></pre></details>
-        <div class="ai-chat-footer"><p id="aiQuestionPrivacy" class="mr-help">입력한 질문과 이 창의 최근 대화를 Gemini에 전송합니다. 건강 기록·사진은 자동으로 가져오지 않습니다. 대화는 새로고침하거나 로그아웃하면 사라집니다.</p><p class="mr-help">AI 답변은 틀릴 수 있습니다. 복약 방법은 처방전과 의사·약사의 안내를 확인하세요.</p><button type="button" id="aiOpenReminder">복약알람 화면 열기 →</button></div>
+        <div class="ai-chat-footer"><p id="aiQuestionPrivacy" class="mr-help">입력한 질문과 이 창의 최근 대화를 Gemini에 전송합니다. 건강 기록·사진은 자동으로 가져오지 않습니다. 대화는 새로고침하거나 로그아웃하면 사라집니다.</p><p class="mr-help">답변에 오류가 있을 수 있습니다. 복약 방법은 처방전과 의사·약사의 안내를 확인하세요.</p><button type="button" id="aiOpenReminder">복약알람 화면 열기 →</button></div>
     </div>
 </dialog>
 <script>
@@ -3589,7 +3589,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
         renderList();
     };
     function edit(plan) {
-        if(state.ai && !confirm('아직 저장하지 않은 AI 초안을 닫고 기존 알람을 수정할까요?')) return;
+        if(state.ai && !confirm('아직 저장하지 않은 복약알람 초안을 닫고 기존 알람을 수정할까요?')) return;
         clearPrescriptionDrafts(); state.formDirty=true;
         state.editing=plan.id; $('mrName').value=plan.name; $('mrDose').value=plan.dose;
         $('mrFrequency').value=plan.times.length; $('mrMeal').value=plan.meal; $('mrMealMinutes').value=plan.mealMinutes ?? '';
@@ -3778,20 +3778,20 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
         if (!uid || !state.ready || state.key !== PREFIX+uid) throw new Error('복약 알람의 로그인 계정이 바뀌었습니다. 다시 시도해 주세요.');
         if ($('mrFields').disabled) throw new Error('복약 알람 저장소를 사용할 수 없습니다. 브라우저 저장 설정을 확인하세요.');
         if (!Array.isArray(medications) || !medications.length) throw new Error('입력할 복약 정보가 없습니다.');
-        if ((state.ai || state.formDirty || state.editing) && !confirm('작성 중인 복약 알람 입력을 이번 처방전의 AI 초안으로 바꿀까요? 저장된 알람은 유지됩니다.')) return false;
+        if ((state.ai || state.formDirty || state.editing) && !confirm('작성 중인 복약 알람 입력을 이번 처방전의 판독 초안으로 바꿀까요? 저장된 알람은 유지됩니다.')) return false;
         clearPrescriptionDrafts(); resetForm();
         state.ai = { index:-1, items:medications.map(data=>({data,status:'pending',fields:null,autoEnd:false})), photoUrl:URL.createObjectURL(photoBlob) };
         $('mrAiPhoto').src = state.ai.photoUrl;
         selectPrescriptionDraft(0);
         window.switchAppTab?.('medicines');
         $('medicationReminderCard').open = true;
-        status('AI가 읽은 초안을 채웠습니다. 원본과 비교하고 수정한 뒤 약별로 알람을 생성하세요. 아직 저장되지 않았습니다.');
+        status('처방전에서 읽은 초안을 채웠습니다. 원본과 비교하고 수정한 뒤 약별로 알람을 생성하세요. 아직 저장되지 않았습니다.');
         return true;
     };
     $('mrAiSelect').addEventListener('change',()=>selectPrescriptionDraft(Number($('mrAiSelect').value)));
     $('mrAiSkip').addEventListener('click',()=>finishPrescriptionDraft('skipped'));
     $('mrAiExit').addEventListener('click',()=>{
-        if (state.ai && !confirm('아직 저장하지 않은 AI 초안을 닫을까요? 저장한 알람은 유지됩니다.')) return;
+        if (state.ai && !confirm('아직 저장하지 않은 복약알람 초안을 닫을까요? 저장한 알람은 유지됩니다.')) return;
         clearPrescriptionDrafts(); resetForm(); status();
     });
     $('mrStart').addEventListener('change',()=>{
@@ -3855,7 +3855,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
     
     import { backgroundTask, loadHomeEssentials } from './app-loading.js?v=20261008-1';
     import { currentRecoveryGoals, recoveryGoalsHtml, recoveryGoalsSummary } from './recovery-goals.js?v=20261027-1';
-    import { installCommunityFeed, communityCommentId } from './community-feed.js?v=20261028-1';
+    import { installCommunityFeed, communityCommentId } from './community-feed.js?v=20261031-1';
     import { buildAccumulatedRecords, recordRankClass, accumulatedChartConfig } from './accumulated-records.js?v=20261021-1';
     import { installSectionSelection } from './section-selection.js?v=20261028-1';
     import { installCommunityAdvice, createCommunityAdviceSlot, COMMUNITY_ADVICE_INSTRUCTION } from './community-ai.js?v=20261022-1';
@@ -3863,7 +3863,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
     import { formatRecordDuration, getStreakRankContext } from './record-activity.js?v=20261018-1';
     import { installRecordSectionUI } from './record-section-ui.js?v=20261005-1';
     import { renderFailureTimeRisk, renderCravingTimeRisk, renderBodyTimeRisk, updateFailureTimeProgress, installTodayWeather } from './daily-health-tools.js?v=20261027-1';
-    import { installDailyWisdom, WISDOM_SYSTEM_INSTRUCTION } from './daily-wisdom.js?v=20261022-1';
+    import { installDailyWisdom, WISDOM_SYSTEM_INSTRUCTION } from './daily-wisdom.js?v=20261031-1';
     import { installCalendarEnvironment } from './calendar-environment.js?v=20261008-1';
     import { installAccountDeletion } from './account-deletion.js?v=20261009-1';
     import { createProgressChartPlugin, formatBestRankRange, distributionDensityPercent, distributionDayProbabilityPercent } from './progress-chart.js?v=20261017-1';
@@ -7097,9 +7097,9 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
         if (/prepayment|prepay|credits.*depleted|no credits/i.test(detail)) return 'Gemini 선불 크레딧이 부족합니다. Google AI Studio에서 alcoholaway 프로젝트의 결제·잔액을 확인한 뒤 다시 시도하세요.';
         const known={
             'rx-ai/no-medicines':'약 이름과 복용법을 읽지 못했습니다. 글자가 선명한 처방전·약봉투 사진으로 다시 시도하세요.',
-            'rx-ai/invalid-response':'AI 판독 결과 형식을 확인할 수 없습니다. 다시 분석해 주세요.',
+            'rx-ai/invalid-response':'사진 판독 결과 형식을 확인할 수 없습니다. 다시 분석해 주세요.',
             'rx-ai/too-many':'약 목록이 잘렸거나 한 번에 처리할 수 있는 20개를 초과했습니다. 전체 지시가 보이도록 나누어 촬영해 주세요.',
-            'rx-ai/blocked':'AI가 사진에 대한 판독 결과를 반환하지 않았습니다. 사진을 확인하고 다시 시도하세요.',
+            'rx-ai/blocked':'사진의 판독 결과를 받지 못했습니다. 사진을 확인하고 다시 시도하세요.',
             'rx-ai/revoked':'사진 기록 동의가 철회되어 분석을 진행할 수 없습니다.',
             'rx-ai/not-ready':'저장 완료된 사진을 선택해 주세요.',
             'rx-ai/timeout':'사진 분석 응답 시간이 초과되었습니다. 연결 상태를 확인하고 다시 시도하세요.'
@@ -7123,7 +7123,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
     function rxAiSyncButtons() {
         document.querySelectorAll('[data-prescription-ai]').forEach(button=>{
             button.disabled=hr.prescriptionAiBusy;
-            button.textContent=hr.prescriptionAiBusy && !hr.prescriptionAiNotebook && button.dataset.prescriptionAi===hr.prescriptionAiPhoto ? 'AI가 사진 분석 중…' : 'AI복약알람 만들기';
+            button.textContent=hr.prescriptionAiBusy && !hr.prescriptionAiNotebook && button.dataset.prescriptionAi===hr.prescriptionAiPhoto ? '사진 분석 중…' : 'AI복약알람 만들기';
         });
         document.querySelectorAll('[data-prescription-phr]').forEach(button=>{
             button.disabled=hr.prescriptionAiBusy;
@@ -7178,7 +7178,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
             stage='AI SDK';
             const {getAI,getGenerativeModel,GoogleAIBackend,AgentPlatformBackend,Schema}=await rxAiDeadline(import('https://www.gstatic.com/firebasejs/12.19.0/firebase-ai.js'));
             if(!current())return;
-            stage='Gemini';progress('AI가 약 이름·1일 복용 횟수·투약일수를 읽고 있습니다…');
+            stage='Gemini';progress('약 이름·1일 복용 횟수·투약일수를 읽고 있습니다…');
             const provider=hrEl('aiTestProvider').value, modelId=hrEl('aiTestModel').value.trim(),location=hrEl('aiTestLocation').value.trim();
             diagnostic.provider=provider;diagnostic.model=modelId;
             const ai=getAI(app,{backend:provider==='agent'?new AgentPlatformBackend(location):new GoogleAIBackend()});
@@ -7190,7 +7190,7 @@ button.otc-patient-chip:hover{filter:brightness(.95)}
             }
             const result=await generatePrescriptionAiContent({ai,getGenerativeModel,Schema,modelId,systemInstruction,prompt,base64,current,notebook,onMode:mode=>{
                 diagnostic.mode=mode;diagnostic.attempts++;
-                if(mode==='json')progress('AI 응답 형식을 간소화해 한 번 다시 분석하고 있습니다…');
+                if(mode==='json')progress('분석 요청 형식을 바꿔 한 번 다시 분석하고 있습니다…');
             }});
             if(!result || !current())return;
             if(notebook) {
@@ -10049,7 +10049,7 @@ initPillIdentification();
                 if (challengeEntriesForDay.some(entry => entry.type === 'medication')) logIcons.push('💊');
                 if (challengeEntriesForDay.some(entry => entry.type && entry.type !== 'medication')) logIcons.push('📝');
                 if (logIcons.length > 0) {
-                    logBadge = `<div style="position: absolute; top: 2px; left: 4px; font-size: 0.62rem; z-index: 20; white-space: nowrap; letter-spacing:-2px;">${logIcons.join('')}</div>`;
+                    logBadge = `<div class="cal-log-icons" title="${logIcons.join(' ')}" style="position: absolute; top: 2px; left: 4px; font-size: 0.62rem; z-index: 20; white-space: nowrap; letter-spacing:-2px;">${logIcons.map(icon => `<span>${icon}</span>`).join('')}</div>`;
                 }
             }
 
@@ -10555,7 +10555,7 @@ initPillIdentification();
                 input.dispatchEvent(new Event('input', {bubbles:true}));
             }
             if (userId === uid) {
-                status.textContent = '글을 보냈습니다. AI 조언은 잠시 후 글 아래에 표시됩니다.';
+                status.textContent = '글을 보냈습니다. 조언은 잠시 후 글 아래에 표시됩니다.';
                 void communityAdvice.run(postRef.id);
             }
         } catch (error) { if (userId === uid) status.textContent = '작성하지 못했습니다. 연결 상태를 확인하고 다시 보내 주세요.'; }
